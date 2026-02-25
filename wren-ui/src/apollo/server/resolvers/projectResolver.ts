@@ -357,6 +357,12 @@ export class ProjectResolver {
         status: OnboardingStatusEnum.NOT_STARTED,
       };
     }
+    // A project without a data source type hasn't completed connection setup
+    if (!project.type) {
+      return {
+        status: OnboardingStatusEnum.NOT_STARTED,
+      };
+    }
     const { id, sampleDataset } = project;
     if (sampleDataset) {
       return {

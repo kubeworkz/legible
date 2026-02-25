@@ -21,35 +21,44 @@ export const useWithOnboarding = () => {
     if (onboardingStatus) {
       const newPath = redirectRoute[onboardingStatus];
       const pathname = router.pathname;
+      const isOnSetupPage = pathname.startsWith(Path.Onboarding);
+      const isIndexPage = pathname === '/';
 
-      // redirect to new path if onboarding is not completed
+      // --- Onboarding NOT completed ---
       if (newPath && newPath !== Path.Modeling) {
-        // do not redirect if the new path and router pathname are the same
-        if (newPath === pathname) {
+        // In multi-project, only redirect to onboarding from:
+        //   1. The index page (/)
+        //   2. Other setup pages (allow navigating within the setup flow)
+        // Do NOT redirect users who are on app pages like /home, /modeling, etc.
+        if (isIndexPage) {
+          router.push(newPath);
           return;
         }
 
-        // allow return back to previous steps
-        if (
-          router.pathname.startsWith(Path.Onboarding) &&
-          onboardingStatus !== OnboardingStatus.ONBOARDING_FINISHED
-        ) {
+        // Allow navigating between setup steps
+        if (isOnSetupPage) {
+          // don't redirect if already on the target page
+          if (newPath === pathname) {
+            return;
+          }
+          // allow going back to previous steps within setup
           return;
         }
 
+        // On app pages (/home, /modeling, etc.) — don't redirect.
+        // The user can use the project switcher to navigate or set up the project.
+        return;
+      }
+
+      // --- Onboarding IS completed ---
+
+      // redirect to the modeling page when entering the Index page
+      if (isIndexPage) {
         router.push(newPath);
         return;
       }
 
-      // redirect to home page if onboarding is completed
-
-      // redirect to the home page when entering the Index page
-      if (pathname === '/') {
-        router.push(newPath);
-        return;
-      }
-
-      // redirect to home page since user using sample dataset
+      // redirect to modeling page since user using sample dataset
       if (
         pathname === Path.OnboardingRelationships &&
         onboardingStatus === OnboardingStatus.WITH_SAMPLE_DATASET
@@ -58,7 +67,7 @@ export const useWithOnboarding = () => {
         return;
       }
 
-      // redirect to home page when entering the connection page or select models page
+      // redirect to modeling page when entering the connection page or select models page
       if (
         [Path.OnboardingConnection, Path.OnboardingModels].includes(
           pathname as Path,
