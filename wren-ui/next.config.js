@@ -37,6 +37,12 @@ const nextConfig = withLess({
         destination: '/projects/:projectId/setup/connection',
         permanent: true,
       },
+      // Redirect bare /projects to root (which resolves the correct project)
+      {
+        source: '/projects',
+        destination: '/',
+        permanent: false,
+      },
     ];
   },
 });

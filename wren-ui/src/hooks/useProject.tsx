@@ -14,6 +14,7 @@ import {
   UPDATE_PROJECT,
   DELETE_PROJECT,
 } from '@/apollo/client/graphql/project';
+import useAuth from '@/hooks/useAuth';
 
 const LOCAL_STORAGE_KEY = 'wren-current-project-id';
 
@@ -85,11 +86,13 @@ function setStoredProjectId(id: number | undefined) {
 
 export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [currentProjectId, setCurrentProjectIdState] = useState<
     number | undefined
   >(() => getStoredProjectId());
 
   const { data, loading, refetch } = useQuery(LIST_PROJECTS, {
+    skip: !isAuthenticated,
     fetchPolicy: 'cache-and-network',
   });
 
