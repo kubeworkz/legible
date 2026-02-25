@@ -1,10 +1,14 @@
 import { useRouter } from 'next/router';
-import { Button, Layout, Space } from 'antd';
+import { Button, Dropdown, Layout, Menu, Space, Typography } from 'antd';
 import styled from 'styled-components';
+import UserOutlined from '@ant-design/icons/UserOutlined';
+import LogoutOutlined from '@ant-design/icons/LogoutOutlined';
+import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import LogoBar from '@/components/LogoBar';
 import { Path, buildPath } from '@/utils/enum';
 import Deploy from '@/components/deploy/Deploy';
 import useProject from '@/hooks/useProject';
+import useAuth from '@/hooks/useAuth';
 
 const { Header } = Layout;
 
@@ -32,9 +36,25 @@ const StyledHeader = styled(Header)`
   padding: 10px 16px;
 `;
 
+const AvatarButton = styled(Button)`
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: var(--gray-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover,
+  &:focus {
+    background: rgba(255, 255, 255, 0.25);
+    color: var(--gray-1);
+  }
+`;
+
 export default function HeaderBar() {
   const router = useRouter();
   const { currentProjectId } = useProject();
+  const { user, logout } = useAuth();
   const { pathname } = router;
   const showNav = !pathname.startsWith(Path.Onboarding);
   const isModeling = pathname.startsWith(Path.Modeling);
@@ -85,11 +105,48 @@ export default function HeaderBar() {
             </Space>
           )}
         </Space>
-        {isModeling && (
-          <Space size={[16, 0]}>
-            <Deploy />
-          </Space>
-        )}
+        <Space size={[12, 0]}>
+          {isModeling && <Deploy />}
+          {user && (
+            <Dropdown
+              overlay={
+                <Menu
+                  items={[
+                    {
+                      key: 'user-info',
+                      label: (
+                        <Typography.Text strong>
+                          {user.displayName || user.email}
+                        </Typography.Text>
+                      ),
+                      disabled: true,
+                    },
+                    { type: 'divider' as const },
+                    {
+                      key: 'settings',
+                      icon: <SettingOutlined />,
+                      label: 'Settings',
+                      onClick: () =>
+                        router.push(bp(Path.SettingsGeneral)),
+                    },
+                    {
+                      key: 'logout',
+                      icon: <LogoutOutlined />,
+                      label: 'Sign out',
+                      onClick: logout,
+                    },
+                  ]}
+                />
+              }
+              trigger={['click']}
+              placement="bottomRight"
+            >
+              <AvatarButton shape="circle" size="small">
+                <UserOutlined />
+              </AvatarButton>
+            </Dropdown>
+          )}
+        </Space>
       </div>
     </StyledHeader>
   );
