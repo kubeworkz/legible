@@ -23,6 +23,7 @@ import {
   DataSourceName,
   SampleDatasetName,
 } from '@/apollo/client/graphql/__types__';
+import useProject from '@/hooks/useProject';
 
 const { Title, Text } = Typography;
 
@@ -165,6 +166,46 @@ function DataSourcePanel(props: {
   );
 }
 
+const SetupPromptContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+`;
+
+function SetupPrompt() {
+  const router = useRouter();
+  const { currentProjectId } = useProject();
+
+  const onContinueSetup = () => {
+    router.push(buildPath(Path.OnboardingConnection, currentProjectId));
+  };
+
+  return (
+    <SetupPromptContainer>
+      <Image
+        src="/images/logo.svg"
+        alt="Wren AI"
+        width={64}
+        height={64}
+        className="mb-4"
+      />
+      <Title level={4} className="gray-9 mb-1">
+        Let&apos;s get you set up!
+      </Title>
+      <Text className="gray-6 d-block mb-5" style={{ maxWidth: 400 }}>
+        To access your data and unlock powerful insights, please complete the
+        setup by clicking the button below.
+      </Text>
+      <Button type="primary" size="large" onClick={onContinueSetup}>
+        Continue setup
+      </Button>
+    </SetupPromptContainer>
+  );
+}
+
 export default function SettingsDataConnection() {
   const [fetchSettings, { data, refetch }] = useGetSettingsLazyQuery({
     fetchPolicy: 'cache-and-network',
@@ -196,7 +237,7 @@ export default function SettingsDataConnection() {
             refetchSettings={() => refetch()}
           />
         ) : (
-          <FlexLoading align="center" height={150} />
+          <SetupPrompt />
         )}
       </PageContainer>
     </SettingsLayout>
