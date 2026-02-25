@@ -4,11 +4,15 @@ import styled from 'styled-components';
 import UserOutlined from '@ant-design/icons/UserOutlined';
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined';
 import SettingOutlined from '@ant-design/icons/SettingOutlined';
+import SwapOutlined from '@ant-design/icons/SwapOutlined';
+import TeamOutlined from '@ant-design/icons/TeamOutlined';
+import CheckOutlined from '@ant-design/icons/CheckOutlined';
 import LogoBar from '@/components/LogoBar';
 import { Path, buildPath } from '@/utils/enum';
 import Deploy from '@/components/deploy/Deploy';
 import useProject from '@/hooks/useProject';
 import useAuth from '@/hooks/useAuth';
+import useOrganization from '@/hooks/useOrganization';
 
 const { Header } = Layout;
 
@@ -51,10 +55,36 @@ const AvatarButton = styled(Button)`
   }
 `;
 
+const OrgButton = styled(Button)`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--gray-1);
+  display: flex;
+  align-items: center;
+  max-width: 180px;
+  font-size: 12px;
+
+  &:hover,
+  &:focus {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--gray-1);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .anticon {
+    font-size: 12px;
+  }
+`;
+
 export default function HeaderBar() {
   const router = useRouter();
   const { currentProjectId } = useProject();
   const { user, logout } = useAuth();
+  const {
+    organizations,
+    currentOrganization,
+    setCurrentOrgId,
+  } = useOrganization();
   const { pathname } = router;
   const showNav = !pathname.startsWith(Path.Onboarding);
   const isModeling = pathname.startsWith(Path.Modeling);
@@ -107,6 +137,36 @@ export default function HeaderBar() {
         </Space>
         <Space size={[12, 0]}>
           {isModeling && <Deploy />}
+          {currentOrganization && organizations.length > 1 && (
+            <Dropdown
+              overlay={
+                <Menu
+                  items={organizations.map((org) => ({
+                    key: String(org.id),
+                    icon:
+                      org.id === currentOrganization.id ? (
+                        <CheckOutlined />
+                      ) : (
+                        <TeamOutlined />
+                      ),
+                    label: org.displayName,
+                    onClick: () => setCurrentOrgId(org.id),
+                  }))}
+                />
+              }
+              trigger={['click']}
+              placement="bottomRight"
+            >
+              <OrgButton size="small" icon={<SwapOutlined />}>
+                <Typography.Text
+                  ellipsis
+                  style={{ color: 'inherit', maxWidth: 130 }}
+                >
+                  {currentOrganization.displayName}
+                </Typography.Text>
+              </OrgButton>
+            </Dropdown>
+          )}
           {user && (
             <Dropdown
               overlay={

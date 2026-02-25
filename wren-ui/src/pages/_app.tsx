@@ -6,6 +6,7 @@ import apolloClient from '@/apollo/client';
 import { GlobalConfigProvider } from '@/hooks/useGlobalConfig';
 import { ProjectProvider } from '@/hooks/useProject';
 import { AuthProvider } from '@/hooks/useAuth';
+import { OrganizationProvider } from '@/hooks/useOrganization';
 import { PostHogProvider } from 'posthog-js/react';
 import { ApolloProvider } from '@apollo/client';
 import { defaultIndicator } from '@/components/PageLoading';
@@ -24,13 +25,15 @@ function App({ Component, pageProps }: AppProps) {
       <GlobalConfigProvider>
         <ApolloProvider client={apolloClient}>
           <AuthProvider>
-            <ProjectProvider>
-              <PostHogProvider client={posthog}>
-                <main className="app">
-                  <Component {...pageProps} />
-                </main>
-              </PostHogProvider>
-            </ProjectProvider>
+            <OrganizationProvider>
+              <ProjectProvider>
+                <PostHogProvider client={posthog}>
+                  <main className="app">
+                    <Component {...pageProps} />
+                  </main>
+                </PostHogProvider>
+              </ProjectProvider>
+            </OrganizationProvider>
           </AuthProvider>
         </ApolloProvider>
       </GlobalConfigProvider>
