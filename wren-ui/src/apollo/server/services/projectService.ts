@@ -77,7 +77,9 @@ export interface IProjectService {
     persistCredentialDir: string,
   ) => string;
   deleteProject: (projectId: number) => Promise<void>;
-  getProjectRecommendationQuestions: (projectId?: number) => Promise<ProjectRecommendationQuestionsResult>;
+  getProjectRecommendationQuestions: (
+    projectId?: number,
+  ) => Promise<ProjectRecommendationQuestionsResult>;
 
   // recommend questions
   generateProjectRecommendationQuestions: (projectId?: number) => Promise<void>;
@@ -132,7 +134,9 @@ export class ProjectService implements IProjectService {
     return await this.metadataService.getVersion(usedProject);
   }
 
-  public async generateProjectRecommendationQuestions(projectId?: number): Promise<void> {
+  public async generateProjectRecommendationQuestions(
+    projectId?: number,
+  ): Promise<void> {
     const project = await this.getCurrentProject(projectId);
     if (!project) {
       throw new Error(`Project not found`);

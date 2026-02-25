@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { message } from 'antd';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
+import useProject from '@/hooks/useProject';
 import { useRouter } from 'next/router';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
@@ -34,6 +35,7 @@ const isSupportCachedSettings = (dataSource: DataSource) => {
 
 export default function Dashboard() {
   const router = useRouter();
+  const { currentProjectId } = useProject();
   const dashboardGridRef = useRef<{ onRefreshAll: () => void }>(null);
   const homeSidebar = useHomeSidebar();
   const cacheSettingsDrawer = useDrawerAction();
@@ -52,7 +54,7 @@ export default function Dashboard() {
     fetchPolicy: 'cache-and-network',
     onError: () => {
       message.error('Failed to fetch dashboard items.');
-      router.push(Path.Home);
+      router.push(buildPath(Path.Home, currentProjectId));
     },
   });
   const dashboardItems = useMemo(

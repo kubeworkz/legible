@@ -3,13 +3,14 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useParams } from 'next/navigation';
 import styled from 'styled-components';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import FundViewOutlined from '@ant-design/icons/FundViewOutlined';
 import SidebarTree, {
   StyledTreeNodeLink,
   useSidebarTreeState,
 } from './SidebarTree';
 import ThreadTree, { ThreadData } from './home/ThreadTree';
+import useProject from '@/hooks/useProject';
 
 export interface Props {
   data: {
@@ -42,7 +43,9 @@ export default function Home(props: Props) {
   const { data, onSelect, onRename, onDelete } = props;
   const router = useRouter();
   const params = useParams<{ id: string }>();
+  const { currentProjectId } = useProject();
   const { threads } = data;
+  const bp = (path: Path) => buildPath(path, currentProjectId);
 
   const { treeSelectedKeys, setTreeSelectedKeys } = useSidebarTreeState();
 
@@ -54,7 +57,7 @@ export default function Home(props: Props) {
     try {
       await onDelete(threadId);
       if (params?.id == threadId) {
-        router.push(Path.Home);
+        router.push(bp(Path.Home));
       }
     } catch (error) {
       console.error(error);
@@ -75,7 +78,7 @@ export default function Home(props: Props) {
         className={clsx({
           'adm-treeNode--selected': router.pathname === Path.HomeDashboard,
         })}
-        href={Path.HomeDashboard}
+        href={bp(Path.HomeDashboard)}
       >
         <FundViewOutlined className="mr-2" />
         <span className="text-medium">Dashboard</span>

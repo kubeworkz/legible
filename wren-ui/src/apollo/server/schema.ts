@@ -850,6 +850,7 @@ export const typeDefs = gql`
     type: DataSourceName
     displayName: String!
     language: ProjectLanguage!
+    timezone: String
     sampleDataset: SampleDatasetName
     createdAt: String!
     updatedAt: String!
@@ -862,6 +863,7 @@ export const typeDefs = gql`
   input UpdateProjectInput {
     displayName: String
     language: ProjectLanguage
+    timezone: String
   }
 
   # Settings

@@ -1,5 +1,5 @@
 import microCors from 'micro-cors';
-import { NextApiRequest, NextApiResponse, PageConfig } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { ApolloServer } from 'apollo-server-micro';
 import { typeDefs } from '@server';
 import resolvers from '@server/resolvers';
@@ -21,7 +21,7 @@ logger.level = 'debug';
 
 const cors = microCors();
 
-export const config: PageConfig = {
+export const config = {
   api: {
     bodyParser: false,
   },
@@ -132,44 +132,44 @@ const bootstrapServer = async () => {
         ? parseInt(String(projectIdHeader), 10)
         : undefined;
       return {
-      config: serverConfig,
-      telemetry,
-      projectId: !isNaN(projectId) ? projectId : undefined,
-      // adaptor
-      wrenEngineAdaptor,
-      ibisServerAdaptor: ibisAdaptor,
-      wrenAIAdaptor,
-      // services
-      projectService,
-      modelService,
-      mdlService,
-      deployService,
-      askingService,
-      queryService,
-      dashboardService,
-      sqlPairService,
-      instructionService,
-      // repository
-      projectRepository,
-      modelRepository,
-      modelColumnRepository,
-      modelNestedColumnRepository,
-      relationRepository,
-      viewRepository,
-      deployRepository: deployLogRepository,
-      schemaChangeRepository,
-      learningRepository,
-      dashboardRepository,
-      dashboardItemRepository,
-      sqlPairRepository,
-      instructionRepository,
-      apiHistoryRepository,
-      dashboardItemRefreshJobRepository,
-      // background trackers
-      projectRecommendQuestionBackgroundTracker,
-      threadRecommendQuestionBackgroundTracker,
-      dashboardCacheBackgroundTracker,
-    };
+        config: serverConfig,
+        telemetry,
+        projectId: !isNaN(projectId) ? projectId : undefined,
+        // adaptor
+        wrenEngineAdaptor,
+        ibisServerAdaptor: ibisAdaptor,
+        wrenAIAdaptor,
+        // services
+        projectService,
+        modelService,
+        mdlService,
+        deployService,
+        askingService,
+        queryService,
+        dashboardService,
+        sqlPairService,
+        instructionService,
+        // repository
+        projectRepository,
+        modelRepository,
+        modelColumnRepository,
+        modelNestedColumnRepository,
+        relationRepository,
+        viewRepository,
+        deployRepository: deployLogRepository,
+        schemaChangeRepository,
+        learningRepository,
+        dashboardRepository,
+        dashboardItemRepository,
+        sqlPairRepository,
+        instructionRepository,
+        apiHistoryRepository,
+        dashboardItemRefreshJobRepository,
+        // background trackers
+        projectRecommendQuestionBackgroundTracker,
+        threadRecommendQuestionBackgroundTracker,
+        dashboardCacheBackgroundTracker,
+      };
     },
   });
   await apolloServer.start();

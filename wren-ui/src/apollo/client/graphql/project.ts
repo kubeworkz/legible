@@ -7,6 +7,7 @@ export const LIST_PROJECTS = gql`
       type
       displayName
       language
+      timezone
       sampleDataset
       createdAt
       updatedAt
@@ -21,6 +22,7 @@ export const GET_PROJECT = gql`
       type
       displayName
       language
+      timezone
       sampleDataset
       createdAt
       updatedAt
@@ -35,6 +37,7 @@ export const CREATE_PROJECT = gql`
       type
       displayName
       language
+      timezone
       sampleDataset
       createdAt
       updatedAt
@@ -49,6 +52,7 @@ export const UPDATE_PROJECT = gql`
       type
       displayName
       language
+      timezone
       sampleDataset
       createdAt
       updatedAt

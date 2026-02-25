@@ -108,10 +108,13 @@ export class ProjectResolver {
 
   public async updateProject(
     _root: any,
-    arg: { projectId: number; data: { displayName?: string; language?: string } },
+    arg: {
+      projectId: number;
+      data: { displayName?: string; language?: string; timezone?: string };
+    },
     ctx: IContext,
   ) {
-    const { displayName, language } = arg.data;
+    const { displayName, language, timezone } = arg.data;
     const updateData: Record<string, any> = {};
     if (displayName !== undefined && displayName !== null) {
       if (displayName.trim().length === 0) {
@@ -122,13 +125,13 @@ export class ProjectResolver {
     if (language !== undefined && language !== null) {
       updateData.language = language;
     }
+    if (timezone !== undefined && timezone !== null) {
+      updateData.timezone = timezone;
+    }
     if (Object.keys(updateData).length === 0) {
       throw new Error('No fields to update');
     }
-    await ctx.projectRepository.updateOne(
-      arg.projectId,
-      updateData,
-    );
+    await ctx.projectRepository.updateOne(arg.projectId, updateData);
     const project = await ctx.projectService.getProjectById(arg.projectId);
     return this.formatProjectInfo(project);
   }
@@ -143,7 +146,9 @@ export class ProjectResolver {
     // Prevent deleting the last remaining project
     const allProjects = await ctx.projectService.listProjects();
     if (allProjects.length <= 1) {
-      throw new Error('Cannot delete the last project. At least one project must exist.');
+      throw new Error(
+        'Cannot delete the last project. At least one project must exist.',
+      );
     }
 
     const project = await ctx.projectService.getProjectById(projectId);
@@ -160,7 +165,9 @@ export class ProjectResolver {
     try {
       await ctx.wrenAIAdaptor.delete(projectId);
     } catch (err) {
-      logger.warn(`Failed to clean up AI service for project ${projectId}: ${err.message}`);
+      logger.warn(
+        `Failed to clean up AI service for project ${projectId}: ${err.message}`,
+      );
     }
 
     logger.debug(`Project deleted: ${projectId}`);
@@ -173,6 +180,7 @@ export class ProjectResolver {
       type: project.type || null,
       displayName: project.displayName,
       language: project.language || 'EN',
+      timezone: project.timezone || null,
       sampleDataset: project.sampleDataset || null,
       createdAt: project.createdAt
         ? new Date(project.createdAt).toISOString()
@@ -224,7 +232,9 @@ export class ProjectResolver {
 
     // only generating for user's data source
     if (project.sampleDataset === null) {
-      await ctx.projectService.generateProjectRecommendationQuestions(ctx.projectId);
+      await ctx.projectService.generateProjectRecommendationQuestions(
+        ctx.projectId,
+      );
     }
     return true;
   }
@@ -315,12 +325,20 @@ export class ProjectResolver {
       await this.overwriteModelsAndColumns(tableNames, ctx, project);
 
       await ctx.modelService.updatePrimaryKeys(dataset.tables, newProjectId);
-      await ctx.modelService.batchUpdateModelProperties(dataset.tables, newProjectId);
-      await ctx.modelService.batchUpdateColumnProperties(dataset.tables, newProjectId);
+      await ctx.modelService.batchUpdateModelProperties(
+        dataset.tables,
+        newProjectId,
+      );
+      await ctx.modelService.batchUpdateColumnProperties(
+        dataset.tables,
+        newProjectId,
+      );
 
       // save relations
       const relations = getRelations(name as SampleDatasetName);
-      const models = await ctx.modelRepository.findAllBy({ projectId: newProjectId });
+      const models = await ctx.modelRepository.findAllBy({
+        projectId: newProjectId,
+      });
       const columns = await ctx.modelColumnRepository.findAll();
       const mappedRelations = this.buildRelationInput(
         relations,
@@ -762,12 +780,16 @@ export class ProjectResolver {
 
   private async deploy(ctx: IContext) {
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
-    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(ctx.projectId);
+    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(
+      ctx.projectId,
+    );
     const deployRes = await ctx.deployService.deploy(manifest, project.id);
 
     // only generating for user's data source
     if (project.sampleDataset === null) {
-      await ctx.projectService.generateProjectRecommendationQuestions(ctx.projectId);
+      await ctx.projectService.generateProjectRecommendationQuestions(
+        ctx.projectId,
+      );
     }
     return deployRes;
   }

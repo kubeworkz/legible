@@ -4,7 +4,11 @@ import {
   TextBasedAnswerResult,
   TextBasedAnswerStatus,
 } from '../models/adaptor';
-import { ThreadResponse, IThreadResponseRepository, IThreadRepository } from '../repositories';
+import {
+  ThreadResponse,
+  IThreadResponseRepository,
+  IThreadRepository,
+} from '../repositories';
 import {
   IProjectService,
   IDeployService,
@@ -75,8 +79,12 @@ export class TextBasedAnswerBackgroundTracker {
           });
 
           // get sql data — look up thread to find the project
-          const thread = await this.threadRepository.findOneBy({ id: threadResponse.threadId });
-          const project = await this.projectService.getCurrentProject(thread?.projectId);
+          const thread = await this.threadRepository.findOneBy({
+            id: threadResponse.threadId,
+          });
+          const project = await this.projectService.getCurrentProject(
+            thread?.projectId,
+          );
           const deployment = await this.deployService.getLastDeployment(
             project.id,
           );

@@ -2,7 +2,8 @@ import { ComponentRef, useMemo, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Button, Typography } from 'antd';
 import { Logo } from '@/components/Logo';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
+import useProject from '@/hooks/useProject';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import Prompt from '@/components/pages/home/prompt';
 import DemoPrompt from '@/components/pages/home/prompt/DemoPrompt';
@@ -90,6 +91,7 @@ function RecommendedQuestionsInstruction(props) {
 export default function Home() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
+  const { currentProjectId } = useProject();
   const homeSidebar = useHomeSidebar();
   const askPrompt = useAskPrompt();
 
@@ -126,7 +128,7 @@ export default function Home() {
       const response = await createThread({ variables: { data: payload } });
       const threadId = response.data.createThread.id;
       await preloadThread({ variables: { threadId } });
-      router.push(Path.Home + `/${threadId}`);
+      router.push(buildPath(Path.Home, currentProjectId) + `/${threadId}`);
     } catch (error) {
       console.error(error);
     }

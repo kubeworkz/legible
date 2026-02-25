@@ -2,8 +2,6 @@ import { Layout } from 'antd';
 import styled, { css } from 'styled-components';
 import SimpleLayout from '@/components/layouts/SimpleLayout';
 import Sidebar from '@/components/sidebar';
-import Settings from '@/components/settings';
-import useModalAction from '@/hooks/useModalAction';
 
 const { Sider } = Layout;
 
@@ -29,19 +27,17 @@ type Props = React.ComponentProps<typeof SimpleLayout> & {
 
 export default function SiderLayout(props: Props) {
   const { sidebar, loading, color } = props;
-  const settings = useModalAction();
 
   return (
     <SimpleLayout loading={loading}>
       <Layout className="adm-layout">
         <StyledSider width={280}>
-          <Sidebar {...sidebar} onOpenSettings={settings.openModal} />
+          <Sidebar {...sidebar} />
         </StyledSider>
         <StyledContentLayout color={color}>
           {props.children}
         </StyledContentLayout>
       </Layout>
-      <Settings {...settings.state} onClose={settings.closeModal} />
     </SimpleLayout>
   );
 }

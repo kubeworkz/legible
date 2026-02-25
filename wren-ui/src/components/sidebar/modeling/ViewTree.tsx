@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Modal } from 'antd';
 import { DataNode } from 'antd/es/tree';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import { DiagramView } from '@/utils/data';
 import { getNodeTypeIcon } from '@/utils/nodeType';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@/components/sidebar/utils';
 import LabelTitle from '@/components/sidebar/LabelTitle';
 import { StyledSidebarTree } from '@/components/sidebar/Modeling';
+import useProject from '@/hooks/useProject';
 
 interface Props {
   [key: string]: any;
@@ -21,6 +22,7 @@ interface Props {
 
 export default function ViewTree(props: Props) {
   const { views } = props;
+  const { currentProjectId } = useProject();
 
   const onAddView = () => {
     Modal.info({
@@ -29,7 +31,7 @@ export default function ViewTree(props: Props) {
         <div>
           Pose your questions at{' '}
           <Link
-            href={Path.Home}
+            href={buildPath(Path.Home, currentProjectId)}
             data-ph-capture="true"
             data-ph-capture-attribute-name="cta_add_view_navigate_to_home"
           >

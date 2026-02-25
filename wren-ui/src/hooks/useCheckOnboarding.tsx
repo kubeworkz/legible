@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useOnboardingStatusQuery } from '@/apollo/client/graphql/onboarding.generated';
 import { OnboardingStatus } from '@/apollo/client/graphql/__types__';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
+import useProject, { getStoredProjectId } from '@/hooks/useProject';
 
 const redirectRoute = {
   [OnboardingStatus.DATASOURCE_SAVED]: Path.OnboardingModels,
@@ -14,6 +15,7 @@ const redirectRoute = {
 export const useWithOnboarding = () => {
   const router = useRouter();
   const { data, loading } = useOnboardingStatusQuery();
+  const { currentProjectId } = useProject();
 
   const onboardingStatus = data?.onboardingStatus?.status;
 
@@ -23,6 +25,11 @@ export const useWithOnboarding = () => {
       const pathname = router.pathname;
       const isOnSetupPage = pathname.startsWith(Path.Onboarding);
       const isIndexPage = pathname === '/';
+      const projectId =
+        (router.query.projectId as string) ||
+        currentProjectId ||
+        getStoredProjectId() ||
+        0;
 
       // --- Onboarding NOT completed ---
       if (newPath && newPath !== Path.Modeling) {
@@ -31,7 +38,7 @@ export const useWithOnboarding = () => {
         //   2. Other setup pages (allow navigating within the setup flow)
         // Do NOT redirect users who are on app pages like /home, /modeling, etc.
         if (isIndexPage) {
-          router.push(newPath);
+          router.push(buildPath(newPath, projectId));
           return;
         }
 
@@ -54,7 +61,7 @@ export const useWithOnboarding = () => {
 
       // redirect to the modeling page when entering the Index page
       if (isIndexPage) {
-        router.push(newPath);
+        router.push(buildPath(newPath, projectId));
         return;
       }
 
@@ -63,7 +70,7 @@ export const useWithOnboarding = () => {
         pathname === Path.OnboardingRelationships &&
         onboardingStatus === OnboardingStatus.WITH_SAMPLE_DATASET
       ) {
-        router.push(newPath);
+        router.push(buildPath(newPath, projectId));
         return;
       }
 
@@ -73,11 +80,11 @@ export const useWithOnboarding = () => {
           pathname as Path,
         )
       ) {
-        router.push(newPath);
+        router.push(buildPath(newPath, projectId));
         return;
       }
     }
-  }, [onboardingStatus, router.pathname]);
+  }, [onboardingStatus, router.pathname, currentProjectId]);
 
   return {
     loading,

@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useCallback } from 'react';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import { ONBOARDING_STATUS } from '@/apollo/client/graphql/onboarding';
 import { useStartSampleDatasetMutation } from '@/apollo/client/graphql/dataSource.generated';
 import { SampleDatasetName } from '@/apollo/client/graphql/__types__';
@@ -18,7 +18,7 @@ export default function useSetupConnectionSampleDataset() {
         if (projectId && typeof window !== 'undefined') {
           localStorage.setItem('wren-current-project-id', String(projectId));
         }
-        router.push(Path.Modeling);
+        router.push(buildPath(Path.Modeling, projectId || 0));
       },
       refetchQueries: [{ query: ONBOARDING_STATUS }],
       awaitRefetchQueries: true,

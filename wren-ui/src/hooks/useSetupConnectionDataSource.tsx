@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import { useState, useCallback } from 'react';
 import {
   Path,
+  buildPath,
   REDSHIFT_AUTH_METHOD,
   DATABRICKS_AUTH_METHOD,
 } from '@/utils/enum';
@@ -32,8 +33,11 @@ export default function useSetupConnectionDataSource() {
       onCompleted: (data) => {
         // Switch to the newly created project so the rest of onboarding
         // operates against it
-        switchToProject(data?.saveDataSource?.projectId);
-        completedDataSourceSave();
+        const projectId = data?.saveDataSource?.projectId;
+        switchToProject(projectId);
+        // Navigate using the newly created project's ID
+        const targetProjectId = projectId || getStoredProjectId() || 0;
+        router.push(buildPath(Path.OnboardingModels, targetProjectId));
       },
     });
 
@@ -60,7 +64,8 @@ export default function useSetupConnectionDataSource() {
   );
 
   const completedDataSourceSave = useCallback(async () => {
-    router.push(Path.OnboardingModels);
+    const targetProjectId = getStoredProjectId() || 0;
+    router.push(buildPath(Path.OnboardingModels, targetProjectId));
   }, [selected, router]);
 
   return {

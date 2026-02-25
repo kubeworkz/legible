@@ -140,7 +140,10 @@ export interface IAskingService {
   /**
    * Asking detail task.
    */
-  createThread(input: AskingDetailTaskInput, projectId?: number): Promise<Thread>;
+  createThread(
+    input: AskingDetailTaskInput,
+    projectId?: number,
+  ): Promise<Thread>;
   updateThread(
     threadId: number,
     input: Partial<AskingDetailTaskUpdateInput>,
@@ -196,7 +199,11 @@ export interface IAskingService {
     status: ThreadResponseAnswerStatus,
     content?: string,
   ): Promise<ThreadResponse>;
-  previewData(responseId: number, limit?: number, projectId?: number): Promise<PreviewDataResponse>;
+  previewData(
+    responseId: number,
+    limit?: number,
+    projectId?: number,
+  ): Promise<PreviewDataResponse>;
   previewBreakdownData(
     responseId: number,
     stepIndex?: number,
@@ -214,7 +221,10 @@ export interface IAskingService {
   getInstantRecommendedQuestions(
     queryId: string,
   ): Promise<RecommendationQuestionsResult>;
-  generateThreadRecommendationQuestions(threadId: number, projectId?: number): Promise<void>;
+  generateThreadRecommendationQuestions(
+    threadId: number,
+    projectId?: number,
+  ): Promise<void>;
   getThreadRecommendationQuestions(
     threadId: number,
   ): Promise<ThreadRecommendQuestionResult>;
@@ -682,7 +692,10 @@ export class AskingService implements IAskingService {
    * 2. create a task on AI service to generate the detail
    * 3. update the thread response with the task id
    */
-  public async createThread(input: AskingDetailTaskInput, projectId?: number): Promise<Thread> {
+  public async createThread(
+    input: AskingDetailTaskInput,
+    projectId?: number,
+  ): Promise<Thread> {
     // 1. create a thread and the first thread response
     const { id } = await this.projectService.getCurrentProject(projectId);
     const thread = await this.threadRepository.createOne({
@@ -931,7 +944,11 @@ export class AskingService implements IAskingService {
     return this.threadResponseRepository.findOneBy({ id: responseId });
   }
 
-  public async previewData(responseId: number, limit?: number, projectId?: number) {
+  public async previewData(
+    responseId: number,
+    limit?: number,
+    projectId?: number,
+  ) {
     const response = await this.getResponse(responseId);
     if (!response) {
       throw new Error(`Thread response ${responseId} not found`);

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Button } from 'antd';
 import styled from 'styled-components';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import { DiscordIcon, GithubIcon } from '@/utils/icons';
 import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import Home, { Props as HomeSidebarProps } from './Home';
@@ -11,6 +11,7 @@ import Knowledge from './Knowledge';
 import APIManagement from './APIManagement';
 import LearningSection from '@/components/learning';
 import ProjectSwitcher from './ProjectSwitcher';
+import useProject from '@/hooks/useProject';
 
 const Layout = styled.div`
   position: relative;
@@ -41,9 +42,7 @@ const StyledButton = styled(Button)`
   }
 `;
 
-type Props = (ModelingSidebarProps | HomeSidebarProps) & {
-  onOpenSettings?: () => void;
-};
+type Props = ModelingSidebarProps | HomeSidebarProps;
 
 const DynamicSidebar = (
   props: Props & {
@@ -76,12 +75,11 @@ const DynamicSidebar = (
 };
 
 export default function Sidebar(props: Props) {
-  const { onOpenSettings } = props;
   const router = useRouter();
+  const { currentProjectId } = useProject();
 
-  const onSettingsClick = (event) => {
-    onOpenSettings && onOpenSettings();
-    event.target.blur();
+  const onSettingsClick = () => {
+    router.push(buildPath(Path.SettingsGeneral, currentProjectId));
   };
 
   return (

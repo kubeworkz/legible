@@ -86,7 +86,10 @@ export class ModelResolver {
 
     const eventName = TelemetryEvent.MODELING_CREATE_RELATION;
     try {
-      const relation = await ctx.modelService.createRelation(data, ctx.projectId);
+      const relation = await ctx.modelService.createRelation(
+        data,
+        ctx.projectId,
+      );
       ctx.telemetry.sendEvent(eventName, { data });
       return relation;
     } catch (err: any) {
@@ -201,7 +204,9 @@ export class ModelResolver {
 
   public async checkModelSync(_root: any, _args: any, ctx: IContext) {
     const { id } = await ctx.projectService.getCurrentProject(ctx.projectId);
-    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(ctx.projectId);
+    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(
+      ctx.projectId,
+    );
     const currentHash = ctx.deployService.createMDLHash(manifest, id);
     const lastDeploy = await ctx.deployService.getLastDeployment(id);
     const lastDeployHash = lastDeploy?.hash;
@@ -228,7 +233,9 @@ export class ModelResolver {
         version,
       });
     }
-    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(ctx.projectId);
+    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(
+      ctx.projectId,
+    );
     const deployRes = await ctx.deployService.deploy(
       manifest,
       project.id,
@@ -237,7 +244,9 @@ export class ModelResolver {
 
     // only generating for user's data source
     if (project.sampleDataset === null) {
-      await ctx.projectService.generateProjectRecommendationQuestions(ctx.projectId);
+      await ctx.projectService.generateProjectRecommendationQuestions(
+        ctx.projectId,
+      );
     }
     return deployRes;
   }
@@ -251,7 +260,9 @@ export class ModelResolver {
   }
 
   public async listModels(_root: any, _args: any, ctx: IContext) {
-    const { id: projectId } = await ctx.projectService.getCurrentProject(ctx.projectId);
+    const { id: projectId } = await ctx.projectService.getCurrentProject(
+      ctx.projectId,
+    );
     const models = await ctx.modelRepository.findAllBy({ projectId });
     const modelIds = models.map((m) => m.id);
     const modelColumnList =
@@ -897,7 +908,9 @@ export class ModelResolver {
       throw new Error('Model not found');
     }
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
-    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(ctx.projectId);
+    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(
+      ctx.projectId,
+    );
     const modelColumns = await ctx.modelColumnRepository.findColumnsByModelIds([
       model.id,
     ]);
@@ -918,7 +931,9 @@ export class ModelResolver {
     if (!view) {
       throw new Error('View not found');
     }
-    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(ctx.projectId);
+    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(
+      ctx.projectId,
+    );
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
 
     const data = (await ctx.queryService.preview(view.statement, {
@@ -963,7 +978,9 @@ export class ModelResolver {
     if (project.sampleDataset) {
       throw new Error(`Doesn't support Native SQL`);
     }
-    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(ctx.projectId);
+    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(
+      ctx.projectId,
+    );
 
     // get sql statement of a response
     const response = await ctx.askingService.getResponse(responseId);

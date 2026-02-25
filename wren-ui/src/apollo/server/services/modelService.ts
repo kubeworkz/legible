@@ -40,11 +40,23 @@ export interface ValidateCalculatedFieldResponse {
 }
 
 export interface IModelService {
-  updatePrimaryKeys(tables: SampleDatasetTable[], projectId?: number): Promise<void>;
-  batchUpdateModelProperties(tables: SampleDatasetTable[], projectId?: number): Promise<void>;
-  batchUpdateColumnProperties(tables: SampleDatasetTable[], projectId?: number): Promise<void>;
+  updatePrimaryKeys(
+    tables: SampleDatasetTable[],
+    projectId?: number,
+  ): Promise<void>;
+  batchUpdateModelProperties(
+    tables: SampleDatasetTable[],
+    projectId?: number,
+  ): Promise<void>;
+  batchUpdateColumnProperties(
+    tables: SampleDatasetTable[],
+    projectId?: number,
+  ): Promise<void>;
   // saveRelations was used in the onboarding process, we assume there is not existing relation in the project
-  saveRelations(relations: RelationData[], projectId?: number): Promise<Relation[]>;
+  saveRelations(
+    relations: RelationData[],
+    projectId?: number,
+  ): Promise<Relation[]>;
   createRelation(relation: RelationData, projectId?: number): Promise<Relation>;
   updateRelation(relation: UpdateRelationData, id: number): Promise<Relation>;
   deleteRelation(id: number): Promise<void>;
@@ -234,7 +246,10 @@ export class ModelService implements IModelService {
     return updatedColumn;
   }
 
-  public async updatePrimaryKeys(tables: SampleDatasetTable[], projectId?: number) {
+  public async updatePrimaryKeys(
+    tables: SampleDatasetTable[],
+    projectId?: number,
+  ) {
     logger.debug('start update primary keys');
     const { id } = await this.projectService.getCurrentProject(projectId);
     const models = await this.modelRepository.findAllBy({
@@ -253,7 +268,10 @@ export class ModelService implements IModelService {
     }
   }
 
-  public async batchUpdateModelProperties(tables: SampleDatasetTable[], projectId?: number) {
+  public async batchUpdateModelProperties(
+    tables: SampleDatasetTable[],
+    projectId?: number,
+  ) {
     logger.debug('start batch update model description');
     const { id } = await this.projectService.getCurrentProject(projectId);
     const models = await this.modelRepository.findAllBy({
@@ -278,7 +296,10 @@ export class ModelService implements IModelService {
     ]);
   }
 
-  public async batchUpdateColumnProperties(tables: SampleDatasetTable[], projectId?: number) {
+  public async batchUpdateColumnProperties(
+    tables: SampleDatasetTable[],
+    projectId?: number,
+  ) {
     logger.debug('start batch update column description');
     const { id } = await this.projectService.getCurrentProject(projectId);
     const models = await this.modelRepository.findAllBy({
@@ -385,7 +406,10 @@ export class ModelService implements IModelService {
     return savedRelations;
   }
 
-  public async createRelation(relation: RelationData, projectId?: number): Promise<Relation> {
+  public async createRelation(
+    relation: RelationData,
+    projectId?: number,
+  ): Promise<Relation> {
     const { id } = await this.projectService.getCurrentProject(projectId);
     const modelIds = [relation.fromModelId, relation.toModelId];
     const models = await this.modelRepository.findAllByIds(modelIds);

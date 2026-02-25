@@ -2,9 +2,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import FunctionOutlined from '@ant-design/icons/FunctionOutlined';
-import { Path, MENU_KEY } from '@/utils/enum';
+import { Path, buildPath, MENU_KEY } from '@/utils/enum';
 import { InstructionsSVG } from '@/utils/svgs';
 import SidebarMenu from '@/components/sidebar/SidebarMenu';
+import useProject from '@/hooks/useProject';
 
 const Layout = styled.div`
   padding: 16px 0;
@@ -26,12 +27,14 @@ const linkStyle = { color: 'inherit', transition: 'none' };
 
 export default function Knowledge() {
   const router = useRouter();
+  const { currentProjectId } = useProject();
+  const bp = (path: Path) => buildPath(path, currentProjectId);
 
   const menuItems = [
     {
       'data-guideid': 'question-sql-pairs',
       label: (
-        <Link style={linkStyle} href={Path.KnowledgeQuestionSQLPairs}>
+        <Link style={linkStyle} href={bp(Path.KnowledgeQuestionSQLPairs)}>
           Question-SQL pairs
         </Link>
       ),
@@ -42,7 +45,7 @@ export default function Knowledge() {
     {
       'data-guideid': 'instructions',
       label: (
-        <Link style={linkStyle} href={Path.KnowledgeInstructions}>
+        <Link style={linkStyle} href={bp(Path.KnowledgeInstructions)}>
           Instructions
         </Link>
       ),

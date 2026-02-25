@@ -5,7 +5,7 @@ import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import ProjectOutlined from '@ant-design/icons/ProjectOutlined';
 import useProject from '@/hooks/useProject';
 import { useApolloClient } from '@apollo/client';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 
 const Wrapper = styled.div`
   padding: 12px 16px;
@@ -58,12 +58,8 @@ const Label = styled.span`
 `;
 
 export default function ProjectSwitcher() {
-  const {
-    projects,
-    currentProjectId,
-    setCurrentProjectId,
-    loading,
-  } = useProject();
+  const { projects, currentProjectId, setCurrentProjectId, loading } =
+    useProject();
   const apolloClient = useApolloClient();
   const router = useRouter();
 
@@ -78,7 +74,7 @@ export default function ProjectSwitcher() {
     await apolloClient.resetStore();
 
     // Navigate to home to ensure a clean state
-    router.push(Path.Home);
+    router.push(buildPath(Path.Home, value));
   };
 
   const options = projects.map((p) => ({
@@ -103,7 +99,11 @@ export default function ProjectSwitcher() {
             size="small"
             icon={<PlusOutlined />}
             style={{ color: 'var(--gray-7)' }}
-            onClick={() => router.push(Path.OnboardingConnection)}
+            onClick={() =>
+              router.push(
+                buildPath(Path.OnboardingConnection, currentProjectId || 0),
+              )
+            }
           />
         </Tooltip>
       </Header>

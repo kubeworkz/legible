@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 const withLess = require('next-with-less');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -34,8 +33,8 @@ const nextConfig = withLess({
   async redirects() {
     return [
       {
-        source: '/setup',
-        destination: '/setup/connection',
+        source: '/projects/:projectId/setup',
+        destination: '/projects/:projectId/setup/connection',
         permanent: true,
       },
     ];

@@ -10,6 +10,7 @@ import {
 import { Dispatcher, DriverObj } from './utils';
 import { makeStoriesPlayer } from './stories';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
+import useProject from '@/hooks/useProject';
 
 import 'driver.js/dist/driver.css';
 
@@ -21,6 +22,7 @@ interface Attributes {
 
 export default forwardRef<Attributes, Props>(function Guide(_props, ref) {
   const router = useRouter();
+  const { currentProjectId } = useProject();
   const $driver = useRef<DriverObj>(null);
 
   const { data: settingsResult } = useGetSettingsQuery();
@@ -45,6 +47,7 @@ export default forwardRef<Attributes, Props>(function Guide(_props, ref) {
       $driver.current,
       router,
       storyPayload,
+      currentProjectId,
     );
     playStoryWithId(id, dispatcher);
   };
@@ -53,6 +56,7 @@ export default forwardRef<Attributes, Props>(function Guide(_props, ref) {
     $driver.current,
     storyPayload,
     router,
+    currentProjectId,
   ]);
 
   return null;

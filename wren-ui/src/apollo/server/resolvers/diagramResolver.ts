@@ -33,7 +33,9 @@ export class DiagramResolver {
     _args: any,
     ctx: IContext,
   ): Promise<Diagram> {
-    const project = await ctx.projectRepository.getCurrentProject(ctx.projectId);
+    const project = await ctx.projectRepository.getCurrentProject(
+      ctx.projectId,
+    );
     const models = await ctx.modelRepository.findAllBy({
       projectId: project.id,
     });

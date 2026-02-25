@@ -50,11 +50,11 @@ export class MDLBuilder implements IMDLBuilder {
   private readonly views: View[];
 
   // related models, columns, and relations are used as the reference to build calculatedField expression or other
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   private readonly relatedModels: Model[];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   private readonly relatedColumns: ModelColumn[];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   private readonly relatedRelations: RelationInfo[];
 
   constructor(builderOptions: MDLBuilderBuildFromOptions) {

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
+import useProject from '@/hooks/useProject';
 import {
   useDeleteThreadMutation,
   useThreadsQuery,
@@ -9,6 +10,7 @@ import {
 
 export default function useHomeSidebar() {
   const router = useRouter();
+  const { currentProjectId } = useProject();
   const { data, refetch } = useThreadsQuery({
     fetchPolicy: 'cache-and-network',
   });
@@ -29,7 +31,7 @@ export default function useHomeSidebar() {
   );
 
   const onSelect = (selectKeys: string[]) => {
-    router.push(`${Path.Home}/${selectKeys[0]}`);
+    router.push(`${buildPath(Path.Home, currentProjectId)}/${selectKeys[0]}`);
   };
 
   const onRename = async (id: string, newName: string) => {

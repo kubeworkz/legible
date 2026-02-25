@@ -13,7 +13,7 @@ import {
   DriverPopoverDOM,
   LEARNING,
 } from './utils';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import {
   ProjectLanguage,
   SampleDatasetName,
@@ -42,7 +42,7 @@ type StoryPayload = {
 };
 
 export const makeStoriesPlayer =
-  (...args: [DriverObj, NextRouter, StoryPayload]) =>
+  (...args: [DriverObj, NextRouter, StoryPayload, number | undefined]) =>
   (id: string, dispatcher: Dispatcher) => {
     const action =
       {
@@ -68,6 +68,7 @@ const playDataModelingGuide = (
   $driver: DriverObj,
   router: NextRouter,
   payload: StoryPayload,
+  projectId: number | undefined,
   dispatcher: Dispatcher,
 ) => {
   if ($driver === null) {
@@ -242,7 +243,7 @@ const playDataModelingGuide = (
         },
         doneBtnText: 'Go to Home',
         onNextClick: () => {
-          router.push(Path.Home);
+          router.push(buildPath(Path.Home, projectId));
           $driver.destroy();
           dispatcher?.onDone && dispatcher.onDone();
         },
@@ -283,6 +284,7 @@ const playSwitchProjectLanguageGuide = (
   $driver: DriverObj,
   _router: NextRouter,
   payload: StoryPayload,
+  _projectId: number | undefined,
   dispatcher: Dispatcher,
 ) => {
   if ($driver === null) {
@@ -368,6 +370,7 @@ const playKnowledgeGuide = (
   $driver: DriverObj,
   _router: NextRouter,
   _payload: StoryPayload,
+  _projectId: number | undefined,
   dispatcher: Dispatcher,
 ) => {
   if ($driver === null) {
@@ -449,6 +452,7 @@ const playSaveToKnowledgeGuide = async (
   $driver: DriverObj,
   _router: NextRouter,
   _payload: StoryPayload,
+  _projectId: number | undefined,
   dispatcher: Dispatcher,
 ) => {
   if ($driver === null) {

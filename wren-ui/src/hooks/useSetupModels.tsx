@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Path, SETUP } from '@/utils/enum';
+import { Path, buildPath, SETUP } from '@/utils/enum';
 import { useRouter } from 'next/router';
+import useProject from '@/hooks/useProject';
 import {
   useListDataSourceTablesQuery,
   useSaveTablesMutation,
@@ -10,6 +11,7 @@ export default function useSetupModels() {
   const [stepKey] = useState(SETUP.SELECT_MODELS);
 
   const router = useRouter();
+  const { currentProjectId } = useProject();
 
   const { data, loading: fetching } = useListDataSourceTablesQuery({
     fetchPolicy: 'no-cache',
@@ -26,14 +28,14 @@ export default function useSetupModels() {
           data: { tables },
         },
       });
-      router.push(Path.OnboardingRelationships);
+      router.push(buildPath(Path.OnboardingRelationships, currentProjectId));
     } catch (error) {
       console.error(error);
     }
   };
 
   const onBack = () => {
-    router.push(Path.OnboardingConnection);
+    router.push(buildPath(Path.OnboardingConnection, currentProjectId));
   };
 
   const onNext = (data: { selectedTables: string[] }) => {

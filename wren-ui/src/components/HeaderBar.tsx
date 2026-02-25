@@ -2,8 +2,9 @@ import { useRouter } from 'next/router';
 import { Button, Layout, Space } from 'antd';
 import styled from 'styled-components';
 import LogoBar from '@/components/LogoBar';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import Deploy from '@/components/deploy/Deploy';
+import useProject from '@/hooks/useProject';
 
 const { Header } = Layout;
 
@@ -33,9 +34,11 @@ const StyledHeader = styled(Header)`
 
 export default function HeaderBar() {
   const router = useRouter();
+  const { currentProjectId } = useProject();
   const { pathname } = router;
   const showNav = !pathname.startsWith(Path.Onboarding);
   const isModeling = pathname.startsWith(Path.Modeling);
+  const bp = (path: Path) => buildPath(path, currentProjectId);
 
   return (
     <StyledHeader>
@@ -51,7 +54,7 @@ export default function HeaderBar() {
                 shape="round"
                 size="small"
                 $isHighlight={pathname.startsWith(Path.Home)}
-                onClick={() => router.push(Path.Home)}
+                onClick={() => router.push(bp(Path.Home))}
               >
                 Home
               </StyledButton>
@@ -59,7 +62,7 @@ export default function HeaderBar() {
                 shape="round"
                 size="small"
                 $isHighlight={pathname.startsWith(Path.Modeling)}
-                onClick={() => router.push(Path.Modeling)}
+                onClick={() => router.push(bp(Path.Modeling))}
               >
                 Modeling
               </StyledButton>
@@ -67,7 +70,7 @@ export default function HeaderBar() {
                 shape="round"
                 size="small"
                 $isHighlight={pathname.startsWith(Path.Knowledge)}
-                onClick={() => router.push(Path.KnowledgeQuestionSQLPairs)}
+                onClick={() => router.push(bp(Path.KnowledgeQuestionSQLPairs))}
               >
                 Knowledge
               </StyledButton>
@@ -75,7 +78,7 @@ export default function HeaderBar() {
                 shape="round"
                 size="small"
                 $isHighlight={pathname.startsWith(Path.APIManagement)}
-                onClick={() => router.push(Path.APIManagementHistory)}
+                onClick={() => router.push(bp(Path.APIManagementHistory))}
               >
                 API
               </StyledButton>

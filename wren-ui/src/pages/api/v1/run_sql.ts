@@ -45,8 +45,8 @@ export default async function handler(
   const { sql, threadId, limit = 1000 } = req.body as RunSqlRequest;
   const startTime = Date.now();
   let project;
-    const projectIdHeader = req.headers['x-project-id'] as string;
-    const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
+  const projectIdHeader = req.headers['x-project-id'] as string;
+  const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
 
   try {
     // Only allow POST method

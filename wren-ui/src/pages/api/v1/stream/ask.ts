@@ -100,8 +100,8 @@ export default async function handler(
     req.body as AsyncAskRequest;
   const startTime = Date.now();
   let project;
-    const projectIdHeader = req.headers['x-project-id'] as string;
-    const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
+  const projectIdHeader = req.headers['x-project-id'] as string;
+  const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
 
   try {
     project = await projectService.getCurrentProject(projectId);

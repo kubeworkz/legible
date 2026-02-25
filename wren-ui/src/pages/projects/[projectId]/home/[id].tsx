@@ -10,9 +10,10 @@ import {
 } from 'react';
 import { isEmpty } from 'lodash';
 import { message } from 'antd';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SiderLayout from '@/components/layouts/SiderLayout';
+import useProject from '@/hooks/useProject';
 import Prompt from '@/components/pages/home/prompt';
 import useAskPrompt, {
   getIsFinished,
@@ -74,6 +75,7 @@ export default function HomeThread() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
   const params = useParams();
+  const { currentProjectId } = useProject();
   const homeSidebar = useHomeSidebar();
   const threadId = useMemo(() => Number(params?.id) || null, [params]);
   const askPrompt = useAskPrompt(threadId);
@@ -95,7 +97,7 @@ export default function HomeThread() {
     variables: { threadId },
     fetchPolicy: 'cache-and-network',
     skip: threadId === null,
-    onError: () => router.push(Path.Home),
+    onError: () => router.push(buildPath(Path.Home, currentProjectId)),
   });
   const [createThreadResponse] = useCreateThreadResponseMutation({
     onError: (error) => console.error(error),

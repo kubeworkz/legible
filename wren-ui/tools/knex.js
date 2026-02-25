@@ -6,7 +6,7 @@ const SQLITE_FILE = process.env.SQLITE_FILE; // export SQLITE_FILE=./db.sqlite3
 const getKnex = () => {
   if (DB_TYPE === 'pg') {
     console.log('using pg');
-    /* eslint-disable @typescript-eslint/no-var-requires */
+
     return require('knex')({
       client: 'pg',
       connection: PG_URL,
@@ -15,7 +15,7 @@ const getKnex = () => {
     });
   } else {
     console.log('using sqlite');
-    /* eslint-disable @typescript-eslint/no-var-requires */
+
     return require('knex')({
       client: 'better-sqlite3',
       connection: {

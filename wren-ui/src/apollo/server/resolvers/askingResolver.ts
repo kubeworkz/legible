@@ -132,7 +132,9 @@ export class AskingResolver {
     _args: any,
     ctx: IContext,
   ): Promise<boolean> {
-    await ctx.projectService.generateProjectRecommendationQuestions(ctx.projectId);
+    await ctx.projectService.generateProjectRecommendationQuestions(
+      ctx.projectId,
+    );
     return true;
   }
 
@@ -143,7 +145,10 @@ export class AskingResolver {
   ): Promise<boolean> {
     const { threadId } = args;
     const askingService = ctx.askingService;
-    await askingService.generateThreadRecommendationQuestions(threadId, ctx.projectId);
+    await askingService.generateThreadRecommendationQuestions(
+      threadId,
+      ctx.projectId,
+    );
     return true;
   }
 
@@ -278,7 +283,10 @@ export class AskingResolver {
 
     const eventName = TelemetryEvent.HOME_CREATE_THREAD;
     try {
-      const thread = await askingService.createThread(threadInput, ctx.projectId);
+      const thread = await askingService.createThread(
+        threadInput,
+        ctx.projectId,
+      );
       ctx.telemetry.sendEvent(eventName, {});
       return thread;
     } catch (err: any) {
@@ -636,7 +644,11 @@ export class AskingResolver {
   ): Promise<any> {
     const { responseId, limit } = args.where;
     const askingService = ctx.askingService;
-    const data = await askingService.previewData(responseId, limit, ctx.projectId);
+    const data = await askingService.previewData(
+      responseId,
+      limit,
+      ctx.projectId,
+    );
     return data;
   }
 

@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { useRouter } from 'next/router';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   LIST_PROJECTS,
@@ -21,6 +22,7 @@ export interface ProjectInfo {
   type: string;
   displayName: string;
   language: string;
+  timezone: string | null;
   sampleDataset: string | null;
   createdAt: string;
   updatedAt: string;
@@ -47,7 +49,7 @@ interface ProjectContextValue {
   /** Update a project */
   updateProject: (
     projectId: number,
-    data: { displayName?: string; language?: string },
+    data: { displayName?: string; language?: string; timezone?: string },
   ) => Promise<ProjectInfo>;
   /** Delete a project */
   deleteProject: (projectId: number) => Promise<void>;
@@ -82,6 +84,7 @@ function setStoredProjectId(id: number | undefined) {
 }
 
 export function ProjectProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [currentProjectId, setCurrentProjectIdState] = useState<
     number | undefined
   >(() => getStoredProjectId());
@@ -98,6 +101,18 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     () => data?.listProjects ?? [],
     [data],
   );
+
+  // Sync projectId from URL param → state + localStorage
+  useEffect(() => {
+    const urlProjectId = router.query.projectId;
+    if (urlProjectId) {
+      const parsed = Number(urlProjectId);
+      if (Number.isFinite(parsed) && parsed !== currentProjectId) {
+        setCurrentProjectIdState(parsed);
+        setStoredProjectId(parsed);
+      }
+    }
+  }, [router.query.projectId]);
 
   // Once projects load, ensure we have a valid currentProjectId
   useEffect(() => {
@@ -140,7 +155,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const handleUpdateProject = useCallback(
     async (
       projectId: number,
-      input: { displayName?: string; language?: string },
+      input: { displayName?: string; language?: string; timezone?: string },
     ) => {
       const { data: result } = await updateProjectMutation({
         variables: { projectId, data: input },

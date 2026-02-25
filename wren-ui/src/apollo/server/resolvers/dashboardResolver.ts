@@ -44,7 +44,9 @@ export class DashboardResolver {
       nextScheduledAt: string | null;
     }
   > {
-    const dashboard = await ctx.dashboardService.getCurrentDashboard(ctx.projectId);
+    const dashboard = await ctx.dashboardService.getCurrentDashboard(
+      ctx.projectId,
+    );
     if (!dashboard) {
       throw new Error('Dashboard not found.');
     }
@@ -65,7 +67,9 @@ export class DashboardResolver {
     _args: any,
     ctx: IContext,
   ): Promise<DashboardItem[]> {
-    const dashboard = await ctx.dashboardService.getCurrentDashboard(ctx.projectId);
+    const dashboard = await ctx.dashboardService.getCurrentDashboard(
+      ctx.projectId,
+    );
     if (!dashboard) {
       throw new Error('Dashboard not found.');
     }
@@ -78,7 +82,9 @@ export class DashboardResolver {
     ctx: IContext,
   ): Promise<DashboardItem> {
     const { responseId, itemType } = args.data;
-    const dashboard = await ctx.dashboardService.getCurrentDashboard(ctx.projectId);
+    const dashboard = await ctx.dashboardService.getCurrentDashboard(
+      ctx.projectId,
+    );
     const response = await ctx.askingService.getResponse(responseId);
 
     if (!response) {
@@ -160,7 +166,9 @@ export class DashboardResolver {
     const { itemId, limit, refresh } = args.data;
     try {
       const item = await ctx.dashboardService.getDashboardItem(itemId);
-      const { cacheEnabled } = await ctx.dashboardService.getCurrentDashboard(ctx.projectId);
+      const { cacheEnabled } = await ctx.dashboardService.getCurrentDashboard(
+        ctx.projectId,
+      );
       const project = await ctx.projectService.getCurrentProject(ctx.projectId);
       const deployment = await ctx.deployService.getLastDeployment(project.id);
       const mdl = deployment.manifest;
@@ -198,7 +206,9 @@ export class DashboardResolver {
     ctx: IContext,
   ): Promise<Dashboard> {
     try {
-      const dashboard = await ctx.dashboardService.getCurrentDashboard(ctx.projectId);
+      const dashboard = await ctx.dashboardService.getCurrentDashboard(
+        ctx.projectId,
+      );
       if (!dashboard) {
         throw new Error('Dashboard not found.');
       }

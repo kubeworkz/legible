@@ -9,7 +9,7 @@ export const bootstrapKnex = (options: KnexOptions) => {
   if (options.dbType === 'pg') {
     const { pgUrl, debug } = options;
     console.log('using pg');
-    /* eslint-disable @typescript-eslint/no-var-requires */
+
     return require('knex')({
       client: 'pg',
       connection: pgUrl,
@@ -18,7 +18,7 @@ export const bootstrapKnex = (options: KnexOptions) => {
     });
   } else {
     console.log('using sqlite');
-    /* eslint-disable @typescript-eslint/no-var-requires */
+
     return require('knex')({
       client: 'better-sqlite3',
       connection: {
