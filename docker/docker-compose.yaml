@@ -54,6 +54,10 @@ services:
       - ${WREN_AI_SERVICE_PORT}
     ports:
       - ${AI_SERVICE_FORWARD_PORT}:${WREN_AI_SERVICE_PORT}
+    deploy:
+      resources:
+        limits:
+          memory: 4g
     environment:
       # sometimes the console won't show print messages,
       # using PYTHONUNBUFFERED: 1 can fix this
@@ -77,6 +81,10 @@ services:
       - 6334
     volumes:
       - data:/qdrant/storage
+    deploy:
+      resources:
+        limits:
+          memory: 2g
     networks:
       - wren
 
@@ -84,6 +92,10 @@ services:
     image: ghcr.io/canner/wren-ui:${WREN_UI_VERSION}
     restart: on-failure
     platform: ${PLATFORM}
+    deploy:
+      resources:
+        limits:
+          memory: 4g
     environment:
       DB_TYPE: sqlite
       # /app is the working directory in the container

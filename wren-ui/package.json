@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "TZ=UTC next dev --webpack",
-    "build": "NODE_OPTIONS=--max-old-space-size=8192 next build --webpack",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build --webpack",
     "start": "TZ=UTC next start",
     "lint": "yarn check-types && next lint",
     "test": "jest",
