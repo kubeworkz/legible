@@ -56,6 +56,9 @@ export interface IContext {
   // active project (set from X-Project-Id header or falls back to first project)
   projectId?: number;
 
+  // active organization (set from X-Organization-Id header)
+  organizationId?: number;
+
   // auth
   currentUser?: User | null;
   authToken?: string;

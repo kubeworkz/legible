@@ -50,7 +50,7 @@ export interface ProjectRecommendationQuestionsResult {
   error: WrenAIError;
 }
 export interface IProjectService {
-  createProject: (projectData: ProjectData) => Promise<Project>;
+  createProject: (projectData: ProjectData, organizationId?: number) => Promise<Project>;
   updateProject: (
     projectId: number,
     projectData: Partial<Project>,
@@ -71,7 +71,7 @@ export interface IProjectService {
 
   getCurrentProject: (projectId?: number) => Promise<Project>;
   getProjectById: (projectId: number) => Promise<Project>;
-  listProjects: () => Promise<Project[]>;
+  listProjects: (organizationId?: number) => Promise<Project[]>;
   writeCredentialFile: (
     credentials: JSON,
     persistCredentialDir: string,
@@ -194,8 +194,8 @@ export class ProjectService implements IProjectService {
     return await this.projectRepository.getProjectById(projectId);
   }
 
-  public async listProjects() {
-    return await this.projectRepository.listProjects();
+  public async listProjects(organizationId?: number) {
+    return await this.projectRepository.listProjects(organizationId);
   }
 
   public async getProjectDataSourceTables(
@@ -222,8 +222,8 @@ export class ProjectService implements IProjectService {
     return await this.metadataService.listConstraints(usedProject);
   }
 
-  public async createProject(projectData: ProjectData) {
-    const projectValue = {
+  public async createProject(projectData: ProjectData, organizationId?: number) {
+    const projectValue: Record<string, any> = {
       displayName: projectData.displayName,
       type: projectData.type,
       catalog: 'wrenai',
@@ -233,6 +233,9 @@ export class ProjectService implements IProjectService {
         projectData.connectionInfo,
       ),
     };
+    if (organizationId) {
+      projectValue.organizationId = organizationId;
+    }
     logger.debug('Creating project...');
     const project = await this.projectRepository.createOne(projectValue);
     return project;

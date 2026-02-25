@@ -173,6 +173,7 @@ export interface Project {
   schema: string; // Schema name
   sampleDataset: string; // Sample dataset name
   connectionInfo: WREN_AI_CONNECTION_INFO;
+  organizationId?: number; // Organization this project belongs to
   language?: string; // Project language
   timezone?: string; // Project timezone (IANA, e.g. America/New_York)
 
@@ -185,7 +186,7 @@ export interface Project {
 
 export interface IProjectRepository extends IBasicRepository<Project> {
   getCurrentProject: (projectId?: number) => Promise<Project>;
-  listProjects: () => Promise<Project[]>;
+  listProjects: (organizationId?: number) => Promise<Project[]>;
   getProjectById: (id: number) => Promise<Project>;
 }
 
@@ -213,7 +214,13 @@ export class ProjectRepository
     return projects[0];
   }
 
-  public async listProjects() {
+  public async listProjects(organizationId?: number) {
+    if (organizationId) {
+      return await this.findAllBy(
+        { organizationId } as Partial<Project>,
+        { order: 'id' },
+      );
+    }
     return await this.findAll({ order: 'id' });
   }
 

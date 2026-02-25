@@ -1,5 +1,6 @@
 import { IContext } from '@server/types';
 import { MemberRole } from '@server/repositories/memberRepository';
+import { requireAuth } from '../utils/authGuard';
 
 export class OrganizationResolver {
   constructor() {
@@ -15,15 +16,8 @@ export class OrganizationResolver {
     this.removeMember = this.removeMember.bind(this);
   }
 
-  private requireAuth(ctx: IContext) {
-    if (!ctx.currentUser) {
-      throw new Error('Authentication required');
-    }
-    return ctx.currentUser;
-  }
-
   public async listOrganizations(_root: any, _args: any, ctx: IContext) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     return ctx.organizationService.listUserOrganizations(user.id);
   }
 
@@ -32,7 +26,7 @@ export class OrganizationResolver {
     args: { organizationId: number },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     // Verify membership
     await ctx.memberService.requireRole(args.organizationId, user.id, [
       MemberRole.OWNER,
@@ -47,7 +41,7 @@ export class OrganizationResolver {
     args: { organizationId: number },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     await ctx.memberService.requireRole(args.organizationId, user.id, [
       MemberRole.OWNER,
       MemberRole.ADMIN,
@@ -63,7 +57,7 @@ export class OrganizationResolver {
     },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     return ctx.organizationService.createOrganization(args.data, user.id);
   }
 
@@ -75,7 +69,7 @@ export class OrganizationResolver {
     },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     await ctx.memberService.requireRole(args.organizationId, user.id, [
       MemberRole.OWNER,
       MemberRole.ADMIN,
@@ -91,7 +85,7 @@ export class OrganizationResolver {
     args: { organizationId: number },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     await ctx.memberService.requireRole(args.organizationId, user.id, [
       MemberRole.OWNER,
     ]);
@@ -105,7 +99,7 @@ export class OrganizationResolver {
     },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     await ctx.memberService.requireRole(args.data.organizationId, user.id, [
       MemberRole.OWNER,
       MemberRole.ADMIN,
@@ -118,7 +112,7 @@ export class OrganizationResolver {
     args: { token: string },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     return ctx.memberService.acceptInvitation(args.token, user.id);
   }
 
@@ -127,7 +121,7 @@ export class OrganizationResolver {
     args: { data: { memberId: number; role: MemberRole } },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     // Get the member to find the org
     const member = await ctx.memberRepository.findOneBy({
       id: args.data.memberId,
@@ -149,7 +143,7 @@ export class OrganizationResolver {
     args: { memberId: number },
     ctx: IContext,
   ) {
-    const user = this.requireAuth(ctx);
+    const user = requireAuth(ctx);
     const member = await ctx.memberRepository.findOneBy({
       id: args.memberId,
     });

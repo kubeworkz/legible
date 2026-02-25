@@ -36,6 +36,7 @@ import DataSourceSchemaDetector, {
 } from '@server/managers/dataSourceSchemaDetector';
 import { encryptConnectionInfo } from '../dataSource';
 import { TelemetryEvent } from '../telemetry/telemetry';
+import { requireAuth, requireOrganization } from '../utils/authGuard';
 
 const logger = getLogger('DataSourceResolver');
 logger.level = 'debug';
@@ -73,7 +74,7 @@ export class ProjectResolver {
   }
 
   public async listProjects(_root: any, _arg: any, ctx: IContext) {
-    const projects = await ctx.projectService.listProjects();
+    const projects = await ctx.projectService.listProjects(ctx.organizationId);
     return projects.map((p) => this.formatProjectInfo(p));
   }
 
@@ -96,12 +97,16 @@ export class ProjectResolver {
       throw new Error('Project display name is required');
     }
     // Create a project without a data source — it will need setup afterward
-    const project = await ctx.projectRepository.createOne({
+    const projectValue: Record<string, any> = {
       displayName: displayName.trim(),
       catalog: 'wrenai',
       schema: 'public',
       language: 'EN',
-    });
+    };
+    if (ctx.organizationId) {
+      projectValue.organizationId = ctx.organizationId;
+    }
+    const project = await ctx.projectRepository.createOne(projectValue);
     logger.debug(`Project created: ${project.id}`);
     return this.formatProjectInfo(project);
   }
@@ -143,8 +148,8 @@ export class ProjectResolver {
   ) {
     const { projectId } = arg;
 
-    // Prevent deleting the last remaining project
-    const allProjects = await ctx.projectService.listProjects();
+    // Prevent deleting the last remaining project in the organization
+    const allProjects = await ctx.projectService.listProjects(ctx.organizationId);
     if (allProjects.length <= 1) {
       throw new Error(
         'Cannot delete the last project. At least one project must exist.',
@@ -415,7 +420,7 @@ export class ProjectResolver {
       displayName,
       type,
       connectionInfo,
-    } as ProjectData);
+    } as ProjectData, ctx.organizationId);
     logger.debug(`Project created.`);
 
     // init dashboard

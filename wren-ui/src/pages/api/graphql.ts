@@ -12,6 +12,7 @@ import {
   defaultApolloErrorHandler,
   GeneralErrorCodes,
 } from '@/apollo/server/utils/error';
+import { createAuthPlugin } from '@/apollo/server/utils/authPlugin';
 import { TelemetryEvent } from '@/apollo/server/telemetry/telemetry';
 import { components } from '@/common';
 
@@ -98,6 +99,7 @@ const bootstrapServer = async () => {
   const apolloServer: ApolloServer = new ApolloServer({
     typeDefs,
     resolvers,
+    plugins: [createAuthPlugin()],
     formatError: (error: GraphQLError) => {
       // stop print error stacktrace of dry run error
       if (error.extensions?.code === GeneralErrorCodes.DRY_RUN_ERROR) {
@@ -141,6 +143,12 @@ const bootstrapServer = async () => {
         ? parseInt(String(projectIdHeader), 10)
         : undefined;
 
+      // Extract organizationId from X-Organization-Id header if present
+      const orgIdHeader = req?.headers?.['x-organization-id'];
+      const organizationId = orgIdHeader
+        ? parseInt(String(orgIdHeader), 10)
+        : undefined;
+
       // Extract auth token from Authorization header
       const authHeader = req?.headers?.authorization || '';
       const authToken = authHeader.startsWith('Bearer ')
@@ -157,6 +165,7 @@ const bootstrapServer = async () => {
         config: serverConfig,
         telemetry,
         projectId: !isNaN(projectId) ? projectId : undefined,
+        organizationId: !isNaN(organizationId) ? organizationId : undefined,
         // auth
         currentUser,
         authToken,
