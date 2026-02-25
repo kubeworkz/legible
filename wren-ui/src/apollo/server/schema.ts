@@ -4,6 +4,97 @@ export const typeDefs = gql`
   scalar JSON
   scalar DialectSQL
 
+  # ─── Auth & Organization Types ───────────────────────────────
+
+  enum MemberRole {
+    OWNER
+    ADMIN
+    MEMBER
+  }
+
+  type AuthUser {
+    id: Int!
+    email: String!
+    displayName: String
+    avatarUrl: String
+    isActive: Boolean!
+    lastLoginAt: String
+    createdAt: String!
+  }
+
+  type AuthPayload {
+    token: String!
+    user: AuthUser!
+  }
+
+  type OrganizationType {
+    id: Int!
+    displayName: String!
+    slug: String!
+    logoUrl: String
+    currentUserRole: MemberRole
+    createdAt: String!
+    updatedAt: String!
+    members: [MemberType!]
+  }
+
+  type MemberType {
+    id: Int!
+    organizationId: Int!
+    userId: Int!
+    role: MemberRole!
+    user: AuthUser
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type InvitationType {
+    id: Int!
+    organizationId: Int!
+    email: String!
+    role: MemberRole!
+    token: String!
+    expiresAt: String!
+    acceptedAt: String
+    createdAt: String!
+  }
+
+  input SignupInput {
+    email: String!
+    password: String!
+    displayName: String
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
+  input CreateOrganizationInput {
+    displayName: String!
+    slug: String!
+    logoUrl: String
+  }
+
+  input UpdateOrganizationInput {
+    displayName: String
+    slug: String
+    logoUrl: String
+  }
+
+  input InviteMemberInput {
+    organizationId: Int!
+    email: String!
+    role: MemberRole
+  }
+
+  input UpdateMemberRoleInput {
+    memberId: Int!
+    role: MemberRole!
+  }
+
+  # ─── End Auth & Organization Types ──────────────────────────
+
   enum ApiType {
     GENERATE_SQL
     RUN_SQL
@@ -1136,6 +1227,12 @@ export const typeDefs = gql`
 
   # Query and Mutation
   type Query {
+    # Auth
+    me: AuthUser
+    listOrganizations: [OrganizationType!]!
+    organization(organizationId: Int!): OrganizationType
+    organizationMembers(organizationId: Int!): [MemberType!]!
+
     # On Boarding Steps
     listDataSourceTables: [CompactTable!]!
     autoGenerateRelation: [RecommendRelations!]!
@@ -1198,6 +1295,25 @@ export const typeDefs = gql`
   }
 
   type Mutation {
+    # Auth
+    signup(data: SignupInput!): AuthPayload!
+    login(data: LoginInput!): AuthPayload!
+    logout: Boolean!
+
+    # Organization
+    createOrganization(data: CreateOrganizationInput!): OrganizationType!
+    updateOrganization(
+      organizationId: Int!
+      data: UpdateOrganizationInput!
+    ): OrganizationType!
+    deleteOrganization(organizationId: Int!): Boolean!
+
+    # Members
+    inviteMember(data: InviteMemberInput!): InvitationType!
+    acceptInvitation(token: String!): MemberType!
+    updateMemberRole(data: UpdateMemberRoleInput!): MemberType!
+    removeMember(memberId: Int!): Boolean!
+
     # On Boarding Steps
     saveDataSource(data: DataSourceInput!): DataSource!
     startSampleDataset(data: SampleDatasetInput!): JSON!

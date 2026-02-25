@@ -47,6 +47,11 @@ const bootstrapServer = async () => {
     instructionRepository,
     apiHistoryRepository,
     dashboardItemRefreshJobRepository,
+    userRepository,
+    organizationRepository,
+    memberRepository,
+    sessionRepository,
+    invitationRepository,
     // adaptors
     wrenEngineAdaptor,
     ibisAdaptor,
@@ -62,6 +67,10 @@ const bootstrapServer = async () => {
     sqlPairService,
 
     instructionService,
+    // auth services
+    authService,
+    organizationService,
+    memberService,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
     threadRecommendQuestionBackgroundTracker,
@@ -125,16 +134,32 @@ const bootstrapServer = async () => {
       return defaultApolloErrorHandler(error);
     },
     introspection: process.env.NODE_ENV !== 'production',
-    context: ({ req }): IContext => {
+    context: async ({ req }): Promise<IContext> => {
       // Extract projectId from X-Project-Id header if present
       const projectIdHeader = req?.headers?.['x-project-id'];
       const projectId = projectIdHeader
         ? parseInt(String(projectIdHeader), 10)
         : undefined;
+
+      // Extract auth token from Authorization header
+      const authHeader = req?.headers?.authorization || '';
+      const authToken = authHeader.startsWith('Bearer ')
+        ? authHeader.slice(7)
+        : undefined;
+
+      // Resolve current user from session token
+      let currentUser = null;
+      if (authToken) {
+        currentUser = await authService.validateSession(authToken);
+      }
+
       return {
         config: serverConfig,
         telemetry,
         projectId: !isNaN(projectId) ? projectId : undefined,
+        // auth
+        currentUser,
+        authToken,
         // adaptor
         wrenEngineAdaptor,
         ibisServerAdaptor: ibisAdaptor,
@@ -149,6 +174,9 @@ const bootstrapServer = async () => {
         dashboardService,
         sqlPairService,
         instructionService,
+        authService,
+        organizationService,
+        memberService,
         // repository
         projectRepository,
         modelRepository,
@@ -165,6 +193,11 @@ const bootstrapServer = async () => {
         instructionRepository,
         apiHistoryRepository,
         dashboardItemRefreshJobRepository,
+        userRepository,
+        organizationRepository,
+        memberRepository,
+        sessionRepository,
+        invitationRepository,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

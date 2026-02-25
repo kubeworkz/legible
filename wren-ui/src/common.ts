@@ -19,6 +19,11 @@ import {
   InstructionRepository,
   ApiHistoryRepository,
   DashboardItemRefreshJobRepository,
+  UserRepository,
+  OrganizationRepository,
+  MemberRepository,
+  SessionRepository,
+  InvitationRepository,
 } from '@server/repositories';
 import {
   WrenEngineAdaptor,
@@ -35,6 +40,9 @@ import {
   DashboardService,
   AskingTaskTracker,
   InstructionService,
+  AuthService,
+  OrganizationService,
+  MemberService,
 } from '@server/services';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
@@ -75,6 +83,11 @@ export const initComponents = () => {
   const apiHistoryRepository = new ApiHistoryRepository(knex);
   const dashboardItemRefreshJobRepository =
     new DashboardItemRefreshJobRepository(knex);
+  const userRepository = new UserRepository(knex);
+  const organizationRepository = new OrganizationRepository(knex);
+  const memberRepository = new MemberRepository(knex);
+  const sessionRepository = new SessionRepository(knex);
+  const invitationRepository = new InvitationRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -150,6 +163,23 @@ export const initComponents = () => {
     instructionRepository,
     wrenAIAdaptor,
   });
+  const authService = new AuthService({
+    userRepository,
+    sessionRepository,
+    organizationRepository,
+    memberRepository,
+  });
+  const organizationService = new OrganizationService({
+    organizationRepository,
+    memberRepository,
+    userRepository,
+  });
+  const memberService = new MemberService({
+    memberRepository,
+    invitationRepository,
+    userRepository,
+    organizationRepository,
+  });
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =
@@ -196,6 +226,11 @@ export const initComponents = () => {
     apiHistoryRepository,
     instructionRepository,
     dashboardItemRefreshJobRepository,
+    userRepository,
+    organizationRepository,
+    memberRepository,
+    sessionRepository,
+    invitationRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -213,6 +248,9 @@ export const initComponents = () => {
     sqlPairService,
     instructionService,
     askingTaskTracker,
+    authService,
+    organizationService,
+    memberService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

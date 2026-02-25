@@ -8,6 +8,8 @@ import { DashboardResolver } from './resolvers/dashboardResolver';
 import { SqlPairResolver } from './resolvers/sqlPairResolver';
 import { InstructionResolver } from './resolvers/instructionResolver';
 import { ApiHistoryResolver } from './resolvers/apiHistoryResolver';
+import { AuthResolver } from './resolvers/authResolver';
+import { OrganizationResolver } from './resolvers/organizationResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -20,10 +22,18 @@ const dashboardResolver = new DashboardResolver();
 const sqlPairResolver = new SqlPairResolver();
 const instructionResolver = new InstructionResolver();
 const apiHistoryResolver = new ApiHistoryResolver();
+const authResolver = new AuthResolver();
+const organizationResolver = new OrganizationResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
   Query: {
+    // Auth
+    me: authResolver.me,
+    listOrganizations: organizationResolver.listOrganizations,
+    organization: organizationResolver.getOrganization,
+    organizationMembers: organizationResolver.getOrganizationMembers,
+
     listDataSourceTables: projectResolver.listDataSourceTables,
     autoGenerateRelation: projectResolver.autoGenerateRelation,
     listModels: modelResolver.listModels,
@@ -81,6 +91,22 @@ const resolvers = {
     apiHistory: apiHistoryResolver.getApiHistory,
   },
   Mutation: {
+    // Auth
+    signup: authResolver.signup,
+    login: authResolver.login,
+    logout: authResolver.logout,
+
+    // Organization
+    createOrganization: organizationResolver.createOrganization,
+    updateOrganization: organizationResolver.updateOrganization,
+    deleteOrganization: organizationResolver.deleteOrganization,
+
+    // Members
+    inviteMember: organizationResolver.inviteMember,
+    acceptInvitation: organizationResolver.acceptInvitation,
+    updateMemberRole: organizationResolver.updateMemberRole,
+    removeMember: organizationResolver.removeMember,
+
     deploy: modelResolver.deploy,
     saveDataSource: projectResolver.saveDataSource,
     startSampleDataset: projectResolver.startSampleDataset,

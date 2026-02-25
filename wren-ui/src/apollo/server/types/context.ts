@@ -20,6 +20,11 @@ import {
   IInstructionRepository,
   IApiHistoryRepository,
   IDashboardItemRefreshJobRepository,
+  IUserRepository,
+  IOrganizationRepository,
+  IMemberRepository,
+  ISessionRepository,
+  IInvitationRepository,
 } from '@server/repositories';
 import {
   IQueryService,
@@ -30,6 +35,9 @@ import {
   IProjectService,
   IDashboardService,
   IInstructionService,
+  IAuthService,
+  IOrganizationService,
+  IMemberService,
 } from '@server/services';
 import { ITelemetry } from '@server/telemetry/telemetry';
 import {
@@ -38,6 +46,7 @@ import {
   DashboardCacheBackgroundTracker,
 } from '@server/backgrounds';
 import { ISqlPairService } from '../services/sqlPairService';
+import { User } from '@server/repositories/userRepository';
 
 export interface IContext {
   config: IConfig;
@@ -46,6 +55,10 @@ export interface IContext {
 
   // active project (set from X-Project-Id header or falls back to first project)
   projectId?: number;
+
+  // auth
+  currentUser?: User | null;
+  authToken?: string;
 
   // adaptor
   wrenEngineAdaptor: IWrenEngineAdaptor;
@@ -62,6 +75,9 @@ export interface IContext {
   dashboardService: IDashboardService;
   sqlPairService: ISqlPairService;
   instructionService: IInstructionService;
+  authService: IAuthService;
+  organizationService: IOrganizationService;
+  memberService: IMemberService;
 
   // repository
   projectRepository: IProjectRepository;
@@ -79,6 +95,11 @@ export interface IContext {
   instructionRepository: IInstructionRepository;
   apiHistoryRepository: IApiHistoryRepository;
   dashboardItemRefreshJobRepository: IDashboardItemRefreshJobRepository;
+  userRepository: IUserRepository;
+  organizationRepository: IOrganizationRepository;
+  memberRepository: IMemberRepository;
+  sessionRepository: ISessionRepository;
+  invitationRepository: IInvitationRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;
