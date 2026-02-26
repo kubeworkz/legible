@@ -566,7 +566,10 @@ export class ProjectResolver {
   }
 
   public async listDataSourceTables(_root: any, _arg, ctx: IContext) {
-    return await ctx.projectService.getProjectDataSourceTables();
+    return await ctx.projectService.getProjectDataSourceTables(
+      undefined,
+      ctx.projectId,
+    );
   }
 
   public async saveTables(

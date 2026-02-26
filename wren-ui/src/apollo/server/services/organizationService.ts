@@ -22,7 +22,7 @@ export interface UpdateOrganizationInput {
 }
 
 export interface OrganizationWithRole extends Organization {
-  currentUserRole: MemberRole;
+  currentUserRole: string;  // Uppercased for GraphQL MemberRole enum
 }
 
 export interface MemberWithUser extends Member {
@@ -138,7 +138,7 @@ export class OrganizationService implements IOrganizationService {
       if (org) {
         orgs.push({
           ...org,
-          currentUserRole: membership.role,
+          currentUserRole: membership.role.toUpperCase() as string,
         });
       }
     }
@@ -158,7 +158,11 @@ export class OrganizationService implements IOrganizationService {
         id: member.userId,
       } as Partial<User>);
       if (user) {
-        result.push({ ...member, user });
+        result.push({
+          ...member,
+          role: member.role.toUpperCase() as unknown as MemberRole,
+          user,
+        });
       }
     }
 

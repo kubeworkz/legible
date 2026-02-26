@@ -106,18 +106,24 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   );
 
   // Sync projectId from URL param → state + localStorage
+  // But only if the URL project belongs to the current user's projects
   useEffect(() => {
     const urlProjectId = router.query.projectId;
     if (urlProjectId) {
       const parsed = Number(urlProjectId);
       if (Number.isFinite(parsed) && parsed !== currentProjectId) {
-        setCurrentProjectIdState(parsed);
-        setStoredProjectId(parsed);
+        // Only sync if we haven't loaded projects yet or the project is valid
+        if (loading || projects.length === 0 || projects.some((p) => p.id === parsed)) {
+          setCurrentProjectIdState(parsed);
+          setStoredProjectId(parsed);
+        }
       }
     }
-  }, [router.query.projectId]);
+  }, [router.query.projectId, loading, projects]);
 
-  // Once projects load, ensure we have a valid currentProjectId
+  // Once projects load, ensure we have a valid currentProjectId.
+  // If the URL points to a project the user doesn't have access to,
+  // redirect to their actual project.
   useEffect(() => {
     if (loading || projects.length === 0) return;
     const stored = currentProjectId;
@@ -127,6 +133,17 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       const firstId = projects[0].id;
       setCurrentProjectIdState(firstId);
       setStoredProjectId(firstId);
+
+      // If the URL has a wrong project ID, redirect to the correct one
+      const urlProjectId = router.query.projectId;
+      if (urlProjectId) {
+        const currentPath = router.asPath;
+        const correctedPath = currentPath.replace(
+          `/projects/${urlProjectId}`,
+          `/projects/${firstId}`,
+        );
+        router.replace(correctedPath);
+      }
     }
   }, [projects, loading, currentProjectId]);
 
