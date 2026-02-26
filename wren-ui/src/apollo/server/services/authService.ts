@@ -15,6 +15,9 @@ import {
   IMemberRepository,
   MemberRole,
 } from '@server/repositories/memberRepository';
+import {
+  IProjectRepository,
+} from '@server/repositories/projectRepository';
 
 const SALT_ROUNDS = 12;
 const SESSION_TOKEN_BYTES = 48;
@@ -49,22 +52,26 @@ export class AuthService implements IAuthService {
   private readonly sessionRepository: ISessionRepository;
   private readonly organizationRepository: IOrganizationRepository;
   private readonly memberRepository: IMemberRepository;
+  private readonly projectRepository: IProjectRepository;
 
   constructor({
     userRepository,
     sessionRepository,
     organizationRepository,
     memberRepository,
+    projectRepository,
   }: {
     userRepository: IUserRepository;
     sessionRepository: ISessionRepository;
     organizationRepository: IOrganizationRepository;
     memberRepository: IMemberRepository;
+    projectRepository: IProjectRepository;
   }) {
     this.userRepository = userRepository;
     this.sessionRepository = sessionRepository;
     this.organizationRepository = organizationRepository;
     this.memberRepository = memberRepository;
+    this.projectRepository = projectRepository;
   }
 
   public async signup(input: SignupInput): Promise<AuthPayload> {
@@ -98,6 +105,15 @@ export class AuthService implements IAuthService {
       organizationId: org.id,
       userId: user.id,
       role: MemberRole.OWNER,
+    });
+
+    // Create a default project for the organization
+    await this.projectRepository.createOne({
+      displayName: 'Default Project',
+      catalog: 'wrenai',
+      schema: 'public',
+      language: 'EN',
+      organizationId: org.id,
     });
 
     // Create a session

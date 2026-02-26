@@ -412,16 +412,42 @@ export class ProjectResolver {
     ctx: IContext,
   ) {
     const { type, properties } = args.data;
-    // Multi-project: no longer delete existing project when creating a new data source
-    // await this.resetCurrentProject(_root, args, ctx);
 
     const { displayName, ...connectionInfo } = properties;
-    const project = await ctx.projectService.createProject({
-      displayName,
-      type,
-      connectionInfo,
-    } as ProjectData, ctx.organizationId);
-    logger.debug(`Project created.`);
+
+    // If the org has an unconfigured project (Default Project with no type),
+    // update it instead of creating a new one. This activates the placeholder
+    // project created at signup.
+    let project: Project;
+    let activatedExisting = false;
+    if (ctx.organizationId) {
+      const orgProjects = await ctx.projectRepository.listProjects(ctx.organizationId);
+      const unconfigured = orgProjects.find((p) => !p.type);
+      if (unconfigured) {
+        const encrypted = encryptConnectionInfo(type, connectionInfo as any);
+        project = await ctx.projectService.updateProject(unconfigured.id, {
+          displayName: displayName || unconfigured.displayName,
+          type,
+          connectionInfo: encrypted,
+        } as Partial<Project>);
+        activatedExisting = true;
+        logger.debug(`Default project ${unconfigured.id} activated with data source.`);
+      } else {
+        project = await ctx.projectService.createProject({
+          displayName,
+          type,
+          connectionInfo,
+        } as ProjectData, ctx.organizationId);
+        logger.debug(`Project created.`);
+      }
+    } else {
+      project = await ctx.projectService.createProject({
+        displayName,
+        type,
+        connectionInfo,
+      } as ProjectData, ctx.organizationId);
+      logger.debug(`Project created.`);
+    }
 
     // init dashboard
     logger.debug('Dashboard init...');
@@ -460,7 +486,15 @@ export class ProjectResolver {
         'Failed to get project tables',
         JSON.stringify(err, null, 2),
       );
-      await ctx.projectRepository.deleteOne(project.id);
+      if (activatedExisting) {
+        // Revert the Default Project back to unconfigured state
+        await ctx.projectService.updateProject(project.id, {
+          type: null,
+          connectionInfo: null,
+        } as Partial<Project>);
+      } else {
+        await ctx.projectRepository.deleteOne(project.id);
+      }
       ctx.telemetry.sendEvent(
         eventName,
         { eventProperties, error: err.message },

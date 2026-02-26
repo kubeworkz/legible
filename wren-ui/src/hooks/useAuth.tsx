@@ -98,8 +98,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [signupMutation] = useMutation(SIGNUP);
   const [logoutMutation] = useMutation(LOGOUT);
 
+  // Clear stale project/org IDs from a previous user's session
+  const clearSessionState = useCallback(() => {
+    localStorage.removeItem('wren-current-project-id');
+    localStorage.removeItem('wren-current-org-id');
+  }, []);
+
   const login = useCallback(
     async (email: string, password: string) => {
+      clearSessionState();
       const { data } = await loginMutation({
         variables: { data: { email, password } },
       });
@@ -107,11 +114,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthToken(newToken);
       setUser(newUser);
     },
-    [loginMutation],
+    [loginMutation, clearSessionState],
   );
 
   const signup = useCallback(
     async (email: string, password: string, displayName?: string) => {
+      clearSessionState();
       const { data } = await signupMutation({
         variables: { data: { email, password, displayName } },
       });
@@ -119,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthToken(newToken);
       setUser(newUser);
     },
-    [signupMutation],
+    [signupMutation, clearSessionState],
   );
 
   const logout = useCallback(async () => {
@@ -129,9 +137,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore errors on logout
     }
     clearAuthToken();
+    clearSessionState();
     setUser(null);
     router.push('/login');
-  }, [logoutMutation, router]);
+  }, [logoutMutation, router, clearSessionState]);
 
   // Route protection: redirect unauthenticated users to /login
   const loading = initializing || meLoading;

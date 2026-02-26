@@ -168,6 +168,7 @@ export const initComponents = () => {
     sessionRepository,
     organizationRepository,
     memberRepository,
+    projectRepository,
   });
   const organizationService = new OrganizationService({
     organizationRepository,
