@@ -1,0 +1,49 @@
+# Stage 1: Build the executable JAR with Maven
+FROM eclipse-temurin:21 AS builder
+WORKDIR /build
+
+# Copy Maven wrapper and project files
+COPY .mvn .mvn
+COPY mvnw ./
+RUN chmod +x mvnw
+
+COPY pom.xml ./
+COPY trino-parser/pom.xml trino-parser/pom.xml
+COPY wren-base/pom.xml wren-base/pom.xml
+COPY wren-main/pom.xml wren-main/pom.xml
+COPY wren-server/pom.xml wren-server/pom.xml
+COPY wren-tests/pom.xml wren-tests/pom.xml
+
+# Download dependencies (cached layer)
+RUN ./mvnw dependency:go-offline -B -q || true
+
+# Copy source code
+COPY trino-parser trino-parser
+COPY wren-base wren-base
+COPY wren-main wren-main
+COPY wren-server wren-server
+COPY wren-tests wren-tests
+
+# Build the executable JAR (skip tests and git-commit-id plugin)
+RUN ./mvnw package -P exec-jar -DskipTests -Dmaven.gitcommitid.skip=true -B -q
+
+# Stage 2: Runtime image (same as original Dockerfile)
+FROM eclipse-temurin:21
+LABEL maintainer="https://www.canner.io/"
+WORKDIR /usr/src/app
+
+RUN \
+    apt update && \
+    apt -y install curl gpg lsb-release && \
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg && \
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list && \
+    apt update && \
+    apt -y install postgresql-client-13
+
+# Copy the built JAR from builder
+COPY --from=builder /build/wren-server/target/wren-server-*-executable.jar ./wren-server-executable.jar
+
+COPY docker/entrypoint.sh ./
+RUN chmod +x ./entrypoint.sh
+
+CMD ./entrypoint.sh wren-server-executable.jar ${MAX_HEAP_SIZE} ${MIN_HEAP_SIZE}

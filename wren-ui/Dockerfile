@@ -30,8 +30,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY public ./public
 COPY src ./src
-COPY .eslintrc.json ./
-COPY .eslintignore ./
+COPY eslint.config.mjs ./
 COPY .prettierrc ./
 COPY next.config.js ./
 COPY tsconfig.json ./
