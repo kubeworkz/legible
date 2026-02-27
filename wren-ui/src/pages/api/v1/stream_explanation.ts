@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
+import { withApiKeyAuth } from '@/apollo/server/utils/apiKeyAuth';
 
 const { wrenAIAdaptor } = components;
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -40,3 +41,5 @@ export default async function handler(
     res.status(500).json({ error: error.message });
   }
 }
+
+export default withApiKeyAuth(handler);

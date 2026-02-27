@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
+import { withApiKeyAuth } from '@/apollo/server/utils/apiKeyAuth';
 import { ApiType } from '@server/repositories/apiHistoryRepository';
 import * as Errors from '@/apollo/server/utils/error';
 import { v4 as uuidv4 } from 'uuid';
@@ -32,7 +33,7 @@ logger.level = 'debug';
 const { apiHistoryRepository, projectService, deployService, wrenAIAdaptor } =
   components;
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -201,3 +202,5 @@ export default async function handler(
     endStream(res, threadId || uuidv4(), startTime);
   }
 }
+
+export default withApiKeyAuth(handler);

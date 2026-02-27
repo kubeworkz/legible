@@ -19,6 +19,7 @@ export enum Path {
   SettingsDangerZone = '/projects/[projectId]/settings/danger-zone',
   SettingsOrganization = '/projects/[projectId]/settings/organization',
   SettingsMembers = '/projects/[projectId]/settings/members',
+  SettingsOrgDangerZone = '/projects/[projectId]/settings/org-danger-zone',
 }
 
 /**

@@ -24,3 +24,4 @@ export * from './organizationRepository';
 export * from './memberRepository';
 export * from './sessionRepository';
 export * from './invitationRepository';
+export * from './orgApiKeyRepository';

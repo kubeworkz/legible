@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
+import { withApiKeyAuth } from '@/apollo/server/utils/apiKeyAuth';
 import { ApiType } from '@server/repositories/apiHistoryRepository';
 import { AskResult, WrenAILanguage } from '@/apollo/server/models/adaptor';
 import * as Errors from '@/apollo/server/utils/error';
@@ -35,7 +36,7 @@ interface GenerateSqlRequest {
   returnSqlDialect?: boolean;
 }
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -166,3 +167,5 @@ export default async function handler(
     });
   }
 }
+
+export default withApiKeyAuth(handler);

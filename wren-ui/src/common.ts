@@ -24,6 +24,7 @@ import {
   MemberRepository,
   SessionRepository,
   InvitationRepository,
+  OrgApiKeyRepository,
 } from '@server/repositories';
 import {
   WrenEngineAdaptor,
@@ -43,6 +44,7 @@ import {
   AuthService,
   OrganizationService,
   MemberService,
+  OrgApiKeyService,
 } from '@server/services';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
@@ -88,6 +90,7 @@ export const initComponents = () => {
   const memberRepository = new MemberRepository(knex);
   const sessionRepository = new SessionRepository(knex);
   const invitationRepository = new InvitationRepository(knex);
+  const orgApiKeyRepository = new OrgApiKeyRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -181,6 +184,10 @@ export const initComponents = () => {
     userRepository,
     organizationRepository,
   });
+  const orgApiKeyService = new OrgApiKeyService({
+    orgApiKeyRepository,
+    userRepository,
+  });
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =
@@ -232,6 +239,7 @@ export const initComponents = () => {
     memberRepository,
     sessionRepository,
     invitationRepository,
+    orgApiKeyRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -252,6 +260,7 @@ export const initComponents = () => {
     authService,
     organizationService,
     memberService,
+    orgApiKeyService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

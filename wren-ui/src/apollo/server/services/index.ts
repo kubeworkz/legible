@@ -11,3 +11,4 @@ export * from './instructionService';
 export * from './authService';
 export * from './organizationService';
 export * from './memberService';
+export * from './orgApiKeyService';

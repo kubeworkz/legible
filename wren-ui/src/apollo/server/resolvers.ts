@@ -10,6 +10,7 @@ import { InstructionResolver } from './resolvers/instructionResolver';
 import { ApiHistoryResolver } from './resolvers/apiHistoryResolver';
 import { AuthResolver } from './resolvers/authResolver';
 import { OrganizationResolver } from './resolvers/organizationResolver';
+import { OrgApiKeyResolver } from './resolvers/orgApiKeyResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -24,6 +25,7 @@ const instructionResolver = new InstructionResolver();
 const apiHistoryResolver = new ApiHistoryResolver();
 const authResolver = new AuthResolver();
 const organizationResolver = new OrganizationResolver();
+const orgApiKeyResolver = new OrgApiKeyResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -33,6 +35,9 @@ const resolvers = {
     listOrganizations: organizationResolver.listOrganizations,
     organization: organizationResolver.getOrganization,
     organizationMembers: organizationResolver.getOrganizationMembers,
+
+    // API Keys
+    listApiKeys: orgApiKeyResolver.listApiKeys,
 
     listDataSourceTables: projectResolver.listDataSourceTables,
     autoGenerateRelation: projectResolver.autoGenerateRelation,
@@ -106,6 +111,11 @@ const resolvers = {
     acceptInvitation: organizationResolver.acceptInvitation,
     updateMemberRole: organizationResolver.updateMemberRole,
     removeMember: organizationResolver.removeMember,
+
+    // API Keys
+    createApiKey: orgApiKeyResolver.createApiKey,
+    revokeApiKey: orgApiKeyResolver.revokeApiKey,
+    deleteApiKey: orgApiKeyResolver.deleteApiKey,
 
     deploy: modelResolver.deploy,
     saveDataSource: projectResolver.saveDataSource,

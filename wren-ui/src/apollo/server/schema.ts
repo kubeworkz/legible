@@ -93,6 +93,35 @@ export const typeDefs = gql`
     role: MemberRole!
   }
 
+  # ─── API Key Types ──────────────────────────────────────────
+
+  type OrgApiKey {
+    id: Int!
+    organizationId: Int!
+    name: String!
+    secretKeyMasked: String!
+    permissions: [String!]!
+    lastUsedAt: String
+    expiresAt: String
+    createdBy: Int!
+    createdByEmail: String
+    createdAt: String!
+    revokedAt: String
+  }
+
+  type CreateApiKeyResult {
+    key: OrgApiKey!
+    secretKey: String!
+  }
+
+  input CreateApiKeyInput {
+    name: String!
+    permissions: [String!]
+    expiresAt: String
+  }
+
+  # ─── End API Key Types ─────────────────────────────────────
+
   # ─── End Auth & Organization Types ──────────────────────────
 
   enum ApiType {
@@ -1233,6 +1262,9 @@ export const typeDefs = gql`
     organization(organizationId: Int!): OrganizationType
     organizationMembers(organizationId: Int!): [MemberType!]!
 
+    # API Keys
+    listApiKeys: [OrgApiKey!]!
+
     # On Boarding Steps
     listDataSourceTables: [CompactTable!]!
     autoGenerateRelation: [RecommendRelations!]!
@@ -1313,6 +1345,11 @@ export const typeDefs = gql`
     acceptInvitation(token: String!): MemberType!
     updateMemberRole(data: UpdateMemberRoleInput!): MemberType!
     removeMember(memberId: Int!): Boolean!
+
+    # API Keys
+    createApiKey(data: CreateApiKeyInput!): CreateApiKeyResult!
+    revokeApiKey(keyId: Int!): Boolean!
+    deleteApiKey(keyId: Int!): Boolean!
 
     # On Boarding Steps
     saveDataSource(data: DataSourceInput!): DataSource!

@@ -38,6 +38,7 @@ import {
   IAuthService,
   IOrganizationService,
   IMemberService,
+  IOrgApiKeyService,
 } from '@server/services';
 import { ITelemetry } from '@server/telemetry/telemetry';
 import {
@@ -81,6 +82,7 @@ export interface IContext {
   authService: IAuthService;
   organizationService: IOrganizationService;
   memberService: IMemberService;
+  orgApiKeyService: IOrgApiKeyService;
 
   // repository
   projectRepository: IProjectRepository;

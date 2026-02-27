@@ -72,6 +72,7 @@ const bootstrapServer = async () => {
     authService,
     organizationService,
     memberService,
+    orgApiKeyService,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
     threadRecommendQuestionBackgroundTracker,
@@ -155,17 +156,27 @@ const bootstrapServer = async () => {
         ? authHeader.slice(7)
         : undefined;
 
-      // Resolve current user from session token
+      // Resolve current user from session token or API key
       let currentUser = null;
+      let resolvedOrgId = organizationId;
       if (authToken) {
-        currentUser = await authService.validateSession(authToken);
+        if (authToken.startsWith('osk-')) {
+          // API key authentication
+          const keyResult = await orgApiKeyService.validateKey(authToken);
+          if (keyResult) {
+            resolvedOrgId = keyResult.organizationId;
+          }
+        } else {
+          // Session token authentication
+          currentUser = await authService.validateSession(authToken);
+        }
       }
 
       return {
         config: serverConfig,
         telemetry,
         projectId: !isNaN(projectId) ? projectId : undefined,
-        organizationId: !isNaN(organizationId) ? organizationId : undefined,
+        organizationId: !isNaN(resolvedOrgId) ? resolvedOrgId : undefined,
         // auth
         currentUser,
         authToken,
@@ -186,6 +197,7 @@ const bootstrapServer = async () => {
         authService,
         organizationService,
         memberService,
+        orgApiKeyService,
         // repository
         projectRepository,
         modelRepository,

@@ -99,7 +99,7 @@ const projectMenuItems: MenuItem[] = [
 const orgMenuItems: MenuItem[] = [
   {
     key: 'organization',
-    label: 'Organization',
+    label: 'General',
     icon: <TeamOutlined />,
     path: Path.SettingsOrganization,
   },
@@ -108,6 +108,12 @@ const orgMenuItems: MenuItem[] = [
     label: 'Members',
     icon: <UsergroupAddOutlined />,
     path: Path.SettingsMembers,
+  },
+  {
+    key: 'org-danger-zone',
+    label: 'Danger zone',
+    icon: <ExclamationCircleOutlined />,
+    path: Path.SettingsOrgDangerZone,
   },
 ];
 
