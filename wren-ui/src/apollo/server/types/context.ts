@@ -26,6 +26,7 @@ import {
   ISessionRepository,
   IInvitationRepository,
 } from '@server/repositories';
+import { IProjectApiKeyRepository } from '@server/repositories/projectApiKeyRepository';
 import {
   IQueryService,
   IAskingService,
@@ -40,6 +41,7 @@ import {
   IMemberService,
   IOrgApiKeyService,
 } from '@server/services';
+import { IProjectApiKeyService } from '../services/projectApiKeyService';
 import { ITelemetry } from '@server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -83,6 +85,7 @@ export interface IContext {
   organizationService: IOrganizationService;
   memberService: IMemberService;
   orgApiKeyService: IOrgApiKeyService;
+  projectApiKeyService: IProjectApiKeyService;
 
   // repository
   projectRepository: IProjectRepository;
@@ -105,6 +108,7 @@ export interface IContext {
   memberRepository: IMemberRepository;
   sessionRepository: ISessionRepository;
   invitationRepository: IInvitationRepository;
+  projectApiKeyRepository: IProjectApiKeyRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;

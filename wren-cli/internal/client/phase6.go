@@ -447,3 +447,109 @@ func (c *Client) GenerateChart(req *GenerateChartRequest) (*GenerateChartResult,
 
 	return &result, nil
 }
+
+// --- Project API Keys ---
+
+// ProjectApiKey represents a project-scoped API key.
+type ProjectApiKey struct {
+	ID              int    `json:"id"`
+	ProjectID       int    `json:"projectId"`
+	OrganizationID  int    `json:"organizationId"`
+	Name            string `json:"name"`
+	SecretKeyMasked string `json:"secretKeyMasked"`
+	LastUsedAt      string `json:"lastUsedAt,omitempty"`
+	ExpiresAt       string `json:"expiresAt,omitempty"`
+	CreatedByEmail  string `json:"createdByEmail,omitempty"`
+	CreatedAt       string `json:"createdAt"`
+	RevokedAt       string `json:"revokedAt,omitempty"`
+}
+
+// CreateProjectApiKeyResult contains both the key metadata and the full secret (shown once).
+type CreateProjectApiKeyResult struct {
+	Key       ProjectApiKey `json:"key"`
+	SecretKey string        `json:"secretKey"`
+}
+
+// ListProjectApiKeys returns all API keys for the given project.
+func (c *Client) ListProjectApiKeys(projectID int) ([]ProjectApiKey, error) {
+	query := `query ListProjectApiKeys($projectId: Int!) {
+		listProjectApiKeys(projectId: $projectId) {
+			id projectId organizationId name secretKeyMasked lastUsedAt expiresAt createdByEmail createdAt revokedAt
+		}
+	}`
+
+	gqlResp, err := c.GraphQL(query, map[string]interface{}{
+		"projectId": projectID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("listing project API keys: %w", err)
+	}
+
+	var data struct {
+		ListProjectApiKeys []ProjectApiKey `json:"listProjectApiKeys"`
+	}
+	if err := json.Unmarshal(gqlResp.Data, &data); err != nil {
+		return nil, fmt.Errorf("parsing project API keys: %w", err)
+	}
+	return data.ListProjectApiKeys, nil
+}
+
+// CreateProjectApiKey creates a new project-scoped API key.
+func (c *Client) CreateProjectApiKey(projectID int, name string) (*CreateProjectApiKeyResult, error) {
+	query := `mutation CreateProjectApiKey($data: CreateProjectApiKeyInput!) {
+		createProjectApiKey(data: $data) {
+			key { id projectId organizationId name secretKeyMasked createdAt }
+			secretKey
+		}
+	}`
+
+	gqlResp, err := c.GraphQL(query, map[string]interface{}{
+		"data": map[string]interface{}{
+			"projectId": projectID,
+			"name":      name,
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating project API key: %w", err)
+	}
+
+	var data struct {
+		CreateProjectApiKey CreateProjectApiKeyResult `json:"createProjectApiKey"`
+	}
+	if err := json.Unmarshal(gqlResp.Data, &data); err != nil {
+		return nil, fmt.Errorf("parsing project API key result: %w", err)
+	}
+	return &data.CreateProjectApiKey, nil
+}
+
+// RevokeProjectApiKey revokes (disables) a project API key without deleting it.
+func (c *Client) RevokeProjectApiKey(keyID, projectID int) error {
+	query := `mutation RevokeProjectApiKey($keyId: Int!, $projectId: Int!) {
+		revokeProjectApiKey(keyId: $keyId, projectId: $projectId)
+	}`
+
+	_, err := c.GraphQL(query, map[string]interface{}{
+		"keyId":     keyID,
+		"projectId": projectID,
+	})
+	if err != nil {
+		return fmt.Errorf("revoking project API key: %w", err)
+	}
+	return nil
+}
+
+// DeleteProjectApiKey permanently deletes a project API key.
+func (c *Client) DeleteProjectApiKey(keyID, projectID int) error {
+	query := `mutation DeleteProjectApiKey($keyId: Int!, $projectId: Int!) {
+		deleteProjectApiKey(keyId: $keyId, projectId: $projectId)
+	}`
+
+	_, err := c.GraphQL(query, map[string]interface{}{
+		"keyId":     keyID,
+		"projectId": projectID,
+	})
+	if err != nil {
+		return fmt.Errorf("deleting project API key: %w", err)
+	}
+	return nil
+}

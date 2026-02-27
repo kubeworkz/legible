@@ -122,6 +122,37 @@ export const typeDefs = gql`
 
   # ─── End API Key Types ─────────────────────────────────────
 
+  # ─── Project API Key Types ─────────────────────────────────
+
+  type ProjectApiKey {
+    id: Int!
+    projectId: Int!
+    organizationId: Int!
+    name: String!
+    secretKeyMasked: String!
+    permissions: [String!]!
+    lastUsedAt: String
+    expiresAt: String
+    createdBy: Int!
+    createdByEmail: String
+    createdAt: String!
+    revokedAt: String
+  }
+
+  type CreateProjectApiKeyResult {
+    key: ProjectApiKey!
+    secretKey: String!
+  }
+
+  input CreateProjectApiKeyInput {
+    projectId: Int!
+    name: String!
+    permissions: [String!]
+    expiresAt: String
+  }
+
+  # ─── End Project API Key Types ─────────────────────────────
+
   # ─── End Auth & Organization Types ──────────────────────────
 
   enum ApiType {
@@ -1265,6 +1296,9 @@ export const typeDefs = gql`
     # API Keys
     listApiKeys: [OrgApiKey!]!
 
+    # Project API Keys
+    listProjectApiKeys(projectId: Int!): [ProjectApiKey!]!
+
     # On Boarding Steps
     listDataSourceTables: [CompactTable!]!
     autoGenerateRelation: [RecommendRelations!]!
@@ -1350,6 +1384,11 @@ export const typeDefs = gql`
     createApiKey(data: CreateApiKeyInput!): CreateApiKeyResult!
     revokeApiKey(keyId: Int!): Boolean!
     deleteApiKey(keyId: Int!): Boolean!
+
+    # Project API Keys
+    createProjectApiKey(data: CreateProjectApiKeyInput!): CreateProjectApiKeyResult!
+    revokeProjectApiKey(keyId: Int!, projectId: Int!): Boolean!
+    deleteProjectApiKey(keyId: Int!, projectId: Int!): Boolean!
 
     # On Boarding Steps
     saveDataSource(data: DataSourceInput!): DataSource!

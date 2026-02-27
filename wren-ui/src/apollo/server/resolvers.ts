@@ -11,6 +11,7 @@ import { ApiHistoryResolver } from './resolvers/apiHistoryResolver';
 import { AuthResolver } from './resolvers/authResolver';
 import { OrganizationResolver } from './resolvers/organizationResolver';
 import { OrgApiKeyResolver } from './resolvers/orgApiKeyResolver';
+import { ProjectApiKeyResolver } from './resolvers/projectApiKeyResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -26,6 +27,7 @@ const apiHistoryResolver = new ApiHistoryResolver();
 const authResolver = new AuthResolver();
 const organizationResolver = new OrganizationResolver();
 const orgApiKeyResolver = new OrgApiKeyResolver();
+const projectApiKeyResolver = new ProjectApiKeyResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -38,6 +40,9 @@ const resolvers = {
 
     // API Keys
     listApiKeys: orgApiKeyResolver.listApiKeys,
+
+    // Project API Keys
+    listProjectApiKeys: projectApiKeyResolver.listProjectApiKeys,
 
     listDataSourceTables: projectResolver.listDataSourceTables,
     autoGenerateRelation: projectResolver.autoGenerateRelation,
@@ -116,6 +121,11 @@ const resolvers = {
     createApiKey: orgApiKeyResolver.createApiKey,
     revokeApiKey: orgApiKeyResolver.revokeApiKey,
     deleteApiKey: orgApiKeyResolver.deleteApiKey,
+
+    // Project API Keys
+    createProjectApiKey: projectApiKeyResolver.createProjectApiKey,
+    revokeProjectApiKey: projectApiKeyResolver.revokeProjectApiKey,
+    deleteProjectApiKey: projectApiKeyResolver.deleteProjectApiKey,
 
     deploy: modelResolver.deploy,
     saveDataSource: projectResolver.saveDataSource,

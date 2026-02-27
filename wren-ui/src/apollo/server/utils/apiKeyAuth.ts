@@ -10,8 +10,10 @@ const logger = getLogger('API_KEY_AUTH');
  */
 export interface ApiKeyAuthResult {
   organizationId: number;
+  projectId?: number;
   permissions: string[];
   keyId: number;
+  keyType: 'org' | 'project';
 }
 
 /**
@@ -26,7 +28,8 @@ type NextApiHandler = (
   res: NextApiResponse,
 ) => Promise<void> | void;
 
-const API_KEY_PREFIX = 'osk-';
+const ORG_API_KEY_PREFIX = 'osk-';
+const PROJECT_API_KEY_PREFIX = 'psk-';
 
 /**
  * Extracts the bearer token from an Authorization header.
@@ -42,8 +45,22 @@ function extractBearerToken(req: NextApiRequest): string | undefined {
 /**
  * Returns true if the token looks like an organization API key (starts with "osk-").
  */
+function isOrgApiKey(token: string): boolean {
+  return token.startsWith(ORG_API_KEY_PREFIX);
+}
+
+/**
+ * Returns true if the token looks like a project API key (starts with "psk-").
+ */
+function isProjectApiKey(token: string): boolean {
+  return token.startsWith(PROJECT_API_KEY_PREFIX);
+}
+
+/**
+ * Returns true if the token looks like any API key (org or project).
+ */
 function isApiKey(token: string): boolean {
-  return token.startsWith(API_KEY_PREFIX);
+  return isOrgApiKey(token) || isProjectApiKey(token);
 }
 
 /**
@@ -73,12 +90,36 @@ export function withApiKeyAuth(handler: NextApiHandler): NextApiHandler {
       });
     }
 
-    const { orgApiKeyService, authService } = components;
+    const { orgApiKeyService, authService, projectApiKeyService } = components;
 
     if (isApiKey(token)) {
       // ── API Key auth ──
       try {
-        const result = await orgApiKeyService.validateKey(token);
+        let result: ApiKeyAuthResult | null = null;
+
+        if (isOrgApiKey(token)) {
+          const orgResult = await orgApiKeyService.validateKey(token);
+          if (orgResult) {
+            result = {
+              organizationId: orgResult.organizationId,
+              permissions: orgResult.permissions,
+              keyId: orgResult.keyId,
+              keyType: 'org',
+            };
+          }
+        } else if (isProjectApiKey(token)) {
+          const projResult = await projectApiKeyService.validateKey(token);
+          if (projResult) {
+            result = {
+              organizationId: projResult.organizationId,
+              projectId: projResult.projectId,
+              permissions: projResult.permissions,
+              keyId: projResult.keyId,
+              keyType: 'project',
+            };
+          }
+        }
+
         if (!result) {
           return res.status(401).json({
             error: 'Invalid API key',
@@ -92,8 +133,13 @@ export function withApiKeyAuth(handler: NextApiHandler): NextApiHandler {
         // Auto-inject organization context header so downstream code can read it
         req.headers['x-organization-id'] = String(result.organizationId);
 
+        // For project keys, also inject the project context
+        if (result.projectId) {
+          req.headers['x-project-id'] = String(result.projectId);
+        }
+
         logger.debug(
-          `API key auth success: keyId=${result.keyId}, orgId=${result.organizationId}`,
+          `API key auth success: keyId=${result.keyId}, type=${result.keyType}, orgId=${result.organizationId}${result.projectId ? `, projectId=${result.projectId}` : ''}`,
         );
       } catch (err) {
         logger.error(`API key validation error: ${(err as Error).message}`);

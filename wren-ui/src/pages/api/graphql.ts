@@ -53,6 +53,7 @@ const bootstrapServer = async () => {
     memberRepository,
     sessionRepository,
     invitationRepository,
+    projectApiKeyRepository,
     // adaptors
     wrenEngineAdaptor,
     ibisAdaptor,
@@ -73,6 +74,7 @@ const bootstrapServer = async () => {
     organizationService,
     memberService,
     orgApiKeyService,
+    projectApiKeyService,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
     threadRecommendQuestionBackgroundTracker,
@@ -159,12 +161,20 @@ const bootstrapServer = async () => {
       // Resolve current user from session token or API key
       let currentUser = null;
       let resolvedOrgId = organizationId;
+      let resolvedProjectId = projectId;
       if (authToken) {
         if (authToken.startsWith('osk-')) {
-          // API key authentication
+          // Organization API key authentication
           const keyResult = await orgApiKeyService.validateKey(authToken);
           if (keyResult) {
             resolvedOrgId = keyResult.organizationId;
+          }
+        } else if (authToken.startsWith('psk-')) {
+          // Project API key authentication
+          const keyResult = await projectApiKeyService.validateKey(authToken);
+          if (keyResult) {
+            resolvedOrgId = keyResult.organizationId;
+            resolvedProjectId = keyResult.projectId;
           }
         } else {
           // Session token authentication
@@ -188,7 +198,7 @@ const bootstrapServer = async () => {
       return {
         config: serverConfig,
         telemetry,
-        projectId: !isNaN(projectId) ? projectId : undefined,
+        projectId: !isNaN(resolvedProjectId) ? resolvedProjectId : undefined,
         organizationId: !isNaN(resolvedOrgId) ? resolvedOrgId : undefined,
         // auth
         currentUser,
@@ -211,6 +221,7 @@ const bootstrapServer = async () => {
         organizationService,
         memberService,
         orgApiKeyService,
+        projectApiKeyService,
         // repository
         projectRepository,
         modelRepository,
@@ -232,6 +243,7 @@ const bootstrapServer = async () => {
         memberRepository,
         sessionRepository,
         invitationRepository,
+        projectApiKeyRepository,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,
