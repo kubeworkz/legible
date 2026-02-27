@@ -31,19 +31,31 @@ export class OrgApiKeyResolver {
     },
     ctx: IContext,
   ) {
-    const user = requireAuth(ctx);
-    const organizationId = requireOrganization(ctx);
-    await ctx.memberService.requireRole(organizationId, user.id, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
-    ]);
-    return ctx.orgApiKeyService.createKey({
-      organizationId,
-      name: args.data.name,
-      permissions: args.data.permissions,
-      createdBy: user.id,
-      expiresAt: args.data.expiresAt,
-    });
+    try {
+      const user = requireAuth(ctx);
+      const organizationId = requireOrganization(ctx);
+      await ctx.memberService.requireRole(organizationId, user.id, [
+        MemberRole.OWNER,
+        MemberRole.ADMIN,
+      ]);
+      return await ctx.orgApiKeyService.createKey({
+        organizationId,
+        name: args.data.name,
+        permissions: args.data.permissions,
+        createdBy: user.id,
+        expiresAt: args.data.expiresAt,
+      });
+    } catch (error) {
+      console.error('[createApiKey] Error:', error);
+      console.error('[createApiKey] args:', JSON.stringify(args));
+      console.error(
+        '[createApiKey] ctx.organizationId:',
+        ctx.organizationId,
+        'ctx.currentUser:',
+        ctx.currentUser?.id,
+      );
+      throw error;
+    }
   }
 
   public async revokeApiKey(

@@ -32,6 +32,25 @@ import {
 
 const { Title, Text, Paragraph } = Typography;
 
+function copyText(text: string) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text: string) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+}
+
 const PageContainer = styled.div`
   max-width: 960px;
   padding: 24px 32px;
@@ -97,7 +116,7 @@ function CreateKeyModal({ visible, onClose, onCreate }: CreateKeyModalProps) {
 
   const copyToClipboard = useCallback(() => {
     if (newSecretKey) {
-      navigator.clipboard.writeText(newSecretKey);
+      copyText(newSecretKey);
       message.success('API key copied to clipboard');
     }
   }, [newSecretKey]);
@@ -266,6 +285,7 @@ export default function SettingsApiKeys() {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       render: (name: string, record: ApiKeyRecord) => (
         <Space>
           <KeyOutlined className="gray-6" />
@@ -282,11 +302,24 @@ export default function SettingsApiKeys() {
       title: 'Key',
       dataIndex: 'secretKeyMasked',
       key: 'secretKeyMasked',
-      width: 220,
+      width: 250,
       render: (masked: string) => (
-        <Text code style={{ fontSize: 12 }}>
-          {masked}
-        </Text>
+        <Space size={4}>
+          <Text code style={{ fontSize: 12 }}>
+            {masked}
+          </Text>
+          <Tooltip title="Copy to clipboard">
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined />}
+              onClick={() => {
+                copyText(masked);
+                message.success('Copied to clipboard');
+              }}
+            />
+          </Tooltip>
+        </Space>
       ),
     },
     {
@@ -417,6 +450,7 @@ export default function SettingsApiKeys() {
           loading={keysLoading}
           pagination={false}
           size="middle"
+          scroll={{ x: 1100 }}
           locale={{
             emptyText: (
               <div style={{ padding: '32px 0' }}>

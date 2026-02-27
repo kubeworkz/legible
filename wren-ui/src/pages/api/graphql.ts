@@ -172,6 +172,19 @@ const bootstrapServer = async () => {
         }
       }
 
+      // Auto-resolve organizationId from user's membership when header is missing
+      if (!resolvedOrgId && currentUser) {
+        try {
+          const userOrgs =
+            await organizationService.listUserOrganizations(currentUser.id);
+          if (userOrgs.length > 0) {
+            resolvedOrgId = userOrgs[0].id;
+          }
+        } catch {
+          // ignore — org resolution is best-effort
+        }
+      }
+
       return {
         config: serverConfig,
         telemetry,
