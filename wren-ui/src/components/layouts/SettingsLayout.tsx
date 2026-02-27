@@ -13,6 +13,7 @@ import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlin
 import SafetyOutlined from '@ant-design/icons/SafetyOutlined';
 import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import UsergroupAddOutlined from '@ant-design/icons/UsergroupAddOutlined';
+import KeyOutlined from '@ant-design/icons/KeyOutlined';
 
 const { Sider, Content } = Layout;
 
@@ -108,6 +109,12 @@ const orgMenuItems: MenuItem[] = [
     label: 'Members',
     icon: <UsergroupAddOutlined />,
     path: Path.SettingsMembers,
+  },
+  {
+    key: 'api-keys',
+    label: 'API Keys',
+    icon: <KeyOutlined />,
+    path: Path.SettingsApiKeys,
   },
   {
     key: 'org-danger-zone',
