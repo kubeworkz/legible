@@ -117,6 +117,45 @@ func (c *Client) PostJSON(path string, payload interface{}, dest interface{}) er
 	return nil
 }
 
+// PutJSON performs a PUT request with a JSON body and decodes the response into dest.
+func (c *Client) PutJSON(path string, payload interface{}, dest interface{}) error {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("marshaling request: %w", err)
+	}
+
+	resp, err := c.doRequest("PUT", path, strings.NewReader(string(data)))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
+	}
+
+	if dest != nil {
+		return json.NewDecoder(resp.Body).Decode(dest)
+	}
+	return nil
+}
+
+// Delete performs a DELETE request. Returns nil on success (expects 204).
+func (c *Client) Delete(path string) error {
+	resp, err := c.doRequest("DELETE", path, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
+	}
+	return nil
+}
+
 // GraphQL executes a GraphQL query/mutation and returns the response.
 func (c *Client) GraphQL(query string, variables map[string]interface{}) (*GraphQLResponse, error) {
 	gqlReq := GraphQLRequest{

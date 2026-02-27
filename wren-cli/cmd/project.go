@@ -53,11 +53,45 @@ uses the currently configured project.`,
 	RunE: runProjectInfo,
 }
 
+var projectCreateCmd = &cobra.Command{
+	Use:   "create <name>",
+	Short: "Create a new project",
+	Args:  cobra.ExactArgs(1),
+	RunE:  runProjectCreate,
+}
+
+var projectUpdateCmd = &cobra.Command{
+	Use:   "update [project-id]",
+	Short: "Update a project's settings",
+	Long: `Update a project's name, language, or timezone.
+If no project ID is given, uses the currently configured project.
+
+Examples:
+  wren project update --name "My Project"
+  wren project update 2 --language en --timezone "Asia/Tokyo"`,
+	Args: cobra.MaximumNArgs(1),
+	RunE: runProjectUpdate,
+}
+
+var projectDeleteCmd = &cobra.Command{
+	Use:   "delete <project-id>",
+	Short: "Delete a project",
+	Args:  cobra.ExactArgs(1),
+	RunE:  runProjectDelete,
+}
+
 func init() {
+	projectUpdateCmd.Flags().String("name", "", "New display name")
+	projectUpdateCmd.Flags().String("language", "", "Language code (e.g. en, zh)")
+	projectUpdateCmd.Flags().String("timezone", "", "Timezone (e.g. Asia/Tokyo)")
+
 	projectCmd.AddCommand(projectListCmd)
 	projectCmd.AddCommand(projectUseCmd)
 	projectCmd.AddCommand(projectCurrentCmd)
 	projectCmd.AddCommand(projectInfoCmd)
+	projectCmd.AddCommand(projectCreateCmd)
+	projectCmd.AddCommand(projectUpdateCmd)
+	projectCmd.AddCommand(projectDeleteCmd)
 	rootCmd.AddCommand(projectCmd)
 }
 
@@ -248,5 +282,108 @@ func runProjectInfo(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Printf("Created:     %s\n", project.CreatedAt)
 	fmt.Printf("Updated:     %s\n", project.UpdatedAt)
+	return nil
+}
+
+func runProjectCreate(cmd *cobra.Command, args []string) error {
+	c, _, err := newClientFromConfig()
+	if err != nil {
+		return err
+	}
+
+	project, err := c.CreateProject(args[0])
+	if err != nil {
+		return err
+	}
+
+	if jsonOutput {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(project)
+	}
+
+	fmt.Printf("Created project %q (ID: %d)\n", project.DisplayName, project.ID)
+	return nil
+}
+
+func runProjectUpdate(cmd *cobra.Command, args []string) error {
+	cfg, err := config.Load()
+	if err != nil {
+		return fmt.Errorf("loading config: %w", err)
+	}
+
+	c, err := client.New(cfg)
+	if err != nil {
+		return err
+	}
+
+	var projectID int
+	if len(args) == 1 {
+		projectID, err = strconv.Atoi(args[0])
+		if err != nil {
+			return fmt.Errorf("project ID must be a number, got %q", args[0])
+		}
+	} else if cfg.ProjectID != "" {
+		projectID, _ = strconv.Atoi(cfg.ProjectID)
+	} else {
+		return fmt.Errorf("no project specified — pass an ID or set one with: wren project use <id>")
+	}
+
+	nameFlag, _ := cmd.Flags().GetString("name")
+	langFlag, _ := cmd.Flags().GetString("language")
+	tzFlag, _ := cmd.Flags().GetString("timezone")
+
+	if nameFlag == "" && langFlag == "" && tzFlag == "" {
+		return fmt.Errorf("specify at least one of --name, --language, or --timezone")
+	}
+
+	var name, lang, tz *string
+	if nameFlag != "" {
+		name = &nameFlag
+	}
+	if langFlag != "" {
+		lang = &langFlag
+	}
+	if tzFlag != "" {
+		tz = &tzFlag
+	}
+
+	project, err := c.UpdateProject(projectID, name, lang, tz)
+	if err != nil {
+		return err
+	}
+
+	if jsonOutput {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(project)
+	}
+
+	fmt.Printf("Updated project %q (ID: %d)\n", project.DisplayName, project.ID)
+	return nil
+}
+
+func runProjectDelete(cmd *cobra.Command, args []string) error {
+	projectID, err := strconv.Atoi(args[0])
+	if err != nil {
+		return fmt.Errorf("project ID must be a number, got %q", args[0])
+	}
+
+	c, _, err := newClientFromConfig()
+	if err != nil {
+		return err
+	}
+
+	if err := c.DeleteProject(projectID); err != nil {
+		return err
+	}
+
+	if jsonOutput {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(map[string]interface{}{"deleted": true, "id": projectID})
+	}
+
+	fmt.Printf("Deleted project %d.\n", projectID)
 	return nil
 }

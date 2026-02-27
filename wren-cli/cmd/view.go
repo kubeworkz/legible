@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"text/tabwriter"
 
-	"github.com/Canner/WrenAI/wren-cli/internal/client"
-	"github.com/Canner/WrenAI/wren-cli/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -24,22 +23,46 @@ var viewListCmd = &cobra.Command{
 	RunE:    runViewList,
 }
 
+var viewShowCmd = &cobra.Command{
+	Use:   "show <view-id>",
+	Short: "Show details of a specific view",
+	Args:  cobra.ExactArgs(1),
+	RunE:  runViewShow,
+}
+
+var viewCreateCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create a view from a thread response",
+	Long: `Create a new view by saving a SQL query from a thread response.
+Requires the --name and --response-id flags.
+
+Examples:
+  wren view create --name "top_customers" --response-id 42`,
+	RunE: runViewCreate,
+}
+
+var viewDeleteCmd = &cobra.Command{
+	Use:   "delete <view-id>",
+	Short: "Delete a view",
+	Args:  cobra.ExactArgs(1),
+	RunE:  runViewDelete,
+}
+
 func init() {
+	viewCreateCmd.Flags().String("name", "", "Name for the new view (required)")
+	viewCreateCmd.Flags().Int("response-id", 0, "Thread response ID to create view from (required)")
+	viewCreateCmd.MarkFlagRequired("name")
+	viewCreateCmd.MarkFlagRequired("response-id")
+
 	viewCmd.AddCommand(viewListCmd)
+	viewCmd.AddCommand(viewShowCmd)
+	viewCmd.AddCommand(viewCreateCmd)
+	viewCmd.AddCommand(viewDeleteCmd)
 	rootCmd.AddCommand(viewCmd)
 }
 
 func runViewList(cmd *cobra.Command, args []string) error {
-	cfg, err := config.Load()
-	if err != nil {
-		return fmt.Errorf("loading config: %w", err)
-	}
-
-	if cfg.ProjectID == "" {
-		return fmt.Errorf("no project selected — run: wren project use <id>")
-	}
-
-	c, err := client.New(cfg)
+	c, _, err := newClientFromConfig()
 	if err != nil {
 		return err
 	}
@@ -71,5 +94,85 @@ func runViewList(cmd *cobra.Command, args []string) error {
 	}
 	w.Flush()
 
+	return nil
+}
+
+func runViewShow(cmd *cobra.Command, args []string) error {
+	viewID, err := strconv.Atoi(args[0])
+	if err != nil {
+		return fmt.Errorf("view ID must be a number, got %q", args[0])
+	}
+
+	c, _, err := newClientFromConfig()
+	if err != nil {
+		return err
+	}
+
+	view, err := c.GetView(viewID)
+	if err != nil {
+		return err
+	}
+
+	if jsonOutput {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(view)
+	}
+
+	fmt.Printf("ID:           %d\n", view.ID)
+	fmt.Printf("Name:         %s\n", view.Name)
+	if view.DisplayName != "" {
+		fmt.Printf("Display Name: %s\n", view.DisplayName)
+	}
+	fmt.Printf("Statement:\n  %s\n", view.Statement)
+	return nil
+}
+
+func runViewCreate(cmd *cobra.Command, args []string) error {
+	name, _ := cmd.Flags().GetString("name")
+	responseID, _ := cmd.Flags().GetInt("response-id")
+
+	c, _, err := newClientFromConfig()
+	if err != nil {
+		return err
+	}
+
+	view, err := c.CreateView(name, responseID)
+	if err != nil {
+		return err
+	}
+
+	if jsonOutput {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(view)
+	}
+
+	fmt.Printf("Created view %q (ID: %d)\n", view.Name, view.ID)
+	return nil
+}
+
+func runViewDelete(cmd *cobra.Command, args []string) error {
+	viewID, err := strconv.Atoi(args[0])
+	if err != nil {
+		return fmt.Errorf("view ID must be a number, got %q", args[0])
+	}
+
+	c, _, err := newClientFromConfig()
+	if err != nil {
+		return err
+	}
+
+	if err := c.DeleteView(viewID); err != nil {
+		return err
+	}
+
+	if jsonOutput {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(map[string]interface{}{"deleted": true, "id": viewID})
+	}
+
+	fmt.Printf("Deleted view %d.\n", viewID)
 	return nil
 }
