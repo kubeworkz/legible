@@ -42,7 +42,10 @@ export function createAuthPlugin(): ApolloServerPlugin<IContext> {
           if (allPublic) return;
 
           // Require authentication for non-public operations
-          if (!context.currentUser) {
+          // Allow either session-based auth (currentUser) or API key auth (organizationId from osk- key)
+          const isApiKeyAuth =
+            context.authToken?.startsWith('osk-') && context.organizationId;
+          if (!context.currentUser && !isApiKeyAuth) {
             throw new Error('Authentication required');
           }
         },
