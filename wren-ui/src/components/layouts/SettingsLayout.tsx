@@ -10,6 +10,7 @@ import ArrowLeftOutlined from '@ant-design/icons/ArrowLeftOutlined';
 import InfoCircleOutlined from '@ant-design/icons/InfoCircleOutlined';
 import DatabaseOutlined from '@ant-design/icons/DatabaseOutlined';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
+import SafetyOutlined from '@ant-design/icons/SafetyOutlined';
 import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import UsergroupAddOutlined from '@ant-design/icons/UsergroupAddOutlined';
 
@@ -74,6 +75,12 @@ const projectMenuItems: MenuItem[] = [
     label: 'General',
     icon: <InfoCircleOutlined />,
     path: Path.SettingsGeneral,
+  },
+  {
+    key: 'access-control',
+    label: 'Access control',
+    icon: <SafetyOutlined />,
+    path: Path.SettingsAccessControl,
   },
   {
     key: 'data-connection',

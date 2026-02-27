@@ -10,7 +10,7 @@ import {
   Input,
   message,
   Popconfirm,
-  Space,
+  Tabs,
 } from 'antd';
 import styled from 'styled-components';
 import UserAddOutlined from '@ant-design/icons/UserAddOutlined';
@@ -22,7 +22,7 @@ import useAuth from '@/hooks/useAuth';
 const { Title, Text } = Typography;
 
 const PageContainer = styled.div`
-  max-width: 800px;
+  max-width: 900px;
   padding: 24px 32px;
 `;
 
@@ -44,20 +44,21 @@ const ROLE_OPTIONS = [
   { label: 'Member', value: 'MEMBER' },
 ];
 
-const INVITE_ROLE_OPTIONS = [
+const PERMISSION_OPTIONS = [
+  { label: 'Owner', value: 'OWNER' },
   { label: 'Admin', value: 'ADMIN' },
   { label: 'Member', value: 'MEMBER' },
 ];
 
-// ── Invite Member Modal ──────────────────────────────────────
+// ── Add Member Modal ──────────────────────────────────────
 
-interface InviteModalProps {
+interface AddMemberModalProps {
   visible: boolean;
   onClose: () => void;
-  onInvite: (email: string, role: MemberRole) => Promise<void>;
+  onAdd: (email: string, role: MemberRole) => Promise<void>;
 }
 
-function InviteMemberModal({ visible, onClose, onInvite }: InviteModalProps) {
+function AddMemberModal({ visible, onClose, onAdd }: AddMemberModalProps) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
@@ -65,18 +66,18 @@ function InviteMemberModal({ visible, onClose, onInvite }: InviteModalProps) {
     try {
       const values = await form.validateFields();
       setSubmitting(true);
-      await onInvite(values.email, values.role);
+      await onAdd(values.email, values.role);
       form.resetFields();
       onClose();
-      message.success(`Invitation sent to ${values.email}`);
+      message.success(`Member added: ${values.email}`);
     } catch (error) {
-      if ((error as any)?.errorFields) return; // validation error
-      console.error('Failed to invite member:', error);
-      message.error('Failed to send invitation.');
+      if ((error as any)?.errorFields) return;
+      console.error('Failed to add member:', error);
+      message.error('Failed to add member.');
     } finally {
       setSubmitting(false);
     }
-  }, [form, onInvite, onClose]);
+  }, [form, onAdd, onClose]);
 
   const handleCancel = useCallback(() => {
     form.resetFields();
@@ -85,19 +86,15 @@ function InviteMemberModal({ visible, onClose, onInvite }: InviteModalProps) {
 
   return (
     <Modal
-      title="Invite Member"
+      title="Add Member"
       visible={visible}
       onOk={handleOk}
       onCancel={handleCancel}
       confirmLoading={submitting}
-      okText="Send Invitation"
+      okText="Add member"
       destroyOnClose
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{ role: 'MEMBER' }}
-      >
+      <Form form={form} layout="vertical" initialValues={{ role: 'MEMBER' }}>
         <Form.Item
           label="Email address"
           name="email"
@@ -113,16 +110,16 @@ function InviteMemberModal({ visible, onClose, onInvite }: InviteModalProps) {
           name="role"
           rules={[{ required: true, message: 'Please select a role' }]}
         >
-          <Select options={INVITE_ROLE_OPTIONS} />
+          <Select options={ROLE_OPTIONS} />
         </Form.Item>
       </Form>
     </Modal>
   );
 }
 
-// ── Members Page ─────────────────────────────────────────────
+// ── Access Control Page ─────────────────────────────────────
 
-export default function SettingsMembers() {
+export default function SettingsAccessControl() {
   const {
     currentOrganization,
     members,
@@ -135,7 +132,7 @@ export default function SettingsMembers() {
     refetchMembers,
   } = useOrganization();
   const { user } = useAuth();
-  const [inviteVisible, setInviteVisible] = useState(false);
+  const [addVisible, setAddVisible] = useState(false);
 
   const handleRoleChange = useCallback(
     async (memberId: number, role: MemberRole) => {
@@ -165,7 +162,7 @@ export default function SettingsMembers() {
     [removeMember, refetchMembers],
   );
 
-  const handleInvite = useCallback(
+  const handleAdd = useCallback(
     async (email: string, role: MemberRole) => {
       await inviteMember(email, role);
       await refetchMembers();
@@ -175,31 +172,52 @@ export default function SettingsMembers() {
 
   const columns = [
     {
-      title: 'Member',
-      dataIndex: 'user',
-      key: 'user',
-      render: (_: any, record: MemberInfo) => (
-        <Text strong>
-          {record.user.displayName || record.user.email}
-        </Text>
-      ),
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      render: (_: any, record: MemberInfo) => {
+        const isMe = record.userId === user?.id;
+        return (
+          <Text strong>
+            {record.user.displayName || record.user.email}
+            {isMe && <Text className="gray-6"> (me)</Text>}
+          </Text>
+        );
+      },
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
       render: (_: any, record: MemberInfo) => (
-        <Text className="gray-6">{record.user.email}</Text>
+        <Text className="gray-7">{record.user.email}</Text>
       ),
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
+      title: 'Organization role',
+      dataIndex: 'orgRole',
+      key: 'orgRole',
+      width: 170,
+      render: (_: any, record: MemberInfo) => {
+        return <Tag color={ROLE_COLORS[record.role]}>{record.role}</Tag>;
+      },
+    },
+    {
+      title: 'Permission',
+      dataIndex: 'permission',
+      key: 'permission',
       width: 160,
       render: (_: any, record: MemberInfo) => {
         if (record.role === 'OWNER') {
-          return <Tag color={ROLE_COLORS.OWNER}>Owner</Tag>;
+          return (
+            <Select
+              value={record.role}
+              size="small"
+              style={{ width: 120 }}
+              disabled
+              options={PERMISSION_OPTIONS}
+            />
+          );
         }
         if (isAdmin && record.userId !== user?.id) {
           return (
@@ -217,18 +235,6 @@ export default function SettingsMembers() {
         return <Tag color={ROLE_COLORS[record.role]}>{record.role}</Tag>;
       },
     },
-    {
-      title: 'Joined',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      width: 140,
-      render: (date: string) =>
-        new Date(date).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }),
-    },
     ...(isAdmin
       ? [
           {
@@ -240,7 +246,7 @@ export default function SettingsMembers() {
               if (record.userId === user?.id) return null;
               return (
                 <Popconfirm
-                  title="Remove this member? They will lose access to this organization."
+                  title="Remove this member? They will lose access."
                   onConfirm={() => handleRemove(record.id)}
                   okText="Remove"
                   okButtonProps={{ danger: true }}
@@ -270,23 +276,21 @@ export default function SettingsMembers() {
   return (
     <SettingsLayout>
       <PageContainer>
+        <Title level={4} className="gray-9 mb-3">
+          Access control
+        </Title>
+
         <HeaderRow>
-          <div>
-            <Title level={4} className="gray-9 mb-1">
-              Members
-            </Title>
-            <Text className="gray-6">
-              Manage members of{' '}
-              <Text strong>{currentOrganization.displayName}</Text>.
-            </Text>
-          </div>
+          <Tabs defaultActiveKey="members">
+            <Tabs.TabPane tab="Manage members" key="members" />
+          </Tabs>
           {isAdmin && (
             <Button
               type="primary"
               icon={<UserAddOutlined />}
-              onClick={() => setInviteVisible(true)}
+              onClick={() => setAddVisible(true)}
             >
-              Invite Member
+              Add member
             </Button>
           )}
         </HeaderRow>
@@ -300,10 +304,10 @@ export default function SettingsMembers() {
           size="middle"
         />
 
-        <InviteMemberModal
-          visible={inviteVisible}
-          onClose={() => setInviteVisible(false)}
-          onInvite={handleInvite}
+        <AddMemberModal
+          visible={addVisible}
+          onClose={() => setAddVisible(false)}
+          onAdd={handleAdd}
         />
       </PageContainer>
     </SettingsLayout>

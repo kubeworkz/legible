@@ -14,6 +14,7 @@ export enum Path {
   APIManagementHistory = '/projects/[projectId]/api-management/history',
   Settings = '/projects/[projectId]/settings',
   SettingsGeneral = '/projects/[projectId]/settings/general',
+  SettingsAccessControl = '/projects/[projectId]/settings/access-control',
   SettingsDataConnection = '/projects/[projectId]/settings/data-connection',
   SettingsDangerZone = '/projects/[projectId]/settings/danger-zone',
   SettingsOrganization = '/projects/[projectId]/settings/organization',
