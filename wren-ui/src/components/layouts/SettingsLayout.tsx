@@ -90,6 +90,12 @@ const projectMenuItems: MenuItem[] = [
     path: Path.SettingsDataConnection,
   },
   {
+    key: 'project-api-keys',
+    label: 'API Keys',
+    icon: <KeyOutlined />,
+    path: Path.SettingsProjectApiKeys,
+  },
+  {
     key: 'danger-zone',
     label: 'Danger zone',
     icon: <ExclamationCircleOutlined />,
