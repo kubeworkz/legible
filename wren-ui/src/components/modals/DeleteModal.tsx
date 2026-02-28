@@ -121,3 +121,10 @@ export const DeleteRlsPolicyModal = makeDeleteModal(DefaultDeleteButton, {
   content:
     'This will permanently delete this row-level security policy. Are you sure you want to proceed?',
 });
+
+export const DeleteSessionPropertyModal = makeDeleteModal(DefaultDeleteButton, {
+  icon: <DeleteOutlined className="mr-2" />,
+  itemName: 'session property',
+  content:
+    'Deleting this session property may affect RLS policies that reference it. Are you sure you want to proceed?',
+});

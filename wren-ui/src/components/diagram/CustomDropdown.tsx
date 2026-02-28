@@ -19,6 +19,7 @@ import {
   DeleteQuestionSQLPairModal,
   DeleteInstructionModal,
   DeleteRlsPolicyModal,
+  DeleteSessionPropertyModal,
 } from '@/components/modals/DeleteModal';
 
 const StyledMenu = styled(Menu)`
@@ -382,6 +383,51 @@ export const RlsPolicyDropdown = makeDropdown(
       {
         label: (
           <DeleteRlsPolicyModal
+            onConfirm={() =>
+              onMoreClick({
+                type: MORE_ACTION.DELETE,
+                data,
+              })
+            }
+            modalProps={{
+              cancelButtonProps: { autoFocus: true },
+            }}
+          />
+        ),
+        className: 'red-5',
+        key: MORE_ACTION.DELETE,
+        onClick: ({ domEvent }) => domEvent.stopPropagation(),
+      },
+    ];
+    return items;
+  },
+);
+
+export const SessionPropertyDropdown = makeDropdown(
+  (
+    props: Props & {
+      onMoreClick: (payload: { type: MORE_ACTION; data: any }) => void;
+    },
+  ) => {
+    const { onMoreClick, data } = props;
+    const items: ItemType[] = [
+      {
+        label: (
+          <>
+            <EditOutlined className="mr-2" />
+            Edit
+          </>
+        ),
+        key: MORE_ACTION.EDIT,
+        onClick: () =>
+          onMoreClick({
+            type: MORE_ACTION.EDIT,
+            data,
+          }),
+      },
+      {
+        label: (
+          <DeleteSessionPropertyModal
             onConfirm={() =>
               onMoreClick({
                 type: MORE_ACTION.DELETE,
