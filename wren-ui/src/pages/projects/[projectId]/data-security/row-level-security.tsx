@@ -8,8 +8,8 @@ import { MORE_ACTION } from '@/utils/enum';
 import { getCompactTime } from '@/utils/time';
 import { MoreButton } from '@/components/ActionButton';
 import { RlsPolicyDropdown } from '@/components/diagram/CustomDropdown';
-import useModalAction from '@/hooks/useModalAction';
-import RlsPolicyModal from '@/components/modals/RlsPolicyModal';
+import useDrawerAction from '@/hooks/useDrawerAction';
+import RlsPolicyDrawer from '@/components/modals/RlsPolicyModal';
 import { RlsPolicy } from '@/apollo/client/graphql/__types__';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
 import {
@@ -34,7 +34,7 @@ const StyledTag = styled(Tag)`
 `;
 
 export default function RowLevelSecurity() {
-  const policyModal = useModalAction();
+  const policyDrawer = useDrawerAction();
 
   const { data, loading } = useRlsPoliciesQuery({
     fetchPolicy: 'cache-and-network',
@@ -89,7 +89,7 @@ export default function RowLevelSecurity() {
         variables: { where: { id: data.id } },
       });
     } else if (type === MORE_ACTION.EDIT) {
-      policyModal.openModal(data);
+      policyDrawer.openDrawer(data);
     }
   };
 
@@ -178,7 +178,7 @@ export default function RowLevelSecurity() {
           </>
         }
         titleExtra={
-          <Button type="primary" onClick={() => policyModal.openModal()}>
+          <Button type="primary" onClick={() => policyDrawer.openDrawer()}>
             Add a policy
           </Button>
         }
@@ -197,9 +197,9 @@ export default function RowLevelSecurity() {
           }}
           scroll={{ x: 960 }}
         />
-        <RlsPolicyModal
-          {...policyModal.state}
-          onClose={policyModal.closeModal}
+        <RlsPolicyDrawer
+          {...policyDrawer.state}
+          onClose={policyDrawer.closeDrawer}
           loading={createLoading || updateLoading}
           onSubmit={async ({ id, data }: any) => {
             if (id) {

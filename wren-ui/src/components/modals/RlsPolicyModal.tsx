@@ -1,22 +1,43 @@
-import { useEffect, useMemo } from 'react';
-import { Form, Input, Modal, Select } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  Button,
+  Divider,
+  Drawer,
+  Form,
+  Input,
+  Select,
+  Space,
+  Table,
+  TableColumnsType,
+  Tag,
+  Typography,
+} from 'antd';
+import PlusOutlined from '@ant-design/icons/PlusOutlined';
+import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
+import InfoCircleOutlined from '@ant-design/icons/InfoCircleOutlined';
+import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
+import MinusCircleOutlined from '@ant-design/icons/MinusCircleOutlined';
 import { FORM_MODE } from '@/utils/enum';
-import { ERROR_TEXTS } from '@/utils/error';
-import { ModalAction } from '@/hooks/useModalAction';
-import { RlsPolicy } from '@/apollo/client/graphql/__types__';
+import { DrawerAction } from '@/hooks/useDrawerAction';
+import { RlsPolicy, SessionProperty } from '@/apollo/client/graphql/__types__';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
 import { useSessionPropertiesQuery } from '@/apollo/client/graphql/dataSecurity.generated';
 
-type Props = ModalAction<RlsPolicy> & {
+const { Text } = Typography;
+
+type Props = DrawerAction<RlsPolicy> & {
   loading?: boolean;
+  onSubmit?: (values: any) => Promise<void>;
 };
 
-export default function RlsPolicyModal(props: Props) {
+export default function RlsPolicyDrawer(props: Props) {
   const { defaultValue, formMode, loading, onClose, onSubmit, visible } = props;
 
   const isCreateMode = formMode === FORM_MODE.CREATE;
 
   const [form] = Form.useForm();
+  const [selectedSPIds, setSelectedSPIds] = useState<number[]>([]);
 
   const { data: modelsData } = useListModelsQuery({
     fetchPolicy: 'cache-and-network',
@@ -26,23 +47,49 @@ export default function RlsPolicyModal(props: Props) {
   const { data: sessionPropsData } = useSessionPropertiesQuery({
     fetchPolicy: 'cache-and-network',
   });
-  const sessionProperties = useMemo(
+  const allSessionProperties = useMemo(
     () => sessionPropsData?.sessionProperties || [],
     [sessionPropsData],
   );
 
+  const selectedSessionProperties = useMemo(
+    () => allSessionProperties.filter((sp) => selectedSPIds.includes(sp.id)),
+    [allSessionProperties, selectedSPIds],
+  );
+
+  const availableSessionProperties = useMemo(
+    () => allSessionProperties.filter((sp) => !selectedSPIds.includes(sp.id)),
+    [allSessionProperties, selectedSPIds],
+  );
+
   useEffect(() => {
     if (visible) {
+      const ids = defaultValue?.sessionPropertyIds || [];
       form.setFieldsValue({
         name: defaultValue?.name || '',
         condition: defaultValue?.condition || '',
         modelIds: defaultValue?.modelIds || [],
-        sessionPropertyIds: defaultValue?.sessionPropertyIds || [],
       });
+      setSelectedSPIds(ids);
     }
   }, [visible, defaultValue]);
 
-  const onSubmitButton = () => {
+  const afterVisibleChange = (vis: boolean) => {
+    if (!vis) {
+      form.resetFields();
+      setSelectedSPIds([]);
+    }
+  };
+
+  const addSessionProperty = (spId: number) => {
+    setSelectedSPIds((prev) => [...prev, spId]);
+  };
+
+  const removeSessionProperty = (spId: number) => {
+    setSelectedSPIds((prev) => prev.filter((id) => id !== spId));
+  };
+
+  const submit = () => {
     form
       .validateFields()
       .then(async (values) => {
@@ -50,7 +97,7 @@ export default function RlsPolicyModal(props: Props) {
           name: values.name,
           condition: values.condition,
           modelIds: values.modelIds,
-          sessionPropertyIds: values.sessionPropertyIds,
+          sessionPropertyIds: selectedSPIds,
         };
         await onSubmit({ data, id: defaultValue?.id });
         onClose();
@@ -58,70 +105,119 @@ export default function RlsPolicyModal(props: Props) {
       .catch(console.error);
   };
 
+  const spColumns: TableColumnsType<SessionProperty> = [
+    {
+      title: 'Property name',
+      dataIndex: 'name',
+      render: (name: string) => (
+        <Text style={{ fontFamily: 'monospace' }}>{name}</Text>
+      ),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      width: 100,
+      render: (type: string) => <Tag color="blue">{type}</Tag>,
+    },
+    {
+      title: 'Required',
+      dataIndex: 'required',
+      width: 90,
+      align: 'center',
+      render: (required: boolean) =>
+        required ? (
+          <CheckCircleOutlined className="green-6" />
+        ) : (
+          <MinusCircleOutlined className="gray-5" />
+        ),
+    },
+    {
+      key: 'action',
+      width: 48,
+      align: 'center',
+      render: (_: any, record: SessionProperty) => (
+        <Button
+          type="text"
+          size="small"
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => removeSessionProperty(record.id)}
+        />
+      ),
+    },
+  ];
+
   return (
-    <Modal
-      title={`${isCreateMode ? 'Add' : 'Update'} an RLS policy`}
-      centered
-      closable
-      confirmLoading={loading}
-      destroyOnClose
-      maskClosable={false}
-      onCancel={onClose}
+    <Drawer
       visible={visible}
+      title={`${isCreateMode ? 'Add' : 'Update'} a policy`}
       width={640}
-      cancelButtonProps={{ disabled: loading }}
-      okText="Submit"
-      onOk={onSubmitButton}
-      afterClose={() => form.resetFields()}
+      closable
+      destroyOnClose
+      afterVisibleChange={afterVisibleChange}
+      onClose={onClose}
+      footer={
+        <Space className="d-flex justify-end">
+          <Button onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={submit}
+            loading={loading}
+            disabled={loading}
+          >
+            Submit
+          </Button>
+        </Space>
+      }
     >
+      {isCreateMode && (
+        <Alert
+          className="mb-6"
+          type="info"
+          showIcon
+          icon={<InfoCircleOutlined />}
+          message={
+            <>
+              First time setting up a policy?{' '}
+              <a
+                href="https://docs.getwren.ai/cp/guide/security/rls"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View step-by-step guide
+              </a>
+            </>
+          }
+        />
+      )}
+
       <Form form={form} preserve={false} layout="vertical">
+        {/* Policy name */}
         <Form.Item
           label="Policy name"
           name="name"
+          extra="Policy name is for display only."
           rules={[
-            {
-              required: true,
-              message: 'Please enter a policy name.',
-            },
+            { required: true, message: 'Please enter a policy name.' },
           ]}
         >
-          <Input
-            autoFocus
-            placeholder="e.g. Region-based access"
-            maxLength={200}
-          />
+          <Input placeholder="Name" maxLength={200} />
         </Form.Item>
+
+        {/* Applied to */}
         <Form.Item
-          label="Condition"
-          name="condition"
-          rules={[
-            {
-              required: true,
-              message: 'Please enter a condition expression.',
-            },
-          ]}
-          extra="SQL-like condition expression, e.g. region = @session.region"
-        >
-          <Input.TextArea
-            placeholder='e.g. region = @session.region AND status = "active"'
-            maxLength={2000}
-            rows={3}
-            showCount
-          />
-        </Form.Item>
-        <Form.Item
-          label="Applied models"
+          label="Applied to"
           name="modelIds"
+          extra="Choose the models to apply this policy to."
           rules={[
-            {
-              required: true,
-              message: 'Please select at least one model.',
-            },
+            { required: true, message: 'Please select at least one model.' },
           ]}
         >
           <Select
             mode="multiple"
-            placeholder="Select models to apply this policy"
+            placeholder="Select models"
             optionFilterProp="children"
             showSearch
           >
@@ -132,25 +228,68 @@ export default function RlsPolicyModal(props: Props) {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item
-          label="Session properties"
-          name="sessionPropertyIds"
-          extra="Select session properties referenced in the condition."
-        >
+
+        <Divider />
+
+        {/* Session property section */}
+        <div className="mb-6">
+          <Text strong className="d-block mb-2">
+            Session property
+          </Text>
+          <Text className="gray-7 d-block mb-3">
+            Session properties are <Text strong>dynamic variables</Text> used to
+            evaluate access conditions. To use them in the UI, assign values to
+            users or groups on the Session Property page. When using the API,
+            include them explicitly in the request.
+          </Text>
+
           <Select
-            mode="multiple"
-            placeholder="Select session properties"
-            optionFilterProp="children"
+            className="mb-3"
+            style={{ width: '100%' }}
+            placeholder="+ Add session property"
+            value={undefined}
             showSearch
+            optionFilterProp="children"
+            onChange={(value: number) => addSessionProperty(value)}
+            suffixIcon={<PlusOutlined />}
+            notFoundContent="No more session properties available."
           >
-            {sessionProperties.map((sp) => (
+            {availableSessionProperties.map((sp) => (
               <Select.Option key={sp.id} value={sp.id}>
                 {sp.name} ({sp.type})
               </Select.Option>
             ))}
           </Select>
+
+          <Table
+            size="small"
+            dataSource={selectedSessionProperties}
+            columns={spColumns}
+            rowKey="id"
+            pagination={false}
+            locale={{ emptyText: 'No session properties added yet.' }}
+          />
+        </div>
+
+        <Divider />
+
+        {/* Policy condition */}
+        <Form.Item
+          label="Policy condition"
+          name="condition"
+          extra="This condition will be evaluated using the provided session properties. It will be appended as a WHERE clause to queries on the applied models."
+          rules={[
+            { required: true, message: 'Please enter a condition expression.' },
+          ]}
+        >
+          <Input.TextArea
+            placeholder='e.g. region = @session.user_region AND status = "active"'
+            maxLength={2000}
+            rows={4}
+            showCount
+          />
         </Form.Item>
       </Form>
-    </Modal>
+    </Drawer>
   );
 }
