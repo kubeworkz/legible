@@ -319,6 +319,14 @@ export default function HeaderBar() {
                 >
                   API
                 </StyledButton>
+                <StyledButton
+                  shape="round"
+                  size="small"
+                  $isHighlight={pathname.startsWith(Path.DataSecurity)}
+                  onClick={() => router.push(bp(Path.DataSecurityRowLevel))}
+                >
+                  Data Security
+                </StyledButton>
               </Space>
             )}
           </Space>

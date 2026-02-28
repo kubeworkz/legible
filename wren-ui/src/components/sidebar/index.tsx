@@ -9,6 +9,7 @@ import Home, { Props as HomeSidebarProps } from './Home';
 import Modeling, { Props as ModelingSidebarProps } from './Modeling';
 import Knowledge from './Knowledge';
 import APIManagement from './APIManagement';
+import DataSecurity from './DataSecurity';
 import LearningSection from '@/components/learning';
 import ProjectSwitcher from './ProjectSwitcher';
 import useProject from '@/hooks/useProject';
@@ -66,6 +67,10 @@ const DynamicSidebar = (
 
     if (pathname.startsWith(Path.APIManagement)) {
       return <APIManagement />;
+    }
+
+    if (pathname.startsWith(Path.DataSecurity)) {
+      return <DataSecurity />;
     }
 
     return null;
