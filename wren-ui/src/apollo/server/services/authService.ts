@@ -45,6 +45,16 @@ export interface IAuthService {
   logout(token: string): Promise<boolean>;
   validateSession(token: string): Promise<User | null>;
   getUserById(id: number): Promise<User | null>;
+  updateProfile(
+    userId: number,
+    data: { displayName?: string; avatarUrl?: string },
+  ): Promise<User>;
+  changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<boolean>;
+  deleteAccount(userId: number, token: string): Promise<boolean>;
 }
 
 export class AuthService implements IAuthService {
@@ -178,6 +188,55 @@ export class AuthService implements IAuthService {
 
   public async getUserById(id: number): Promise<User | null> {
     return this.userRepository.findOneBy({ id } as Partial<User>);
+  }
+
+  public async updateProfile(
+    userId: number,
+    data: { displayName?: string; avatarUrl?: string },
+  ): Promise<User> {
+    const updates: Record<string, any> = {};
+    if (data.displayName !== undefined) updates.displayName = data.displayName;
+    if (data.avatarUrl !== undefined) updates.avatarUrl = data.avatarUrl;
+
+    if (Object.keys(updates).length === 0) {
+      const user = await this.userRepository.findOneBy({ id: userId } as Partial<User>);
+      if (!user) throw new Error('User not found');
+      return user;
+    }
+
+    await this.userRepository.updateOne(userId, updates);
+    const user = await this.userRepository.findOneBy({ id: userId } as Partial<User>);
+    if (!user) throw new Error('User not found');
+    return user;
+  }
+
+  public async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<boolean> {
+    const user = await this.userRepository.findOneBy({ id: userId } as Partial<User>);
+    if (!user) throw new Error('User not found');
+
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) throw new Error('Current password is incorrect');
+
+    if (newPassword.length < 8) {
+      throw new Error('New password must be at least 8 characters');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await this.userRepository.updateOne(userId, { passwordHash });
+    return true;
+  }
+
+  public async deleteAccount(userId: number, token: string): Promise<boolean> {
+    // Log out the current session
+    await this.logout(token);
+
+    // Deactivate the user account
+    await this.userRepository.updateOne(userId, { isActive: false });
+    return true;
   }
 
   private async createSession(userId: number): Promise<Session> {

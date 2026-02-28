@@ -14,6 +14,7 @@ import SafetyOutlined from '@ant-design/icons/SafetyOutlined';
 import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import UsergroupAddOutlined from '@ant-design/icons/UsergroupAddOutlined';
 import KeyOutlined from '@ant-design/icons/KeyOutlined';
+import UserOutlined from '@ant-design/icons/UserOutlined';
 
 const { Sider, Content } = Layout;
 
@@ -130,6 +131,21 @@ const orgMenuItems: MenuItem[] = [
   },
 ];
 
+const userMenuItems: MenuItem[] = [
+  {
+    key: 'user-profile',
+    label: 'Profile',
+    icon: <UserOutlined />,
+    path: Path.SettingsUserProfile,
+  },
+  {
+    key: 'user-danger-zone',
+    label: 'Danger zone',
+    icon: <ExclamationCircleOutlined />,
+    path: Path.SettingsUserDangerZone,
+  },
+];
+
 interface Props {
   children: React.ReactNode;
   loading?: boolean;
@@ -142,7 +158,7 @@ export default function SettingsLayout(props: Props) {
   const bp = (path: Path) => buildPath(path, currentProjectId);
 
   const activeKey = useMemo(() => {
-    const allItems = [...projectMenuItems, ...orgMenuItems];
+    const allItems = [...projectMenuItems, ...orgMenuItems, ...userMenuItems];
     const item = allItems.find((item) => item.path === router.pathname);
     return item?.key || 'general';
   }, [router.pathname]);
@@ -201,6 +217,25 @@ export default function SettingsLayout(props: Props) {
               Organization
             </Typography.Text>
             {orgMenuItems.map((item) => (
+              <StyledMenuButton
+                key={item.key}
+                type="text"
+                block
+                $active={activeKey === item.key}
+                onClick={() => onMenuClick(item.path)}
+                icon={item.icon}
+              >
+                {item.label}
+              </StyledMenuButton>
+            ))}
+
+            <Typography.Text
+              className="d-block px-3 py-1 mt-3 gray-6 text-xs"
+              style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+            >
+              User
+            </Typography.Text>
+            {userMenuItems.map((item) => (
               <StyledMenuButton
                 key={item.key}
                 type="text"

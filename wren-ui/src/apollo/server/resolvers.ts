@@ -106,6 +106,11 @@ const resolvers = {
     login: authResolver.login,
     logout: authResolver.logout,
 
+    // User Profile
+    updateProfile: authResolver.updateProfile,
+    changePassword: authResolver.changePassword,
+    deleteAccount: authResolver.deleteAccount,
+
     // Organization
     createOrganization: organizationResolver.createOrganization,
     updateOrganization: organizationResolver.updateOrganization,

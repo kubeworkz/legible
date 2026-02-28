@@ -22,6 +22,8 @@ export enum Path {
   SettingsOrgDangerZone = '/projects/[projectId]/settings/org-danger-zone',
   SettingsApiKeys = '/projects/[projectId]/settings/api-keys',
   SettingsProjectApiKeys = '/projects/[projectId]/settings/project-api-keys',
+  SettingsUserProfile = '/projects/[projectId]/settings/user/profile',
+  SettingsUserDangerZone = '/projects/[projectId]/settings/user/danger-zone',
 }
 
 /**

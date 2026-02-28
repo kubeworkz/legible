@@ -153,6 +153,18 @@ export const typeDefs = gql`
 
   # ─── End Project API Key Types ─────────────────────────────
 
+  # ─── User Profile Types ─────────────────────────────────────
+
+  input UpdateProfileInput {
+    displayName: String
+    avatarUrl: String
+  }
+
+  input ChangePasswordInput {
+    currentPassword: String!
+    newPassword: String!
+  }
+
   # ─── End Auth & Organization Types ──────────────────────────
 
   enum ApiType {
@@ -1365,6 +1377,11 @@ export const typeDefs = gql`
     signup(data: SignupInput!): AuthPayload!
     login(data: LoginInput!): AuthPayload!
     logout: Boolean!
+
+    # User Profile
+    updateProfile(data: UpdateProfileInput!): AuthUser!
+    changePassword(data: ChangePasswordInput!): Boolean!
+    deleteAccount: Boolean!
 
     # Organization
     createOrganization(data: CreateOrganizationInput!): OrganizationType!
