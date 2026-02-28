@@ -54,6 +54,9 @@ const bootstrapServer = async () => {
     sessionRepository,
     invitationRepository,
     projectApiKeyRepository,
+    sessionPropertyRepository,
+    rlsPolicyRepository,
+    userSessionPropertyValueRepository,
     // adaptors
     wrenEngineAdaptor,
     ibisAdaptor,
@@ -75,6 +78,7 @@ const bootstrapServer = async () => {
     memberService,
     orgApiKeyService,
     projectApiKeyService,
+    rlsPolicyService,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
     threadRecommendQuestionBackgroundTracker,
@@ -222,6 +226,7 @@ const bootstrapServer = async () => {
         memberService,
         orgApiKeyService,
         projectApiKeyService,
+        rlsPolicyService,
         // repository
         projectRepository,
         modelRepository,
@@ -244,6 +249,9 @@ const bootstrapServer = async () => {
         sessionRepository,
         invitationRepository,
         projectApiKeyRepository,
+        sessionPropertyRepository,
+        rlsPolicyRepository,
+        userSessionPropertyValueRepository,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

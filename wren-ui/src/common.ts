@@ -26,6 +26,9 @@ import {
   InvitationRepository,
   OrgApiKeyRepository,
   ProjectApiKeyRepository,
+  SessionPropertyRepository,
+  RlsPolicyRepository,
+  UserSessionPropertyValueRepository,
 } from '@server/repositories';
 import {
   WrenEngineAdaptor,
@@ -48,6 +51,7 @@ import {
   OrgApiKeyService,
   ProjectApiKeyService,
 } from '@server/services';
+import { RlsPolicyService } from './apollo/server/services/rlsPolicyService';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -94,6 +98,10 @@ export const initComponents = () => {
   const invitationRepository = new InvitationRepository(knex);
   const orgApiKeyRepository = new OrgApiKeyRepository(knex);
   const projectApiKeyRepository = new ProjectApiKeyRepository(knex);
+  const sessionPropertyRepository = new SessionPropertyRepository(knex);
+  const rlsPolicyRepository = new RlsPolicyRepository(knex);
+  const userSessionPropertyValueRepository =
+    new UserSessionPropertyValueRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -195,6 +203,11 @@ export const initComponents = () => {
     projectApiKeyRepository,
     userRepository,
   });
+  const rlsPolicyService = new RlsPolicyService({
+    sessionPropertyRepository,
+    rlsPolicyRepository,
+    userSessionPropertyValueRepository,
+  });
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =
@@ -248,6 +261,9 @@ export const initComponents = () => {
     invitationRepository,
     orgApiKeyRepository,
     projectApiKeyRepository,
+    sessionPropertyRepository,
+    rlsPolicyRepository,
+    userSessionPropertyValueRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -270,6 +286,7 @@ export const initComponents = () => {
     memberService,
     orgApiKeyService,
     projectApiKeyService,
+    rlsPolicyService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

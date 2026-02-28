@@ -1297,6 +1297,85 @@ export const typeDefs = gql`
     id: Int!
   }
 
+  # ── Data Security: Session Properties ──────────────────────────
+
+  type SessionProperty {
+    id: Int!
+    projectId: Int!
+    name: String!
+    type: String!
+    required: Boolean!
+    defaultExpr: String
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input CreateSessionPropertyInput {
+    name: String!
+    type: String!
+    required: Boolean!
+    defaultExpr: String
+  }
+
+  input UpdateSessionPropertyInput {
+    name: String
+    type: String
+    required: Boolean
+    defaultExpr: String
+  }
+
+  input SessionPropertyWhereUniqueInput {
+    id: Int!
+  }
+
+  # ── Data Security: RLS Policies ──────────────────────────────
+
+  type RlsPolicy {
+    id: Int!
+    projectId: Int!
+    name: String!
+    condition: String!
+    modelIds: [Int!]!
+    sessionPropertyIds: [Int!]!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input CreateRlsPolicyInput {
+    name: String!
+    condition: String!
+    modelIds: [Int!]!
+    sessionPropertyIds: [Int!]!
+  }
+
+  input UpdateRlsPolicyInput {
+    name: String
+    condition: String
+    modelIds: [Int!]
+    sessionPropertyIds: [Int!]
+  }
+
+  input RlsPolicyWhereUniqueInput {
+    id: Int!
+  }
+
+  # ── Data Security: User Session Property Values ─────────────
+
+  type UserSessionPropertyValue {
+    id: Int!
+    userId: Int!
+    sessionPropertyId: Int!
+    value: String!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input AssignSessionPropertyValueInput {
+    userId: Int!
+    sessionPropertyId: Int!
+    value: String!
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -1554,5 +1633,26 @@ export const typeDefs = gql`
       data: UpdateInstructionInput!
     ): Instruction!
     deleteInstruction(where: InstructionWhereInput!): Boolean!
+
+    # Data Security: Session Properties
+    createSessionProperty(data: CreateSessionPropertyInput!): SessionProperty!
+    updateSessionProperty(
+      where: SessionPropertyWhereUniqueInput!
+      data: UpdateSessionPropertyInput!
+    ): SessionProperty!
+    deleteSessionProperty(where: SessionPropertyWhereUniqueInput!): Boolean!
+
+    # Data Security: RLS Policies
+    createRlsPolicy(data: CreateRlsPolicyInput!): RlsPolicy!
+    updateRlsPolicy(
+      where: RlsPolicyWhereUniqueInput!
+      data: UpdateRlsPolicyInput!
+    ): RlsPolicy!
+    deleteRlsPolicy(where: RlsPolicyWhereUniqueInput!): Boolean!
+
+    # Data Security: User Session Property Assignments
+    assignSessionPropertyValues(
+      data: [AssignSessionPropertyValueInput!]!
+    ): Boolean!
   }
 `;

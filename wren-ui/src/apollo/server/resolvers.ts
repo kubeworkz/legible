@@ -12,6 +12,7 @@ import { AuthResolver } from './resolvers/authResolver';
 import { OrganizationResolver } from './resolvers/organizationResolver';
 import { OrgApiKeyResolver } from './resolvers/orgApiKeyResolver';
 import { ProjectApiKeyResolver } from './resolvers/projectApiKeyResolver';
+import { RlsPolicyResolver } from './resolvers/rlsPolicyResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -28,6 +29,7 @@ const authResolver = new AuthResolver();
 const organizationResolver = new OrganizationResolver();
 const orgApiKeyResolver = new OrgApiKeyResolver();
 const projectApiKeyResolver = new ProjectApiKeyResolver();
+const rlsPolicyResolver = new RlsPolicyResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -99,6 +101,12 @@ const resolvers = {
 
     // API History
     apiHistory: apiHistoryResolver.getApiHistory,
+
+    // Data Security
+    sessionProperties: rlsPolicyResolver.listSessionProperties,
+    rlsPolicies: rlsPolicyResolver.listRlsPolicies,
+    rlsPolicy: rlsPolicyResolver.getRlsPolicy,
+    userSessionPropertyValues: rlsPolicyResolver.listUserSessionPropertyValues,
   },
   Mutation: {
     // Auth
@@ -237,6 +245,19 @@ const resolvers = {
     createInstruction: instructionResolver.createInstruction,
     updateInstruction: instructionResolver.updateInstruction,
     deleteInstruction: instructionResolver.deleteInstruction,
+
+    // Data Security: Session Properties
+    createSessionProperty: rlsPolicyResolver.createSessionProperty,
+    updateSessionProperty: rlsPolicyResolver.updateSessionProperty,
+    deleteSessionProperty: rlsPolicyResolver.deleteSessionProperty,
+
+    // Data Security: RLS Policies
+    createRlsPolicy: rlsPolicyResolver.createRlsPolicy,
+    updateRlsPolicy: rlsPolicyResolver.updateRlsPolicy,
+    deleteRlsPolicy: rlsPolicyResolver.deleteRlsPolicy,
+
+    // Data Security: User Session Property Assignments
+    assignSessionPropertyValues: rlsPolicyResolver.assignSessionPropertyValues,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),
@@ -256,6 +277,10 @@ const resolvers = {
 
   // Add ApiHistoryResponse nested resolvers
   ApiHistoryResponse: apiHistoryResolver.getApiHistoryNestedResolver(),
+
+  // Data Security nested resolvers
+  RlsPolicy: rlsPolicyResolver.getRlsPolicyNestedResolver(),
+  SessionProperty: rlsPolicyResolver.getSessionPropertyNestedResolver(),
 };
 
 export default resolvers;

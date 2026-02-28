@@ -26,3 +26,6 @@ export * from './sessionRepository';
 export * from './invitationRepository';
 export * from './orgApiKeyRepository';
 export * from './projectApiKeyRepository';
+export * from './sessionPropertyRepository';
+export * from './rlsPolicyRepository';
+export * from './userSessionPropertyValueRepository';

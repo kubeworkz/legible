@@ -27,6 +27,9 @@ import {
   IInvitationRepository,
 } from '@server/repositories';
 import { IProjectApiKeyRepository } from '@server/repositories/projectApiKeyRepository';
+import { ISessionPropertyRepository } from '@server/repositories/sessionPropertyRepository';
+import { IRlsPolicyRepository } from '@server/repositories/rlsPolicyRepository';
+import { IUserSessionPropertyValueRepository } from '@server/repositories/userSessionPropertyValueRepository';
 import {
   IQueryService,
   IAskingService,
@@ -42,6 +45,7 @@ import {
   IOrgApiKeyService,
 } from '@server/services';
 import { IProjectApiKeyService } from '../services/projectApiKeyService';
+import { IRlsPolicyService } from '../services/rlsPolicyService';
 import { ITelemetry } from '@server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -86,6 +90,7 @@ export interface IContext {
   memberService: IMemberService;
   orgApiKeyService: IOrgApiKeyService;
   projectApiKeyService: IProjectApiKeyService;
+  rlsPolicyService: IRlsPolicyService;
 
   // repository
   projectRepository: IProjectRepository;
@@ -109,6 +114,9 @@ export interface IContext {
   sessionRepository: ISessionRepository;
   invitationRepository: IInvitationRepository;
   projectApiKeyRepository: IProjectApiKeyRepository;
+  sessionPropertyRepository: ISessionPropertyRepository;
+  rlsPolicyRepository: IRlsPolicyRepository;
+  userSessionPropertyValueRepository: IUserSessionPropertyValueRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;
