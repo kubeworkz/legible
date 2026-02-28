@@ -90,6 +90,17 @@ export interface IRlsPolicyService {
   assignSessionPropertyValues(
     data: AssignSessionPropertyValueInput[],
   ): Promise<boolean>;
+
+  /**
+   * Resolve the current user's session property values for a given project.
+   * Returns a Record<propertyName, value> suitable for passing as
+   * x-wren-variable-* headers to the engine.
+   * Properties with no assigned value fall back to defaultExpr if available.
+   */
+  resolveSessionProperties(
+    projectId: number,
+    userId: number,
+  ): Promise<Record<string, string>>;
 }
 
 // ── Service implementation ──────────────────────────────────────────
@@ -310,6 +321,42 @@ export class RlsPolicyService implements IRlsPolicyService {
   }
 
   // ── Private helpers ───────────────────────────────────────────
+
+  /**
+   * Resolve a user's session property values for the project.
+   * For each session property defined in the project:
+   *   1. Use the user's explicitly assigned value if present
+   *   2. Otherwise fall back to the property's defaultExpr
+   *   3. If the property is required and has no value/default, skip it
+   *      (engine will enforce the requirement)
+   * Returns a map of { propertyName: value }.
+   */
+  public async resolveSessionProperties(
+    projectId: number,
+    userId: number,
+  ): Promise<Record<string, string>> {
+    const [properties, userValues] = await Promise.all([
+      this.sessionPropertyRepository.findAllByProjectId(projectId),
+      this.userSessionPropertyValueRepository.findAllByUserId(userId),
+    ]);
+
+    // Build a lookup: sessionPropertyId → user-assigned value
+    const userValueMap = new Map(
+      userValues.map((v) => [v.sessionPropertyId, v.value]),
+    );
+
+    const result: Record<string, string> = {};
+    for (const prop of properties) {
+      const userVal = userValueMap.get(prop.id);
+      if (userVal !== undefined) {
+        result[prop.name] = userVal;
+      } else if (prop.defaultExpr) {
+        result[prop.name] = prop.defaultExpr;
+      }
+      // If no value and no default, omit — engine handles required enforcement
+    }
+    return result;
+  }
 
   private async enrichPolicy(policy: RlsPolicy): Promise<RlsPolicyDetail> {
     const [modelIds, sessionPropertyIds] = await Promise.all([

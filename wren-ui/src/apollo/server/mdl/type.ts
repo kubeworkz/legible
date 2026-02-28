@@ -11,6 +11,18 @@ export interface ColumnMDL {
   expression?: string; // eg: "SUM(orders.totalprice)"
 }
 
+export interface SessionPropertyMDL {
+  name: string; // eg: "user_id", "department"
+  required: boolean; // whether the session property must be supplied
+  defaultExpr?: string | null; // default SQL expression if omitted
+}
+
+export interface RowLevelAccessControlMDL {
+  name: string; // eg: "department_filter"
+  requiredProperties: SessionPropertyMDL[]; // session properties referenced by the condition
+  condition: string; // SQL predicate, eg: "department = @department"
+}
+
 export interface ModelMDL {
   name: string; // eg: "OrdersModel", "LineitemModel"
   refSql?: string; // eg: "select * from orders", "select * from lineitem"
@@ -19,6 +31,7 @@ export interface ModelMDL {
   primaryKey?: string; // eg: "orderkey", "custkey"
   cached: boolean; // eg true, false
   refreshTime?: string; // eg: "30.00m"
+  rowLevelAccessControls?: RowLevelAccessControlMDL[];
   properties?: {
     description?: string; // eg: "tpch tiny orders table"
     displayName?: string; // eg: "Orders"

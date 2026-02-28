@@ -181,6 +181,8 @@ export interface IbisBaseOptions {
   dataSource: DataSourceName;
   connectionInfo: WREN_AI_CONNECTION_INFO;
   mdl: Manifest;
+  // RLS session property values: { propertyName: value }
+  sessionProperties?: Record<string, string>;
 }
 export interface IbisQueryOptions extends IbisBaseOptions {
   limit?: number;
@@ -289,7 +291,7 @@ export class IbisAdaptor implements IIbisAdaptor {
     query: string,
     options: IbisQueryOptions,
   ): Promise<IbisQueryResponse> {
-    const { dataSource, mdl } = options;
+    const { dataSource, mdl, sessionProperties } = options;
     const connectionInfo = this.updateConnectionInfo(options.connectionInfo);
     const ibisConnectionInfo = toIbisConnectionInfo(dataSource, connectionInfo);
     const queryString = this.buildQueryString(options);
@@ -298,6 +300,7 @@ export class IbisAdaptor implements IIbisAdaptor {
       connectionInfo: ibisConnectionInfo,
       manifestStr: Buffer.from(JSON.stringify(mdl)).toString('base64'),
     };
+    const headers = this.buildSessionPropertyHeaders(sessionProperties);
     try {
       const res = await axios.post(
         `${this.ibisServerEndpoint}/${this.getIbisApiVersion(IBIS_API_TYPE.QUERY)}/connector/${dataSourceUrlMap[dataSource]}/query${queryString}`,
@@ -306,6 +309,7 @@ export class IbisAdaptor implements IIbisAdaptor {
           params: {
             limit: options.limit || DEFAULT_PREVIEW_LIMIT,
           },
+          headers,
         },
       );
       return {
@@ -329,9 +333,9 @@ export class IbisAdaptor implements IIbisAdaptor {
 
   public async dryRun(
     query: string,
-    options: IbisQueryOptions,
+    options: IbisBaseOptions,
   ): Promise<DryRunResponse> {
-    const { dataSource, mdl } = options;
+    const { dataSource, mdl, sessionProperties } = options;
     const connectionInfo = this.updateConnectionInfo(options.connectionInfo);
     const ibisConnectionInfo = toIbisConnectionInfo(dataSource, connectionInfo);
     const body = {
@@ -339,11 +343,13 @@ export class IbisAdaptor implements IIbisAdaptor {
       connectionInfo: ibisConnectionInfo,
       manifestStr: Buffer.from(JSON.stringify(mdl)).toString('base64'),
     };
+    const headers = this.buildSessionPropertyHeaders(sessionProperties);
     logger.debug(`Dry run sql from ibis with body:`);
     try {
       const response = await axios.post(
         `${this.ibisServerEndpoint}/${this.getIbisApiVersion(IBIS_API_TYPE.DRY_RUN)}/connector/${dataSourceUrlMap[dataSource]}/query?dryRun=true`,
         body,
+        { headers },
       );
       logger.debug(`Ibis server Dry run success`);
       return {
@@ -641,6 +647,25 @@ export class IbisAdaptor implements IIbisAdaptor {
       );
     }
     return message;
+  }
+
+  /**
+   * Build x-wren-variable-* HTTP headers from session property name→value map.
+   * The ibis-server's EmbeddedEngineRewriter strips the prefix and passes
+   * the remaining key/value pairs as session properties to the wren-core engine
+   * for row-level access control evaluation.
+   */
+  private buildSessionPropertyHeaders(
+    sessionProperties?: Record<string, string>,
+  ): Record<string, string> {
+    if (!sessionProperties || Object.keys(sessionProperties).length === 0) {
+      return {};
+    }
+    const headers: Record<string, string> = {};
+    for (const [name, value] of Object.entries(sessionProperties)) {
+      headers[`x-wren-variable-${name}`] = value;
+    }
+    return headers;
   }
 
   private buildQueryString(options: IbisQueryOptions) {

@@ -136,6 +136,8 @@ export const initComponents = () => {
     modelNestedColumnRepository,
     relationRepository,
     viewRepository,
+    rlsPolicyRepository,
+    sessionPropertyRepository,
   });
   const projectService = new ProjectService({
     projectRepository,

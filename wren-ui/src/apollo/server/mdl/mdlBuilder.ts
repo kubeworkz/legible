@@ -10,9 +10,12 @@ import {
 import {
   Manifest,
   ModelMDL,
+  RowLevelAccessControlMDL,
   TableReference,
   WrenEngineDataSourceType,
 } from './type';
+import { RlsPolicy } from '../repositories/rlsPolicyRepository';
+import { SessionProperty } from '../repositories/sessionPropertyRepository';
 import { getLogger } from '@server/utils';
 import { getConfig } from '@server/config';
 import { DataSourceName } from '../types';
@@ -21,6 +24,11 @@ const logger = getLogger('MDLBuilder');
 logger.level = 'debug';
 
 const config = getConfig();
+
+export interface RlsPolicyWithJoins extends RlsPolicy {
+  modelIds: number[];
+  sessionPropertyIds: number[];
+}
 
 export interface MDLBuilderBuildFromOptions {
   project: Project;
@@ -32,6 +40,8 @@ export interface MDLBuilderBuildFromOptions {
   relatedModels?: Model[];
   relatedColumns?: ModelColumn[];
   relatedRelations?: RelationInfo[];
+  rlsPolicies?: RlsPolicyWithJoins[];
+  sessionProperties?: SessionProperty[];
 }
 
 export interface IMDLBuilder {
@@ -57,6 +67,9 @@ export class MDLBuilder implements IMDLBuilder {
 
   private readonly relatedRelations: RelationInfo[];
 
+  private readonly rlsPolicies: RlsPolicyWithJoins[];
+  private readonly sessionProperties: SessionProperty[];
+
   constructor(builderOptions: MDLBuilderBuildFromOptions) {
     const {
       project,
@@ -68,6 +81,8 @@ export class MDLBuilder implements IMDLBuilder {
       relatedModels,
       relatedColumns,
       relatedRelations,
+      rlsPolicies,
+      sessionProperties,
     } = builderOptions;
     this.project = project;
     this.models = models.sort((a, b) => a.id - b.id);
@@ -78,6 +93,8 @@ export class MDLBuilder implements IMDLBuilder {
     this.relatedModels = relatedModels;
     this.relatedColumns = relatedColumns;
     this.relatedRelations = relatedRelations;
+    this.rlsPolicies = rlsPolicies || [];
+    this.sessionProperties = sessionProperties || [];
 
     // init manifest
     this.manifest = {};
@@ -110,6 +127,9 @@ export class MDLBuilder implements IMDLBuilder {
       }
       const tableReference = this.buildTableReference(model);
 
+      // Build row-level access controls for this model
+      const rlac = this.buildRowLevelAccessControls(model.id);
+
       return {
         name: model.referenceName,
         columns: [],
@@ -122,6 +142,7 @@ export class MDLBuilder implements IMDLBuilder {
             : model.refSql,
         cached: model.cached ? true : false,
         refreshTime: model.refreshTime,
+        rowLevelAccessControls: rlac.length > 0 ? rlac : undefined,
         properties: {
           displayName: model.displayName,
           description: properties.description,
@@ -431,6 +452,32 @@ export class MDLBuilder implements IMDLBuilder {
     const { fromColumnName, toColumnName, fromModelName, toModelName } =
       relation;
     return `"${fromModelName}".${fromColumnName} = "${toModelName}".${toColumnName}`;
+  }
+
+  private buildRowLevelAccessControls(
+    modelId: number,
+  ): RowLevelAccessControlMDL[] {
+    // Find all policies referencing this model
+    const matchingPolicies = this.rlsPolicies.filter((p) =>
+      p.modelIds.includes(modelId),
+    );
+    if (matchingPolicies.length === 0) return [];
+
+    // Build a quick lookup map: sessionProperty id → SessionProperty
+    const spMap = new Map(this.sessionProperties.map((sp) => [sp.id, sp]));
+
+    return matchingPolicies.map((policy) => ({
+      name: policy.name,
+      condition: policy.condition,
+      requiredProperties: policy.sessionPropertyIds
+        .map((spId) => spMap.get(spId))
+        .filter(Boolean)
+        .map((sp) => ({
+          name: sp.name,
+          required: sp.required,
+          defaultExpr: sp.defaultExpr ?? undefined,
+        })),
+    }));
   }
 
   private buildTableReference(model: Model): TableReference | null {

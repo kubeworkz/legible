@@ -53,6 +53,7 @@ export interface DryPlanOption {
 export interface WrenEngineDryRunOption {
   manifest?: Manifest;
   limit?: number;
+  sessionProperties?: Record<string, string>;
 }
 
 export interface DuckDBPrepareOptions {
@@ -83,6 +84,7 @@ export interface IWrenEngineAdaptor {
     sql: string,
     mdl: Manifest,
     limit?: number,
+    sessionProperties?: Record<string, string>,
   ): Promise<EngineQueryResponse>;
   getNativeSQL(sql: string, options?: DryPlanOption): Promise<string>;
   validateColumnIsValid(
@@ -233,11 +235,13 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
     sql: string,
     manifest: Manifest,
     limit: number = DEFAULT_PREVIEW_LIMIT,
+    sessionProperties?: Record<string, string>,
   ): Promise<EngineQueryResponse> {
     try {
       const url = new URL(this.previewUrlPath, this.wrenEngineBaseEndpoint);
-      const headers = {
+      const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        ...this.buildSessionPropertyHeaders(sessionProperties),
       };
 
       const res: AxiosResponse<EngineQueryResponse> = await axios({
@@ -299,10 +303,13 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
     options: WrenEngineDryRunOption,
   ): Promise<WrenEngineDryRunResponse[]> {
     try {
-      const { manifest } = options;
+      const { manifest, sessionProperties } = options;
       const body = {
         sql,
         manifest,
+      };
+      const headers: Record<string, string> = {
+        ...this.buildSessionPropertyHeaders(sessionProperties),
       };
       logger.debug(
         `Dry run wren engine with body: ${JSON.stringify(sql, null, 2)}`,
@@ -311,6 +318,7 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
       const res: AxiosResponse<WrenEngineDryRunResponse[]> = await axios({
         method: 'get',
         url: url.href,
+        headers,
         data: body,
       });
       logger.debug(`Wren Engine Dry run success`);
@@ -336,6 +344,24 @@ export class WrenEngineAdaptor implements IWrenEngineAdaptor {
       );
       throw err;
     }
+  }
+
+  /**
+   * Build x-wren-variable-* HTTP headers from session property name→value map.
+   * These headers carry RLS session property values to the engine for
+   * row-level access control evaluation.
+   */
+  private buildSessionPropertyHeaders(
+    sessionProperties?: Record<string, string>,
+  ): Record<string, string> {
+    if (!sessionProperties || Object.keys(sessionProperties).length === 0) {
+      return {};
+    }
+    const headers: Record<string, string> = {};
+    for (const [name, value] of Object.entries(sessionProperties)) {
+      headers[`x-wren-variable-${name}`] = value;
+    }
+    return headers;
   }
 
   private async initDatabase(sql) {
