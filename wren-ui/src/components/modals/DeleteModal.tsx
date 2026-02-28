@@ -114,3 +114,10 @@ export const DeleteInstructionModal = makeDeleteModal(DefaultDeleteButton, {
   content:
     'This action is permanent and cannot be undone. Are you sure you want to proceed?',
 });
+
+export const DeleteRlsPolicyModal = makeDeleteModal(DefaultDeleteButton, {
+  icon: <DeleteOutlined className="mr-2" />,
+  itemName: 'RLS policy',
+  content:
+    'This will permanently delete this row-level security policy. Are you sure you want to proceed?',
+});

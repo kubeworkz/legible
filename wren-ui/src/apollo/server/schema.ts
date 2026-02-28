@@ -1449,6 +1449,12 @@ export const typeDefs = gql`
       filter: ApiHistoryFilterInput
       pagination: ApiHistoryPaginationInput!
     ): ApiHistoryPaginatedResponse!
+
+    # Data Security
+    sessionProperties: [SessionProperty!]!
+    rlsPolicies: [RlsPolicy!]!
+    rlsPolicy(where: RlsPolicyWhereUniqueInput!): RlsPolicy!
+    userSessionPropertyValues(userId: Int!): [UserSessionPropertyValue!]!
   }
 
   type Mutation {

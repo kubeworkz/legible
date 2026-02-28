@@ -690,10 +690,13 @@ export type Mutation = {
   createCalculatedField: Scalars['JSON'];
   createDashboardItem: DashboardItem;
   createInstantRecommendedQuestions: Task;
+  assignSessionPropertyValues: Scalars['Boolean'];
   createInstruction: Instruction;
   createModel: Scalars['JSON'];
   createProject: ProjectInfo;
   createRelation: Scalars['JSON'];
+  createRlsPolicy: RlsPolicy;
+  createSessionProperty: SessionProperty;
   createSqlPair: SqlPair;
   createThread: Thread;
   createThreadResponse: ThreadResponse;
@@ -704,6 +707,8 @@ export type Mutation = {
   deleteModel: Scalars['Boolean'];
   deleteProject: Scalars['Boolean'];
   deleteRelation: Scalars['Boolean'];
+  deleteRlsPolicy: Scalars['Boolean'];
+  deleteSessionProperty: Scalars['Boolean'];
   deleteSqlPair: Scalars['Boolean'];
   deleteThread: Scalars['Boolean'];
   deleteView: Scalars['Boolean'];
@@ -742,6 +747,8 @@ export type Mutation = {
   updateModelMetadata: Scalars['Boolean'];
   updateProject: ProjectInfo;
   updateRelation: Scalars['JSON'];
+  updateRlsPolicy: RlsPolicy;
+  updateSessionProperty: SessionProperty;
   updateSqlPair: SqlPair;
   updateThread: Thread;
   updateThreadResponse: ThreadResponse;
@@ -1200,12 +1207,26 @@ export type Query = {
   project: ProjectInfo;
   schemaChange: SchemaChange;
   settings: Settings;
+  rlsPolicies: Array<RlsPolicy>;
+  rlsPolicy: RlsPolicy;
+  sessionProperties: Array<SessionProperty>;
   sqlPairs: Array<Maybe<SqlPair>>;
   suggestedQuestions: SuggestedQuestionResponse;
   thread: DetailedThread;
   threadResponse: ThreadResponse;
   threads: Array<Thread>;
+  userSessionPropertyValues: Array<UserSessionPropertyValue>;
   view: ViewInfo;
+};
+
+
+export type QueryRlsPolicyArgs = {
+  where: RlsPolicyWhereUniqueInput;
+};
+
+
+export type QueryUserSessionPropertyValuesArgs = {
+  userId: Scalars['Int'];
 };
 
 
@@ -1674,4 +1695,112 @@ export type ViewWhereUniqueInput = {
 
 export type WhereIdInput = {
   id: Scalars['Int'];
+};
+
+// ── Data Security Types ─────────────────────────────
+
+export type SessionProperty = {
+  __typename?: 'SessionProperty';
+  id: Scalars['Int'];
+  projectId: Scalars['Int'];
+  name: Scalars['String'];
+  type: Scalars['String'];
+  required: Scalars['Boolean'];
+  defaultExpr?: Maybe<Scalars['String']>;
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type RlsPolicy = {
+  __typename?: 'RlsPolicy';
+  id: Scalars['Int'];
+  projectId: Scalars['Int'];
+  name: Scalars['String'];
+  condition: Scalars['String'];
+  modelIds: Array<Scalars['Int']>;
+  sessionPropertyIds: Array<Scalars['Int']>;
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type UserSessionPropertyValue = {
+  __typename?: 'UserSessionPropertyValue';
+  id: Scalars['Int'];
+  userId: Scalars['Int'];
+  sessionPropertyId: Scalars['Int'];
+  value: Scalars['String'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type CreateSessionPropertyInput = {
+  name: Scalars['String'];
+  type: Scalars['String'];
+  required: Scalars['Boolean'];
+  defaultExpr?: InputMaybe<Scalars['String']>;
+};
+
+export type UpdateSessionPropertyInput = {
+  name?: InputMaybe<Scalars['String']>;
+  type?: InputMaybe<Scalars['String']>;
+  required?: InputMaybe<Scalars['Boolean']>;
+  defaultExpr?: InputMaybe<Scalars['String']>;
+};
+
+export type SessionPropertyWhereUniqueInput = {
+  id: Scalars['Int'];
+};
+
+export type CreateRlsPolicyInput = {
+  name: Scalars['String'];
+  condition: Scalars['String'];
+  modelIds: Array<Scalars['Int']>;
+  sessionPropertyIds: Array<Scalars['Int']>;
+};
+
+export type UpdateRlsPolicyInput = {
+  name?: InputMaybe<Scalars['String']>;
+  condition?: InputMaybe<Scalars['String']>;
+  modelIds?: InputMaybe<Array<Scalars['Int']>>;
+  sessionPropertyIds?: InputMaybe<Array<Scalars['Int']>>;
+};
+
+export type RlsPolicyWhereUniqueInput = {
+  id: Scalars['Int'];
+};
+
+export type AssignSessionPropertyValueInput = {
+  userId: Scalars['Int'];
+  sessionPropertyId: Scalars['Int'];
+  value: Scalars['String'];
+};
+
+export type MutationAssignSessionPropertyValuesArgs = {
+  data: Array<AssignSessionPropertyValueInput>;
+};
+
+export type MutationCreateSessionPropertyArgs = {
+  data: CreateSessionPropertyInput;
+};
+
+export type MutationUpdateSessionPropertyArgs = {
+  where: SessionPropertyWhereUniqueInput;
+  data: UpdateSessionPropertyInput;
+};
+
+export type MutationDeleteSessionPropertyArgs = {
+  where: SessionPropertyWhereUniqueInput;
+};
+
+export type MutationCreateRlsPolicyArgs = {
+  data: CreateRlsPolicyInput;
+};
+
+export type MutationUpdateRlsPolicyArgs = {
+  where: RlsPolicyWhereUniqueInput;
+  data: UpdateRlsPolicyInput;
+};
+
+export type MutationDeleteRlsPolicyArgs = {
+  where: RlsPolicyWhereUniqueInput;
 };
