@@ -5,7 +5,6 @@ import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import LockOutlined from '@ant-design/icons/LockOutlined';
 import { MORE_ACTION } from '@/utils/enum';
-import { getCompactTime } from '@/utils/time';
 import { MoreButton } from '@/components/ActionButton';
 import { RlsPolicyDropdown } from '@/components/diagram/CustomDropdown';
 import useDrawerAction from '@/hooks/useDrawerAction';
@@ -14,6 +13,7 @@ import { RlsPolicy } from '@/apollo/client/graphql/__types__';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
 import {
   useRlsPoliciesQuery,
+  useSessionPropertiesQuery,
   useCreateRlsPolicyMutation,
   useUpdateRlsPolicyMutation,
   useDeleteRlsPolicyMutation,
@@ -21,7 +21,7 @@ import {
 
 const { Text } = Typography;
 
-const StyledModelsBlock = styled.div`
+const StyledTagBlock = styled.div`
   margin: -2px -4px;
 `;
 
@@ -51,6 +51,17 @@ export default function RowLevelSecurity() {
     });
     return map;
   }, [modelsData]);
+
+  const { data: sessionPropsData } = useSessionPropertiesQuery({
+    fetchPolicy: 'cache-and-network',
+  });
+  const spMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    (sessionPropsData?.sessionProperties || []).forEach((sp) => {
+      map[sp.id] = sp.name;
+    });
+    return map;
+  }, [sessionPropsData]);
 
   const getBaseOptions = (options?: Record<string, any>) => ({
     onError: (error: any) => console.error(error),
@@ -93,11 +104,37 @@ export default function RowLevelSecurity() {
     }
   };
 
+  const renderTags = (
+    ids: number[],
+    lookup: Record<number, string>,
+    fallbackPrefix: string,
+  ) => {
+    const display = ids.slice(0, 3);
+    const moreCount = ids.length - 3;
+    return (
+      <StyledTagBlock>
+        {display.map((id) => (
+          <StyledTag
+            key={id}
+            className="bg-gray-1 border-gray-5 text-truncate"
+          >
+            <Text className="gray-9" title={lookup[id]}>
+              {lookup[id] || `${fallbackPrefix} #${id}`}
+            </Text>
+          </StyledTag>
+        ))}
+        {moreCount > 0 && (
+          <span className="text-sm gray-7 pl-1">+{moreCount} more</span>
+        )}
+      </StyledTagBlock>
+    );
+  };
+
   const columns: TableColumnsType<RlsPolicy> = [
     {
       title: 'Policy name',
       dataIndex: 'name',
-      width: '20%',
+      width: '30%',
       render: (name: string) => (
         <Text strong title={name} ellipsis>
           {name}
@@ -105,55 +142,21 @@ export default function RowLevelSecurity() {
       ),
     },
     {
-      title: 'Condition',
-      dataIndex: 'condition',
-      width: '30%',
-      render: (condition: string) => (
-        <Text
-          className="gray-7"
-          title={condition}
-          ellipsis
-          style={{ fontFamily: 'monospace', fontSize: 12 }}
-        >
-          {condition}
-        </Text>
-      ),
-    },
-    {
-      title: 'Applied models',
+      title: 'Applied to',
       dataIndex: 'modelIds',
-      width: '25%',
-      render: (modelIds: number[]) => {
-        const displayModels = modelIds.slice(0, 3);
-        const moreCount = modelIds.length - 3;
-        return (
-          <StyledModelsBlock>
-            {displayModels.map((id) => (
-              <StyledTag
-                key={id}
-                className="bg-gray-1 border-gray-5 text-truncate"
-              >
-                <Text className="gray-9" title={modelMap[id]}>
-                  {modelMap[id] || `Model #${id}`}
-                </Text>
-              </StyledTag>
-            ))}
-            {moreCount > 0 && (
-              <span className="text-sm gray-7 pl-1">
-                +{moreCount} more
-              </span>
-            )}
-          </StyledModelsBlock>
-        );
-      },
+      width: '35%',
+      render: (modelIds: number[]) => renderTags(modelIds, modelMap, 'Model'),
     },
     {
-      title: 'Created time',
-      dataIndex: 'createdAt',
-      width: 130,
-      render: (time: string) => (
-        <Text className="gray-7">{getCompactTime(time)}</Text>
-      ),
+      title: 'Session properties',
+      dataIndex: 'sessionPropertyIds',
+      width: '30%',
+      render: (spIds: number[]) =>
+        spIds.length > 0 ? (
+          renderTags(spIds, spMap, 'Property')
+        ) : (
+          <Text className="gray-5">—</Text>
+        ),
     },
     {
       key: 'action',
@@ -174,7 +177,7 @@ export default function RowLevelSecurity() {
         title={
           <>
             <LockOutlined className="mr-2 gray-8" />
-            Row-level Security
+            Row-level security
           </>
         }
         titleExtra={
@@ -182,7 +185,7 @@ export default function RowLevelSecurity() {
             Add a policy
           </Button>
         }
-        description="Manage row-level security policies to control which rows each user can access in your data models. Policies use conditions with session properties to filter data at query time."
+        description="Row-level security lets you filter data and enables access to specific rows in a table based on conditions you define."
       >
         <Table
           className="ant-table-has-header"
@@ -195,7 +198,7 @@ export default function RowLevelSecurity() {
             pageSize: 10,
             size: 'small',
           }}
-          scroll={{ x: 960 }}
+          scroll={{ x: 800 }}
         />
         <RlsPolicyDrawer
           {...policyDrawer.state}
