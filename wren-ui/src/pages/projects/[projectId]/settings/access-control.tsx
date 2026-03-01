@@ -677,6 +677,44 @@ function RolePermissionsTab({ isAdmin }: { isAdmin: boolean }) {
     },
   ];
 
+  const CAPABILITIES_MATRIX = [
+    { function: 'Update Project Settings', owner: 'Yes', contributor: 'No', viewer: 'No' },
+    { function: 'Manage Project Members', owner: 'Yes', contributor: 'No', viewer: 'No' },
+    { function: 'Modeling', owner: 'CRUD', contributor: 'RU (Read, Update)', viewer: viewerPerms.modeling === 'read_only' ? 'R (Read Only)' : 'No Permission' },
+    { function: 'Knowledge', owner: 'CRUD', contributor: 'CRUD', viewer: viewerPerms.knowledge === 'read_only' ? 'R (Read Only)' : 'No Permission' },
+    { function: 'Dashboard', owner: 'CRUD', contributor: 'CRUD', viewer: 'CRUD' },
+    { function: 'Spreadsheet', owner: 'CRUD', contributor: 'CRUD', viewer: 'CRUD' },
+    { function: 'CSV Download', owner: 'Yes', contributor: 'Yes', viewer: 'Yes' },
+  ];
+
+  const capabilityColumns = [
+    {
+      title: 'Function',
+      dataIndex: 'function',
+      key: 'function',
+      width: 220,
+      render: (text: string) => <Text strong>{text}</Text>,
+    },
+    {
+      title: 'Project Owner',
+      dataIndex: 'owner',
+      key: 'owner',
+      width: 160,
+    },
+    {
+      title: 'Project Contributor',
+      dataIndex: 'contributor',
+      key: 'contributor',
+      width: 180,
+    },
+    {
+      title: 'Project Viewer',
+      dataIndex: 'viewer',
+      key: 'viewer',
+      width: 160,
+    },
+  ];
+
   return (
     <>
       <Table
@@ -685,6 +723,23 @@ function RolePermissionsTab({ isAdmin }: { isAdmin: boolean }) {
         rowKey="role"
         pagination={false}
         size="middle"
+      />
+
+      <Title level={5} className="gray-9 mt-6 mb-3">
+        Role Capabilities Matrix
+      </Title>
+      <Text className="gray-7 d-block mb-3">
+        Default permissions for each role. Project Owners can further restrict
+        Viewer access to Modeling and Knowledge via the &quot;Change
+        permission&quot; action above.
+      </Text>
+      <Table
+        dataSource={CAPABILITIES_MATRIX}
+        columns={capabilityColumns}
+        rowKey="function"
+        pagination={false}
+        size="middle"
+        bordered
       />
 
       <Modal
