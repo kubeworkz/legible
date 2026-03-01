@@ -1925,6 +1925,15 @@ export type MoveThreadToFolderInput = {
   folderId?: Scalars['Int'] | null;
 };
 
+export type FolderOrderInput = {
+  id: Scalars['Int'];
+  sortOrder: Scalars['Int'];
+};
+
+export type ReorderFoldersInput = {
+  orders: Array<FolderOrderInput>;
+};
+
 export type QueryFoldersArgs = Record<string, never>;
 
 export type QueryFolderArgs = {
@@ -1959,4 +1968,8 @@ export type MutationMoveDashboardToFolderArgs = {
 
 export type MutationMoveThreadToFolderArgs = {
   data: MoveThreadToFolderInput;
+};
+
+export type MutationReorderFoldersArgs = {
+  data: ReorderFoldersInput;
 };

@@ -20,6 +20,7 @@ import {
   useDeleteFolderMutation,
   useMoveDashboardToFolderMutation,
   useMoveThreadToFolderMutation,
+  useReorderFoldersMutation,
 } from '@/apollo/client/graphql/folder.generated';
 
 export interface FolderItem {
@@ -63,6 +64,9 @@ export default function useHomeSidebar() {
     onError: (error) => console.error(error),
   });
   const [moveThreadToFolder] = useMoveThreadToFolderMutation({
+    onError: (error) => console.error(error),
+  });
+  const [reorderFolders] = useReorderFoldersMutation({
     onError: (error) => console.error(error),
   });
 
@@ -289,6 +293,15 @@ export default function useHomeSidebar() {
     refetch();
   };
 
+  const onReorderFolders = async (
+    orders: Array<{ id: number; sortOrder: number }>,
+  ) => {
+    await reorderFolders({
+      variables: { data: { orders } },
+    });
+    refetchFolders();
+  };
+
   return {
     data: { threads, dashboards, folders, folderGroups },
     onSelect,
@@ -303,6 +316,7 @@ export default function useHomeSidebar() {
     onFolderDelete,
     onMoveDashboardToFolder,
     onMoveThreadToFolder,
+    onReorderFolders,
     refetch,
     refetchDashboards,
     refetchFolders,

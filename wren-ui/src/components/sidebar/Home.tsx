@@ -26,6 +26,7 @@ export interface Props {
   onFolderDelete?: (id: number) => Promise<void>;
   onMoveDashboardToFolder?: (dashboardId: number, folderId: number | null) => Promise<void>;
   onMoveThreadToFolder?: (threadId: number, folderId: number | null) => Promise<void>;
+  onReorderFolders?: (orders: Array<{ id: number; sortOrder: number }>) => Promise<void>;
 }
 
 export default function Home(props: Props) {
@@ -43,6 +44,7 @@ export default function Home(props: Props) {
     onFolderDelete,
     onMoveDashboardToFolder,
     onMoveThreadToFolder,
+    onReorderFolders,
   } = props;
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -135,6 +137,7 @@ export default function Home(props: Props) {
       onFolderRename={onFolderRename}
       onFolderDelete={onFolderDelete}
       onMoveToFolder={onMoveItemToFolder}
+      onReorderFolders={onReorderFolders}
     />
   );
 }

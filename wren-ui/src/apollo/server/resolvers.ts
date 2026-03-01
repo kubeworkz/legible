@@ -278,6 +278,7 @@ const resolvers = {
     setFolderAccess: folderResolver.setFolderAccess,
     moveDashboardToFolder: folderResolver.moveDashboardToFolder,
     moveThreadToFolder: folderResolver.moveThreadToFolder,
+    reorderFolders: folderResolver.reorderFolders,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),

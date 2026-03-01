@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { DataNode } from 'antd/lib/tree';
 import { Dropdown, Menu } from 'antd';
@@ -8,6 +8,7 @@ import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import MoreOutlined from '@ant-design/icons/MoreOutlined';
+import HolderOutlined from '@ant-design/icons/HolderOutlined';
 import SidebarTree, {
   sidebarCommonStyle,
 } from '@/components/sidebar/SidebarTree';
@@ -22,6 +23,25 @@ import type { FolderGroup, SidebarItem, FolderItem } from '@/hooks/useHomeSideba
 
 const StyledSidebarTree = styled(SidebarTree)`
   ${sidebarCommonStyle}
+
+  /* Drag-drop indicator styles */
+  .ant-tree-treenode.drag-over {
+    > .ant-tree-node-content-wrapper {
+      background-color: var(--geekblue-1) !important;
+      outline: 1px dashed var(--geekblue-4);
+      border-radius: 4px;
+    }
+  }
+  .ant-tree-treenode.drag-over-gap-top > .ant-tree-node-content-wrapper {
+    border-top: 2px solid var(--geekblue-4);
+  }
+  .ant-tree-treenode.drag-over-gap-bottom > .ant-tree-node-content-wrapper {
+    border-bottom: 2px solid var(--geekblue-4);
+  }
+  /* Hide the drag icon — we rely on cursor instead */
+  .ant-tree-draggable-icon {
+    display: none !important;
+  }
 
   .adm-treeNode {
     &.adm-treeNode__folder-item {
@@ -100,6 +120,7 @@ interface Props {
   onFolderRename?: (id: number, name: string) => Promise<void>;
   onFolderDelete?: (id: number) => Promise<void>;
   onMoveToFolder?: (itemId: string, folderId: number) => void;
+  onReorderFolders?: (orders: Array<{ id: number; sortOrder: number }>) => Promise<void>;
 }
 
 function getFolderIcon(type: string) {
@@ -156,6 +177,7 @@ export default function FolderTree(props: Props) {
     onFolderRename,
     onFolderDelete,
     onMoveToFolder,
+    onReorderFolders,
   } = props;
 
   const [tree, setTree] = useState<DataNode[]>([]);
@@ -173,6 +195,106 @@ export default function FolderTree(props: Props) {
       }
     },
     [folderModal.state.defaultValue, onFolderRename, onFolderCreate],
+  );
+
+  // ── Drag-and-drop helpers ──────────────────────────────────
+
+  // Determine if a tree node is draggable
+  const draggable = useCallback(
+    (node: any) => {
+      const key = String(node.key);
+      // Custom folder headers can be reordered
+      if (key.startsWith('folder-')) {
+        const folderId = Number(key.replace('folder-', ''));
+        const group = folderGroups.find((g) => g.folder.id === folderId);
+        if (group && group.folder.type === 'custom') return true;
+        return false;
+      }
+      // Thread/dashboard items can be dragged between folders
+      if (key.startsWith('thread-') || key.startsWith('dashboard-')) return true;
+      return false;
+    },
+    [folderGroups],
+  );
+
+  // Determine where drops are allowed
+  const allowDrop = useCallback(
+    ({ dragNode, dropNode, dropPosition }: any) => {
+      const dragKey = String(dragNode.key);
+      const dropKey = String(dropNode.key);
+
+      // Dragging a folder — can only drop between other top-level folder headers
+      if (dragKey.startsWith('folder-')) {
+        if (!dropKey.startsWith('folder-')) return false;
+        // Only allow gap drops (between nodes), not drop-onto
+        // dropPosition: -1 = before, 1 = after, 0 = inside
+        if (dropPosition === 0) return false;
+        return true;
+      }
+
+      // Dragging an item — can drop onto a folder header (to move into that folder)
+      if (dragKey.startsWith('thread-') || dragKey.startsWith('dashboard-')) {
+        // Can drop onto a folder header
+        if (dropKey.startsWith('folder-') && dropPosition === 0) return true;
+        // Don't allow dropping onto other items, subtitles, or in gaps
+        return false;
+      }
+
+      return false;
+    },
+    [],
+  );
+
+  // Handle the drop event
+  const onDrop = useCallback(
+    (info: any) => {
+      const dragKey = String(info.dragNode.key);
+      const dropKey = String(info.node.key);
+      const dropPos = info.dropPosition;
+
+      // Case 1: Reorder a custom folder
+      if (dragKey.startsWith('folder-') && dropKey.startsWith('folder-')) {
+        const dragFolderId = Number(dragKey.replace('folder-', ''));
+
+        // Get the current ordered list of folder IDs from the tree
+        const folderIds = folderGroups.map((g) => g.folder.id);
+
+        // Remove dragged folder from its current position
+        const filtered = folderIds.filter((id) => id !== dragFolderId);
+
+        // Find the index of the drop target
+        const dropFolderId = Number(dropKey.replace('folder-', ''));
+        const dropIndex = filtered.indexOf(dropFolderId);
+
+        // Insert at the right position
+        // info.dropPosition is the visible position; Ant Tree provides dropToGap
+        // and the actual computed index via info.dropPosition
+        // For gap drops: dropPosition < dropIndex means before, >= means after
+        if (dropPos <= dropIndex) {
+          // Insert before drop target
+          filtered.splice(dropIndex, 0, dragFolderId);
+        } else {
+          // Insert after drop target
+          filtered.splice(dropIndex + 1, 0, dragFolderId);
+        }
+
+        // Build new sort orders
+        const orders = filtered.map((id, idx) => ({ id, sortOrder: idx }));
+        onReorderFolders?.(orders);
+        return;
+      }
+
+      // Case 2: Move an item (thread/dashboard) to a folder
+      if (
+        (dragKey.startsWith('thread-') || dragKey.startsWith('dashboard-')) &&
+        dropKey.startsWith('folder-')
+      ) {
+        const folderId = Number(dropKey.replace('folder-', ''));
+        onMoveToFolder?.(dragKey, folderId);
+        return;
+      }
+    },
+    [folderGroups, onReorderFolders, onMoveToFolder],
   );
 
   useEffect(() => {
@@ -354,6 +476,9 @@ export default function FolderTree(props: Props) {
         selectedKeys={selectedKeys}
         onSelect={onSelect}
         defaultExpandAll
+        draggable={{ icon: false, nodeDraggable: draggable }}
+        allowDrop={allowDrop}
+        onDrop={onDrop}
       />
       <FolderModal
         {...folderModal.state}

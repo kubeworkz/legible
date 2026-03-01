@@ -1483,6 +1483,15 @@ export const typeDefs = gql`
     folderId: Int
   }
 
+  input FolderOrderInput {
+    id: Int!
+    sortOrder: Int!
+  }
+
+  input ReorderFoldersInput {
+    orders: [FolderOrderInput!]!
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -1788,5 +1797,6 @@ export const typeDefs = gql`
     setFolderAccess(where: FolderAccessWhereInput!, data: SetFolderAccessInput!): [FolderAccess!]!
     moveDashboardToFolder(data: MoveDashboardToFolderInput!): Boolean!
     moveThreadToFolder(data: MoveThreadToFolderInput!): Boolean!
+    reorderFolders(data: ReorderFoldersInput!): [Folder!]!
   }
 `;

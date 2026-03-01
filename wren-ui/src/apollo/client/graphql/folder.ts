@@ -89,3 +89,12 @@ export const MOVE_THREAD_TO_FOLDER = gql`
     moveThreadToFolder(data: $data)
   }
 `;
+
+export const REORDER_FOLDERS = gql`
+  mutation ReorderFolders($data: ReorderFoldersInput!) {
+    reorderFolders(data: $data) {
+      ...FolderFields
+    }
+  }
+  ${FOLDER_FIELDS}
+`;

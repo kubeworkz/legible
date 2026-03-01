@@ -108,6 +108,15 @@ export type MoveThreadToFolderMutation = {
   moveThreadToFolder: boolean;
 };
 
+export type ReorderFoldersMutationVariables = Types.Exact<{
+  data: Types.ReorderFoldersInput;
+}>;
+
+export type ReorderFoldersMutation = {
+  __typename?: 'Mutation';
+  reorderFolders: Array<FolderFieldsFragment>;
+};
+
 // ── Documents ──────────────────────────────────────────────
 
 export const FolderFieldsFragmentDoc = gql`
@@ -198,6 +207,15 @@ export const MoveThreadToFolderDocument = gql`
   mutation MoveThreadToFolder($data: MoveThreadToFolderInput!) {
     moveThreadToFolder(data: $data)
   }
+`;
+
+export const ReorderFoldersDocument = gql`
+  mutation ReorderFolders($data: ReorderFoldersInput!) {
+    reorderFolders(data: $data) {
+      ...FolderFields
+    }
+  }
+  ${FolderFieldsFragmentDoc}
 `;
 
 // ── Query Hooks ────────────────────────────────────────────
@@ -394,4 +412,28 @@ export function useMoveThreadToFolderMutation(
 
 export type MoveThreadToFolderMutationHookResult = ReturnType<
   typeof useMoveThreadToFolderMutation
+>;
+
+// ── Reorder Folders ─────────────────────────────────────────
+
+export type ReorderFoldersMutationFn = Apollo.MutationFunction<
+  ReorderFoldersMutation,
+  ReorderFoldersMutationVariables
+>;
+
+export function useReorderFoldersMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ReorderFoldersMutation,
+    ReorderFoldersMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    ReorderFoldersMutation,
+    ReorderFoldersMutationVariables
+  >(ReorderFoldersDocument, options);
+}
+
+export type ReorderFoldersMutationHookResult = ReturnType<
+  typeof useReorderFoldersMutation
 >;

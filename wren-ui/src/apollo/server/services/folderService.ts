@@ -72,6 +72,11 @@ export interface IFolderService {
     threadId: number,
     folderId: number | null,
   ): Promise<boolean>;
+
+  // Reorder folders
+  reorderFolders(
+    orders: Array<{ id: number; sortOrder: number }>,
+  ): Promise<Folder[]>;
 }
 
 export class FolderService implements IFolderService {
@@ -269,5 +274,25 @@ export class FolderService implements IFolderService {
 
     logger.info(`Moved thread ${threadId} to folder ${folderId ?? 'none'}`);
     return true;
+  }
+
+  public async reorderFolders(
+    orders: Array<{ id: number; sortOrder: number }>,
+  ): Promise<Folder[]> {
+    // Update each folder's sortOrder
+    for (const order of orders) {
+      await this.folderRepository.updateOne(order.id, {
+        sortOrder: order.sortOrder,
+      } as Partial<Folder>);
+    }
+
+    // Return the updated folders
+    const results: Folder[] = [];
+    for (const order of orders) {
+      const folder = await this.getFolder(order.id);
+      results.push(folder);
+    }
+    logger.info(`Reordered ${orders.length} folders`);
+    return results;
   }
 }

@@ -18,6 +18,7 @@ export class FolderResolver {
     this.setFolderAccess = this.setFolderAccess.bind(this);
     this.moveDashboardToFolder = this.moveDashboardToFolder.bind(this);
     this.moveThreadToFolder = this.moveThreadToFolder.bind(this);
+    this.reorderFolders = this.reorderFolders.bind(this);
   }
 
   public async listFolders(
@@ -149,6 +150,16 @@ export class FolderResolver {
       args.data.threadId,
       args.data.folderId,
     );
+  }
+
+  public async reorderFolders(
+    _root: any,
+    args: {
+      data: { orders: Array<{ id: number; sortOrder: number }> };
+    },
+    ctx: IContext,
+  ): Promise<Folder[]> {
+    return ctx.folderService.reorderFolders(args.data.orders);
   }
 
   public getFolderNestedResolver() {
