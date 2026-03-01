@@ -11,10 +11,13 @@ import {
   message,
   Popconfirm,
   Tabs,
+  Space,
+  Tooltip,
 } from 'antd';
 import styled from 'styled-components';
 import UserAddOutlined from '@ant-design/icons/UserAddOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
+import EditOutlined from '@ant-design/icons/EditOutlined';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
 import useOrganization, { MemberInfo, MemberRole } from '@/hooks/useOrganization';
 import useAuth from '@/hooks/useAuth';
@@ -280,29 +283,39 @@ export default function SettingsAccessControl() {
           Access control
         </Title>
 
-        <HeaderRow>
-          <Tabs defaultActiveKey="members">
-            <Tabs.TabPane tab="Manage members" key="members" />
-          </Tabs>
-          {isAdmin && (
-            <Button
-              type="primary"
-              icon={<UserAddOutlined />}
-              onClick={() => setAddVisible(true)}
-            >
-              Add member
-            </Button>
-          )}
-        </HeaderRow>
+        <Tabs defaultActiveKey="members">
+          <Tabs.TabPane tab="Manage members" key="members">
+            <HeaderRow>
+              <div />
+              {isAdmin && (
+                <Button
+                  type="primary"
+                  icon={<UserAddOutlined />}
+                  onClick={() => setAddVisible(true)}
+                >
+                  Add member
+                </Button>
+              )}
+            </HeaderRow>
 
-        <Table
-          dataSource={members}
-          columns={columns}
-          rowKey="id"
-          loading={membersLoading}
-          pagination={false}
-          size="middle"
-        />
+            <Table
+              dataSource={members}
+              columns={columns}
+              rowKey="id"
+              loading={membersLoading}
+              pagination={false}
+              size="middle"
+            />
+          </Tabs.TabPane>
+
+          <Tabs.TabPane tab="Manage groups" key="groups">
+            <ManageGroupsTab isAdmin={isAdmin} />
+          </Tabs.TabPane>
+
+          <Tabs.TabPane tab="Role permissions" key="permissions">
+            <RolePermissionsTab isAdmin={isAdmin} />
+          </Tabs.TabPane>
+        </Tabs>
 
         <AddMemberModal
           visible={addVisible}
@@ -311,5 +324,221 @@ export default function SettingsAccessControl() {
         />
       </PageContainer>
     </SettingsLayout>
+  );
+}
+
+// ── Manage Groups Tab ─────────────────────────────────────
+
+interface Group {
+  id: number;
+  name: string;
+  description: string;
+  memberCount: number;
+}
+
+const SAMPLE_GROUPS: Group[] = [];
+
+function ManageGroupsTab({ isAdmin }: { isAdmin: boolean }) {
+  const [groups, setGroups] = useState<Group[]>(SAMPLE_GROUPS);
+  const [addVisible, setAddVisible] = useState(false);
+  const [form] = Form.useForm();
+
+  const handleAdd = useCallback(async () => {
+    try {
+      const values = await form.validateFields();
+      const newGroup: Group = {
+        id: Date.now(),
+        name: values.name,
+        description: values.description || '',
+        memberCount: 0,
+      };
+      setGroups((prev) => [...prev, newGroup]);
+      form.resetFields();
+      setAddVisible(false);
+      message.success(`Group "${values.name}" created.`);
+    } catch {
+      // validation error
+    }
+  }, [form]);
+
+  const handleDelete = useCallback((id: number) => {
+    setGroups((prev) => prev.filter((g) => g.id !== id));
+    message.success('Group deleted.');
+  }, []);
+
+  const groupColumns = [
+    {
+      title: 'Group name',
+      dataIndex: 'name',
+      key: 'name',
+      render: (name: string) => <Text strong>{name}</Text>,
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+      render: (desc: string) => (
+        <Text className="gray-7">{desc || '—'}</Text>
+      ),
+    },
+    {
+      title: 'Members',
+      dataIndex: 'memberCount',
+      key: 'memberCount',
+      width: 100,
+      render: (count: number) => count,
+    },
+    ...(isAdmin
+      ? [
+          {
+            title: 'Action',
+            key: 'actions',
+            width: 100,
+            render: (_: any, record: Group) => (
+              <Space>
+                <Tooltip title="Edit group">
+                  <Button type="text" size="small" icon={<EditOutlined />} />
+                </Tooltip>
+                <Popconfirm
+                  title="Delete this group?"
+                  onConfirm={() => handleDelete(record.id)}
+                  okText="Delete"
+                  okButtonProps={{ danger: true }}
+                >
+                  <Button
+                    type="text"
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                  />
+                </Popconfirm>
+              </Space>
+            ),
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <>
+      <HeaderRow>
+        <div />
+        {isAdmin && (
+          <Button type="primary" onClick={() => setAddVisible(true)}>
+            Create group
+          </Button>
+        )}
+      </HeaderRow>
+      <Table
+        dataSource={groups}
+        columns={groupColumns}
+        rowKey="id"
+        pagination={false}
+        size="middle"
+        locale={{ emptyText: 'No groups yet. Create a group to organize members.' }}
+      />
+      <Modal
+        title="Create group"
+        visible={addVisible}
+        onOk={handleAdd}
+        onCancel={() => {
+          form.resetFields();
+          setAddVisible(false);
+        }}
+        okText="Create"
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="Group name"
+            name="name"
+            rules={[{ required: true, message: 'Please enter a group name' }]}
+          >
+            <Input placeholder="e.g. Engineering" />
+          </Form.Item>
+          <Form.Item label="Description" name="description">
+            <Input.TextArea
+              placeholder="Optional description"
+              rows={3}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
+}
+
+// ── Role Permissions Tab ──────────────────────────────────
+
+interface RolePermission {
+  role: string;
+  description: string;
+  canChangePermission: boolean;
+}
+
+const ROLE_PERMISSIONS: RolePermission[] = [
+  {
+    role: 'Owner',
+    description: 'Full access',
+    canChangePermission: false,
+  },
+  {
+    role: 'Contributor',
+    description:
+      'Modeling: Read and Update\nKnowledge: Create, Read, Update, Delete',
+    canChangePermission: false,
+  },
+  {
+    role: 'Viewer',
+    description: 'Modeling: Read only\nKnowledge: Read only',
+    canChangePermission: true,
+  },
+];
+
+function RolePermissionsTab({ isAdmin }: { isAdmin: boolean }) {
+  const permissionColumns = [
+    {
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      width: 120,
+      render: (role: string) => <Text strong>{role}</Text>,
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+      render: (desc: string) => (
+        <div>
+          {desc.split('\n').map((line, i) => (
+            <div key={i}>• {line}</div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      width: 160,
+      render: (_: any, record: RolePermission) => {
+        if (!record.canChangePermission) return null;
+        if (!isAdmin) return null;
+        return (
+          <Button type="link" size="small">
+            Change permission
+          </Button>
+        );
+      },
+    },
+  ];
+
+  return (
+    <Table
+      dataSource={ROLE_PERMISSIONS}
+      columns={permissionColumns}
+      rowKey="role"
+      pagination={false}
+      size="middle"
+    />
   );
 }
