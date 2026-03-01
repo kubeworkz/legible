@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { DataNode } from 'antd/lib/tree';
-import { useRouter } from 'next/router';
+import { Dropdown, Menu } from 'antd';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import FolderOutlined from '@ant-design/icons/FolderOutlined';
-import FolderOpenOutlined from '@ant-design/icons/FolderOpenOutlined';
 import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
+import EditOutlined from '@ant-design/icons/EditOutlined';
+import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import SidebarTree, {
   sidebarCommonStyle,
 } from '@/components/sidebar/SidebarTree';
@@ -14,6 +15,9 @@ import {
   GroupActionButton,
 } from '@/components/sidebar/utils';
 import TreeTitle, { MoveToFolderOption } from './TreeTitle';
+import FolderModal from '@/components/modals/FolderModal';
+import { DeleteFolderModal } from '@/components/modals/DeleteModal';
+import useModalAction from '@/hooks/useModalAction';
 import type { FolderGroup, SidebarItem, FolderItem } from '@/hooks/useHomeSidebar';
 
 const StyledSidebarTree = styled(SidebarTree)`
@@ -93,6 +97,8 @@ interface Props {
   onDelete: (id: string) => Promise<void>;
   onDashboardCreate: () => Promise<void>;
   onFolderCreate?: (name: string) => Promise<void>;
+  onFolderRename?: (id: number, name: string) => Promise<void>;
+  onFolderDelete?: (id: number) => Promise<void>;
   onMoveToFolder?: (itemId: string, folderId: number) => void;
 }
 
@@ -147,10 +153,27 @@ export default function FolderTree(props: Props) {
     onDelete,
     onDashboardCreate,
     onFolderCreate,
+    onFolderRename,
+    onFolderDelete,
     onMoveToFolder,
   } = props;
 
   const [tree, setTree] = useState<DataNode[]>([]);
+  const folderModal = useModalAction();
+
+  const handleFolderModalSubmit = useCallback(
+    async (values: { name: string }) => {
+      const defaultValue = folderModal.state.defaultValue as any;
+      if (defaultValue?.id) {
+        // Edit mode — rename existing folder
+        await onFolderRename?.(defaultValue.id, values.name);
+      } else {
+        // Create mode
+        await onFolderCreate?.(values.name);
+      }
+    },
+    [folderModal.state.defaultValue, onFolderRename, onFolderCreate],
+  );
 
   useEffect(() => {
     const treeData: DataNode[] = [];
@@ -224,6 +247,9 @@ export default function FolderTree(props: Props) {
         });
       }
 
+      // Build folder header with context menu for custom folders
+      const isCustomFolder = folder.type === 'custom';
+
       treeData.push({
         className: 'adm-treeNode--folder-header',
         key: folderKey,
@@ -234,8 +260,8 @@ export default function FolderTree(props: Props) {
               {getFolderIcon(folder.type)}
               {folder.name}
             </span>
-            {folder.type === 'public' && (
-              <span className="folder-actions">
+            <span className="folder-actions">
+              {folder.type === 'public' && (
                 <GroupActionButton
                   size="small"
                   icon={<PlusOutlined />}
@@ -246,8 +272,52 @@ export default function FolderTree(props: Props) {
                 >
                   New
                 </GroupActionButton>
-              </span>
-            )}
+              )}
+              {isCustomFolder && (
+                <Dropdown
+                  trigger={['click']}
+                  overlayStyle={{ userSelect: 'none', minWidth: 150 }}
+                  overlay={
+                    <Menu
+                      items={[
+                        {
+                          label: (
+                            <>
+                              <EditOutlined className="mr-2" />
+                              Rename
+                            </>
+                          ),
+                          key: 'rename-folder',
+                          onClick: ({ domEvent }) => {
+                            domEvent.stopPropagation();
+                            folderModal.openModal({
+                              id: folder.id,
+                              name: folder.name,
+                            });
+                          },
+                        },
+                        {
+                          label: (
+                            <DeleteFolderModal
+                              onConfirm={() => onFolderDelete?.(folder.id)}
+                            />
+                          ),
+                          key: 'delete-folder',
+                          onClick: ({ domEvent }) => {
+                            domEvent.stopPropagation();
+                          },
+                        },
+                      ]}
+                    />
+                  }
+                >
+                  <MoreOutlined
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ cursor: 'pointer', padding: '0 4px' }}
+                  />
+                </Dropdown>
+              )}
+            </span>
           </FolderHeaderTitle>
         ),
         children,
@@ -265,9 +335,7 @@ export default function FolderTree(props: Props) {
           <GroupActionButton
             size="small"
             icon={<FolderOutlined />}
-            onClick={async () => {
-              await onFolderCreate('New Folder');
-            }}
+            onClick={() => folderModal.openModal()}
             style={{ padding: '4px 0', marginTop: 4 }}
           >
             New Folder
@@ -280,11 +348,18 @@ export default function FolderTree(props: Props) {
   }, [folderGroups]);
 
   return (
-    <StyledSidebarTree
-      treeData={tree}
-      selectedKeys={selectedKeys}
-      onSelect={onSelect}
-      defaultExpandAll
-    />
+    <>
+      <StyledSidebarTree
+        treeData={tree}
+        selectedKeys={selectedKeys}
+        onSelect={onSelect}
+        defaultExpandAll
+      />
+      <FolderModal
+        {...folderModal.state}
+        onSubmit={handleFolderModalSubmit}
+        onClose={folderModal.closeModal}
+      />
+    </>
   );
 }

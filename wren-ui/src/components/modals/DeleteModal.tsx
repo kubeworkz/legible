@@ -135,3 +135,10 @@ export const DeleteDashboardModal = makeDeleteModal(DefaultDeleteButton, {
   content:
     'This will permanently delete this dashboard and all its items. Are you sure you want to proceed?',
 });
+
+export const DeleteFolderModal = makeDeleteModal(DefaultDeleteButton, {
+  icon: <DeleteOutlined className="mr-2" />,
+  itemName: 'folder',
+  content:
+    'Deleting this folder will move all its items to the default Public folder. This cannot be undone.',
+});

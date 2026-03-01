@@ -22,6 +22,8 @@ export interface Props {
   onDashboardDelete: (id: string) => Promise<void>;
   onDashboardCreate: () => Promise<void>;
   onFolderCreate?: (name: string) => Promise<void>;
+  onFolderRename?: (id: number, name: string) => Promise<void>;
+  onFolderDelete?: (id: number) => Promise<void>;
   onMoveDashboardToFolder?: (dashboardId: number, folderId: number | null) => Promise<void>;
   onMoveThreadToFolder?: (threadId: number, folderId: number | null) => Promise<void>;
 }
@@ -37,6 +39,8 @@ export default function Home(props: Props) {
     onDashboardDelete,
     onDashboardCreate,
     onFolderCreate,
+    onFolderRename,
+    onFolderDelete,
     onMoveDashboardToFolder,
     onMoveThreadToFolder,
   } = props;
@@ -128,6 +132,8 @@ export default function Home(props: Props) {
       onDelete={onUnifiedDelete}
       onDashboardCreate={onDashboardCreate}
       onFolderCreate={onFolderCreate}
+      onFolderRename={onFolderRename}
+      onFolderDelete={onFolderDelete}
       onMoveToFolder={onMoveItemToFolder}
     />
   );
