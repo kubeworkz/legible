@@ -3,14 +3,16 @@ import { useRouter } from 'next/router';
 import { useParams } from 'next/navigation';
 import { Path, buildPath } from '@/utils/enum';
 import { useSidebarTreeState } from './SidebarTree';
-import ThreadTree, { ThreadData } from './home/ThreadTree';
-import DashboardTree, { DashboardData } from './home/DashboardTree';
+import FolderTree from './home/FolderTree';
 import useProject from '@/hooks/useProject';
+import type { FolderGroup, SidebarItem } from '@/hooks/useHomeSidebar';
 
 export interface Props {
   data: {
-    threads: ThreadData[];
-    dashboards: DashboardData[];
+    threads: SidebarItem[];
+    dashboards: SidebarItem[];
+    folders: any[];
+    folderGroups: FolderGroup[];
   };
   onSelect: (selectKeys) => void;
   onDelete: (id: string) => Promise<void>;
@@ -19,6 +21,7 @@ export interface Props {
   onDashboardRename: (id: string, newName: string) => Promise<void>;
   onDashboardDelete: (id: string) => Promise<void>;
   onDashboardCreate: () => Promise<void>;
+  onFolderCreate?: (name: string) => Promise<void>;
 }
 
 export default function Home(props: Props) {
@@ -31,32 +34,25 @@ export default function Home(props: Props) {
     onDashboardRename,
     onDashboardDelete,
     onDashboardCreate,
+    onFolderCreate,
   } = props;
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { currentProjectId } = useProject();
-  const { threads } = data;
-  const { dashboards } = data;
+  const { folderGroups } = data;
   const bp = (path: Path) => buildPath(path, currentProjectId);
 
   const { treeSelectedKeys, setTreeSelectedKeys } = useSidebarTreeState();
-  const {
-    treeSelectedKeys: dashboardSelectedKeys,
-    setTreeSelectedKeys: setDashboardSelectedKeys,
-  } = useSidebarTreeState();
 
-  useEffect(() => {
-    params?.id && setTreeSelectedKeys([params.id] as string[]);
-  }, [params?.id]);
-
+  // Determine selected key from URL
   useEffect(() => {
     const dashboardId = router.query?.dashboardId as string;
     if (dashboardId) {
-      setDashboardSelectedKeys([`dashboard-${dashboardId}`]);
-      // deselect threads when dashboard is selected
-      setTreeSelectedKeys([]);
+      setTreeSelectedKeys([`dashboard-${dashboardId}`]);
+    } else if (params?.id) {
+      setTreeSelectedKeys([`thread-${params.id}`]);
     }
-  }, [router.query?.dashboardId]);
+  }, [params?.id, router.query?.dashboardId]);
 
   const onDeleteThread = async (threadId: string) => {
     try {
@@ -69,44 +65,55 @@ export default function Home(props: Props) {
     }
   };
 
-  const onTreeSelect = (selectedKeys: React.Key[], _info: any) => {
-    // prevent deselected
+  const onUnifiedSelect = (selectedKeys: React.Key[], _info: any) => {
     if (selectedKeys.length === 0) return;
 
     setTreeSelectedKeys(selectedKeys);
-    setDashboardSelectedKeys([]);
-    onSelect(selectedKeys);
+
+    const key = String(selectedKeys[0]);
+    if (key.startsWith('dashboard-')) {
+      const dashboardIds = selectedKeys.map((k) =>
+        String(k).replace('dashboard-', ''),
+      );
+      onDashboardSelect(dashboardIds as string[]);
+    } else if (key.startsWith('thread-')) {
+      // Thread selection — strip prefix to get raw id
+      const threadKeys = selectedKeys.map((k) =>
+        String(k).replace('thread-', ''),
+      );
+      onSelect(threadKeys);
+    }
   };
 
-  const onDashboardTreeSelect = (selectedKeys: React.Key[], _info: any) => {
-    if (selectedKeys.length === 0) return;
+  const onUnifiedRename = async (id: string, newName: string) => {
+    if (id.startsWith('dashboard-')) {
+      const dashboardId = id.replace('dashboard-', '');
+      await onDashboardRename(dashboardId, newName);
+    } else if (id.startsWith('thread-')) {
+      const threadId = id.replace('thread-', '');
+      await onRename(threadId, newName);
+    }
+  };
 
-    setDashboardSelectedKeys(selectedKeys);
-    setTreeSelectedKeys([]);
-    // Extract the actual dashboard id from the key (format: "dashboard-{id}")
-    const dashboardIds = selectedKeys.map((key) =>
-      String(key).replace('dashboard-', ''),
-    );
-    onDashboardSelect(dashboardIds as string[]);
+  const onUnifiedDelete = async (id: string) => {
+    if (id.startsWith('dashboard-')) {
+      const dashboardId = id.replace('dashboard-', '');
+      await onDashboardDelete(dashboardId);
+    } else if (id.startsWith('thread-')) {
+      const threadId = id.replace('thread-', '');
+      await onDeleteThread(threadId);
+    }
   };
 
   return (
-    <>
-      <DashboardTree
-        dashboards={dashboards}
-        selectedKeys={dashboardSelectedKeys}
-        onSelect={onDashboardTreeSelect}
-        onRename={onDashboardRename}
-        onDeleteDashboard={onDashboardDelete}
-        onCreateDashboard={onDashboardCreate}
-      />
-      <ThreadTree
-        threads={threads}
-        selectedKeys={treeSelectedKeys}
-        onSelect={onTreeSelect}
-        onRename={onRename}
-        onDeleteThread={onDeleteThread}
-      />
-    </>
+    <FolderTree
+      folderGroups={folderGroups}
+      selectedKeys={treeSelectedKeys}
+      onSelect={onUnifiedSelect}
+      onRename={onUnifiedRename}
+      onDelete={onUnifiedDelete}
+      onDashboardCreate={onDashboardCreate}
+      onFolderCreate={onFolderCreate}
+    />
   );
 }

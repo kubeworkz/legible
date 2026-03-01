@@ -48,6 +48,7 @@ import {
 } from '@server/services';
 import { IProjectApiKeyService } from '../services/projectApiKeyService';
 import { IRlsPolicyService } from '../services/rlsPolicyService';
+import { IFolderService } from '../services/folderService';
 import { ITelemetry } from '@server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -93,6 +94,7 @@ export interface IContext {
   orgApiKeyService: IOrgApiKeyService;
   projectApiKeyService: IProjectApiKeyService;
   rlsPolicyService: IRlsPolicyService;
+  folderService: IFolderService;
 
   // repository
   projectRepository: IProjectRepository;

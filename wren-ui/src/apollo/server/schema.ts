@@ -990,6 +990,7 @@ export const typeDefs = gql`
   type Thread {
     id: Int!
     summary: String!
+    folderId: Int
   }
 
   # Detailed thread consists of thread and thread responses
@@ -1227,6 +1228,7 @@ export const typeDefs = gql`
     projectId: Int!
     name: String!
     description: String
+    folderId: Int
     sortOrder: Int!
     cacheEnabled: Boolean!
     scheduleFrequency: ScheduleFrequencyEnum
@@ -1395,6 +1397,90 @@ export const typeDefs = gql`
     value: String!
   }
 
+  # ── Folders ─────────────────────────────────────────────────
+
+  enum FolderType {
+    personal
+    public
+    custom
+  }
+
+  enum FolderVisibility {
+    private
+    shared
+  }
+
+  enum FolderAccessRole {
+    editor
+    viewer
+  }
+
+  type FolderAccess {
+    id: Int!
+    folderId: Int!
+    userId: Int!
+    role: FolderAccessRole!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type Folder {
+    id: Int!
+    projectId: Int!
+    name: String!
+    type: FolderType!
+    ownerId: Int!
+    visibility: FolderVisibility!
+    sortOrder: Int!
+    access: [FolderAccess!]!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type SystemFolders {
+    personal: Folder!
+    public: Folder!
+  }
+
+  input FolderWhereInput {
+    id: Int!
+  }
+
+  input FolderAccessWhereInput {
+    folderId: Int!
+  }
+
+  input CreateFolderInput {
+    name: String!
+    type: FolderType
+    visibility: FolderVisibility
+  }
+
+  input UpdateFolderInput {
+    name: String
+    visibility: FolderVisibility
+    sortOrder: Int
+  }
+
+  input FolderAccessEntryInput {
+    userId: Int!
+    role: FolderAccessRole!
+  }
+
+  input SetFolderAccessInput {
+    entries: [FolderAccessEntryInput!]!
+  }
+
+  input MoveDashboardToFolderInput {
+    dashboardId: Int!
+    folderId: Int
+  }
+
+  input MoveThreadToFolderInput {
+    threadId: Int!
+    folderId: Int
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -1475,6 +1561,11 @@ export const typeDefs = gql`
     rlsPolicies: [RlsPolicy!]!
     rlsPolicy(where: RlsPolicyWhereUniqueInput!): RlsPolicy!
     userSessionPropertyValues(userId: Int!): [UserSessionPropertyValue!]!
+
+    # Folders
+    folders: [Folder!]!
+    folder(where: FolderWhereInput!): Folder!
+    folderAccess(where: FolderAccessWhereInput!): [FolderAccess!]!
   }
 
   type Mutation {
@@ -1686,5 +1777,14 @@ export const typeDefs = gql`
     assignSessionPropertyValues(
       data: [AssignSessionPropertyValueInput!]!
     ): Boolean!
+
+    # Folders
+    createFolder(data: CreateFolderInput!): Folder!
+    updateFolder(where: FolderWhereInput!, data: UpdateFolderInput!): Folder!
+    deleteFolder(where: FolderWhereInput!): Boolean!
+    ensureSystemFolders: SystemFolders!
+    setFolderAccess(where: FolderAccessWhereInput!, data: SetFolderAccessInput!): [FolderAccess!]!
+    moveDashboardToFolder(data: MoveDashboardToFolderInput!): Boolean!
+    moveThreadToFolder(data: MoveThreadToFolderInput!): Boolean!
   }
 `;

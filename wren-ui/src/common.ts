@@ -32,6 +32,7 @@ import {
   FolderRepository,
   FolderAccessRepository,
 } from '@server/repositories';
+import { FolderService } from '@server/services/folderService';
 import {
   WrenEngineAdaptor,
   WrenAIAdaptor,
@@ -214,6 +215,12 @@ export const initComponents = () => {
     rlsPolicyRepository,
     userSessionPropertyValueRepository,
   });
+  const folderService = new FolderService({
+    folderRepository,
+    folderAccessRepository,
+    dashboardRepository,
+    threadRepository,
+  });
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =
@@ -295,6 +302,7 @@ export const initComponents = () => {
     orgApiKeyService,
     projectApiKeyService,
     rlsPolicyService,
+    folderService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

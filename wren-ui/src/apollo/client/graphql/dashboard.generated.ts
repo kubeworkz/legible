@@ -56,7 +56,7 @@ export type SetDashboardScheduleMutation = { __typename?: 'Mutation', setDashboa
 export type DashboardsQueryVariables = Types.Exact<{ [key: string]: never; }>;
 
 
-export type DashboardsQuery = { __typename?: 'Query', dashboards: Array<{ __typename?: 'Dashboard', id: number, projectId: number, name: string, description?: string | null, sortOrder: number }> };
+export type DashboardsQuery = { __typename?: 'Query', dashboards: Array<{ __typename?: 'Dashboard', id: number, projectId: number, name: string, description?: string | null, folderId?: number | null, sortOrder: number }> };
 
 export type DashboardQueryVariables = Types.Exact<{
   where?: Types.InputMaybe<Types.DashboardWhereInput>;
@@ -406,6 +406,7 @@ export const DashboardsDocument = gql`
     projectId
     name
     description
+    folderId
     sortOrder
   }
 }

@@ -13,3 +13,4 @@ export * from './organizationService';
 export * from './memberService';
 export * from './orgApiKeyService';
 export * from './projectApiKeyService';
+export * from './folderService';

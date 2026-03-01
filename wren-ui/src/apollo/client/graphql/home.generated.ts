@@ -32,7 +32,7 @@ export type AskingTaskQuery = { __typename?: 'Query', askingTask?: { __typename?
 export type ThreadsQueryVariables = Types.Exact<{ [key: string]: never; }>;
 
 
-export type ThreadsQuery = { __typename?: 'Query', threads: Array<{ __typename?: 'Thread', id: number, summary: string }> };
+export type ThreadsQuery = { __typename?: 'Query', threads: Array<{ __typename?: 'Thread', id: number, summary: string, folderId?: number | null }> };
 
 export type ThreadQueryVariables = Types.Exact<{
   threadId: Types.Scalars['Int'];
@@ -430,6 +430,7 @@ export const ThreadsDocument = gql`
   threads {
     id
     summary
+    folderId
   }
 }
     `;

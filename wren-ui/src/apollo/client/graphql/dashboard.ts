@@ -98,6 +98,7 @@ export const DASHBOARDS = gql`
       projectId
       name
       description
+      folderId
       sortOrder
     }
   }

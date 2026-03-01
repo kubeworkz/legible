@@ -13,10 +13,58 @@ import {
   useUpdateDashboardMutation,
   useDeleteDashboardMutation,
 } from '@/apollo/client/graphql/dashboard.generated';
+import {
+  useFoldersQuery,
+  useCreateFolderMutation,
+  useUpdateFolderMutation,
+  useDeleteFolderMutation,
+  useMoveDashboardToFolderMutation,
+  useMoveThreadToFolderMutation,
+} from '@/apollo/client/graphql/folder.generated';
+
+export interface FolderItem {
+  id: number;
+  name: string;
+  type: string;
+  visibility: string;
+  sortOrder: number;
+}
+
+export interface SidebarItem {
+  id: string;
+  name: string;
+  folderId?: number | null;
+}
+
+export interface FolderGroup {
+  folder: FolderItem;
+  dashboards: SidebarItem[];
+  threads: SidebarItem[];
+}
 
 export default function useHomeSidebar() {
   const router = useRouter();
   const { currentProjectId } = useProject();
+
+  // --- Folders ---
+  const { data: foldersData, refetch: refetchFolders } = useFoldersQuery({
+    fetchPolicy: 'cache-and-network',
+  });
+  const [createFolder] = useCreateFolderMutation({
+    onError: (error) => console.error(error),
+  });
+  const [updateFolder] = useUpdateFolderMutation({
+    onError: (error) => console.error(error),
+  });
+  const [deleteFolderMutation] = useDeleteFolderMutation({
+    onError: (error) => console.error(error),
+  });
+  const [moveDashboardToFolder] = useMoveDashboardToFolderMutation({
+    onError: (error) => console.error(error),
+  });
+  const [moveThreadToFolder] = useMoveThreadToFolderMutation({
+    onError: (error) => console.error(error),
+  });
 
   // --- Threads ---
   const { data, refetch } = useThreadsQuery({
@@ -29,11 +77,12 @@ export default function useHomeSidebar() {
     onError: (error) => console.error(error),
   });
 
-  const threads = useMemo(
+  const threads: SidebarItem[] = useMemo(
     () =>
       (data?.threads || []).map((thread) => ({
         id: thread.id.toString(),
         name: thread.summary,
+        folderId: thread.folderId,
       })),
     [data],
   );
@@ -69,11 +118,12 @@ export default function useHomeSidebar() {
     onError: (error) => console.error(error),
   });
 
-  const dashboards = useMemo(
+  const dashboards: SidebarItem[] = useMemo(
     () =>
       (dashboardsData?.dashboards || []).map((d) => ({
         id: d.id.toString(),
         name: d.name,
+        folderId: d.folderId,
       })),
     [dashboardsData],
   );
@@ -100,7 +150,6 @@ export default function useHomeSidebar() {
       variables: { where: { id: Number(id) } },
     });
     await refetchDashboards();
-    // Navigate to the first remaining dashboard or home
     const remaining = dashboards.filter((d) => d.id !== id);
     if (remaining.length > 0) {
       router.push(
@@ -130,8 +179,111 @@ export default function useHomeSidebar() {
     }
   };
 
+  // --- Folder operations ---
+  const folders: FolderItem[] = useMemo(
+    () =>
+      (foldersData?.folders || []).map((f) => ({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+        visibility: f.visibility,
+        sortOrder: f.sortOrder,
+      })),
+    [foldersData],
+  );
+
+  // Group items by folder
+  const folderGroups: FolderGroup[] = useMemo(() => {
+    const groups: FolderGroup[] = [];
+
+    // System folders first (public, personal), then custom by sortOrder
+    const sorted = [...folders].sort((a, b) => {
+      const typeOrder = { public: 0, personal: 1, custom: 2 };
+      const aOrder = typeOrder[a.type] ?? 2;
+      const bOrder = typeOrder[b.type] ?? 2;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return a.sortOrder - b.sortOrder;
+    });
+
+    for (const folder of sorted) {
+      groups.push({
+        folder,
+        dashboards: dashboards.filter((d) => d.folderId === folder.id),
+        threads: threads.filter((t) => t.folderId === folder.id),
+      });
+    }
+
+    // Items without a folder go into the public folder or an ungrouped section
+    const unassignedDashboards = dashboards.filter((d) => !d.folderId);
+    const unassignedThreads = threads.filter((t) => !t.folderId);
+    if (unassignedDashboards.length > 0 || unassignedThreads.length > 0) {
+      const publicGroup = groups.find((g) => g.folder.type === 'public');
+      if (publicGroup) {
+        publicGroup.dashboards.push(...unassignedDashboards);
+        publicGroup.threads.push(...unassignedThreads);
+      } else {
+        groups.push({
+          folder: {
+            id: 0,
+            name: 'All Items',
+            type: 'public',
+            visibility: 'shared',
+            sortOrder: 0,
+          },
+          dashboards: unassignedDashboards,
+          threads: unassignedThreads,
+        });
+      }
+    }
+
+    return groups;
+  }, [folders, dashboards, threads]);
+
+  const onFolderCreate = async (name: string) => {
+    await createFolder({
+      variables: { data: { name } },
+    });
+    refetchFolders();
+  };
+
+  const onFolderRename = async (id: number, name: string) => {
+    await updateFolder({
+      variables: { where: { id }, data: { name } },
+    });
+    refetchFolders();
+  };
+
+  const onFolderDelete = async (id: number) => {
+    await deleteFolderMutation({
+      variables: { where: { id } },
+    });
+    refetchFolders();
+    refetchDashboards();
+    refetch();
+  };
+
+  const onMoveDashboardToFolder = async (
+    dashboardId: number,
+    folderId: number | null,
+  ) => {
+    await moveDashboardToFolder({
+      variables: { data: { dashboardId, folderId } },
+    });
+    refetchDashboards();
+  };
+
+  const onMoveThreadToFolder = async (
+    threadId: number,
+    folderId: number | null,
+  ) => {
+    await moveThreadToFolder({
+      variables: { data: { threadId, folderId } },
+    });
+    refetch();
+  };
+
   return {
-    data: { threads, dashboards },
+    data: { threads, dashboards, folders, folderGroups },
     onSelect,
     onRename,
     onDelete,
@@ -139,7 +291,13 @@ export default function useHomeSidebar() {
     onDashboardRename,
     onDashboardDelete,
     onDashboardCreate,
+    onFolderCreate,
+    onFolderRename,
+    onFolderDelete,
+    onMoveDashboardToFolder,
+    onMoveThreadToFolder,
     refetch,
     refetchDashboards,
+    refetchFolders,
   };
 }

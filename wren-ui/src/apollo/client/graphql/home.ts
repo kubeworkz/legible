@@ -177,6 +177,7 @@ export const THREADS = gql`
     threads {
       id
       summary
+      folderId
     }
   }
 `;

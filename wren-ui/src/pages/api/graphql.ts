@@ -81,6 +81,7 @@ const bootstrapServer = async () => {
     orgApiKeyService,
     projectApiKeyService,
     rlsPolicyService,
+    folderService,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
     threadRecommendQuestionBackgroundTracker,
@@ -229,6 +230,7 @@ const bootstrapServer = async () => {
         orgApiKeyService,
         projectApiKeyService,
         rlsPolicyService,
+        folderService,
         // repository
         projectRepository,
         modelRepository,

@@ -13,6 +13,7 @@ import { OrganizationResolver } from './resolvers/organizationResolver';
 import { OrgApiKeyResolver } from './resolvers/orgApiKeyResolver';
 import { ProjectApiKeyResolver } from './resolvers/projectApiKeyResolver';
 import { RlsPolicyResolver } from './resolvers/rlsPolicyResolver';
+import { FolderResolver } from './resolvers/folderResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -30,6 +31,7 @@ const organizationResolver = new OrganizationResolver();
 const orgApiKeyResolver = new OrgApiKeyResolver();
 const projectApiKeyResolver = new ProjectApiKeyResolver();
 const rlsPolicyResolver = new RlsPolicyResolver();
+const folderResolver = new FolderResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -108,6 +110,11 @@ const resolvers = {
     rlsPolicies: rlsPolicyResolver.listRlsPolicies,
     rlsPolicy: rlsPolicyResolver.getRlsPolicy,
     userSessionPropertyValues: rlsPolicyResolver.listUserSessionPropertyValues,
+
+    // Folders
+    folders: folderResolver.listFolders,
+    folder: folderResolver.getFolder,
+    folderAccess: folderResolver.getFolderAccess,
   },
   Mutation: {
     // Auth
@@ -262,6 +269,15 @@ const resolvers = {
 
     // Data Security: User Session Property Assignments
     assignSessionPropertyValues: rlsPolicyResolver.assignSessionPropertyValues,
+
+    // Folders
+    createFolder: folderResolver.createFolder,
+    updateFolder: folderResolver.updateFolder,
+    deleteFolder: folderResolver.deleteFolder,
+    ensureSystemFolders: folderResolver.ensureSystemFolders,
+    setFolderAccess: folderResolver.setFolderAccess,
+    moveDashboardToFolder: folderResolver.moveDashboardToFolder,
+    moveThreadToFolder: folderResolver.moveThreadToFolder,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),
@@ -285,6 +301,9 @@ const resolvers = {
   // Data Security nested resolvers
   RlsPolicy: rlsPolicyResolver.getRlsPolicyNestedResolver(),
   SessionProperty: rlsPolicyResolver.getSessionPropertyNestedResolver(),
+
+  // Folder nested resolvers
+  Folder: folderResolver.getFolderNestedResolver(),
 };
 
 export default resolvers;

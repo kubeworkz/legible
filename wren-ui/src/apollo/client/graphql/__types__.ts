@@ -1835,3 +1835,126 @@ export type MutationUpdateRlsPolicyArgs = {
 export type MutationDeleteRlsPolicyArgs = {
   where: RlsPolicyWhereUniqueInput;
 };
+
+// ── Folders ─────────────────────────────────────────────────
+
+export enum FolderType {
+  personal = 'personal',
+  public = 'public',
+  custom = 'custom',
+}
+
+export enum FolderVisibility {
+  private = 'private',
+  shared = 'shared',
+}
+
+export enum FolderAccessRole {
+  editor = 'editor',
+  viewer = 'viewer',
+}
+
+export type FolderAccess = {
+  __typename?: 'FolderAccess';
+  id: Scalars['Int'];
+  folderId: Scalars['Int'];
+  userId: Scalars['Int'];
+  role: FolderAccessRole;
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type Folder = {
+  __typename?: 'Folder';
+  id: Scalars['Int'];
+  projectId: Scalars['Int'];
+  name: Scalars['String'];
+  type: FolderType;
+  ownerId: Scalars['Int'];
+  visibility: FolderVisibility;
+  sortOrder: Scalars['Int'];
+  access: Array<FolderAccess>;
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type SystemFolders = {
+  __typename?: 'SystemFolders';
+  personal: Folder;
+  public: Folder;
+};
+
+export type FolderWhereInput = {
+  id: Scalars['Int'];
+};
+
+export type FolderAccessWhereInput = {
+  folderId: Scalars['Int'];
+};
+
+export type CreateFolderInput = {
+  name: Scalars['String'];
+  type?: FolderType | null;
+  visibility?: FolderVisibility | null;
+};
+
+export type UpdateFolderInput = {
+  name?: Scalars['String'] | null;
+  visibility?: FolderVisibility | null;
+  sortOrder?: Scalars['Int'] | null;
+};
+
+export type FolderAccessEntryInput = {
+  userId: Scalars['Int'];
+  role: FolderAccessRole;
+};
+
+export type SetFolderAccessInput = {
+  entries: Array<FolderAccessEntryInput>;
+};
+
+export type MoveDashboardToFolderInput = {
+  dashboardId: Scalars['Int'];
+  folderId?: Scalars['Int'] | null;
+};
+
+export type MoveThreadToFolderInput = {
+  threadId: Scalars['Int'];
+  folderId?: Scalars['Int'] | null;
+};
+
+export type QueryFoldersArgs = Record<string, never>;
+
+export type QueryFolderArgs = {
+  where: FolderWhereInput;
+};
+
+export type QueryFolderAccessArgs = {
+  where: FolderAccessWhereInput;
+};
+
+export type MutationCreateFolderArgs = {
+  data: CreateFolderInput;
+};
+
+export type MutationUpdateFolderArgs = {
+  where: FolderWhereInput;
+  data: UpdateFolderInput;
+};
+
+export type MutationDeleteFolderArgs = {
+  where: FolderWhereInput;
+};
+
+export type MutationSetFolderAccessArgs = {
+  where: FolderAccessWhereInput;
+  data: SetFolderAccessInput;
+};
+
+export type MutationMoveDashboardToFolderArgs = {
+  data: MoveDashboardToFolderInput;
+};
+
+export type MutationMoveThreadToFolderArgs = {
+  data: MoveThreadToFolderInput;
+};
