@@ -29,6 +29,8 @@ import {
   SessionPropertyRepository,
   RlsPolicyRepository,
   UserSessionPropertyValueRepository,
+  FolderRepository,
+  FolderAccessRepository,
 } from '@server/repositories';
 import {
   WrenEngineAdaptor,
@@ -102,6 +104,8 @@ export const initComponents = () => {
   const rlsPolicyRepository = new RlsPolicyRepository(knex);
   const userSessionPropertyValueRepository =
     new UserSessionPropertyValueRepository(knex);
+  const folderRepository = new FolderRepository(knex);
+  const folderAccessRepository = new FolderAccessRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -266,6 +270,8 @@ export const initComponents = () => {
     sessionPropertyRepository,
     rlsPolicyRepository,
     userSessionPropertyValueRepository,
+    folderRepository,
+    folderAccessRepository,
 
     // adaptors
     wrenEngineAdaptor,

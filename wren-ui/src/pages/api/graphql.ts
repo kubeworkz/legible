@@ -57,6 +57,8 @@ const bootstrapServer = async () => {
     sessionPropertyRepository,
     rlsPolicyRepository,
     userSessionPropertyValueRepository,
+    folderRepository,
+    folderAccessRepository,
     // adaptors
     wrenEngineAdaptor,
     ibisAdaptor,
@@ -252,6 +254,8 @@ const bootstrapServer = async () => {
         sessionPropertyRepository,
         rlsPolicyRepository,
         userSessionPropertyValueRepository,
+        folderRepository,
+        folderAccessRepository,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

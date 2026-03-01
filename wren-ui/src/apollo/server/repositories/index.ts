@@ -29,3 +29,5 @@ export * from './projectApiKeyRepository';
 export * from './sessionPropertyRepository';
 export * from './rlsPolicyRepository';
 export * from './userSessionPropertyValueRepository';
+export * from './folderRepository';
+export * from './folderAccessRepository';

@@ -30,6 +30,8 @@ import { IProjectApiKeyRepository } from '@server/repositories/projectApiKeyRepo
 import { ISessionPropertyRepository } from '@server/repositories/sessionPropertyRepository';
 import { IRlsPolicyRepository } from '@server/repositories/rlsPolicyRepository';
 import { IUserSessionPropertyValueRepository } from '@server/repositories/userSessionPropertyValueRepository';
+import { IFolderRepository } from '@server/repositories/folderRepository';
+import { IFolderAccessRepository } from '@server/repositories/folderAccessRepository';
 import {
   IQueryService,
   IAskingService,
@@ -117,6 +119,8 @@ export interface IContext {
   sessionPropertyRepository: ISessionPropertyRepository;
   rlsPolicyRepository: IRlsPolicyRepository;
   userSessionPropertyValueRepository: IUserSessionPropertyValueRepository;
+  folderRepository: IFolderRepository;
+  folderAccessRepository: IFolderAccessRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;

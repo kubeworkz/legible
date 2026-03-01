@@ -8,6 +8,7 @@ export interface Dashboard {
   name: string;
   description: string | null;
   sortOrder: number;
+  folderId: number | null;
   cacheEnabled: boolean;
   scheduleFrequency: ScheduleFrequencyEnum | null;
   scheduleTimezone: string | null; // e.g. 'America/New_York', 'Asia/Taipei'
