@@ -119,3 +119,28 @@ export const DELETE_SESSION_PROPERTY = gql`
     deleteSessionProperty(where: $where)
   }
 `;
+
+// ── User Session Property Value Queries ──────────────
+
+export const USER_SESSION_PROPERTY_VALUES = gql`
+  query UserSessionPropertyValues($userId: Int!) {
+    userSessionPropertyValues(userId: $userId) {
+      id
+      userId
+      sessionPropertyId
+      value
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// ── User Session Property Value Mutations ────────────
+
+export const ASSIGN_SESSION_PROPERTY_VALUES = gql`
+  mutation AssignSessionPropertyValues(
+    $data: [AssignSessionPropertyValueInput!]!
+  ) {
+    assignSessionPropertyValues(data: $data)
+  }
+`;

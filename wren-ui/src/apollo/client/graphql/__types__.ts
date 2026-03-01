@@ -1173,6 +1173,7 @@ export type PreviewSqlDataInput = {
   limit?: InputMaybe<Scalars['Int']>;
   projectId?: InputMaybe<Scalars['String']>;
   sql: Scalars['String'];
+  sessionProperties?: InputMaybe<Scalars['JSON']>;
 };
 
 export type PreviewViewDataInput = {

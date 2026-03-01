@@ -952,7 +952,7 @@ export class ModelResolver {
     args: { data: PreviewSQLData },
     ctx: IContext,
   ) {
-    const { sql, projectId, limit, dryRun } = args.data;
+    const { sql, projectId, limit, dryRun, sessionProperties } = args.data;
     const project = projectId
       ? await ctx.projectService.getProjectById(parseInt(projectId))
       : await ctx.projectService.getCurrentProject(ctx.projectId);
@@ -963,6 +963,7 @@ export class ModelResolver {
       modelingOnly: false,
       manifest,
       dryRun,
+      sessionProperties,
     });
   }
 

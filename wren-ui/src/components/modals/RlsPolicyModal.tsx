@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Alert,
+  Badge,
   Button,
   Divider,
   Drawer,
   Form,
   Input,
+  Popover,
   Select,
   Space,
   Table,
@@ -18,13 +20,189 @@ import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import InfoCircleOutlined from '@ant-design/icons/InfoCircleOutlined';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import MinusCircleOutlined from '@ant-design/icons/MinusCircleOutlined';
+import CaretRightOutlined from '@ant-design/icons/CaretRightOutlined';
+import styled from 'styled-components';
 import { FORM_MODE } from '@/utils/enum';
 import { DrawerAction } from '@/hooks/useDrawerAction';
 import { RlsPolicy, SessionProperty } from '@/apollo/client/graphql/__types__';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
 import { useSessionPropertiesQuery } from '@/apollo/client/graphql/dataSecurity.generated';
+import { usePreviewSqlMutation } from '@/apollo/client/graphql/sql.generated';
+import PreviewData from '@/components/dataPreview/PreviewData';
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
+
+const SessionPropertyPopover = styled.div`
+  .sp-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    &:last-child { margin-bottom: 0; }
+  }
+  .sp-label {
+    font-family: monospace;
+    min-width: 120px;
+    font-weight: 500;
+  }
+`;
+
+interface PolicyPreviewProps {
+  models: Array<{ id: number; displayName: string; referenceName: string }>;
+  selectedModelIds: number[];
+  selectedSessionProperties: SessionProperty[];
+}
+
+function PolicyPreview({
+  models,
+  selectedModelIds,
+  selectedSessionProperties,
+}: PolicyPreviewProps) {
+  const [previewModelId, setPreviewModelId] = useState<number | undefined>(
+    undefined,
+  );
+  const [spValues, setSpValues] = useState<Record<number, string>>({});
+  const [popoverVisible, setPopoverVisible] = useState(false);
+
+  const [previewSql, { data: previewResult, loading, error }] =
+    usePreviewSqlMutation();
+
+  // Models available for preview = only the ones selected in "Applied to"
+  const previewModels = useMemo(
+    () => models.filter((m) => selectedModelIds.includes(m.id)),
+    [models, selectedModelIds],
+  );
+
+  // Reset preview model if it's removed from selection
+  useEffect(() => {
+    if (previewModelId && !selectedModelIds.includes(previewModelId)) {
+      setPreviewModelId(undefined);
+    }
+  }, [selectedModelIds, previewModelId]);
+
+  const spCount = Object.values(spValues).filter((v) => v.trim()).length;
+
+  const handlePreview = useCallback(() => {
+    if (!previewModelId) return;
+    const model = models.find((m) => m.id === previewModelId);
+    if (!model) return;
+
+    const sql = `SELECT * FROM "${model.referenceName}"`;
+    const sessionProperties: Record<string, string> = {};
+    selectedSessionProperties.forEach((sp) => {
+      const val = spValues[sp.id];
+      if (val && val.trim()) {
+        sessionProperties[sp.name] = val.trim();
+      }
+    });
+
+    previewSql({
+      variables: {
+        data: {
+          sql,
+          limit: 50,
+          sessionProperties:
+            Object.keys(sessionProperties).length > 0
+              ? sessionProperties
+              : undefined,
+        },
+      },
+    });
+  }, [previewModelId, models, selectedSessionProperties, spValues, previewSql]);
+
+  const previewData = useMemo(() => {
+    if (!previewResult?.previewSql) return undefined;
+    const result = previewResult.previewSql;
+    return {
+      columns: result.columns || [],
+      data: result.data || [],
+    };
+  }, [previewResult]);
+
+  const popoverContent = (
+    <SessionPropertyPopover>
+      {selectedSessionProperties.length === 0 ? (
+        <Text className="gray-7">No session properties selected.</Text>
+      ) : (
+        selectedSessionProperties.map((sp) => (
+          <div key={sp.id} className="sp-row">
+            <Text className="sp-label">{sp.name}</Text>
+            <Input
+              size="small"
+              placeholder={`Value (${sp.type})`}
+              value={spValues[sp.id] || ''}
+              onChange={(e) =>
+                setSpValues((prev) => ({ ...prev, [sp.id]: e.target.value }))
+              }
+              style={{ width: 180 }}
+            />
+          </div>
+        ))
+      )}
+    </SessionPropertyPopover>
+  );
+
+  return (
+    <div>
+      <Title level={5} className="gray-9 mb-1">
+        Policy preview
+      </Title>
+      <Text className="gray-7 d-block mb-3">
+        Preview how this policy filters data by{' '}
+        <Text strong>selecting a model</Text> and{' '}
+        <Text strong>setting session property values</Text>.
+      </Text>
+
+      <Space className="mb-3" size={8}>
+        <Select
+          placeholder="Select a model"
+          value={previewModelId}
+          onChange={setPreviewModelId}
+          style={{ width: 200 }}
+          allowClear
+        >
+          {previewModels.map((m) => (
+            <Select.Option key={m.id} value={m.id}>
+              {m.displayName}
+            </Select.Option>
+          ))}
+        </Select>
+
+        <Popover
+          content={popoverContent}
+          title="Set session properties"
+          trigger="click"
+          visible={popoverVisible}
+          onVisibleChange={setPopoverVisible}
+          placement="bottomLeft"
+        >
+          <Badge count={spCount} size="small" offset={[-4, 0]}>
+            <Button>Set session properties</Button>
+          </Badge>
+        </Popover>
+
+        <Button
+          type="primary"
+          ghost
+          icon={<CaretRightOutlined />}
+          onClick={handlePreview}
+          loading={loading}
+          disabled={!previewModelId}
+        >
+          Preview
+        </Button>
+      </Space>
+
+      <PreviewData
+        previewData={previewData}
+        loading={loading}
+        error={error}
+        locale={{ emptyText: 'Run a preview to see filtered data.' }}
+        copyable={false}
+      />
+    </div>
+  );
+}
 
 type Props = DrawerAction<RlsPolicy> & {
   loading?: boolean;
@@ -287,6 +465,22 @@ export default function RlsPolicyDrawer(props: Props) {
             maxLength={2000}
             rows={4}
           />
+        </Form.Item>
+
+        <Divider />
+
+        {/* Policy preview */}
+        <Form.Item noStyle shouldUpdate>
+          {() => {
+            const modelIds = form.getFieldValue('modelIds') || [];
+            return (
+              <PolicyPreview
+                models={models as any}
+                selectedModelIds={modelIds}
+                selectedSessionProperties={selectedSessionProperties}
+              />
+            );
+          }}
         </Form.Item>
       </Form>
     </Drawer>

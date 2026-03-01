@@ -94,4 +94,5 @@ export interface PreviewSQLData {
   projectId?: string;
   limit?: number;
   dryRun?: boolean;
+  sessionProperties?: Record<string, string>;
 }

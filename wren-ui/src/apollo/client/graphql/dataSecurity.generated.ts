@@ -547,3 +547,72 @@ export type DeleteSessionPropertyMutationOptions = Apollo.BaseMutationOptions<
   DeleteSessionPropertyMutation,
   DeleteSessionPropertyMutationVariables
 >;
+
+// ── Manual hooks for UserSessionPropertyValues ───────────────
+
+import {
+  USER_SESSION_PROPERTY_VALUES,
+  ASSIGN_SESSION_PROPERTY_VALUES,
+} from './dataSecurity';
+import {
+  UserSessionPropertyValue,
+  AssignSessionPropertyValueInput,
+} from './__types__';
+
+export type UserSessionPropertyValuesQueryVariables = { userId: number };
+export type UserSessionPropertyValuesQuery = {
+  __typename?: 'Query';
+  userSessionPropertyValues: UserSessionPropertyValue[];
+};
+
+export const UserSessionPropertyValuesDocument = USER_SESSION_PROPERTY_VALUES;
+
+export function useUserSessionPropertyValuesQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    UserSessionPropertyValuesQuery,
+    UserSessionPropertyValuesQueryVariables
+  > & { variables: UserSessionPropertyValuesQueryVariables },
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<
+    UserSessionPropertyValuesQuery,
+    UserSessionPropertyValuesQueryVariables
+  >(UserSessionPropertyValuesDocument, options);
+}
+
+export function useUserSessionPropertyValuesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    UserSessionPropertyValuesQuery,
+    UserSessionPropertyValuesQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<
+    UserSessionPropertyValuesQuery,
+    UserSessionPropertyValuesQueryVariables
+  >(UserSessionPropertyValuesDocument, options);
+}
+
+export type AssignSessionPropertyValuesMutationVariables = {
+  data: AssignSessionPropertyValueInput[];
+};
+export type AssignSessionPropertyValuesMutation = {
+  __typename?: 'Mutation';
+  assignSessionPropertyValues: boolean;
+};
+
+export const AssignSessionPropertyValuesDocument =
+  ASSIGN_SESSION_PROPERTY_VALUES;
+
+export function useAssignSessionPropertyValuesMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    AssignSessionPropertyValuesMutation,
+    AssignSessionPropertyValuesMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    AssignSessionPropertyValuesMutation,
+    AssignSessionPropertyValuesMutationVariables
+  >(AssignSessionPropertyValuesDocument, options);
+}

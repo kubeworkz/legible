@@ -1054,6 +1054,7 @@ export const typeDefs = gql`
     projectId: String
     limit: Int
     dryRun: Boolean
+    sessionProperties: JSON
   }
 
   # Schema Change
