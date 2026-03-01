@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router';
 import { Select, Button, Tooltip } from 'antd';
 import styled from 'styled-components';
-import PlusOutlined from '@ant-design/icons/PlusOutlined';
-import ProjectOutlined from '@ant-design/icons/ProjectOutlined';
+import FolderOutlined from '@ant-design/icons/FolderOutlined';
+import MenuFoldOutlined from '@ant-design/icons/MenuFoldOutlined';
 import useProject from '@/hooks/useProject';
 import { useApolloClient } from '@apollo/client';
 import { Path, buildPath } from '@/utils/enum';
@@ -10,54 +10,56 @@ import { Path, buildPath } from '@/utils/enum';
 const Wrapper = styled.div`
   padding: 12px 16px;
   border-bottom: 1px solid var(--gray-4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 const StyledSelect = styled(Select)`
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 
   .ant-select-selector {
-    background-color: var(--gray-3) !important;
-    border-color: var(--gray-5) !important;
-    color: var(--gray-8) !important;
-    border-radius: 4px !important;
-    height: 36px !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-left: 0 !important;
+    height: 32px !important;
+    cursor: pointer !important;
   }
 
   .ant-select-selection-item {
-    line-height: 34px !important;
+    line-height: 30px !important;
     font-weight: 500;
+    font-size: 14px;
+    color: var(--gray-9) !important;
   }
 
   .ant-select-arrow {
     color: var(--gray-7);
+    font-size: 10px;
   }
 
-  &:hover .ant-select-selector {
-    border-color: var(--gray-6) !important;
-  }
-
-  &.ant-select-focused .ant-select-selector {
-    border-color: var(--geekblue-6) !important;
-    box-shadow: 0 0 0 2px rgba(47, 84, 235, 0.1) !important;
+  &:hover .ant-select-selection-item {
+    color: var(--geekblue-6) !important;
   }
 `;
 
-const Header = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
+const CollapseButton = styled(Button)`
+  flex-shrink: 0;
+  color: var(--gray-7) !important;
+  &:hover {
+    color: var(--gray-9) !important;
+    background-color: var(--gray-4) !important;
+  }
 `;
 
-const Label = styled.span`
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--gray-7);
-`;
+interface Props {
+  onCollapse?: () => void;
+}
 
-export default function ProjectSwitcher() {
+export default function ProjectSwitcher(props: Props) {
+  const { onCollapse } = props;
   const { projects, currentProjectId, setCurrentProjectId, loading } =
     useProject();
   const apolloClient = useApolloClient();
@@ -88,33 +90,25 @@ export default function ProjectSwitcher() {
 
   return (
     <Wrapper>
-      <Header>
-        <Label>
-          <ProjectOutlined className="mr-1" />
-          Project
-        </Label>
-        <Tooltip title="New project" placement="right">
-          <Button
-            type="text"
-            size="small"
-            icon={<PlusOutlined />}
-            style={{ color: 'var(--gray-7)' }}
-            onClick={() =>
-              router.push(
-                buildPath(Path.OnboardingConnection, currentProjectId || 0),
-              )
-            }
-          />
-        </Tooltip>
-      </Header>
+      <FolderOutlined style={{ fontSize: 16, color: 'var(--gray-7)' }} />
       <StyledSelect
         value={currentProjectId}
         onChange={handleProjectChange}
         options={options}
-        placeholder="Select project"
+        placeholder="Personal Folder"
         loading={loading}
-        suffixIcon={null}
+        dropdownMatchSelectWidth={200}
       />
+      {onCollapse && (
+        <Tooltip title="Collapse sidebar" placement="right">
+          <CollapseButton
+            type="text"
+            size="small"
+            icon={<MenuFoldOutlined />}
+            onClick={onCollapse}
+          />
+        </Tooltip>
+      )}
     </Wrapper>
   );
 }

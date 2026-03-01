@@ -43,7 +43,9 @@ const StyledButton = styled(Button)`
   }
 `;
 
-type Props = ModelingSidebarProps | HomeSidebarProps;
+type Props = (ModelingSidebarProps | HomeSidebarProps) & {
+  onCollapse?: () => void;
+};
 
 const DynamicSidebar = (
   props: Props & {
@@ -82,6 +84,7 @@ const DynamicSidebar = (
 export default function Sidebar(props: Props) {
   const router = useRouter();
   const { currentProjectId } = useProject();
+  const { onCollapse, ...sidebarProps } = props;
 
   const onSettingsClick = () => {
     router.push(buildPath(Path.SettingsGeneral, currentProjectId));
@@ -89,8 +92,8 @@ export default function Sidebar(props: Props) {
 
   return (
     <Layout className="d-flex flex-column">
-      <ProjectSwitcher />
-      <DynamicSidebar {...props} pathname={router.pathname} />
+      <ProjectSwitcher onCollapse={onCollapse} />
+      <DynamicSidebar {...sidebarProps} pathname={router.pathname} />
       <LearningSection />
       <div className="border-t border-gray-4 pt-2">
         <StyledButton type="text" block onClick={onSettingsClick}>
