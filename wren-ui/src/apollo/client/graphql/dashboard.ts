@@ -135,6 +135,7 @@ export const CREATE_DASHBOARD = gql`
       projectId
       name
       description
+      folderId
       sortOrder
     }
   }

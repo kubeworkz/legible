@@ -38,6 +38,7 @@ export type UpdateDashboardItemLayouts = (DashboardItemLayout & {
 
 export interface CreateDashboardInput {
   name: string;
+  folderId?: number | null;
 }
 
 export interface UpdateDashboardInput {
@@ -189,11 +190,15 @@ export class DashboardService implements IDashboardService {
     const maxSortOrder = existing.length > 0
       ? Math.max(...existing.map((d) => d.sortOrder))
       : -1;
-    return await this.dashboardRepository.createOne({
+    const createData: Partial<Dashboard> = {
       name: input.name,
       projectId,
       sortOrder: maxSortOrder + 1,
-    });
+    };
+    if (input.folderId !== undefined) {
+      createData.folderId = input.folderId;
+    }
+    return await this.dashboardRepository.createOne(createData);
   }
 
   public async updateDashboard(

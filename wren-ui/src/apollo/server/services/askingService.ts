@@ -143,6 +143,7 @@ export interface IAskingService {
   createThread(
     input: AskingDetailTaskInput,
     projectId?: number,
+    folderId?: number | null,
   ): Promise<Thread>;
   updateThread(
     threadId: number,
@@ -695,13 +696,18 @@ export class AskingService implements IAskingService {
   public async createThread(
     input: AskingDetailTaskInput,
     projectId?: number,
+    folderId?: number | null,
   ): Promise<Thread> {
     // 1. create a thread and the first thread response
     const { id } = await this.projectService.getCurrentProject(projectId);
-    const thread = await this.threadRepository.createOne({
+    const createData: Partial<Thread> = {
       projectId: id,
       summary: input.question,
-    });
+    };
+    if (folderId !== undefined) {
+      createData.folderId = folderId;
+    }
+    const thread = await this.threadRepository.createOne(createData);
 
     const threadResponse = await this.threadResponseRepository.createOne({
       threadId: thread.id,

@@ -77,12 +77,13 @@ export class DashboardResolver {
 
   public async createDashboard(
     _root: any,
-    args: { data: { name: string } },
+    args: { data: { name: string; folderId?: number } },
     ctx: IContext,
   ): Promise<Dashboard> {
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return await ctx.dashboardService.createDashboard(project.id, {
       name: args.data.name,
+      folderId: args.data.folderId,
     });
   }
 

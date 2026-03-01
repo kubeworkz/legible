@@ -863,6 +863,7 @@ export const typeDefs = gql`
     question: String
     sql: String
     taskId: String
+    folderId: Int
   }
 
   input CreateThreadResponseInput {
@@ -1254,6 +1255,7 @@ export const typeDefs = gql`
 
   input CreateDashboardInput {
     name: String!
+    folderId: Int
   }
 
   input UpdateDashboardInput {
@@ -1514,7 +1516,7 @@ export const typeDefs = gql`
     # Ask
     askingTask(taskId: String!): AskingTask
     suggestedQuestions: SuggestedQuestionResponse!
-    threads: [Thread!]!
+    threads(folderId: Int): [Thread!]!
     thread(threadId: Int!): DetailedThread!
     threadResponse(responseId: Int!): ThreadResponse!
     nativeSql(responseId: Int!): String!
@@ -1541,7 +1543,7 @@ export const typeDefs = gql`
     instantRecommendedQuestions(taskId: String!): RecommendedQuestionsTask!
 
     # Dashboard
-    dashboards: [Dashboard!]!
+    dashboards(folderId: Int): [Dashboard!]!
     dashboard(where: DashboardWhereInput): DetailedDashboard!
     dashboardItems: [DashboardItem!]!
 

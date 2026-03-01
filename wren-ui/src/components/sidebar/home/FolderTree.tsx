@@ -13,8 +13,8 @@ import SidebarTree, {
 import {
   GroupActionButton,
 } from '@/components/sidebar/utils';
-import TreeTitle from './TreeTitle';
-import type { FolderGroup, SidebarItem } from '@/hooks/useHomeSidebar';
+import TreeTitle, { MoveToFolderOption } from './TreeTitle';
+import type { FolderGroup, SidebarItem, FolderItem } from '@/hooks/useHomeSidebar';
 
 const StyledSidebarTree = styled(SidebarTree)`
   ${sidebarCommonStyle}
@@ -93,6 +93,7 @@ interface Props {
   onDelete: (id: string) => Promise<void>;
   onDashboardCreate: () => Promise<void>;
   onFolderCreate?: (name: string) => Promise<void>;
+  onMoveToFolder?: (itemId: string, folderId: number) => void;
 }
 
 function getFolderIcon(type: string) {
@@ -112,6 +113,8 @@ function buildItemNodes(
   onRename: (id: string, newName: string) => Promise<void>,
   onDelete: (id: string) => Promise<void>,
   deleteModalType?: 'dashboard' | undefined,
+  moveToFolderOptions?: MoveToFolderOption[],
+  onMoveToFolder?: (itemId: string, folderId: number) => void,
 ): DataNode[] {
   return items.map((item) => {
     const nodeKey = `${prefix}-${item.id}`;
@@ -127,6 +130,8 @@ function buildItemNodes(
           onRename={onRename}
           onDelete={onDelete}
           deleteModalType={deleteModalType}
+          moveToFolderOptions={moveToFolderOptions}
+          onMoveToFolder={onMoveToFolder}
         />
       ),
     };
@@ -142,6 +147,7 @@ export default function FolderTree(props: Props) {
     onDelete,
     onDashboardCreate,
     onFolderCreate,
+    onMoveToFolder,
   } = props;
 
   const [tree, setTree] = useState<DataNode[]>([]);
@@ -149,10 +155,19 @@ export default function FolderTree(props: Props) {
   useEffect(() => {
     const treeData: DataNode[] = [];
 
+    // Build a list of all folders for "Move to" options
+    const allFolders: MoveToFolderOption[] = folderGroups.map((g) => ({
+      id: g.folder.id,
+      name: g.folder.name,
+    }));
+
     for (const group of folderGroups) {
       const { folder, dashboards, threads } = group;
       const folderKey = `folder-${folder.id}`;
       const children: DataNode[] = [];
+
+      // Exclude the current folder from move options
+      const moveOptions = allFolders.filter((f) => f.id !== folder.id);
 
       // Dashboards sub-section
       if (dashboards.length > 0) {
@@ -170,6 +185,8 @@ export default function FolderTree(props: Props) {
             onRename,
             onDelete,
             'dashboard',
+            moveOptions,
+            onMoveToFolder,
           ),
         );
       }
@@ -184,7 +201,15 @@ export default function FolderTree(props: Props) {
           className: 'adm-treeNode adm-treeNode--folder-subtitle adm-treeNode--selectNone',
         });
         children.push(
-          ...buildItemNodes(threads, 'thread', onRename, onDelete),
+          ...buildItemNodes(
+            threads,
+            'thread',
+            onRename,
+            onDelete,
+            undefined,
+            moveOptions,
+            onMoveToFolder,
+          ),
         );
       }
 

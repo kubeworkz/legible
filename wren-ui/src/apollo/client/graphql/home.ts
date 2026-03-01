@@ -229,6 +229,7 @@ export const CREATE_THREAD = gql`
   mutation CreateThread($data: CreateThreadInput!) {
     createThread(data: $data) {
       id
+      folderId
     }
   }
 `;

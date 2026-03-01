@@ -70,7 +70,7 @@ export type CreateDashboardMutationVariables = Types.Exact<{
 }>;
 
 
-export type CreateDashboardMutation = { __typename?: 'Mutation', createDashboard: { __typename?: 'Dashboard', id: number, projectId: number, name: string, description?: string | null, sortOrder: number } };
+export type CreateDashboardMutation = { __typename?: 'Mutation', createDashboard: { __typename?: 'Dashboard', id: number, projectId: number, name: string, description?: string | null, folderId?: number | null, sortOrder: number } };
 
 export type UpdateDashboardMutationVariables = Types.Exact<{
   where: Types.DashboardWhereInput;
@@ -432,6 +432,7 @@ export const CreateDashboardDocument = gql`
     projectId
     name
     description
+    folderId
     sortOrder
   }
 }

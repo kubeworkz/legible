@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Dropdown, Menu } from 'antd';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import MoreOutlined from '@ant-design/icons/MoreOutlined';
+import FolderOutlined from '@ant-design/icons/FolderOutlined';
 import LabelTitle from '@/components/sidebar/LabelTitle';
 import TreeTitleInput from '@/components/sidebar/home/TreeTitleInput';
 import {
@@ -13,6 +14,7 @@ import {
 const MENU_ITEM_KEYS = {
   RENAME: 'rename',
   DELETE: 'delete',
+  MOVE_TO: 'move-to',
 };
 
 const StyledMenu = styled(Menu)`
@@ -26,16 +28,30 @@ const deleteModalMap = {
   dashboard: DeleteDashboardModal,
 };
 
+export interface MoveToFolderOption {
+  id: number;
+  name: string;
+}
+
 interface TreeTitleProps {
   id: string;
   title: string;
   deleteModalType?: 'thread' | 'dashboard';
   onDelete?: (id: string) => void;
   onRename?: (id: string, newName: string) => void;
+  moveToFolderOptions?: MoveToFolderOption[];
+  onMoveToFolder?: (itemId: string, folderId: number) => void;
 }
 
 export default function TreeTitle(props: TreeTitleProps) {
-  const { id, onDelete, onRename, deleteModalType = 'thread' } = props;
+  const {
+    id,
+    onDelete,
+    onRename,
+    deleteModalType = 'thread',
+    moveToFolderOptions,
+    onMoveToFolder,
+  } = props;
   const [title, setTitle] = useState(props.title);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -84,6 +100,27 @@ export default function TreeTitle(props: TreeTitleProps) {
                     setIsEditing(true);
                   },
                 },
+                ...(moveToFolderOptions && moveToFolderOptions.length > 0
+                  ? [
+                      {
+                        label: (
+                          <>
+                            <FolderOutlined className="mr-2" />
+                            Move to
+                          </>
+                        ),
+                        key: MENU_ITEM_KEYS.MOVE_TO,
+                        children: moveToFolderOptions.map((folder) => ({
+                          label: folder.name,
+                          key: `move-to-${folder.id}`,
+                          onClick: ({ domEvent }: any) => {
+                            domEvent.stopPropagation();
+                            onMoveToFolder && onMoveToFolder(id, folder.id);
+                          },
+                        })),
+                      },
+                    ]
+                  : []),
                 {
                   label: (() => {
                     const DeleteModal = deleteModalMap[deleteModalType];

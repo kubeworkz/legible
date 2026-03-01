@@ -255,6 +255,7 @@ export class AskingResolver {
         taskId?: string;
         // if we use recommendation questions, sql will be provided
         sql?: string;
+        folderId?: number;
       };
     },
     ctx: IContext,
@@ -286,6 +287,7 @@ export class AskingResolver {
       const thread = await askingService.createThread(
         threadInput,
         ctx.projectId,
+        data.folderId,
       );
       ctx.telemetry.sendEvent(eventName, {});
       return thread;
@@ -385,7 +387,7 @@ export class AskingResolver {
 
   public async listThreads(
     _root: any,
-    _args: any,
+    args: { folderId?: number },
     ctx: IContext,
   ): Promise<Thread[]> {
     const threads = await ctx.askingService.listThreads(ctx.projectId);

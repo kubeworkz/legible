@@ -22,6 +22,8 @@ export interface Props {
   onDashboardDelete: (id: string) => Promise<void>;
   onDashboardCreate: () => Promise<void>;
   onFolderCreate?: (name: string) => Promise<void>;
+  onMoveDashboardToFolder?: (dashboardId: number, folderId: number | null) => Promise<void>;
+  onMoveThreadToFolder?: (threadId: number, folderId: number | null) => Promise<void>;
 }
 
 export default function Home(props: Props) {
@@ -35,6 +37,8 @@ export default function Home(props: Props) {
     onDashboardDelete,
     onDashboardCreate,
     onFolderCreate,
+    onMoveDashboardToFolder,
+    onMoveThreadToFolder,
   } = props;
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -105,6 +109,16 @@ export default function Home(props: Props) {
     }
   };
 
+  const onMoveItemToFolder = (itemId: string, folderId: number) => {
+    if (itemId.startsWith('dashboard-')) {
+      const dashboardId = Number(itemId.replace('dashboard-', ''));
+      onMoveDashboardToFolder?.(dashboardId, folderId);
+    } else if (itemId.startsWith('thread-')) {
+      const threadId = Number(itemId.replace('thread-', ''));
+      onMoveThreadToFolder?.(threadId, folderId);
+    }
+  };
+
   return (
     <FolderTree
       folderGroups={folderGroups}
@@ -114,6 +128,7 @@ export default function Home(props: Props) {
       onDelete={onUnifiedDelete}
       onDashboardCreate={onDashboardCreate}
       onFolderCreate={onFolderCreate}
+      onMoveToFolder={onMoveItemToFolder}
     />
   );
 }

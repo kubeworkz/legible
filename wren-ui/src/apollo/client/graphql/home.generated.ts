@@ -74,7 +74,7 @@ export type CreateThreadMutationVariables = Types.Exact<{
 }>;
 
 
-export type CreateThreadMutation = { __typename?: 'Mutation', createThread: { __typename?: 'Thread', id: number } };
+export type CreateThreadMutation = { __typename?: 'Mutation', createThread: { __typename?: 'Thread', id: number, folderId?: number | null } };
 
 export type CreateThreadResponseMutationVariables = Types.Exact<{
   threadId: Types.Scalars['Int'];
@@ -635,6 +635,7 @@ export const CreateThreadDocument = gql`
     mutation CreateThread($data: CreateThreadInput!) {
   createThread(data: $data) {
     id
+    folderId
   }
 }
     `;

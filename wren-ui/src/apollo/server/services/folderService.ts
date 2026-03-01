@@ -247,7 +247,7 @@ export class FolderService implements IFolderService {
 
     await this.dashboardRepository.updateOne(dashboardId, {
       folderId,
-    } as any);
+    });
 
     logger.info(
       `Moved dashboard ${dashboardId} to folder ${folderId ?? 'none'}`,
@@ -265,7 +265,7 @@ export class FolderService implements IFolderService {
 
     await this.threadRepository.updateOne(threadId, {
       folderId,
-    } as any);
+    });
 
     logger.info(`Moved thread ${threadId} to folder ${folderId ?? 'none'}`);
     return true;

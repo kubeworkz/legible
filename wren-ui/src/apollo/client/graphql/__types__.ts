@@ -238,6 +238,7 @@ export type CreateThreadInput = {
   question?: InputMaybe<Scalars['String']>;
   sql?: InputMaybe<Scalars['String']>;
   taskId?: InputMaybe<Scalars['String']>;
+  folderId?: InputMaybe<Scalars['Int']>;
 };
 
 export type CreateThreadResponseInput = {
@@ -277,6 +278,7 @@ export type DashboardWhereInput = {
 
 export type CreateDashboardInput = {
   name: Scalars['String'];
+  folderId?: InputMaybe<Scalars['Int']>;
 };
 
 export type UpdateDashboardInput = {
