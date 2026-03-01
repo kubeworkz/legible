@@ -115,7 +115,6 @@ export default function ManageQuestionSQLPairs() {
       key: 'action',
       width: 64,
       align: 'center',
-      fixed: 'right',
       render: (_, record) => (
         <SQLPairDropdown onMoreClick={onMoreClick} data={record}>
           <MoreButton className="gray-8" />
@@ -169,7 +168,6 @@ export default function ManageQuestionSQLPairs() {
             pageSize: 10,
             size: 'small',
           }}
-          scroll={{ x: 1080 }}
         />
         <SQLPairDrawer
           {...sqlPairDrawer.state}

@@ -156,7 +156,6 @@ export default function ManageInstructions() {
       key: 'action',
       width: 64,
       align: 'center',
-      fixed: 'right',
       render: (_, record) => (
         <InstructionDropdown onMoreClick={onMoreClick} data={record}>
           <MoreButton className="gray-8" />
@@ -207,7 +206,6 @@ export default function ManageInstructions() {
             pageSize: 10,
             size: 'small',
           }}
-          scroll={{ x: 1080 }}
         />
         <InstructionDrawer
           {...instructionDrawer.state}

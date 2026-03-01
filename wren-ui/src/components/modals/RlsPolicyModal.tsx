@@ -286,7 +286,6 @@ export default function RlsPolicyDrawer(props: Props) {
             placeholder='e.g. region = @session.user_region AND status = "active"'
             maxLength={2000}
             rows={4}
-            showCount
           />
         </Form.Item>
       </Form>

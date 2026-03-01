@@ -133,7 +133,6 @@ export default function SessionPropertyPage() {
       key: 'action',
       width: 64,
       align: 'center',
-      fixed: 'right',
       render: (_: any, record: SessionProperty) => (
         <SessionPropertyDropdown onMoreClick={onMoreClick} data={record}>
           <MoreButton className="gray-8" />
@@ -169,7 +168,6 @@ export default function SessionPropertyPage() {
             pageSize: 10,
             size: 'small',
           }}
-          scroll={{ x: 800 }}
         />
         <SessionPropertyModal
           {...propertyModal.state}

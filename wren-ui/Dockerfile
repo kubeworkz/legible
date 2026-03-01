@@ -36,7 +36,7 @@ COPY next.config.js ./
 COPY tsconfig.json ./
 
 # Limit Node.js memory to avoid OOM on resource-constrained hosts
-ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV NODE_OPTIONS=--max-old-space-size=8192
 RUN yarn build
 
 # Production image, copy all the files and run next

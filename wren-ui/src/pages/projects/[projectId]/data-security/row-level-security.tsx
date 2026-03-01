@@ -162,7 +162,6 @@ export default function RowLevelSecurity() {
       key: 'action',
       width: 64,
       align: 'center',
-      fixed: 'right',
       render: (_: any, record: RlsPolicy) => (
         <RlsPolicyDropdown onMoreClick={onMoreClick} data={record}>
           <MoreButton className="gray-8" />
@@ -198,7 +197,6 @@ export default function RowLevelSecurity() {
             pageSize: 10,
             size: 'small',
           }}
-          scroll={{ x: 800 }}
         />
         <RlsPolicyDrawer
           {...policyDrawer.state}
