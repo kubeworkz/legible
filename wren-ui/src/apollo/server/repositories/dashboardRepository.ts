@@ -6,6 +6,8 @@ export interface Dashboard {
   id: number;
   projectId: number;
   name: string;
+  description: string | null;
+  sortOrder: number;
   cacheEnabled: boolean;
   scheduleFrequency: ScheduleFrequencyEnum | null;
   scheduleTimezone: string | null; // e.g. 'America/New_York', 'Asia/Taipei'

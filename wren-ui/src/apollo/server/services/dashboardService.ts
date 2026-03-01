@@ -36,9 +36,23 @@ export type UpdateDashboardItemLayouts = (DashboardItemLayout & {
   itemId: number;
 })[];
 
+export interface CreateDashboardInput {
+  name: string;
+}
+
+export interface UpdateDashboardInput {
+  name?: string;
+  description?: string | null;
+}
+
 export interface IDashboardService {
   initDashboard(projectId?: number): Promise<Dashboard>;
   getCurrentDashboard(projectId?: number): Promise<Dashboard>;
+  getDashboard(dashboardId: number): Promise<Dashboard>;
+  listDashboards(projectId?: number): Promise<Dashboard[]>;
+  createDashboard(projectId: number, input: CreateDashboardInput): Promise<Dashboard>;
+  updateDashboard(dashboardId: number, input: UpdateDashboardInput): Promise<Dashboard>;
+  deleteDashboard(dashboardId: number): Promise<boolean>;
   getDashboardItem(dashboardItemId: number): Promise<DashboardItem>;
   getDashboardItems(dashboardId: number): Promise<DashboardItem[]>;
   createDashboardItem(input: CreateDashboardItemInput): Promise<DashboardItem>;
@@ -131,19 +145,92 @@ export class DashboardService implements IDashboardService {
       projectId: project.id,
     });
     if (existingDashboard) return existingDashboard;
-    // only support one dashboard for oss
     return await this.dashboardRepository.createOne({
       name: 'Dashboard',
       projectId: project.id,
+      sortOrder: 0,
     });
   }
 
   public async getCurrentDashboard(projectId?: number): Promise<Dashboard> {
     const project = await this.projectService.getCurrentProject(projectId);
-    const dashboard = await this.dashboardRepository.findOneBy({
+    const dashboards = await this.dashboardRepository.findAllBy({
       projectId: project.id,
     });
-    return { ...dashboard };
+    // Return the first dashboard by sort order for backward compat
+    const sorted = dashboards.sort((a, b) => a.sortOrder - b.sortOrder);
+    return { ...sorted[0] };
+  }
+
+  public async getDashboard(dashboardId: number): Promise<Dashboard> {
+    const dashboard = await this.dashboardRepository.findOneBy({
+      id: dashboardId,
+    });
+    if (!dashboard) {
+      throw new Error(`Dashboard with id ${dashboardId} not found`);
+    }
+    return dashboard;
+  }
+
+  public async listDashboards(projectId?: number): Promise<Dashboard[]> {
+    const project = await this.projectService.getCurrentProject(projectId);
+    const dashboards = await this.dashboardRepository.findAllBy({
+      projectId: project.id,
+    });
+    return dashboards.sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+
+  public async createDashboard(
+    projectId: number,
+    input: CreateDashboardInput,
+  ): Promise<Dashboard> {
+    // Calculate the next sort order
+    const existing = await this.dashboardRepository.findAllBy({ projectId });
+    const maxSortOrder = existing.length > 0
+      ? Math.max(...existing.map((d) => d.sortOrder))
+      : -1;
+    return await this.dashboardRepository.createOne({
+      name: input.name,
+      projectId,
+      sortOrder: maxSortOrder + 1,
+    });
+  }
+
+  public async updateDashboard(
+    dashboardId: number,
+    input: UpdateDashboardInput,
+  ): Promise<Dashboard> {
+    const dashboard = await this.dashboardRepository.findOneBy({
+      id: dashboardId,
+    });
+    if (!dashboard) {
+      throw new Error(`Dashboard with id ${dashboardId} not found`);
+    }
+    const updateData: Partial<Dashboard> = {};
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.description !== undefined) updateData.description = input.description;
+    return await this.dashboardRepository.updateOne(dashboardId, updateData);
+  }
+
+  public async deleteDashboard(dashboardId: number): Promise<boolean> {
+    const dashboard = await this.dashboardRepository.findOneBy({
+      id: dashboardId,
+    });
+    if (!dashboard) {
+      throw new Error(`Dashboard with id ${dashboardId} not found`);
+    }
+    // Prevent deleting the last dashboard in a project
+    const siblings = await this.dashboardRepository.findAllBy({
+      projectId: dashboard.projectId,
+    });
+    if (siblings.length <= 1) {
+      throw new Error('Cannot delete the last dashboard in a project.');
+    }
+    // Cascade: delete all items first, then the dashboard
+    const items = await this.dashboardItemRepository.findAllBy({ dashboardId });
+    await Promise.all(items.map((item) => this.dashboardItemRepository.deleteOne(item.id)));
+    await this.dashboardRepository.deleteOne(dashboardId);
+    return true;
   }
 
   public async getDashboardItem(

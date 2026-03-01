@@ -91,9 +91,21 @@ export const SET_DASHBOARD_SCHEDULE = gql`
   }
 `;
 
+export const DASHBOARDS = gql`
+  query Dashboards {
+    dashboards {
+      id
+      projectId
+      name
+      description
+      sortOrder
+    }
+  }
+`;
+
 export const DASHBOARD = gql`
-  query Dashboard {
-    dashboard {
+  query Dashboard($where: DashboardWhereInput) {
+    dashboard(where: $where) {
       id
       name
       description
@@ -113,4 +125,37 @@ export const DASHBOARD = gql`
     }
   }
   ${COMMON_DASHBOARD_ITEM}
+`;
+
+export const CREATE_DASHBOARD = gql`
+  mutation CreateDashboard($data: CreateDashboardInput!) {
+    createDashboard(data: $data) {
+      id
+      projectId
+      name
+      description
+      sortOrder
+    }
+  }
+`;
+
+export const UPDATE_DASHBOARD = gql`
+  mutation UpdateDashboard(
+    $where: DashboardWhereInput!
+    $data: UpdateDashboardInput!
+  ) {
+    updateDashboard(where: $where, data: $data) {
+      id
+      projectId
+      name
+      description
+      sortOrder
+    }
+  }
+`;
+
+export const DELETE_DASHBOARD = gql`
+  mutation DeleteDashboard($where: DashboardWhereInput!) {
+    deleteDashboard(where: $where)
+  }
 `;

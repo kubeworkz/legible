@@ -53,10 +53,39 @@ export type SetDashboardScheduleMutationVariables = Types.Exact<{
 
 export type SetDashboardScheduleMutation = { __typename?: 'Mutation', setDashboardSchedule: { __typename?: 'Dashboard', id: number, projectId: number, name: string, cacheEnabled: boolean, scheduleFrequency?: Types.ScheduleFrequencyEnum | null, scheduleTimezone?: string | null, scheduleCron?: string | null, nextScheduledAt?: string | null } };
 
-export type DashboardQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type DashboardsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+
+
+export type DashboardsQuery = { __typename?: 'Query', dashboards: Array<{ __typename?: 'Dashboard', id: number, projectId: number, name: string, description?: string | null, sortOrder: number }> };
+
+export type DashboardQueryVariables = Types.Exact<{
+  where?: Types.InputMaybe<Types.DashboardWhereInput>;
+}>;
 
 
 export type DashboardQuery = { __typename?: 'Query', dashboard: { __typename?: 'DetailedDashboard', id: number, name: string, description?: string | null, cacheEnabled: boolean, nextScheduledAt?: string | null, schedule?: { __typename?: 'DashboardSchedule', frequency?: Types.ScheduleFrequencyEnum | null, hour?: number | null, minute?: number | null, day?: Types.CacheScheduleDayEnum | null, timezone?: string | null, cron?: string | null } | null, items: Array<{ __typename?: 'DashboardItem', id: number, dashboardId: number, type: Types.DashboardItemType, displayName?: string | null, layout: { __typename?: 'DashboardItemLayout', x: number, y: number, w: number, h: number }, detail: { __typename?: 'DashboardItemDetail', sql: string, chartSchema?: any | null } }> } };
+
+export type CreateDashboardMutationVariables = Types.Exact<{
+  data: Types.CreateDashboardInput;
+}>;
+
+
+export type CreateDashboardMutation = { __typename?: 'Mutation', createDashboard: { __typename?: 'Dashboard', id: number, projectId: number, name: string, description?: string | null, sortOrder: number } };
+
+export type UpdateDashboardMutationVariables = Types.Exact<{
+  where: Types.DashboardWhereInput;
+  data: Types.UpdateDashboardInput;
+}>;
+
+
+export type UpdateDashboardMutation = { __typename?: 'Mutation', updateDashboard: { __typename?: 'Dashboard', id: number, projectId: number, name: string, description?: string | null, sortOrder: number } };
+
+export type DeleteDashboardMutationVariables = Types.Exact<{
+  where: Types.DashboardWhereInput;
+}>;
+
+
+export type DeleteDashboardMutation = { __typename?: 'Mutation', deleteDashboard: boolean };
 
 export const CommonDashboardItemFragmentDoc = gql`
     fragment CommonDashboardItem on DashboardItem {
@@ -319,8 +348,8 @@ export type SetDashboardScheduleMutationHookResult = ReturnType<typeof useSetDas
 export type SetDashboardScheduleMutationResult = Apollo.MutationResult<SetDashboardScheduleMutation>;
 export type SetDashboardScheduleMutationOptions = Apollo.BaseMutationOptions<SetDashboardScheduleMutation, SetDashboardScheduleMutationVariables>;
 export const DashboardDocument = gql`
-    query Dashboard {
-  dashboard {
+    query Dashboard($where: DashboardWhereInput) {
+  dashboard(where: $where) {
     id
     name
     description
@@ -353,6 +382,7 @@ export const DashboardDocument = gql`
  * @example
  * const { data, loading, error } = useDashboardQuery({
  *   variables: {
+ *      where: // value for 'where'
  *   },
  * });
  */
@@ -367,3 +397,88 @@ export function useDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<
 export type DashboardQueryHookResult = ReturnType<typeof useDashboardQuery>;
 export type DashboardLazyQueryHookResult = ReturnType<typeof useDashboardLazyQuery>;
 export type DashboardQueryResult = Apollo.QueryResult<DashboardQuery, DashboardQueryVariables>;
+
+// --- Dashboards list ---
+export const DashboardsDocument = gql`
+    query Dashboards {
+  dashboards {
+    id
+    projectId
+    name
+    description
+    sortOrder
+  }
+}
+    `;
+
+export function useDashboardsQuery(baseOptions?: Apollo.QueryHookOptions<DashboardsQuery, DashboardsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DashboardsQuery, DashboardsQueryVariables>(DashboardsDocument, options);
+      }
+export function useDashboardsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardsQuery, DashboardsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DashboardsQuery, DashboardsQueryVariables>(DashboardsDocument, options);
+        }
+export type DashboardsQueryHookResult = ReturnType<typeof useDashboardsQuery>;
+export type DashboardsLazyQueryHookResult = ReturnType<typeof useDashboardsLazyQuery>;
+export type DashboardsQueryResult = Apollo.QueryResult<DashboardsQuery, DashboardsQueryVariables>;
+
+// --- Create Dashboard ---
+export const CreateDashboardDocument = gql`
+    mutation CreateDashboard($data: CreateDashboardInput!) {
+  createDashboard(data: $data) {
+    id
+    projectId
+    name
+    description
+    sortOrder
+  }
+}
+    `;
+export type CreateDashboardMutationFn = Apollo.MutationFunction<CreateDashboardMutation, CreateDashboardMutationVariables>;
+
+export function useCreateDashboardMutation(baseOptions?: Apollo.MutationHookOptions<CreateDashboardMutation, CreateDashboardMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateDashboardMutation, CreateDashboardMutationVariables>(CreateDashboardDocument, options);
+      }
+export type CreateDashboardMutationHookResult = ReturnType<typeof useCreateDashboardMutation>;
+export type CreateDashboardMutationResult = Apollo.MutationResult<CreateDashboardMutation>;
+export type CreateDashboardMutationOptions = Apollo.BaseMutationOptions<CreateDashboardMutation, CreateDashboardMutationVariables>;
+
+// --- Update Dashboard ---
+export const UpdateDashboardDocument = gql`
+    mutation UpdateDashboard($where: DashboardWhereInput!, $data: UpdateDashboardInput!) {
+  updateDashboard(where: $where, data: $data) {
+    id
+    projectId
+    name
+    description
+    sortOrder
+  }
+}
+    `;
+export type UpdateDashboardMutationFn = Apollo.MutationFunction<UpdateDashboardMutation, UpdateDashboardMutationVariables>;
+
+export function useUpdateDashboardMutation(baseOptions?: Apollo.MutationHookOptions<UpdateDashboardMutation, UpdateDashboardMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateDashboardMutation, UpdateDashboardMutationVariables>(UpdateDashboardDocument, options);
+      }
+export type UpdateDashboardMutationHookResult = ReturnType<typeof useUpdateDashboardMutation>;
+export type UpdateDashboardMutationResult = Apollo.MutationResult<UpdateDashboardMutation>;
+export type UpdateDashboardMutationOptions = Apollo.BaseMutationOptions<UpdateDashboardMutation, UpdateDashboardMutationVariables>;
+
+// --- Delete Dashboard ---
+export const DeleteDashboardDocument = gql`
+    mutation DeleteDashboard($where: DashboardWhereInput!) {
+  deleteDashboard(where: $where)
+}
+    `;
+export type DeleteDashboardMutationFn = Apollo.MutationFunction<DeleteDashboardMutation, DeleteDashboardMutationVariables>;
+
+export function useDeleteDashboardMutation(baseOptions?: Apollo.MutationHookOptions<DeleteDashboardMutation, DeleteDashboardMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteDashboardMutation, DeleteDashboardMutationVariables>(DeleteDashboardDocument, options);
+      }
+export type DeleteDashboardMutationHookResult = ReturnType<typeof useDeleteDashboardMutation>;
+export type DeleteDashboardMutationResult = Apollo.MutationResult<DeleteDashboardMutation>;
+export type DeleteDashboardMutationOptions = Apollo.BaseMutationOptions<DeleteDashboardMutation, DeleteDashboardMutationVariables>;

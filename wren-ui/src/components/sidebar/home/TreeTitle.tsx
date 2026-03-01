@@ -5,7 +5,10 @@ import EditOutlined from '@ant-design/icons/EditOutlined';
 import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import LabelTitle from '@/components/sidebar/LabelTitle';
 import TreeTitleInput from '@/components/sidebar/home/TreeTitleInput';
-import { DeleteThreadModal } from '@/components/modals/DeleteModal';
+import {
+  DeleteThreadModal,
+  DeleteDashboardModal,
+} from '@/components/modals/DeleteModal';
 
 const MENU_ITEM_KEYS = {
   RENAME: 'rename',
@@ -18,15 +21,21 @@ const StyledMenu = styled(Menu)`
   }
 `;
 
+const deleteModalMap = {
+  thread: DeleteThreadModal,
+  dashboard: DeleteDashboardModal,
+};
+
 interface TreeTitleProps {
   id: string;
   title: string;
+  deleteModalType?: 'thread' | 'dashboard';
   onDelete?: (id: string) => void;
   onRename?: (id: string, newName: string) => void;
 }
 
 export default function TreeTitle(props: TreeTitleProps) {
-  const { id, onDelete, onRename } = props;
+  const { id, onDelete, onRename, deleteModalType = 'thread' } = props;
   const [title, setTitle] = useState(props.title);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -76,9 +85,12 @@ export default function TreeTitle(props: TreeTitleProps) {
                   },
                 },
                 {
-                  label: (
-                    <DeleteThreadModal onConfirm={() => onDeleteData(id)} />
-                  ),
+                  label: (() => {
+                    const DeleteModal = deleteModalMap[deleteModalType];
+                    return (
+                      <DeleteModal onConfirm={() => onDeleteData(id)} />
+                    );
+                  })(),
                   key: MENU_ITEM_KEYS.DELETE,
                   onClick: ({ domEvent }) => {
                     domEvent.stopPropagation();

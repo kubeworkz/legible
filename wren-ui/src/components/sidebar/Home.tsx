@@ -1,57 +1,62 @@
-import clsx from 'clsx';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useParams } from 'next/navigation';
-import styled from 'styled-components';
 import { Path, buildPath } from '@/utils/enum';
-import FundViewOutlined from '@ant-design/icons/FundViewOutlined';
-import SidebarTree, {
-  StyledTreeNodeLink,
-  useSidebarTreeState,
-} from './SidebarTree';
+import { useSidebarTreeState } from './SidebarTree';
 import ThreadTree, { ThreadData } from './home/ThreadTree';
+import DashboardTree, { DashboardData } from './home/DashboardTree';
 import useProject from '@/hooks/useProject';
 
 export interface Props {
   data: {
     threads: ThreadData[];
+    dashboards: DashboardData[];
   };
   onSelect: (selectKeys) => void;
   onDelete: (id: string) => Promise<void>;
   onRename: (id: string, newName: string) => Promise<void>;
+  onDashboardSelect: (selectKeys: string[]) => void;
+  onDashboardRename: (id: string, newName: string) => Promise<void>;
+  onDashboardDelete: (id: string) => Promise<void>;
+  onDashboardCreate: () => Promise<void>;
 }
 
-export const StyledSidebarTree = styled(SidebarTree)`
-  .adm-treeNode {
-    &.adm-treeNode__thread {
-      padding: 0px 16px 0px 4px !important;
-
-      .ant-tree-title {
-        flex-grow: 1;
-        display: inline-flex;
-        align-items: center;
-        span:first-child,
-        .adm-treeTitle__title {
-          flex-grow: 1;
-        }
-      }
-    }
-  }
-`;
-
 export default function Home(props: Props) {
-  const { data, onSelect, onRename, onDelete } = props;
+  const {
+    data,
+    onSelect,
+    onRename,
+    onDelete,
+    onDashboardSelect,
+    onDashboardRename,
+    onDashboardDelete,
+    onDashboardCreate,
+  } = props;
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { currentProjectId } = useProject();
   const { threads } = data;
+  const { dashboards } = data;
   const bp = (path: Path) => buildPath(path, currentProjectId);
 
   const { treeSelectedKeys, setTreeSelectedKeys } = useSidebarTreeState();
+  const {
+    treeSelectedKeys: dashboardSelectedKeys,
+    setTreeSelectedKeys: setDashboardSelectedKeys,
+  } = useSidebarTreeState();
 
   useEffect(() => {
     params?.id && setTreeSelectedKeys([params.id] as string[]);
   }, [params?.id]);
+
+  useEffect(() => {
+    const dashboardId = router.query?.dashboardId as string;
+    if (dashboardId) {
+      setDashboardSelectedKeys([`dashboard-${dashboardId}`]);
+      // deselect threads when dashboard is selected
+      setTreeSelectedKeys([]);
+    }
+  }, [router.query?.dashboardId]);
 
   const onDeleteThread = async (threadId: string) => {
     try {
@@ -69,20 +74,32 @@ export default function Home(props: Props) {
     if (selectedKeys.length === 0) return;
 
     setTreeSelectedKeys(selectedKeys);
+    setDashboardSelectedKeys([]);
     onSelect(selectedKeys);
+  };
+
+  const onDashboardTreeSelect = (selectedKeys: React.Key[], _info: any) => {
+    if (selectedKeys.length === 0) return;
+
+    setDashboardSelectedKeys(selectedKeys);
+    setTreeSelectedKeys([]);
+    // Extract the actual dashboard id from the key (format: "dashboard-{id}")
+    const dashboardIds = selectedKeys.map((key) =>
+      String(key).replace('dashboard-', ''),
+    );
+    onDashboardSelect(dashboardIds as string[]);
   };
 
   return (
     <>
-      <StyledTreeNodeLink
-        className={clsx({
-          'adm-treeNode--selected': router.pathname === Path.HomeDashboard,
-        })}
-        href={bp(Path.HomeDashboard)}
-      >
-        <FundViewOutlined className="mr-2" />
-        <span className="text-medium">Dashboard</span>
-      </StyledTreeNodeLink>
+      <DashboardTree
+        dashboards={dashboards}
+        selectedKeys={dashboardSelectedKeys}
+        onSelect={onDashboardTreeSelect}
+        onRename={onDashboardRename}
+        onDeleteDashboard={onDashboardDelete}
+        onCreateDashboard={onDashboardCreate}
+      />
       <ThreadTree
         threads={threads}
         selectedKeys={treeSelectedKeys}

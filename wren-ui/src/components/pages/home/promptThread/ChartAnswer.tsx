@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import dynamic from 'next/dynamic';
 import styled from 'styled-components';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Form, Button, Skeleton, Modal, message } from 'antd';
+import { Alert, Form, Button, Skeleton, Modal, Select, message } from 'antd';
 import { attachLoading } from '@/utils/helper';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import BasicProperties from '@/components/chart/properties/BasicProperties';
@@ -18,7 +18,10 @@ import {
   getChartSpecFieldTitleMap,
   getChartSpecOptionValues,
 } from '@/components/chart/handler';
-import { useCreateDashboardItemMutation } from '@/apollo/client/graphql/dashboard.generated';
+import {
+  useCreateDashboardItemMutation,
+  useDashboardsQuery,
+} from '@/apollo/client/graphql/dashboard.generated';
 import { DashboardItemType } from '@/apollo/server/repositories';
 import usePromptThreadStore from './store';
 
@@ -100,6 +103,18 @@ export default function ChartAnswer(props: AnswerResultProps) {
     },
   });
 
+  const { data: dashboardsData } = useDashboardsQuery({
+    fetchPolicy: 'cache-and-network',
+  });
+  const dashboardOptions = useMemo(
+    () =>
+      (dashboardsData?.dashboards || []).map((d) => ({
+        label: d.name,
+        value: d.id,
+      })),
+    [dashboardsData],
+  );
+
   // initial trigger when render
   useEffect(() => {
     previewData({
@@ -179,19 +194,37 @@ export default function ChartAnswer(props: AnswerResultProps) {
   };
 
   const onPin = () => {
+    let selectedDashboardId: number | undefined =
+      dashboardOptions.length === 1 ? dashboardOptions[0].value : undefined;
+
     Modal.confirm({
-      title: 'Are you sure you want to pin this chart to the dashboard?',
+      title: 'Pin chart to dashboard',
+      content:
+        dashboardOptions.length > 1 ? (
+          <Select
+            style={{ width: '100%', marginTop: 8 }}
+            placeholder="Select a dashboard"
+            options={dashboardOptions}
+            defaultValue={selectedDashboardId}
+            onChange={(value) => {
+              selectedDashboardId = value;
+            }}
+          />
+        ) : null,
       okText: 'Save',
-      onOk: async () =>
+      onOk: async () => {
         await createDashboardItem({
           variables: {
             data: {
-              // DashboardItemType is compatible with ChartType
               itemType: chartType as unknown as DashboardItemType,
               responseId: threadResponse.id,
+              ...(selectedDashboardId
+                ? { dashboardId: selectedDashboardId }
+                : {}),
             },
           },
-        }),
+        });
+      },
     });
   };
 

@@ -1122,6 +1122,7 @@ export const typeDefs = gql`
   input CreateDashboardItemInput {
     itemType: DashboardItemType!
     responseId: Int!
+    dashboardId: Int
   }
 
   input UpdateDashboardItemInput {
@@ -1159,6 +1160,7 @@ export const typeDefs = gql`
   }
 
   input SetDashboardScheduleInput {
+    dashboardId: Int
     cacheEnabled: Boolean!
     schedule: SetDashboardScheduleData
   }
@@ -1223,6 +1225,8 @@ export const typeDefs = gql`
     id: Int!
     projectId: Int!
     name: String!
+    description: String
+    sortOrder: Int!
     cacheEnabled: Boolean!
     scheduleFrequency: ScheduleFrequencyEnum
     scheduleTimezone: String
@@ -1238,6 +1242,20 @@ export const typeDefs = gql`
     nextScheduledAt: String
     schedule: DashboardSchedule
     items: [DashboardItem!]!
+  }
+
+  # Multi-dashboard CRUD
+  input DashboardWhereInput {
+    id: Int!
+  }
+
+  input CreateDashboardInput {
+    name: String!
+  }
+
+  input UpdateDashboardInput {
+    name: String
+    description: String
   }
 
   type SqlPair {
@@ -1436,8 +1454,9 @@ export const typeDefs = gql`
     instantRecommendedQuestions(taskId: String!): RecommendedQuestionsTask!
 
     # Dashboard
+    dashboards: [Dashboard!]!
+    dashboard(where: DashboardWhereInput): DetailedDashboard!
     dashboardItems: [DashboardItem!]!
-    dashboard: DetailedDashboard!
 
     # SQL Pairs
     sqlPairs: [SqlPair]!
@@ -1611,6 +1630,12 @@ export const typeDefs = gql`
     ): Task!
 
     # Dashboard
+    createDashboard(data: CreateDashboardInput!): Dashboard!
+    updateDashboard(
+      where: DashboardWhereInput!
+      data: UpdateDashboardInput!
+    ): Dashboard!
+    deleteDashboard(where: DashboardWhereInput!): Boolean!
     updateDashboardItemLayouts(
       data: UpdateDashboardItemLayoutsInput!
     ): [DashboardItem!]!

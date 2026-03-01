@@ -128,3 +128,10 @@ export const DeleteSessionPropertyModal = makeDeleteModal(DefaultDeleteButton, {
   content:
     'Deleting this session property may affect RLS policies that reference it. Are you sure you want to proceed?',
 });
+
+export const DeleteDashboardModal = makeDeleteModal(DefaultDeleteButton, {
+  icon: <DeleteOutlined className="mr-2" />,
+  itemName: 'dashboard',
+  content:
+    'This will permanently delete this dashboard and all its items. Are you sure you want to proceed?',
+});

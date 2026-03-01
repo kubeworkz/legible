@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { message } from 'antd';
 import { Path, buildPath } from '@/utils/enum';
 import useProject from '@/hooks/useProject';
@@ -15,7 +15,6 @@ import CacheSettingsDrawer, {
 } from '@/components/pages/home/dashboardGrid/CacheSettingsDrawer';
 import {
   useDashboardQuery,
-  useDashboardsQuery,
   useDeleteDashboardItemMutation,
   useUpdateDashboardItemLayoutsMutation,
   useSetDashboardScheduleMutation,
@@ -34,9 +33,10 @@ const isSupportCachedSettings = (dataSource: DataSource) => {
   );
 };
 
-export default function Dashboard() {
+export default function DashboardDetail() {
   const router = useRouter();
   const { currentProjectId } = useProject();
+  const dashboardId = router.query.dashboardId as string;
   const dashboardGridRef = useRef<{ onRefreshAll: () => void }>(null);
   const homeSidebar = useHomeSidebar();
   const cacheSettingsDrawer = useDrawerAction();
@@ -47,28 +47,13 @@ export default function Dashboard() {
     [settings?.dataSource],
   );
 
-  // Redirect to first dashboard detail page when dashboards are available
-  const { data: dashboardsData } = useDashboardsQuery({
-    fetchPolicy: 'cache-and-network',
-  });
-  useEffect(() => {
-    const dashes = dashboardsData?.dashboards || [];
-    if (dashes.length > 0) {
-      const firstId = dashes[0].id;
-      router.replace(
-        buildPath(Path.HomeDashboardDetail, currentProjectId).replace(
-          '[dashboardId]',
-          String(firstId),
-        ),
-      );
-    }
-  }, [dashboardsData?.dashboards]);
-
   const {
     data,
     loading,
     updateQuery: updateDashboardQuery,
   } = useDashboardQuery({
+    variables: { where: { id: Number(dashboardId) } },
+    skip: !dashboardId,
     fetchPolicy: 'cache-and-network',
     onError: () => {
       message.error('Failed to fetch dashboard items.');
@@ -155,7 +140,11 @@ export default function Dashboard() {
               {...cacheSettingsDrawer.state}
               onClose={cacheSettingsDrawer.closeDrawer}
               onSubmit={async (values) => {
-                await setDashboardSchedule({ variables: { data: values } });
+                await setDashboardSchedule({
+                  variables: {
+                    data: { ...values, dashboardId: Number(dashboardId) },
+                  },
+                });
               }}
             />
           )}

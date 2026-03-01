@@ -195,6 +195,7 @@ export type CreateCalculatedFieldInput = {
 };
 
 export type CreateDashboardItemInput = {
+  dashboardId?: InputMaybe<Scalars['Int']>;
   itemType: DashboardItemType;
   responseId: Scalars['Int'];
 };
@@ -259,6 +260,7 @@ export type CustomFieldInput = {
 export type Dashboard = {
   __typename?: 'Dashboard';
   cacheEnabled: Scalars['Boolean'];
+  description?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   name: Scalars['String'];
   nextScheduledAt?: Maybe<Scalars['String']>;
@@ -266,6 +268,20 @@ export type Dashboard = {
   scheduleCron?: Maybe<Scalars['String']>;
   scheduleFrequency?: Maybe<ScheduleFrequencyEnum>;
   scheduleTimezone?: Maybe<Scalars['String']>;
+  sortOrder: Scalars['Int'];
+};
+
+export type DashboardWhereInput = {
+  id: Scalars['Int'];
+};
+
+export type CreateDashboardInput = {
+  name: Scalars['String'];
+};
+
+export type UpdateDashboardInput = {
+  name?: InputMaybe<Scalars['String']>;
+  description?: InputMaybe<Scalars['String']>;
 };
 
 export type DashboardItem = {
@@ -792,6 +808,19 @@ export type MutationCreateCalculatedFieldArgs = {
 
 export type MutationCreateDashboardItemArgs = {
   data: CreateDashboardItemInput;
+};
+
+export type MutationCreateDashboardArgs = {
+  data: CreateDashboardInput;
+};
+
+export type MutationUpdateDashboardArgs = {
+  where: DashboardWhereInput;
+  data: UpdateDashboardInput;
+};
+
+export type MutationDeleteDashboardArgs = {
+  where: DashboardWhereInput;
 };
 
 
@@ -1424,6 +1453,7 @@ export type SetDashboardScheduleData = {
 };
 
 export type SetDashboardScheduleInput = {
+  dashboardId?: InputMaybe<Scalars['Int']>;
   cacheEnabled: Scalars['Boolean'];
   schedule?: InputMaybe<SetDashboardScheduleData>;
 };
