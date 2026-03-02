@@ -37,7 +37,8 @@
     "posthog-node": "^4.3.2",
     "rxjs": "^7.8.2",
     "sql-formatter": "^15.3.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@apollo/client": "^3.6.9",

@@ -12,6 +12,11 @@ import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SpreadsheetSqlEditor from '@/components/spreadsheet/SpreadsheetSqlEditor';
 import SpreadsheetToolbar from '@/components/spreadsheet/SpreadsheetToolbar';
 import type { ColumnConfig } from '@/components/spreadsheet/ColumnManager';
+import {
+  applyColumnConfigs,
+  exportToCSV,
+  exportToExcel,
+} from '@/components/spreadsheet/exportSpreadsheet';
 import UniverSheetDynamic from '@/components/spreadsheet/UniverSheetDynamic';
 import DataSourceOverlay from '@/components/spreadsheet/DataSourceOverlay';
 import {
@@ -330,6 +335,45 @@ export default function SpreadsheetDetail() {
     setShowSqlEditor((prev) => !prev);
   }, []);
 
+  // ── Export handlers ──────────────────────────────────
+  const getExportPayload = useCallback(() => {
+    if (!resultData?.columns || !resultData?.data) return null;
+    const { columns: cols, data: rows } = applyColumnConfigs(
+      resultData.columns as { name: string; type: string }[],
+      resultData.data as any[][],
+      columnConfigs,
+    );
+    return {
+      columns: cols,
+      data: rows,
+      fileName: spreadsheet?.name || 'spreadsheet',
+    };
+  }, [resultData, columnConfigs, spreadsheet?.name]);
+
+  const handleExportCSV = useCallback(() => {
+    const payload = getExportPayload();
+    if (!payload || payload.columns.length === 0) {
+      message.warning('No data to export');
+      return;
+    }
+    exportToCSV(payload);
+    message.success('CSV downloaded');
+  }, [getExportPayload]);
+
+  const handleExportExcel = useCallback(async () => {
+    const payload = getExportPayload();
+    if (!payload || payload.columns.length === 0) {
+      message.warning('No data to export');
+      return;
+    }
+    try {
+      await exportToExcel(payload);
+      message.success('Excel file downloaded');
+    } catch {
+      message.error('Failed to export Excel file');
+    }
+  }, [getExportPayload]);
+
   // ── Data source overlay handlers ─────────────────────
   const handleSelectModelView = useCallback(
     (sql: string, _name: string) => {
@@ -405,6 +449,9 @@ export default function SpreadsheetDetail() {
             onToggleSqlEditor={handleToggleSqlEditor}
             columnConfigs={columnConfigs}
             onColumnConfigsChange={handleColumnConfigsChange}
+            hasData={!!resultData?.columns && resultData.columns.length > 0}
+            onExportCSV={handleExportCSV}
+            onExportExcel={handleExportExcel}
           />
         )}
 

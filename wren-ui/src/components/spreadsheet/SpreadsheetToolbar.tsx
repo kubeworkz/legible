@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import styled from 'styled-components';
-import { Button, Tooltip, Divider } from 'antd';
+import { Button, Tooltip, Divider, Dropdown, Menu } from 'antd';
 import SaveOutlined from '@ant-design/icons/SaveOutlined';
 import UndoOutlined from '@ant-design/icons/UndoOutlined';
 import RedoOutlined from '@ant-design/icons/RedoOutlined';
@@ -8,6 +8,9 @@ import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import HistoryOutlined from '@ant-design/icons/HistoryOutlined';
 import CodeOutlined from '@ant-design/icons/CodeOutlined';
 import DownOutlined from '@ant-design/icons/DownOutlined';
+import ExportOutlined from '@ant-design/icons/ExportOutlined';
+import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
+import FileTextOutlined from '@ant-design/icons/FileTextOutlined';
 import ColumnManager, { ColumnConfig } from './ColumnManager';
 
 // ── Styles ──────────────────────────────────────────────
@@ -118,6 +121,12 @@ export interface SpreadsheetToolbarProps {
   columnConfigs?: ColumnConfig[];
   /** Called when column configs change */
   onColumnConfigsChange?: (configs: ColumnConfig[]) => void;
+  /** Whether data is available for export */
+  hasData?: boolean;
+  /** Called when export CSV is requested */
+  onExportCSV?: () => void;
+  /** Called when export Excel is requested */
+  onExportExcel?: () => void;
 }
 
 // ── Component ───────────────────────────────────────────
@@ -132,6 +141,9 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
     onToggleSqlEditor,
     columnConfigs = [],
     onColumnConfigsChange,
+    hasData = false,
+    onExportCSV,
+    onExportExcel,
   } = props;
 
   const handleSave = useCallback(() => {
@@ -238,6 +250,47 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
             Update columns
           </ToolbarButton>
         </ColumnManager>
+      </ToolbarSection>
+
+      <StyledDivider type="vertical" />
+
+      {/* ── Export section ── */}
+      <ToolbarSection>
+        <SectionLabel>
+          <SectionDot $color="var(--green-5, #52c41a)" />
+          Export
+        </SectionLabel>
+        <Dropdown
+          disabled={!hasData || loading}
+          overlay={
+            <Menu>
+              <Menu.Item
+                key="csv"
+                icon={<FileTextOutlined />}
+                onClick={onExportCSV}
+              >
+                Export as CSV
+              </Menu.Item>
+              <Menu.Item
+                key="excel"
+                icon={<FileExcelOutlined />}
+                onClick={onExportExcel}
+              >
+                Export as Excel
+              </Menu.Item>
+            </Menu>
+          }
+          trigger={['click']}
+        >
+          <ToolbarButton
+            size="small"
+            icon={<ExportOutlined />}
+            disabled={!hasData || loading}
+          >
+            Download
+            <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+          </ToolbarButton>
+        </Dropdown>
       </ToolbarSection>
     </ToolbarContainer>
   );
