@@ -8,6 +8,7 @@ import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import HistoryOutlined from '@ant-design/icons/HistoryOutlined';
 import CodeOutlined from '@ant-design/icons/CodeOutlined';
 import DownOutlined from '@ant-design/icons/DownOutlined';
+import ColumnManager, { ColumnConfig } from './ColumnManager';
 
 // ── Styles ──────────────────────────────────────────────
 
@@ -113,6 +114,10 @@ export interface SpreadsheetToolbarProps {
   onDiscard?: () => void;
   /** Called to toggle SQL editor visibility */
   onToggleSqlEditor?: () => void;
+  /** Column configs for the column manager */
+  columnConfigs?: ColumnConfig[];
+  /** Called when column configs change */
+  onColumnConfigsChange?: (configs: ColumnConfig[]) => void;
 }
 
 // ── Component ───────────────────────────────────────────
@@ -125,6 +130,8 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
     onSave,
     onDiscard,
     onToggleSqlEditor,
+    columnConfigs = [],
+    onColumnConfigsChange,
   } = props;
 
   const handleSave = useCallback(() => {
@@ -213,21 +220,24 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
 
       <StyledDivider type="vertical" />
 
-      {/* ── Columns section (placeholder) ── */}
+      {/* ── Columns section ── */}
       <ToolbarSection>
         <SectionLabel>
           <SectionDot $color="var(--geekblue-5, #597ef7)" />
           Columns
         </SectionLabel>
-        <Tooltip title="Coming soon">
+        <ColumnManager
+          columns={columnConfigs}
+          onChange={onColumnConfigsChange || (() => {})}
+        >
           <ToolbarButton
             size="small"
             icon={<DownOutlined style={{ fontSize: 10 }} />}
-            disabled
+            disabled={columnConfigs.length === 0}
           >
             Update columns
           </ToolbarButton>
-        </Tooltip>
+        </ColumnManager>
       </ToolbarSection>
     </ToolbarContainer>
   );

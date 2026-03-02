@@ -11,6 +11,7 @@ import SiderLayout from '@/components/layouts/SiderLayout';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SpreadsheetSqlEditor from '@/components/spreadsheet/SpreadsheetSqlEditor';
 import SpreadsheetToolbar from '@/components/spreadsheet/SpreadsheetToolbar';
+import type { ColumnConfig } from '@/components/spreadsheet/ColumnManager';
 import UniverSheetDynamic from '@/components/spreadsheet/UniverSheetDynamic';
 import DataSourceOverlay from '@/components/spreadsheet/DataSourceOverlay';
 import {
@@ -192,21 +193,138 @@ export default function SpreadsheetDetail() {
     }
   }, [spreadsheet?.sourceSql, spreadsheetId]);
 
+  // ── Column config state ──────────────────────────────
+  const [columnConfigs, setColumnConfigs] = useState<ColumnConfig[]>([]);
+  const columnConfigsInitialized = useRef(false);
+
+  // Initialize column configs when query results arrive
+  useEffect(() => {
+    if (!resultData?.columns || resultData.columns.length === 0) return;
+
+    const queryCols = resultData.columns as { name: string; type: string }[];
+
+    // Try to load saved config
+    let savedConfigs: ColumnConfig[] = [];
+    if (spreadsheet?.columnsMetadata) {
+      try {
+        savedConfigs = JSON.parse(spreadsheet.columnsMetadata);
+      } catch {
+        savedConfigs = [];
+      }
+    }
+
+    if (savedConfigs.length > 0 && !columnConfigsInitialized.current) {
+      // Merge: keep saved order/visibility for known columns, add new ones
+      const savedMap = new Map(savedConfigs.map((c) => [c.name, c]));
+      const knownNames = new Set(queryCols.map((c) => c.name));
+      const merged: ColumnConfig[] = [];
+
+      // First: saved columns that still exist
+      for (const sc of savedConfigs) {
+        if (knownNames.has(sc.name)) {
+          const qc = queryCols.find((q) => q.name === sc.name)!;
+          merged.push({ name: sc.name, type: qc.type, visible: sc.visible });
+        }
+      }
+
+      // Then: new columns not in saved config
+      for (const qc of queryCols) {
+        if (!savedMap.has(qc.name)) {
+          merged.push({ name: qc.name, type: qc.type, visible: true });
+        }
+      }
+
+      setColumnConfigs(merged);
+      columnConfigsInitialized.current = true;
+    } else if (!columnConfigsInitialized.current) {
+      // No saved config — all visible in query order
+      setColumnConfigs(
+        queryCols.map((c) => ({ name: c.name, type: c.type, visible: true })),
+      );
+      columnConfigsInitialized.current = true;
+    } else {
+      // Config already initialized, but new query results — reconcile
+      const knownNames = new Set(queryCols.map((c) => c.name));
+      const existingMap = new Map(columnConfigs.map((c) => [c.name, c]));
+      const merged: ColumnConfig[] = [];
+
+      // Keep existing order for columns that still exist
+      for (const ec of columnConfigs) {
+        if (knownNames.has(ec.name)) {
+          const qc = queryCols.find((q) => q.name === ec.name)!;
+          merged.push({ ...ec, type: qc.type });
+        }
+      }
+
+      // Add new columns
+      for (const qc of queryCols) {
+        if (!existingMap.has(qc.name)) {
+          merged.push({ name: qc.name, type: qc.type, visible: true });
+        }
+      }
+
+      setColumnConfigs(merged);
+    }
+  }, [resultData?.columns, spreadsheet?.columnsMetadata]);
+
+  // Handle column config changes from ColumnManager
+  const handleColumnConfigsChange = useCallback(
+    (configs: ColumnConfig[]) => {
+      setColumnConfigs(configs);
+      setSqlDirty(true); // Mark as dirty so user can save
+    },
+    [],
+  );
+
   // ── Toolbar handlers ──────────────────────────────────
   const handleToolbarSave = useCallback(() => {
-    if (currentSql) handleSaveSql(currentSql);
-  }, [currentSql, handleSaveSql]);
+    // Save both SQL and column configs
+    const saveData: Record<string, any> = {};
+    if (currentSql) saveData.sourceSql = currentSql;
+    saveData.columnsMetadata = JSON.stringify(columnConfigs);
+
+    updateSpreadsheet({
+      variables: {
+        where: { id: Number(spreadsheetId) },
+        data: saveData,
+      },
+    }).then(() => {
+      setSqlDirty(false);
+      refetch();
+      message.success('Saved');
+    });
+  }, [currentSql, columnConfigs, spreadsheetId, updateSpreadsheet, refetch]);
 
   const handleDiscard = useCallback(() => {
     const savedSql = spreadsheet?.sourceSql || '';
     setCurrentSql(savedSql);
     setExternalSql(savedSql); // Push back into the editor
     setSqlDirty(false);
+
+    // Reset column configs to saved state
+    if (spreadsheet?.columnsMetadata) {
+      try {
+        const saved = JSON.parse(spreadsheet.columnsMetadata) as ColumnConfig[];
+        setColumnConfigs(saved);
+      } catch {
+        // leave current configs
+      }
+    } else if (resultData?.columns) {
+      // No saved config — reset to all visible
+      setColumnConfigs(
+        (resultData.columns as { name: string; type: string }[]).map((c) => ({
+          name: c.name,
+          type: c.type,
+          visible: true,
+        })),
+      );
+    }
+
     if (savedSql) {
       handleRunSql(savedSql);
     }
     message.info('Changes discarded');
-  }, [spreadsheet?.sourceSql, handleRunSql]);
+  }, [spreadsheet?.sourceSql, spreadsheet?.columnsMetadata, resultData?.columns, handleRunSql]);
 
   const handleToggleSqlEditor = useCallback(() => {
     setShowSqlEditor((prev) => !prev);
@@ -285,6 +403,8 @@ export default function SpreadsheetDetail() {
             onSave={handleToolbarSave}
             onDiscard={handleDiscard}
             onToggleSqlEditor={handleToggleSqlEditor}
+            columnConfigs={columnConfigs}
+            onColumnConfigsChange={handleColumnConfigsChange}
           />
         )}
 
@@ -305,6 +425,7 @@ export default function SpreadsheetDetail() {
             data={resultData?.data}
             loading={previewLoading}
             error={previewError || null}
+            columnConfigs={columnConfigs}
             overlay={
               !hasRun ? (
                 <DataSourceOverlay

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Alert, Spin } from 'antd';
 import { ApolloError } from '@apollo/client';
 import { parseGraphQLError } from '@/utils/errorHandler';
+import type { ColumnConfig } from './ColumnManager';
 
 // Univer imports — these are client-only (canvas-based rendering)
 import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core';
@@ -70,6 +71,8 @@ export interface UniverSheetProps {
   error?: ApolloError | null;
   /** Overlay element to render on top of the empty grid */
   overlay?: React.ReactNode;
+  /** Column configs controlling visibility and order */
+  columnConfigs?: ColumnConfig[];
 }
 
 // ── Helpers ─────────────────────────────────────────────
@@ -150,16 +153,41 @@ function buildWorkbookData(columns: ColumnMeta[], data: any[][]) {
 // ── Component ───────────────────────────────────────────
 
 export default function UniverSheet(props: UniverSheetProps) {
-  const { columns = [], data = [], loading = false, error, overlay } = props;
+  const { columns = [], data = [], loading = false, error, overlay, columnConfigs } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<FUniver | null>(null);
 
-  const hasData = columns.length > 0;
+  // Apply column configs: filter visible + reorder
+  const { filteredColumns, filteredData } = useMemo(() => {
+    if (!columnConfigs || columnConfigs.length === 0 || columns.length === 0) {
+      return { filteredColumns: columns, filteredData: data };
+    }
+
+    // Build a map from column name to original index
+    const colIndexMap = new Map<string, number>();
+    columns.forEach((col, idx) => colIndexMap.set(col.name, idx));
+
+    // Filter to visible columns in config order
+    const visibleConfigs = columnConfigs.filter((c) => c.visible && colIndexMap.has(c.name));
+
+    if (visibleConfigs.length === 0) {
+      // All hidden — show empty grid
+      return { filteredColumns: [], filteredData: [] };
+    }
+
+    const indices = visibleConfigs.map((c) => colIndexMap.get(c.name)!);
+    const fc = indices.map((i) => columns[i]);
+    const fd = data.map((row) => indices.map((i) => row[i]));
+
+    return { filteredColumns: fc, filteredData: fd };
+  }, [columns, data, columnConfigs]);
+
+  const hasData = filteredColumns.length > 0;
 
   // Build workbook data — either real data or empty sheet
   const workbookData = useMemo(() => {
     if (hasData) {
-      return buildWorkbookData(columns, data);
+      return buildWorkbookData(filteredColumns, filteredData);
     }
     // Empty workbook — just an empty grid (Univer shows Column A, B, C… headers)
     return {
@@ -179,7 +207,7 @@ export default function UniverSheet(props: UniverSheetProps) {
         },
       },
     };
-  }, [columns, data, hasData]);
+  }, [filteredColumns, filteredData, hasData]);
 
   // Initialize and update Univer instance
   useEffect(() => {
