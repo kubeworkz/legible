@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { Button, Tooltip } from 'antd';
 import CaretRightOutlined from '@ant-design/icons/CaretRightOutlined';
@@ -61,6 +61,8 @@ const EditorBody = styled.div`
 
 interface Props {
   initialSql?: string;
+  /** Externally-controlled SQL value (e.g. set from model/view selection) */
+  externalSql?: string;
   loading?: boolean;
   onRun: (sql: string) => void;
   onSave?: (sql: string) => void;
@@ -69,9 +71,16 @@ interface Props {
 }
 
 export default function SpreadsheetSqlEditor(props: Props) {
-  const { initialSql = '', loading = false, onRun, onSave, dirty } = props;
+  const { initialSql = '', externalSql, loading = false, onRun, onSave, dirty } = props;
   const [sql, setSql] = useState(initialSql);
   const [collapsed, setCollapsed] = useState(false);
+
+  // Accept externally-injected SQL (from model/view selector)
+  useEffect(() => {
+    if (externalSql !== undefined && externalSql !== sql) {
+      setSql(externalSql);
+    }
+  }, [externalSql]);
 
   const handleRun = useCallback(() => {
     if (sql.trim()) {

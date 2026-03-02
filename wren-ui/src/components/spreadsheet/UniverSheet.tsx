@@ -1,6 +1,6 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
-import { Alert, Spin, Empty } from 'antd';
+import { Alert, Spin } from 'antd';
 import { ApolloError } from '@apollo/client';
 import { parseGraphQLError } from '@/utils/errorHandler';
 
@@ -18,10 +18,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border: 1px solid var(--gray-4);
-  border-radius: 8px;
-  overflow: hidden;
-  background: white;
+  position: relative;
 `;
 
 const UniverContainer = styled.div`
@@ -29,16 +26,10 @@ const UniverContainer = styled.div`
   min-height: 0;
   position: relative;
 
-  /* Hide Univer's own toolbar and header — we only want the grid */
-  .univer-toolbar {
-    display: none !important;
-  }
-  .univer-formula-bar {
-    display: none !important;
-  }
-  .univer-sheet-bar {
-    display: none !important;
-  }
+  /* Hide Univer's own toolbar, formula bar, sheet tabs — we only want the grid */
+  .univer-toolbar,
+  .univer-formula-bar,
+  .univer-sheet-bar,
   .univer-header {
     display: none !important;
   }
@@ -47,41 +38,22 @@ const UniverContainer = styled.div`
   }
 `;
 
-const CenteredState = styled.div`
+const SpinOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  background: rgba(255, 255, 255, 0.7);
+`;
+
+const ErrorContainer = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px;
-`;
-
-const TableHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: var(--gray-2);
-  border-bottom: 1px solid var(--gray-4);
-  min-height: 36px;
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--gray-7);
-  }
-
-  .row-count {
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--gray-6);
-    text-transform: none;
-    letter-spacing: 0;
-  }
 `;
 
 // ── Types ───────────────────────────────────────────────
@@ -91,13 +63,13 @@ interface ColumnMeta {
   type: string;
 }
 
-interface Props {
+export interface UniverSheetProps {
   columns?: ColumnMeta[];
   data?: any[][];
   loading?: boolean;
   error?: ApolloError | null;
-  /** True when no SQL has been run yet */
-  empty?: boolean;
+  /** Overlay element to render on top of the empty grid */
+  overlay?: React.ReactNode;
 }
 
 // ── Helpers ─────────────────────────────────────────────
@@ -109,20 +81,16 @@ interface Props {
 function buildCellData(
   columns: ColumnMeta[],
   data: any[][],
-): Record<number, Record<number, { v: string | number | boolean }>> {
-  const cellData: Record<
-    number,
-    Record<number, { v: string | number | boolean }>
-  > = {};
+): Record<number, Record<number, any>> {
+  const cellData: Record<number, Record<number, any>> = {};
 
   // Row 0: Header row with bold styling
   cellData[0] = {};
   columns.forEach((col, colIdx) => {
     cellData[0][colIdx] = {
       v: col.name,
-      // Bold header
       s: { bl: 1, fs: 11, bg: { rgb: '#F5F5F5' } },
-    } as any;
+    };
   });
 
   // Data rows (offset by 1 for header)
@@ -144,20 +112,59 @@ function buildCellData(
   return cellData;
 }
 
+function buildWorkbookData(columns: ColumnMeta[], data: any[][]) {
+  return {
+    id: 'spreadsheet-preview',
+    name: 'Preview',
+    appVersion: '0.16.0',
+    locale: LocaleType.EN_US,
+    sheetOrder: ['sheet1'],
+    styles: {},
+    sheets: {
+      sheet1: {
+        id: 'sheet1',
+        name: 'Results',
+        rowCount: Math.max(data.length + 2, 50),
+        columnCount: Math.max(columns.length, 26),
+        cellData: buildCellData(columns, data),
+        columnData: columns.reduce(
+          (acc, col, idx) => {
+            acc[idx] = {
+              w: Math.max(col.name.length * 9 + 24, 120),
+            };
+            return acc;
+          },
+          {} as Record<number, { w: number }>,
+        ),
+        freeze: {
+          startRow: 1,
+          startColumn: 0,
+          ySplit: 1,
+          xSplit: 0,
+        },
+      },
+    },
+  };
+}
+
 // ── Component ───────────────────────────────────────────
 
-export default function UniverSheet(props: Props) {
-  const { columns = [], data = [], loading = false, error, empty } = props;
+export default function UniverSheet(props: UniverSheetProps) {
+  const { columns = [], data = [], loading = false, error, overlay } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<FUniver | null>(null);
 
-  // Build the workbook data whenever columns/data change
-  const workbookData = useMemo(() => {
-    if (columns.length === 0) return null;
+  const hasData = columns.length > 0;
 
+  // Build workbook data — either real data or empty sheet
+  const workbookData = useMemo(() => {
+    if (hasData) {
+      return buildWorkbookData(columns, data);
+    }
+    // Empty workbook — just an empty grid (Univer shows Column A, B, C… headers)
     return {
-      id: 'spreadsheet-preview',
-      name: 'Preview',
+      id: 'spreadsheet-empty',
+      name: 'New Spreadsheet',
       appVersion: '0.16.0',
       locale: LocaleType.EN_US,
       sheetOrder: ['sheet1'],
@@ -165,35 +172,18 @@ export default function UniverSheet(props: Props) {
       sheets: {
         sheet1: {
           id: 'sheet1',
-          name: 'Results',
-          rowCount: data.length + 2, // +1 for header, +1 buffer
-          columnCount: columns.length,
-          cellData: buildCellData(columns, data),
-          // Set column widths based on header text length
-          columnData: columns.reduce(
-            (acc, col, idx) => {
-              acc[idx] = {
-                w: Math.max(col.name.length * 9 + 24, 100),
-              };
-              return acc;
-            },
-            {} as Record<number, { w: number }>,
-          ),
-          // Freeze the header row
-          freeze: {
-            startRow: 1,
-            startColumn: 0,
-            ySplit: 1,
-            xSplit: 0,
-          },
+          name: 'Sheet1',
+          rowCount: 100,
+          columnCount: 26,
+          cellData: {},
         },
       },
     };
-  }, [columns, data]);
+  }, [columns, data, hasData]);
 
   // Initialize and update Univer instance
   useEffect(() => {
-    if (!containerRef.current || !workbookData || loading) return;
+    if (!containerRef.current) return;
 
     // Clean up previous instance
     if (univerAPIRef.current) {
@@ -228,7 +218,7 @@ export default function UniverSheet(props: Props) {
       }
       univerAPIRef.current = null;
     };
-  }, [workbookData, loading]);
+  }, [workbookData]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -243,63 +233,37 @@ export default function UniverSheet(props: Props) {
     };
   }, []);
 
-  // Error state
+  // Error state — show above the grid
   if (error) {
-    const { message, shortMessage } = parseGraphQLError(error);
+    const { message: msg, shortMessage } = parseGraphQLError(error);
     return (
       <Container>
-        <TableHeader>
-          <span className="header-left">Results</span>
-        </TableHeader>
-        <CenteredState>
+        <ErrorContainer>
           <Alert
             message={shortMessage}
-            description={message}
+            description={msg}
             type="error"
             showIcon
             style={{ maxWidth: 600 }}
           />
-        </CenteredState>
-      </Container>
-    );
-  }
-
-  // Empty state — no SQL has been run yet
-  if (empty && !loading && columns.length === 0) {
-    return (
-      <Container>
-        <TableHeader>
-          <span className="header-left">Results</span>
-        </TableHeader>
-        <CenteredState>
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="Write a SQL query above and click Run to see results"
-          />
-        </CenteredState>
+        </ErrorContainer>
       </Container>
     );
   }
 
   return (
     <Container>
-      <TableHeader>
-        <span className="header-left">
-          Results
-          {data.length > 0 && (
-            <span className="row-count">
-              ({data.length} row{data.length !== 1 ? 's' : ''})
-            </span>
-          )}
-        </span>
-      </TableHeader>
-      {loading ? (
-        <CenteredState>
+      <UniverContainer ref={containerRef} />
+
+      {/* Loading spinner overlay */}
+      {loading && (
+        <SpinOverlay>
           <Spin tip="Running query..." />
-        </CenteredState>
-      ) : (
-        <UniverContainer ref={containerRef} />
+        </SpinOverlay>
       )}
+
+      {/* Data source selection overlay (when no data yet) */}
+      {!hasData && !loading && overlay}
     </Container>
   );
 }

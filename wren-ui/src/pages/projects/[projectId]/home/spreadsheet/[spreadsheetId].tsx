@@ -11,6 +11,7 @@ import SiderLayout from '@/components/layouts/SiderLayout';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SpreadsheetSqlEditor from '@/components/spreadsheet/SpreadsheetSqlEditor';
 import UniverSheetDynamic from '@/components/spreadsheet/UniverSheetDynamic';
+import DataSourceOverlay from '@/components/spreadsheet/DataSourceOverlay';
 import {
   useSpreadsheetQuery,
   useUpdateSpreadsheetMutation,
@@ -126,11 +127,14 @@ export default function SpreadsheetDetail() {
   const [currentSql, setCurrentSql] = useState('');
   const [sqlDirty, setSqlDirty] = useState(false);
   const [hasRun, setHasRun] = useState(false);
+  const [showSqlEditor, setShowSqlEditor] = useState(false);
+  const [externalSql, setExternalSql] = useState<string | undefined>(undefined);
 
   // Sync initial SQL from the loaded spreadsheet
   useEffect(() => {
     if (spreadsheet?.sourceSql && !hasRun) {
       setCurrentSql(spreadsheet.sourceSql);
+      setShowSqlEditor(true); // Show editor if spreadsheet already has SQL
     }
   }, [spreadsheet?.sourceSql]);
 
@@ -187,6 +191,21 @@ export default function SpreadsheetDetail() {
     }
   }, [spreadsheet?.sourceSql, spreadsheetId]);
 
+  // ── Data source overlay handlers ─────────────────────
+  const handleSelectModelView = useCallback(
+    (sql: string, _name: string) => {
+      setExternalSql(sql);
+      setShowSqlEditor(true);
+      // Auto-run the generated SQL
+      handleRunSql(sql);
+    },
+    [handleRunSql],
+  );
+
+  const handleCreateFromSql = useCallback(() => {
+    setShowSqlEditor(true);
+  }, []);
+
   return (
     <SiderLayout loading={false} sidebar={homeSidebar}>
       <PageContainer>
@@ -237,13 +256,16 @@ export default function SpreadsheetDetail() {
           </div>
         </Header>
 
-        <SpreadsheetSqlEditor
-          initialSql={spreadsheet?.sourceSql || ''}
-          loading={previewLoading}
-          onRun={handleRunSql}
-          onSave={handleSaveSql}
-          dirty={sqlDirty}
-        />
+        {showSqlEditor && (
+          <SpreadsheetSqlEditor
+            initialSql={spreadsheet?.sourceSql || ''}
+            externalSql={externalSql}
+            loading={previewLoading}
+            onRun={handleRunSql}
+            onSave={handleSaveSql}
+            dirty={sqlDirty}
+          />
+        )}
 
         <GridArea>
           <UniverSheetDynamic
@@ -251,7 +273,14 @@ export default function SpreadsheetDetail() {
             data={resultData?.data}
             loading={previewLoading}
             error={previewError || null}
-            empty={!hasRun}
+            overlay={
+              !hasRun ? (
+                <DataSourceOverlay
+                  onSelectModelView={handleSelectModelView}
+                  onCreateFromSql={handleCreateFromSql}
+                />
+              ) : undefined
+            }
           />
         </GridArea>
       </PageContainer>
