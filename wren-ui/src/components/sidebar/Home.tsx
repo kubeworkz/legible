@@ -184,6 +184,14 @@ export default function Home(props: Props) {
     [folderModal],
   );
 
+  const handleManageAccess = useCallback(
+    (_folderId: number) => {
+      // TODO: wire to Manage Access modal (coming next)
+      console.log('Manage access for folder', _folderId);
+    },
+    [],
+  );
+
   const handleFolderModalSubmit = useCallback(
     async (values: { name: string }) => {
       const defaultValue = folderModal.state.defaultValue as any;
@@ -205,6 +213,7 @@ export default function Home(props: Props) {
         onCreateFolder={onFolderCreate ? handleFolderCreate : undefined}
         onRenameFolder={onFolderRename ? handleFolderRenameFromSelector : undefined}
         onDeleteFolder={onFolderDelete}
+        onManageAccess={handleManageAccess}
       />
       <FolderContentList
         folderGroup={currentGroup}

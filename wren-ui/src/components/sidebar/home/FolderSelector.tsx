@@ -6,6 +6,8 @@ import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
 import DownOutlined from '@ant-design/icons/DownOutlined';
 import EditOutlined from '@ant-design/icons/EditOutlined';
+import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
+import UsergroupAddOutlined from '@ant-design/icons/UsergroupAddOutlined';
 import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import { DeleteFolderModal } from '@/components/modals/DeleteModal';
@@ -138,6 +140,25 @@ function getFolderMenuIcon(type: string) {
   }
 }
 
+const FolderActionMenu = styled(Menu)`
+  min-width: 180px;
+
+  .ant-dropdown-menu-item {
+    font-size: 13px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .delete-item {
+    color: var(--red-5);
+    &:hover {
+      color: var(--red-6);
+    }
+  }
+`;
+
 interface Props {
   folders: FolderItem[];
   selectedFolderId: number;
@@ -145,6 +166,7 @@ interface Props {
   onCreateFolder?: () => void;
   onRenameFolder?: (id: number, name: string) => void;
   onDeleteFolder?: (id: number) => Promise<void>;
+  onManageAccess?: (id: number) => void;
 }
 
 export default function FolderSelector(props: Props) {
@@ -155,14 +177,13 @@ export default function FolderSelector(props: Props) {
     onCreateFolder,
     onRenameFolder,
     onDeleteFolder,
+    onManageAccess,
   } = props;
 
   const selectedFolder = useMemo(
     () => folders.find((f) => f.id === selectedFolderId) || folders[0],
     [folders, selectedFolderId],
   );
-
-  const isCustomFolder = selectedFolder?.type === 'custom';
 
   const menuItems = useMemo(() => {
     const items: any[] = folders.map((folder) => ({
@@ -194,35 +215,46 @@ export default function FolderSelector(props: Props) {
   }, [folders, onCreateFolder, onSelectFolder]);
 
   const folderActionMenu = useMemo(() => {
-    if (!isCustomFolder || !selectedFolder) return null;
-    return (
-      <Menu
-        items={[
-          {
-            label: (
-              <>
-                <EditOutlined className="mr-2" />
-                Rename
-              </>
-            ),
-            key: 'rename-folder',
-            onClick: () => {
-              // We pass the current name — the parent will open a modal
-              onRenameFolder?.(selectedFolder.id, selectedFolder.name);
-            },
-          },
-          {
-            label: (
-              <DeleteFolderModal
-                onConfirm={() => onDeleteFolder?.(selectedFolder.id)}
-              />
-            ),
-            key: 'delete-folder',
-          },
-        ]}
-      />
-    );
-  }, [isCustomFolder, selectedFolder, onRenameFolder, onDeleteFolder]);
+    if (!selectedFolder) return null;
+
+    const items: any[] = [
+      {
+        label: (
+          <>
+            <EditOutlined />
+            Rename
+          </>
+        ),
+        key: 'rename-folder',
+        onClick: () => {
+          onRenameFolder?.(selectedFolder.id, selectedFolder.name);
+        },
+      },
+      {
+        label: (
+          <>
+            <UsergroupAddOutlined />
+            Manage access
+          </>
+        ),
+        key: 'manage-access',
+        onClick: () => {
+          onManageAccess?.(selectedFolder.id);
+        },
+      },
+      {
+        label: (
+          <DeleteFolderModal
+            onConfirm={() => onDeleteFolder?.(selectedFolder.id)}
+          />
+        ),
+        key: 'delete-folder',
+        className: 'delete-item',
+      },
+    ];
+
+    return <FolderActionMenu items={items} />;
+  }, [selectedFolder, onRenameFolder, onDeleteFolder, onManageAccess]);
 
   if (!selectedFolder) return null;
 
@@ -240,11 +272,11 @@ export default function FolderSelector(props: Props) {
         </TriggerButton>
       </Dropdown>
 
-      {isCustomFolder && folderActionMenu && (
+      {folderActionMenu && (
         <Dropdown
           trigger={['click']}
           overlay={folderActionMenu}
-          overlayStyle={{ minWidth: 150 }}
+          overlayStyle={{ minWidth: 180 }}
         >
           <KebabButton>
             <MoreOutlined />
