@@ -12,6 +12,8 @@ import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SpreadsheetSqlEditor from '@/components/spreadsheet/SpreadsheetSqlEditor';
 import SpreadsheetToolbar from '@/components/spreadsheet/SpreadsheetToolbar';
 import type { ColumnConfig, SortState } from '@/components/spreadsheet/ColumnManager';
+import SpreadsheetSearch from '@/components/spreadsheet/SpreadsheetSearch';
+import type { SearchMatch } from '@/components/spreadsheet/SpreadsheetSearch';
 import {
   applyColumnConfigs,
   exportToCSV,
@@ -211,6 +213,31 @@ export default function SpreadsheetDetail() {
     },
     [],
   );
+
+  // ── Search state ──────────────────────────────────────
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchMatches, setSearchMatches] = useState<SearchMatch[]>([]);
+  const [activeMatchIndex, setActiveMatchIndex] = useState(0);
+
+  const handleSearchChange = useCallback(
+    (_term: string, matches: SearchMatch[], activeIdx: number) => {
+      setSearchMatches(matches);
+      setActiveMatchIndex(activeIdx);
+    },
+    [],
+  );
+
+  // Ctrl+F / Cmd+F to open search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        setSearchVisible(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Initialize column configs when query results arrive
   useEffect(() => {
@@ -465,6 +492,8 @@ export default function SpreadsheetDetail() {
             onExportExcel={handleExportExcel}
             sort={sort}
             onSortChange={handleSortChange}
+            onSearch={() => setSearchVisible(true)}
+            searchActive={searchVisible}
           />
         )}
 
@@ -487,6 +516,29 @@ export default function SpreadsheetDetail() {
             error={previewError || null}
             columnConfigs={columnConfigs}
             sort={sort}
+            searchMatches={searchMatches}
+            activeMatchIndex={activeMatchIndex}
+            searchOverlay={
+              searchVisible ? (
+                <SpreadsheetSearch
+                  visible={searchVisible}
+                  onClose={() => {
+                    setSearchVisible(false);
+                    setSearchMatches([]);
+                    setActiveMatchIndex(0);
+                  }}
+                  columnCount={resultData?.columns?.length || 0}
+                  rowCount={resultData?.data?.length || 0}
+                  onSearchChange={handleSearchChange}
+                  data={resultData?.data as any[][] | undefined}
+                  columnNames={
+                    (resultData?.columns as { name: string }[] | undefined)?.map(
+                      (c) => c.name,
+                    ) || []
+                  }
+                />
+              ) : undefined
+            }
             overlay={
               !hasRun ? (
                 <DataSourceOverlay

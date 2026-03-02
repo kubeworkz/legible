@@ -11,6 +11,7 @@ import DownOutlined from '@ant-design/icons/DownOutlined';
 import ExportOutlined from '@ant-design/icons/ExportOutlined';
 import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
 import FileTextOutlined from '@ant-design/icons/FileTextOutlined';
+import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import ColumnManager, { ColumnConfig, SortState } from './ColumnManager';
 
 // ── Styles ──────────────────────────────────────────────
@@ -131,6 +132,10 @@ export interface SpreadsheetToolbarProps {
   sort?: SortState | null;
   /** Called when sort changes */
   onSortChange?: (sort: SortState | null) => void;
+  /** Called when Search is clicked */
+  onSearch?: () => void;
+  /** Whether search is currently active */
+  searchActive?: boolean;
 }
 
 // ── Component ───────────────────────────────────────────
@@ -150,6 +155,8 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
     onExportExcel,
     sort,
     onSortChange,
+    onSearch,
+    searchActive = false,
   } = props;
 
   const handleSave = useCallback(() => {
@@ -299,6 +306,23 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
             <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
           </ToolbarButton>
         </Dropdown>
+      </ToolbarSection>
+
+      <StyledDivider type="vertical" />
+
+      {/* ── Search ── */}
+      <ToolbarSection>
+        <Tooltip title="Search data (Ctrl+F)">
+          <ToolbarButton
+            size="small"
+            icon={<SearchOutlined />}
+            onClick={onSearch}
+            disabled={!hasData || loading}
+            style={searchActive ? { background: 'var(--gray-3)', borderColor: 'var(--gray-5)' } : undefined}
+          >
+            Search
+          </ToolbarButton>
+        </Tooltip>
       </ToolbarSection>
     </ToolbarContainer>
   );

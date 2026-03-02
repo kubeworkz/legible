@@ -1,9 +1,10 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { Alert, Spin } from 'antd';
 import { ApolloError } from '@apollo/client';
 import { parseGraphQLError } from '@/utils/errorHandler';
 import type { ColumnConfig, SortState } from './ColumnManager';
+import type { SearchMatch } from './SpreadsheetSearch';
 
 // Univer imports — these are client-only (canvas-based rendering)
 import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core';
@@ -104,6 +105,14 @@ export interface UniverSheetProps {
   columnConfigs?: ColumnConfig[];
   /** Current sort state */
   sort?: SortState | null;
+  /** Search term for highlighting */
+  searchTerm?: string;
+  /** Search matches for highlighting */
+  searchMatches?: SearchMatch[];
+  /** Active search match index */
+  activeMatchIndex?: number;
+  /** Search bar overlay element */
+  searchOverlay?: React.ReactNode;
 }
 
 // ── Type classification helpers ─────────────────────────
@@ -174,8 +183,23 @@ function buildCellData(
   columns: ColumnMeta[],
   data: any[][],
   sort?: SortState | null,
+  searchMatches?: SearchMatch[],
+  activeMatchIndex?: number,
 ): Record<number, Record<number, any>> {
   const cellData: Record<number, Record<number, any>> = {};
+
+  // Build a set of highlighted cells for fast lookup
+  const matchSet = new Set<string>();
+  let activeKey = '';
+  if (searchMatches && searchMatches.length > 0) {
+    searchMatches.forEach((m, idx) => {
+      // rowIndex -1 = header row (grid row 0), data rows offset by 1
+      const gridRow = m.rowIndex === -1 ? 0 : m.rowIndex + 1;
+      const key = `${gridRow}:${m.colIndex}`;
+      matchSet.add(key);
+      if (idx === activeMatchIndex) activeKey = key;
+    });
+  }
 
   // Row 0: Header row with type icon prefix + bold styling + sort indicator
   cellData[0] = {};
@@ -187,12 +211,15 @@ function buildCellData(
           ? ' ▲'
           : ' ▼'
         : '';
+    const key = `0:${colIdx}`;
+    const isMatch = matchSet.has(key);
+    const isActive = key === activeKey;
     cellData[0][colIdx] = {
       v: `${icon}  ${col.name}${sortArrow}`,
       s: {
         bl: 1,
         fs: 11,
-        bg: { rgb: sort?.columnName === col.name ? '#E6F7FF' : '#F0F0F0' },
+        bg: { rgb: isActive ? '#FFF566' : isMatch ? '#FFFBE6' : sort?.columnName === col.name ? '#E6F7FF' : '#F0F0F0' },
         cl: { rgb: sort?.columnName === col.name ? '#1D39C4' : '#434343' },
       },
     };
@@ -205,6 +232,10 @@ function buildCellData(
       if (colIdx >= columns.length) return;
 
       const colType = columns[colIdx].type;
+      const cellKey = `${rowIdx + 1}:${colIdx}`;
+      const isMatch = matchSet.has(cellKey);
+      const isActive = cellKey === activeKey;
+      const highlightBg = isActive ? '#FFF566' : isMatch ? '#FFFBE6' : undefined;
 
       // NULL / undefined — italic gray
       if (value === null || value === undefined) {
@@ -214,6 +245,7 @@ function buildCellData(
             it: 1,
             cl: { rgb: '#BFBFBF' },
             fs: 11,
+            ...(highlightBg && { bg: { rgb: highlightBg } }),
           },
         };
         return;
@@ -229,6 +261,7 @@ function buildCellData(
             cl: { rgb: boolVal ? '#389E0D' : '#CF1322' },
             fs: 12,
             bl: 1,
+            ...(highlightBg && { bg: { rgb: highlightBg } }),
           },
         };
         return;
@@ -242,6 +275,7 @@ function buildCellData(
             ht: 3, // right align
             cl: { rgb: '#1D39C4' },
             fs: 11,
+            ...(highlightBg && { bg: { rgb: highlightBg } }),
           },
         };
         return;
@@ -258,6 +292,7 @@ function buildCellData(
           s: {
             cl: { rgb: '#531DAB' },
             fs: 11,
+            ...(highlightBg && { bg: { rgb: highlightBg } }),
           },
         };
         return;
@@ -270,6 +305,7 @@ function buildCellData(
           s: {
             cl: { rgb: '#8C8C8C' },
             fs: 10,
+            ...(highlightBg && { bg: { rgb: highlightBg } }),
           },
         };
         return;
@@ -278,7 +314,10 @@ function buildCellData(
       // Default — plain text
       cellData[rowIdx + 1][colIdx] = {
         v: value,
-        s: { fs: 11 },
+        s: {
+          fs: 11,
+          ...(highlightBg && { bg: { rgb: highlightBg } }),
+        },
       };
     });
   });
@@ -299,7 +338,13 @@ function formatDate(d: Date, colType: string): string {
   return `${datePart} ${timePart}`;
 }
 
-function buildWorkbookData(columns: ColumnMeta[], data: any[][], sort?: SortState | null) {
+function buildWorkbookData(
+  columns: ColumnMeta[],
+  data: any[][],
+  sort?: SortState | null,
+  searchMatchesList?: SearchMatch[],
+  activeMatchIdx?: number,
+) {
   return {
     id: 'spreadsheet-preview',
     name: 'Preview',
@@ -313,7 +358,7 @@ function buildWorkbookData(columns: ColumnMeta[], data: any[][], sort?: SortStat
         name: 'Results',
         rowCount: Math.max(data.length + 2, 50),
         columnCount: Math.max(columns.length, 26),
-        cellData: buildCellData(columns, data, sort),
+        cellData: buildCellData(columns, data, sort, searchMatchesList, activeMatchIdx),
         columnData: columns.reduce(
           (acc, col, idx) => {
             acc[idx] = {
@@ -337,7 +382,11 @@ function buildWorkbookData(columns: ColumnMeta[], data: any[][], sort?: SortStat
 // ── Component ───────────────────────────────────────────
 
 export default function UniverSheet(props: UniverSheetProps) {
-  const { columns = [], data = [], loading = false, error, overlay, columnConfigs, sort } = props;
+  const {
+    columns = [], data = [], loading = false, error, overlay,
+    columnConfigs, sort, searchTerm, searchMatches, activeMatchIndex,
+    searchOverlay,
+  } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<FUniver | null>(null);
 
@@ -399,7 +448,7 @@ export default function UniverSheet(props: UniverSheetProps) {
   // Build workbook data — either real data or empty sheet
   const workbookData = useMemo(() => {
     if (hasData) {
-      return buildWorkbookData(filteredColumns, sortedData, sort);
+      return buildWorkbookData(filteredColumns, sortedData, sort, searchMatches, activeMatchIndex);
     }
     // Empty workbook — just an empty grid (Univer shows Column A, B, C… headers)
     return {
@@ -419,7 +468,7 @@ export default function UniverSheet(props: UniverSheetProps) {
         },
       },
     };
-  }, [filteredColumns, sortedData, hasData, sort]);
+  }, [filteredColumns, sortedData, hasData, sort, searchMatches, activeMatchIndex]);
 
   // Initialize and update Univer instance
   useEffect(() => {
@@ -493,6 +542,9 @@ export default function UniverSheet(props: UniverSheetProps) {
 
   return (
     <Container>
+      {/* Search overlay (floating bar) */}
+      {searchOverlay}
+
       <UniverContainer ref={containerRef} />
 
       {/* Loading spinner overlay */}
