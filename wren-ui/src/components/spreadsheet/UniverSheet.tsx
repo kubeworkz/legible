@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Alert, Spin } from 'antd';
 import { ApolloError } from '@apollo/client';
 import { parseGraphQLError } from '@/utils/errorHandler';
-import type { ColumnConfig } from './ColumnManager';
+import type { ColumnConfig, SortState } from './ColumnManager';
 
 // Univer imports — these are client-only (canvas-based rendering)
 import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core';
@@ -102,6 +102,8 @@ export interface UniverSheetProps {
   overlay?: React.ReactNode;
   /** Column configs controlling visibility and order */
   columnConfigs?: ColumnConfig[];
+  /** Current sort state */
+  sort?: SortState | null;
 }
 
 // ── Type classification helpers ─────────────────────────
@@ -171,20 +173,27 @@ function isDateType(type: string): boolean {
 function buildCellData(
   columns: ColumnMeta[],
   data: any[][],
+  sort?: SortState | null,
 ): Record<number, Record<number, any>> {
   const cellData: Record<number, Record<number, any>> = {};
 
-  // Row 0: Header row with type icon prefix + bold styling
+  // Row 0: Header row with type icon prefix + bold styling + sort indicator
   cellData[0] = {};
   columns.forEach((col, colIdx) => {
     const icon = getTypeIcon(col.type);
+    const sortArrow =
+      sort?.columnName === col.name
+        ? sort.direction === 'asc'
+          ? ' ▲'
+          : ' ▼'
+        : '';
     cellData[0][colIdx] = {
-      v: `${icon}  ${col.name}`,
+      v: `${icon}  ${col.name}${sortArrow}`,
       s: {
         bl: 1,
         fs: 11,
-        bg: { rgb: '#F0F0F0' },
-        cl: { rgb: '#434343' },
+        bg: { rgb: sort?.columnName === col.name ? '#E6F7FF' : '#F0F0F0' },
+        cl: { rgb: sort?.columnName === col.name ? '#1D39C4' : '#434343' },
       },
     };
   });
@@ -290,7 +299,7 @@ function formatDate(d: Date, colType: string): string {
   return `${datePart} ${timePart}`;
 }
 
-function buildWorkbookData(columns: ColumnMeta[], data: any[][]) {
+function buildWorkbookData(columns: ColumnMeta[], data: any[][], sort?: SortState | null) {
   return {
     id: 'spreadsheet-preview',
     name: 'Preview',
@@ -304,7 +313,7 @@ function buildWorkbookData(columns: ColumnMeta[], data: any[][]) {
         name: 'Results',
         rowCount: Math.max(data.length + 2, 50),
         columnCount: Math.max(columns.length, 26),
-        cellData: buildCellData(columns, data),
+        cellData: buildCellData(columns, data, sort),
         columnData: columns.reduce(
           (acc, col, idx) => {
             acc[idx] = {
@@ -328,7 +337,7 @@ function buildWorkbookData(columns: ColumnMeta[], data: any[][]) {
 // ── Component ───────────────────────────────────────────
 
 export default function UniverSheet(props: UniverSheetProps) {
-  const { columns = [], data = [], loading = false, error, overlay, columnConfigs } = props;
+  const { columns = [], data = [], loading = false, error, overlay, columnConfigs, sort } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<FUniver | null>(null);
 
@@ -357,12 +366,40 @@ export default function UniverSheet(props: UniverSheetProps) {
     return { filteredColumns: fc, filteredData: fd };
   }, [columns, data, columnConfigs]);
 
+  // Apply sort to filtered data
+  const sortedData = useMemo(() => {
+    if (!sort || !sort.columnName || filteredColumns.length === 0) {
+      return filteredData;
+    }
+
+    const sortColIdx = filteredColumns.findIndex((c) => c.name === sort.columnName);
+    if (sortColIdx === -1) return filteredData;
+
+    const colType = filteredColumns[sortColIdx].type;
+    const isNum = isNumericType(colType);
+    const multiplier = sort.direction === 'asc' ? 1 : -1;
+
+    return [...filteredData].sort((a, b) => {
+      const va = a[sortColIdx];
+      const vb = b[sortColIdx];
+
+      // Nulls always last
+      if (va === null || va === undefined) return 1;
+      if (vb === null || vb === undefined) return -1;
+
+      if (isNum) {
+        return (Number(va) - Number(vb)) * multiplier;
+      }
+      return String(va).localeCompare(String(vb)) * multiplier;
+    });
+  }, [filteredData, filteredColumns, sort]);
+
   const hasData = filteredColumns.length > 0;
 
   // Build workbook data — either real data or empty sheet
   const workbookData = useMemo(() => {
     if (hasData) {
-      return buildWorkbookData(filteredColumns, filteredData);
+      return buildWorkbookData(filteredColumns, sortedData, sort);
     }
     // Empty workbook — just an empty grid (Univer shows Column A, B, C… headers)
     return {
@@ -382,7 +419,7 @@ export default function UniverSheet(props: UniverSheetProps) {
         },
       },
     };
-  }, [filteredColumns, filteredData, hasData]);
+  }, [filteredColumns, sortedData, hasData, sort]);
 
   // Initialize and update Univer instance
   useEffect(() => {
@@ -492,6 +529,11 @@ export default function UniverSheet(props: UniverSheetProps) {
             <span style={{ color: 'var(--gray-6)' }}>
               {filteredColumns.map((c) => c.type).filter((v, i, a) => a.indexOf(v) === i).length} data type{filteredColumns.map((c) => c.type).filter((v, i, a) => a.indexOf(v) === i).length !== 1 ? 's' : ''}
             </span>
+            {sort && (
+              <span style={{ color: 'var(--geekblue-6, #2f54eb)' }}>
+                Sorted by {sort.columnName} {sort.direction === 'asc' ? '↑' : '↓'}
+              </span>
+            )}
           </StatusSection>
         </StatusBar>
       )}

@@ -7,10 +7,19 @@ import DownOutlined from '@ant-design/icons/DownOutlined';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
 import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 import ColumnWidthOutlined from '@ant-design/icons/ColumnWidthOutlined';
+import SortAscendingOutlined from '@ant-design/icons/SortAscendingOutlined';
+import SortDescendingOutlined from '@ant-design/icons/SortDescendingOutlined';
 
 const { Text } = Typography;
 
 // ── Types ───────────────────────────────────────────────
+
+export type SortDirection = 'asc' | 'desc';
+
+export interface SortState {
+  columnName: string;
+  direction: SortDirection;
+}
 
 export interface ColumnConfig {
   /** Original column name from the query result */
@@ -26,6 +35,10 @@ export interface ColumnManagerProps {
   columns: ColumnConfig[];
   /** Called when column configs change (reorder, toggle visibility) */
   onChange: (columns: ColumnConfig[]) => void;
+  /** Current sort state */
+  sort?: SortState | null;
+  /** Called when sort changes */
+  onSortChange?: (sort: SortState | null) => void;
   /** Trigger element (rendered as children) */
   children: React.ReactNode;
 }
@@ -115,6 +128,28 @@ const ArrowBtn = styled(Button)`
   }
 `;
 
+const SortBtn = styled(Button)<{ $active?: boolean }>`
+  && {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    ${(props) =>
+      props.$active &&
+      `
+      color: var(--geekblue-6, #2f54eb);
+      border-color: var(--geekblue-5, #597ef7);
+      background: var(--geekblue-1, #f0f5ff);
+    `}
+  }
+`;
+
 const QuickActions = styled.div`
   display: flex;
   gap: 8px;
@@ -125,7 +160,7 @@ const QuickActions = styled.div`
 // ── Component ───────────────────────────────────────────
 
 export default function ColumnManager(props: ColumnManagerProps) {
-  const { columns, onChange, children } = props;
+  const { columns, onChange, sort, onSortChange, children } = props;
   const [visible, setVisible] = useState(false);
 
   const visibleCount = useMemo(
@@ -176,6 +211,23 @@ export default function ColumnManager(props: ColumnManagerProps) {
       handleShowAll();
     }
   }, [allVisible, handleShowAll, handleHideAll]);
+
+  const handleSort = useCallback(
+    (colName: string) => {
+      if (!onSortChange) return;
+      if (sort?.columnName === colName) {
+        // Cycle: asc → desc → none
+        if (sort.direction === 'asc') {
+          onSortChange({ columnName: colName, direction: 'desc' });
+        } else {
+          onSortChange(null);
+        }
+      } else {
+        onSortChange({ columnName: colName, direction: 'asc' });
+      }
+    },
+    [sort, onSortChange],
+  );
 
   const content = (
     <PanelContainer>
@@ -230,6 +282,30 @@ export default function ColumnManager(props: ColumnManagerProps) {
               </Tooltip>
 
               <ColumnType>{col.type}</ColumnType>
+
+              <Tooltip
+                title={
+                  sort?.columnName === col.name
+                    ? sort.direction === 'asc'
+                      ? 'Sorted ascending — click for descending'
+                      : 'Sorted descending — click to clear'
+                    : 'Sort by this column'
+                }
+              >
+                <SortBtn
+                  type="text"
+                  size="small"
+                  $active={sort?.columnName === col.name}
+                  onClick={() => handleSort(col.name)}
+                  icon={
+                    sort?.columnName === col.name && sort.direction === 'desc' ? (
+                      <SortDescendingOutlined />
+                    ) : (
+                      <SortAscendingOutlined />
+                    )
+                  }
+                />
+              </Tooltip>
             </ColumnRow>
           ))
         )}

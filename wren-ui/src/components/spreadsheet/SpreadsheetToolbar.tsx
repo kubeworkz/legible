@@ -11,7 +11,7 @@ import DownOutlined from '@ant-design/icons/DownOutlined';
 import ExportOutlined from '@ant-design/icons/ExportOutlined';
 import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
 import FileTextOutlined from '@ant-design/icons/FileTextOutlined';
-import ColumnManager, { ColumnConfig } from './ColumnManager';
+import ColumnManager, { ColumnConfig, SortState } from './ColumnManager';
 
 // ── Styles ──────────────────────────────────────────────
 
@@ -127,6 +127,10 @@ export interface SpreadsheetToolbarProps {
   onExportCSV?: () => void;
   /** Called when export Excel is requested */
   onExportExcel?: () => void;
+  /** Current sort state */
+  sort?: SortState | null;
+  /** Called when sort changes */
+  onSortChange?: (sort: SortState | null) => void;
 }
 
 // ── Component ───────────────────────────────────────────
@@ -144,6 +148,8 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
     hasData = false,
     onExportCSV,
     onExportExcel,
+    sort,
+    onSortChange,
   } = props;
 
   const handleSave = useCallback(() => {
@@ -241,6 +247,8 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
         <ColumnManager
           columns={columnConfigs}
           onChange={onColumnConfigsChange || (() => {})}
+          sort={sort}
+          onSortChange={onSortChange}
         >
           <ToolbarButton
             size="small"

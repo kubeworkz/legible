@@ -11,7 +11,7 @@ import SiderLayout from '@/components/layouts/SiderLayout';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SpreadsheetSqlEditor from '@/components/spreadsheet/SpreadsheetSqlEditor';
 import SpreadsheetToolbar from '@/components/spreadsheet/SpreadsheetToolbar';
-import type { ColumnConfig } from '@/components/spreadsheet/ColumnManager';
+import type { ColumnConfig, SortState } from '@/components/spreadsheet/ColumnManager';
 import {
   applyColumnConfigs,
   exportToCSV,
@@ -202,6 +202,16 @@ export default function SpreadsheetDetail() {
   const [columnConfigs, setColumnConfigs] = useState<ColumnConfig[]>([]);
   const columnConfigsInitialized = useRef(false);
 
+  // ── Sort state ────────────────────────────────────────
+  const [sort, setSort] = useState<SortState | null>(null);
+
+  const handleSortChange = useCallback(
+    (newSort: SortState | null) => {
+      setSort(newSort);
+    },
+    [],
+  );
+
   // Initialize column configs when query results arrive
   useEffect(() => {
     if (!resultData?.columns || resultData.columns.length === 0) return;
@@ -305,6 +315,7 @@ export default function SpreadsheetDetail() {
     setCurrentSql(savedSql);
     setExternalSql(savedSql); // Push back into the editor
     setSqlDirty(false);
+    setSort(null); // Clear sort on discard
 
     // Reset column configs to saved state
     if (spreadsheet?.columnsMetadata) {
@@ -452,6 +463,8 @@ export default function SpreadsheetDetail() {
             hasData={!!resultData?.columns && resultData.columns.length > 0}
             onExportCSV={handleExportCSV}
             onExportExcel={handleExportExcel}
+            sort={sort}
+            onSortChange={handleSortChange}
           />
         )}
 
@@ -473,6 +486,7 @@ export default function SpreadsheetDetail() {
             loading={previewLoading}
             error={previewError || null}
             columnConfigs={columnConfigs}
+            sort={sort}
             overlay={
               !hasRun ? (
                 <DataSourceOverlay
