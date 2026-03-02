@@ -2,6 +2,8 @@ export enum Path {
   Home = '/projects/[projectId]/home',
   HomeDashboard = '/projects/[projectId]/home/dashboard',
   HomeDashboardDetail = '/projects/[projectId]/home/dashboard/[dashboardId]',
+  HomeSpreadsheet = '/projects/[projectId]/home/spreadsheet',
+  HomeSpreadsheetDetail = '/projects/[projectId]/home/spreadsheet/[spreadsheetId]',
   Thread = '/projects/[projectId]/home/[id]',
   Modeling = '/projects/[projectId]/modeling',
   Onboarding = '/projects/[projectId]/setup',

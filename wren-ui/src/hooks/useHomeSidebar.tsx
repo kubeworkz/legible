@@ -14,12 +14,19 @@ import {
   useDeleteDashboardMutation,
 } from '@/apollo/client/graphql/dashboard.generated';
 import {
+  useSpreadsheetsQuery,
+  useCreateSpreadsheetMutation,
+  useUpdateSpreadsheetMutation,
+  useDeleteSpreadsheetMutation,
+} from '@/apollo/client/graphql/spreadsheet.generated';
+import {
   useFoldersQuery,
   useCreateFolderMutation,
   useUpdateFolderMutation,
   useDeleteFolderMutation,
   useMoveDashboardToFolderMutation,
   useMoveThreadToFolderMutation,
+  useMoveSpreadsheetToFolderMutation,
   useReorderFoldersMutation,
 } from '@/apollo/client/graphql/folder.generated';
 
@@ -41,6 +48,7 @@ export interface FolderGroup {
   folder: FolderItem;
   dashboards: SidebarItem[];
   threads: SidebarItem[];
+  spreadsheets: SidebarItem[];
 }
 
 export default function useHomeSidebar() {
@@ -64,6 +72,9 @@ export default function useHomeSidebar() {
     onError: (error) => console.error(error),
   });
   const [moveThreadToFolder] = useMoveThreadToFolderMutation({
+    onError: (error) => console.error(error),
+  });
+  const [moveSpreadsheetToFolder] = useMoveSpreadsheetToFolderMutation({
     onError: (error) => console.error(error),
   });
   const [reorderFolders] = useReorderFoldersMutation({
@@ -105,6 +116,98 @@ export default function useHomeSidebar() {
   const onDelete = async (id) => {
     await deleteThread({ variables: { where: { id: Number(id) } } });
     refetch();
+  };
+
+  // --- Spreadsheets ---
+  const { data: spreadsheetsData, refetch: refetchSpreadsheets } =
+    useSpreadsheetsQuery({
+      fetchPolicy: 'cache-and-network',
+    });
+  const [createSpreadsheet] = useCreateSpreadsheetMutation({
+    onError: (error) => console.error(error),
+  });
+  const [updateSpreadsheet] = useUpdateSpreadsheetMutation({
+    onError: (error) => console.error(error),
+  });
+  const [deleteSpreadsheetMutation] = useDeleteSpreadsheetMutation({
+    onError: (error) => console.error(error),
+  });
+
+  const spreadsheets: SidebarItem[] = useMemo(
+    () =>
+      (spreadsheetsData?.spreadsheets || []).map((s) => ({
+        id: s.id.toString(),
+        name: s.name,
+        folderId: s.folderId,
+      })),
+    [spreadsheetsData],
+  );
+
+  const onSpreadsheetSelect = (selectKeys: string[]) => {
+    const spreadsheetId = selectKeys[0];
+    router.push(
+      buildPath(Path.HomeSpreadsheetDetail, currentProjectId).replace(
+        '[spreadsheetId]',
+        spreadsheetId,
+      ),
+    );
+  };
+
+  const onSpreadsheetRename = async (id: string, newName: string) => {
+    await updateSpreadsheet({
+      variables: { where: { id: Number(id) }, data: { name: newName } },
+    });
+    refetchSpreadsheets();
+  };
+
+  const onSpreadsheetDelete = async (id: string) => {
+    await deleteSpreadsheetMutation({
+      variables: { where: { id: Number(id) } },
+    });
+    await refetchSpreadsheets();
+    const remaining = spreadsheets.filter((s) => s.id !== id);
+    if (remaining.length > 0) {
+      router.push(
+        buildPath(Path.HomeSpreadsheetDetail, currentProjectId).replace(
+          '[spreadsheetId]',
+          remaining[0].id,
+        ),
+      );
+    } else {
+      router.push(buildPath(Path.Home, currentProjectId));
+    }
+  };
+
+  const onSpreadsheetCreate = async (folderId?: number) => {
+    const targetFolderId = folderId ?? folders.find((f) => f.type === 'public')?.id;
+    const result = await createSpreadsheet({
+      variables: {
+        data: {
+          name: 'Untitled Spreadsheet',
+          ...(targetFolderId ? { folderId: targetFolderId } : {}),
+        },
+      },
+    });
+    await refetchSpreadsheets();
+    const newId = result.data?.createSpreadsheet?.id;
+    if (newId) {
+      router.push(
+        buildPath(Path.HomeSpreadsheetDetail, currentProjectId).replace(
+          '[spreadsheetId]',
+          String(newId),
+        ),
+      );
+    }
+  };
+
+  const onMoveSpreadsheetToFolder = async (
+    spreadsheetId: number,
+    folderId: number | null,
+  ) => {
+    await moveSpreadsheetToFolder({
+      variables: { data: { spreadsheetId, folderId } },
+    });
+    refetchSpreadsheets();
   };
 
   // --- Dashboards ---
@@ -221,17 +324,20 @@ export default function useHomeSidebar() {
         folder,
         dashboards: dashboards.filter((d) => d.folderId === folder.id),
         threads: threads.filter((t) => t.folderId === folder.id),
+        spreadsheets: spreadsheets.filter((s) => s.folderId === folder.id),
       });
     }
 
     // Items without a folder go into the public folder or an ungrouped section
     const unassignedDashboards = dashboards.filter((d) => !d.folderId);
     const unassignedThreads = threads.filter((t) => !t.folderId);
-    if (unassignedDashboards.length > 0 || unassignedThreads.length > 0) {
+    const unassignedSpreadsheets = spreadsheets.filter((s) => !s.folderId);
+    if (unassignedDashboards.length > 0 || unassignedThreads.length > 0 || unassignedSpreadsheets.length > 0) {
       const publicGroup = groups.find((g) => g.folder.type === 'public');
       if (publicGroup) {
         publicGroup.dashboards.push(...unassignedDashboards);
         publicGroup.threads.push(...unassignedThreads);
+        publicGroup.spreadsheets.push(...unassignedSpreadsheets);
       } else {
         groups.push({
           folder: {
@@ -243,12 +349,13 @@ export default function useHomeSidebar() {
           },
           dashboards: unassignedDashboards,
           threads: unassignedThreads,
+          spreadsheets: unassignedSpreadsheets,
         });
       }
     }
 
     return groups;
-  }, [folders, dashboards, threads]);
+  }, [folders, dashboards, threads, spreadsheets]);
 
   const onFolderCreate = async (name: string) => {
     await createFolder({
@@ -277,6 +384,7 @@ export default function useHomeSidebar() {
     });
     refetchFolders();
     refetchDashboards();
+    refetchSpreadsheets();
     refetch();
   };
 
@@ -310,7 +418,7 @@ export default function useHomeSidebar() {
   };
 
   return {
-    data: { threads, dashboards, folders, folderGroups },
+    data: { threads, dashboards, spreadsheets, folders, folderGroups },
     onSelect,
     onRename,
     onDelete,
@@ -318,6 +426,11 @@ export default function useHomeSidebar() {
     onDashboardRename,
     onDashboardDelete,
     onDashboardCreate,
+    onSpreadsheetSelect,
+    onSpreadsheetRename,
+    onSpreadsheetDelete,
+    onSpreadsheetCreate,
+    onMoveSpreadsheetToFolder,
     onFolderCreate,
     onFolderRename,
     onFolderDelete,
@@ -327,6 +440,7 @@ export default function useHomeSidebar() {
     onReorderFolders,
     refetch,
     refetchDashboards,
+    refetchSpreadsheets,
     refetchFolders,
   };
 }

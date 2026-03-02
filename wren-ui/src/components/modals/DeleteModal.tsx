@@ -136,6 +136,13 @@ export const DeleteDashboardModal = makeDeleteModal(DefaultDeleteButton, {
     'This will permanently delete this dashboard and all its items. Are you sure you want to proceed?',
 });
 
+export const DeleteSpreadsheetModal = makeDeleteModal(DefaultDeleteButton, {
+  icon: <DeleteOutlined className="mr-2" />,
+  itemName: 'spreadsheet',
+  content:
+    'This will permanently delete this spreadsheet. Are you sure you want to proceed?',
+});
+
 export const DeleteFolderModal = makeDeleteModal(DefaultDeleteButton, {
   icon: <DeleteOutlined className="mr-2" />,
   itemName: 'folder',

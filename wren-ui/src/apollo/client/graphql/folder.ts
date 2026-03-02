@@ -90,6 +90,12 @@ export const MOVE_THREAD_TO_FOLDER = gql`
   }
 `;
 
+export const MOVE_SPREADSHEET_TO_FOLDER = gql`
+  mutation MoveSpreadsheetToFolder($data: MoveSpreadsheetToFolderInput!) {
+    moveSpreadsheetToFolder(data: $data)
+  }
+`;
+
 export const REORDER_FOLDERS = gql`
   mutation ReorderFolders($data: ReorderFoldersInput!) {
     reorderFolders(data: $data) {

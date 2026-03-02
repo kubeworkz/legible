@@ -22,6 +22,7 @@ export interface Props {
   data: {
     threads: SidebarItem[];
     dashboards: SidebarItem[];
+    spreadsheets: SidebarItem[];
     folders: any[];
     folderGroups: FolderGroup[];
   };
@@ -32,12 +33,17 @@ export interface Props {
   onDashboardRename: (id: string, newName: string) => Promise<void>;
   onDashboardDelete: (id: string) => Promise<void>;
   onDashboardCreate: (folderId?: number) => Promise<void>;
+  onSpreadsheetSelect: (selectKeys: string[]) => void;
+  onSpreadsheetRename: (id: string, newName: string) => Promise<void>;
+  onSpreadsheetDelete: (id: string) => Promise<void>;
+  onSpreadsheetCreate: (folderId?: number) => Promise<void>;
   onFolderCreate?: (name: string) => Promise<void>;
   onFolderRename?: (id: number, name: string) => Promise<void>;
   onFolderDelete?: (id: number) => Promise<void>;
   onUpdateFolderVisibility?: (id: number, visibility: string) => Promise<void>;
   onMoveDashboardToFolder?: (dashboardId: number, folderId: number | null) => Promise<void>;
   onMoveThreadToFolder?: (threadId: number, folderId: number | null) => Promise<void>;
+  onMoveSpreadsheetToFolder?: (spreadsheetId: number, folderId: number | null) => Promise<void>;
   onReorderFolders?: (orders: Array<{ id: number; sortOrder: number }>) => Promise<void>;
 }
 
@@ -51,12 +57,17 @@ export default function Home(props: Props) {
     onDashboardRename,
     onDashboardDelete,
     onDashboardCreate,
+    onSpreadsheetSelect,
+    onSpreadsheetRename,
+    onSpreadsheetDelete,
+    onSpreadsheetCreate,
     onFolderCreate,
     onFolderRename,
     onFolderDelete,
     onUpdateFolderVisibility,
     onMoveDashboardToFolder,
     onMoveThreadToFolder,
+    onMoveSpreadsheetToFolder,
   } = props;
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -114,12 +125,15 @@ export default function Home(props: Props) {
   // Determine selected key from URL
   useEffect(() => {
     const dashboardId = router.query?.dashboardId as string;
+    const spreadsheetId = router.query?.spreadsheetId as string;
     if (dashboardId) {
       setSelectedKey(`dashboard-${dashboardId}`);
+    } else if (spreadsheetId) {
+      setSelectedKey(`spreadsheet-${spreadsheetId}`);
     } else if (params?.id) {
       setSelectedKey(`thread-${params.id}`);
     }
-  }, [params?.id, router.query?.dashboardId]);
+  }, [params?.id, router.query?.dashboardId, router.query?.spreadsheetId]);
 
   // ── Handlers ─────────────────────────────────────────
 
@@ -139,33 +153,39 @@ export default function Home(props: Props) {
       setSelectedKey(key);
       if (key.startsWith('dashboard-')) {
         onDashboardSelect([key.replace('dashboard-', '')]);
+      } else if (key.startsWith('spreadsheet-')) {
+        onSpreadsheetSelect([key.replace('spreadsheet-', '')]);
       } else if (key.startsWith('thread-')) {
         onSelect([key.replace('thread-', '')]);
       }
     },
-    [onDashboardSelect, onSelect],
+    [onDashboardSelect, onSpreadsheetSelect, onSelect],
   );
 
   const onUnifiedRename = useCallback(
     async (id: string, newName: string) => {
       if (id.startsWith('dashboard-')) {
         await onDashboardRename(id.replace('dashboard-', ''), newName);
+      } else if (id.startsWith('spreadsheet-')) {
+        await onSpreadsheetRename(id.replace('spreadsheet-', ''), newName);
       } else if (id.startsWith('thread-')) {
         await onRename(id.replace('thread-', ''), newName);
       }
     },
-    [onDashboardRename, onRename],
+    [onDashboardRename, onSpreadsheetRename, onRename],
   );
 
   const onUnifiedDelete = useCallback(
     async (id: string) => {
       if (id.startsWith('dashboard-')) {
         await onDashboardDelete(id.replace('dashboard-', ''));
+      } else if (id.startsWith('spreadsheet-')) {
+        await onSpreadsheetDelete(id.replace('spreadsheet-', ''));
       } else if (id.startsWith('thread-')) {
         await onDeleteThread(id.replace('thread-', ''));
       }
     },
-    [onDashboardDelete, onDeleteThread],
+    [onDashboardDelete, onSpreadsheetDelete, onDeleteThread],
   );
 
   const onMoveItemToFolder = useCallback(
@@ -173,12 +193,15 @@ export default function Home(props: Props) {
       if (itemId.startsWith('dashboard-')) {
         const dashboardId = Number(itemId.replace('dashboard-', ''));
         onMoveDashboardToFolder?.(dashboardId, folderId);
+      } else if (itemId.startsWith('spreadsheet-')) {
+        const spreadsheetId = Number(itemId.replace('spreadsheet-', ''));
+        onMoveSpreadsheetToFolder?.(spreadsheetId, folderId);
       } else if (itemId.startsWith('thread-')) {
         const threadId = Number(itemId.replace('thread-', ''));
         onMoveThreadToFolder?.(threadId, folderId);
       }
     },
-    [onMoveDashboardToFolder, onMoveThreadToFolder],
+    [onMoveDashboardToFolder, onMoveSpreadsheetToFolder, onMoveThreadToFolder],
   );
 
   // ── Folder operations for selector ───────────────────
@@ -253,6 +276,7 @@ export default function Home(props: Props) {
         onRename={onUnifiedRename}
         onDelete={onUnifiedDelete}
         onDashboardCreate={onDashboardCreate}
+        onSpreadsheetCreate={onSpreadsheetCreate}
         onThreadCreate={handleNewThread}
         onMoveToFolder={onMoveItemToFolder}
       />

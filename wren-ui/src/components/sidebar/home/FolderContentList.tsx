@@ -7,8 +7,9 @@ import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import FolderOutlined from '@ant-design/icons/FolderOutlined';
 import DashboardOutlined from '@ant-design/icons/DashboardOutlined';
 import MessageOutlined from '@ant-design/icons/MessageOutlined';
+import TableOutlined from '@ant-design/icons/TableOutlined';
 import TreeTitleInput from '@/components/sidebar/home/TreeTitleInput';
-import { DeleteThreadModal, DeleteDashboardModal } from '@/components/modals/DeleteModal';
+import { DeleteThreadModal, DeleteDashboardModal, DeleteSpreadsheetModal } from '@/components/modals/DeleteModal';
 import type { FolderGroup, SidebarItem } from '@/hooks/useHomeSidebar';
 import type { MoveToFolderOption } from './TreeTitle';
 
@@ -172,6 +173,7 @@ interface Props {
   onRename: (id: string, newName: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onDashboardCreate: (folderId?: number) => Promise<void>;
+  onSpreadsheetCreate: (folderId?: number) => Promise<void>;
   onThreadCreate?: () => void;
   onMoveToFolder?: (itemId: string, folderId: number) => void;
 }
@@ -182,7 +184,7 @@ function ContentItem(props: {
   itemKey: string;
   name: string;
   selected: boolean;
-  deleteModal: 'thread' | 'dashboard';
+  deleteModal: 'thread' | 'dashboard' | 'spreadsheet';
   moveToFolderOptions: MoveToFolderOption[];
   onSelect: (key: string) => void;
   onRename: (id: string, newName: string) => Promise<void>;
@@ -229,7 +231,11 @@ function ContentItem(props: {
   }
 
   const DeleteModal =
-    deleteModal === 'dashboard' ? DeleteDashboardModal : DeleteThreadModal;
+    deleteModal === 'dashboard'
+      ? DeleteDashboardModal
+      : deleteModal === 'spreadsheet'
+        ? DeleteSpreadsheetModal
+        : DeleteThreadModal;
 
   const menuItems: any[] = [
     {
@@ -311,7 +317,7 @@ function ContentSection(props: {
   count: number;
   items: SidebarItem[];
   keyPrefix: string;
-  deleteModal: 'thread' | 'dashboard';
+  deleteModal: 'thread' | 'dashboard' | 'spreadsheet';
   selectedKey: string | null;
   moveToFolderOptions: MoveToFolderOption[];
   onNew?: () => void;
@@ -390,6 +396,7 @@ export default function FolderContentList(props: Props) {
     onRename,
     onDelete,
     onDashboardCreate,
+    onSpreadsheetCreate,
     onThreadCreate,
     onMoveToFolder,
   } = props;
@@ -400,6 +407,12 @@ export default function FolderContentList(props: Props) {
     }
   }, [folderGroup, onDashboardCreate]);
 
+  const handleNewSpreadsheet = useCallback(() => {
+    if (folderGroup) {
+      onSpreadsheetCreate(folderGroup.folder.id);
+    }
+  }, [folderGroup, onSpreadsheetCreate]);
+
   if (!folderGroup) {
     return (
       <Container>
@@ -408,7 +421,7 @@ export default function FolderContentList(props: Props) {
     );
   }
 
-  const { folder, dashboards, threads } = folderGroup;
+  const { folder, dashboards, threads, spreadsheets } = folderGroup;
 
   // Exclude current folder from move-to options
   const moveOptions = allFolders.filter((f) => f.id !== folder.id);
@@ -441,6 +454,22 @@ export default function FolderContentList(props: Props) {
         selectedKey={selectedKey}
         moveToFolderOptions={moveOptions}
         onNew={onThreadCreate}
+        onSelect={onSelect}
+        onRename={onRename}
+        onDelete={onDelete}
+        onMoveToFolder={onMoveToFolder}
+      />
+
+      <ContentSection
+        icon={<TableOutlined className="section-icon" />}
+        label="Spreadsheets"
+        count={spreadsheets.length}
+        items={spreadsheets}
+        keyPrefix="spreadsheet"
+        deleteModal="spreadsheet"
+        selectedKey={selectedKey}
+        moveToFolderOptions={moveOptions}
+        onNew={handleNewSpreadsheet}
         onSelect={onSelect}
         onRename={onRename}
         onDelete={onDelete}

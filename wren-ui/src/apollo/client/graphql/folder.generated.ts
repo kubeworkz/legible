@@ -414,6 +414,45 @@ export type MoveThreadToFolderMutationHookResult = ReturnType<
   typeof useMoveThreadToFolderMutation
 >;
 
+// ── Move Spreadsheet to Folder ──────────────────────────────
+
+export type MoveSpreadsheetToFolderMutationVariables = Types.Exact<{
+  data: Types.MoveSpreadsheetToFolderInput;
+}>;
+
+export type MoveSpreadsheetToFolderMutation = {
+  __typename?: 'Mutation';
+  moveSpreadsheetToFolder: boolean;
+};
+
+export const MoveSpreadsheetToFolderDocument = gql`
+  mutation MoveSpreadsheetToFolder($data: MoveSpreadsheetToFolderInput!) {
+    moveSpreadsheetToFolder(data: $data)
+  }
+`;
+
+export type MoveSpreadsheetToFolderMutationFn = Apollo.MutationFunction<
+  MoveSpreadsheetToFolderMutation,
+  MoveSpreadsheetToFolderMutationVariables
+>;
+
+export function useMoveSpreadsheetToFolderMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    MoveSpreadsheetToFolderMutation,
+    MoveSpreadsheetToFolderMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    MoveSpreadsheetToFolderMutation,
+    MoveSpreadsheetToFolderMutationVariables
+  >(MoveSpreadsheetToFolderDocument, options);
+}
+
+export type MoveSpreadsheetToFolderMutationHookResult = ReturnType<
+  typeof useMoveSpreadsheetToFolderMutation
+>;
+
 // ── Reorder Folders ─────────────────────────────────────────
 
 export type ReorderFoldersMutationFn = Apollo.MutationFunction<
