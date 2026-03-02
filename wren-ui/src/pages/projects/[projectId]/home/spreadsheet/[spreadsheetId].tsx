@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SpreadsheetSqlEditor from '@/components/spreadsheet/SpreadsheetSqlEditor';
-import SpreadsheetGrid from '@/components/spreadsheet/SpreadsheetGrid';
+import UniverSheetDynamic from '@/components/spreadsheet/UniverSheetDynamic';
 import {
   useSpreadsheetQuery,
   useUpdateSpreadsheetMutation,
@@ -246,7 +246,7 @@ export default function SpreadsheetDetail() {
         />
 
         <GridArea>
-          <SpreadsheetGrid
+          <UniverSheetDynamic
             columns={resultData?.columns}
             data={resultData?.data}
             loading={previewLoading}
