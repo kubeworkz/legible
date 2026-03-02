@@ -96,6 +96,7 @@ export class FolderService implements IFolderService {
     folderAccessRepository,
     dashboardRepository,
     threadRepository,
+    spreadsheetRepository,
   }: {
     folderRepository: IFolderRepository;
     folderAccessRepository: IFolderAccessRepository;

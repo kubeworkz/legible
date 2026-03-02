@@ -1,8 +1,6 @@
 import {
   BaseRepository,
   IBasicRepository,
-  PaginationRequest,
-  PaginationResponse,
 } from './baseRepository';
 
 export interface Spreadsheet {
@@ -18,12 +16,7 @@ export interface Spreadsheet {
   updatedAt: Date;
 }
 
-export interface ISpreadsheetRepository extends IBasicRepository<Spreadsheet> {
-  paginatedFindAllBy(
-    filter: Partial<Spreadsheet>,
-    pagination: PaginationRequest,
-  ): Promise<PaginationResponse<Spreadsheet>>;
-}
+export interface ISpreadsheetRepository extends IBasicRepository<Spreadsheet> {}
 
 export class SpreadsheetRepository
   extends BaseRepository<Spreadsheet>
@@ -31,12 +24,5 @@ export class SpreadsheetRepository
 {
   constructor(knexPg) {
     super({ knexPg, tableName: 'spreadsheet' });
-  }
-
-  public async paginatedFindAllBy(
-    filter: Partial<Spreadsheet>,
-    pagination: PaginationRequest,
-  ): Promise<PaginationResponse<Spreadsheet>> {
-    return await super.paginatedFindAllBy(filter, pagination);
   }
 }
