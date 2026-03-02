@@ -221,7 +221,7 @@ export default function FolderSelector(props: Props) {
       {
         label: (
           <>
-            <EditOutlined />
+            <EditOutlined className="mr-2" />
             Rename
           </>
         ),
@@ -233,7 +233,7 @@ export default function FolderSelector(props: Props) {
       {
         label: (
           <>
-            <UsergroupAddOutlined />
+            <UsergroupAddOutlined className="mr-2" />
             Manage access
           </>
         ),
