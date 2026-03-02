@@ -445,22 +445,6 @@ export default function FolderContentList(props: Props) {
       />
 
       <ContentSection
-        icon={<MessageOutlined className="section-icon" />}
-        label="Threads"
-        count={threads.length}
-        items={threads}
-        keyPrefix="thread"
-        deleteModal="thread"
-        selectedKey={selectedKey}
-        moveToFolderOptions={moveOptions}
-        onNew={onThreadCreate}
-        onSelect={onSelect}
-        onRename={onRename}
-        onDelete={onDelete}
-        onMoveToFolder={onMoveToFolder}
-      />
-
-      <ContentSection
         icon={<TableOutlined className="section-icon" />}
         label="Spreadsheets"
         count={spreadsheets.length}
@@ -470,6 +454,22 @@ export default function FolderContentList(props: Props) {
         selectedKey={selectedKey}
         moveToFolderOptions={moveOptions}
         onNew={handleNewSpreadsheet}
+        onSelect={onSelect}
+        onRename={onRename}
+        onDelete={onDelete}
+        onMoveToFolder={onMoveToFolder}
+      />
+
+      <ContentSection
+        icon={<MessageOutlined className="section-icon" />}
+        label="Threads"
+        count={threads.length}
+        items={threads}
+        keyPrefix="thread"
+        deleteModal="thread"
+        selectedKey={selectedKey}
+        moveToFolderOptions={moveOptions}
+        onNew={onThreadCreate}
         onSelect={onSelect}
         onRename={onRename}
         onDelete={onDelete}
