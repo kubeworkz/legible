@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { Popover, Checkbox, Button, Tooltip, Typography, Empty } from 'antd';
+import { Popover, Button, Tooltip, Typography, Empty } from 'antd';
+import Checkbox from 'antd/lib/checkbox';
 import UpOutlined from '@ant-design/icons/UpOutlined';
 import DownOutlined from '@ant-design/icons/DownOutlined';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
