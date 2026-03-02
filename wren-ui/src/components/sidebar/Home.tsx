@@ -1,11 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import styled from 'styled-components';
 import { useRouter } from 'next/router';
 import { useParams } from 'next/navigation';
 import { Path, buildPath } from '@/utils/enum';
-import { useSidebarTreeState } from './SidebarTree';
-import FolderTree from './home/FolderTree';
+import FolderSelector from './home/FolderSelector';
+import FolderContentList from './home/FolderContentList';
+import FolderModal from '@/components/modals/FolderModal';
+import useModalAction from '@/hooks/useModalAction';
 import useProject from '@/hooks/useProject';
 import type { FolderGroup, SidebarItem } from '@/hooks/useHomeSidebar';
+
+const SidebarContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
 
 export interface Props {
   data: {
@@ -44,25 +53,64 @@ export default function Home(props: Props) {
     onFolderDelete,
     onMoveDashboardToFolder,
     onMoveThreadToFolder,
-    onReorderFolders,
   } = props;
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { currentProjectId } = useProject();
   const { folderGroups } = data;
   const bp = (path: Path) => buildPath(path, currentProjectId);
+  const folderModal = useModalAction();
 
-  const { treeSelectedKeys, setTreeSelectedKeys } = useSidebarTreeState();
+  // ── Selected folder ──────────────────────────────────
+  const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
+
+  // Default to first (public) folder when folderGroups load
+  useEffect(() => {
+    if (folderGroups.length > 0 && selectedFolderId === null) {
+      setSelectedFolderId(folderGroups[0].folder.id);
+    }
+    // If the selected folder was deleted, fall back to first
+    if (
+      selectedFolderId !== null &&
+      !folderGroups.find((g) => g.folder.id === selectedFolderId)
+    ) {
+      setSelectedFolderId(folderGroups[0]?.folder.id ?? null);
+    }
+  }, [folderGroups, selectedFolderId]);
+
+  const currentGroup = useMemo(
+    () => folderGroups.find((g) => g.folder.id === selectedFolderId) || null,
+    [folderGroups, selectedFolderId],
+  );
+
+  const allFolders = useMemo(
+    () =>
+      folderGroups.map((g) => ({
+        id: g.folder.id,
+        name: g.folder.name,
+      })),
+    [folderGroups],
+  );
+
+  const folders = useMemo(
+    () => folderGroups.map((g) => g.folder),
+    [folderGroups],
+  );
+
+  // ── Selected item key ────────────────────────────────
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   // Determine selected key from URL
   useEffect(() => {
     const dashboardId = router.query?.dashboardId as string;
     if (dashboardId) {
-      setTreeSelectedKeys([`dashboard-${dashboardId}`]);
+      setSelectedKey(`dashboard-${dashboardId}`);
     } else if (params?.id) {
-      setTreeSelectedKeys([`thread-${params.id}`]);
+      setSelectedKey(`thread-${params.id}`);
     }
   }, [params?.id, router.query?.dashboardId]);
+
+  // ── Handlers ─────────────────────────────────────────
 
   const onDeleteThread = async (threadId: string) => {
     try {
@@ -75,69 +123,104 @@ export default function Home(props: Props) {
     }
   };
 
-  const onUnifiedSelect = (selectedKeys: React.Key[], _info: any) => {
-    if (selectedKeys.length === 0) return;
+  const onItemSelect = useCallback(
+    (key: string) => {
+      setSelectedKey(key);
+      if (key.startsWith('dashboard-')) {
+        onDashboardSelect([key.replace('dashboard-', '')]);
+      } else if (key.startsWith('thread-')) {
+        onSelect([key.replace('thread-', '')]);
+      }
+    },
+    [onDashboardSelect, onSelect],
+  );
 
-    setTreeSelectedKeys(selectedKeys);
+  const onUnifiedRename = useCallback(
+    async (id: string, newName: string) => {
+      if (id.startsWith('dashboard-')) {
+        await onDashboardRename(id.replace('dashboard-', ''), newName);
+      } else if (id.startsWith('thread-')) {
+        await onRename(id.replace('thread-', ''), newName);
+      }
+    },
+    [onDashboardRename, onRename],
+  );
 
-    const key = String(selectedKeys[0]);
-    if (key.startsWith('dashboard-')) {
-      const dashboardIds = selectedKeys.map((k) =>
-        String(k).replace('dashboard-', ''),
-      );
-      onDashboardSelect(dashboardIds as string[]);
-    } else if (key.startsWith('thread-')) {
-      // Thread selection — strip prefix to get raw id
-      const threadKeys = selectedKeys.map((k) =>
-        String(k).replace('thread-', ''),
-      );
-      onSelect(threadKeys);
-    }
-  };
+  const onUnifiedDelete = useCallback(
+    async (id: string) => {
+      if (id.startsWith('dashboard-')) {
+        await onDashboardDelete(id.replace('dashboard-', ''));
+      } else if (id.startsWith('thread-')) {
+        await onDeleteThread(id.replace('thread-', ''));
+      }
+    },
+    [onDashboardDelete, onDeleteThread],
+  );
 
-  const onUnifiedRename = async (id: string, newName: string) => {
-    if (id.startsWith('dashboard-')) {
-      const dashboardId = id.replace('dashboard-', '');
-      await onDashboardRename(dashboardId, newName);
-    } else if (id.startsWith('thread-')) {
-      const threadId = id.replace('thread-', '');
-      await onRename(threadId, newName);
-    }
-  };
+  const onMoveItemToFolder = useCallback(
+    (itemId: string, folderId: number) => {
+      if (itemId.startsWith('dashboard-')) {
+        const dashboardId = Number(itemId.replace('dashboard-', ''));
+        onMoveDashboardToFolder?.(dashboardId, folderId);
+      } else if (itemId.startsWith('thread-')) {
+        const threadId = Number(itemId.replace('thread-', ''));
+        onMoveThreadToFolder?.(threadId, folderId);
+      }
+    },
+    [onMoveDashboardToFolder, onMoveThreadToFolder],
+  );
 
-  const onUnifiedDelete = async (id: string) => {
-    if (id.startsWith('dashboard-')) {
-      const dashboardId = id.replace('dashboard-', '');
-      await onDashboardDelete(dashboardId);
-    } else if (id.startsWith('thread-')) {
-      const threadId = id.replace('thread-', '');
-      await onDeleteThread(threadId);
-    }
-  };
+  // ── Folder operations for selector ───────────────────
 
-  const onMoveItemToFolder = (itemId: string, folderId: number) => {
-    if (itemId.startsWith('dashboard-')) {
-      const dashboardId = Number(itemId.replace('dashboard-', ''));
-      onMoveDashboardToFolder?.(dashboardId, folderId);
-    } else if (itemId.startsWith('thread-')) {
-      const threadId = Number(itemId.replace('thread-', ''));
-      onMoveThreadToFolder?.(threadId, folderId);
-    }
-  };
+  const handleFolderCreate = useCallback(() => {
+    folderModal.openModal();
+  }, [folderModal]);
+
+  const handleFolderRenameFromSelector = useCallback(
+    (_id: number, _name: string) => {
+      // Open the modal in edit mode
+      folderModal.openModal({ id: _id, name: _name });
+    },
+    [folderModal],
+  );
+
+  const handleFolderModalSubmit = useCallback(
+    async (values: { name: string }) => {
+      const defaultValue = folderModal.state.defaultValue as any;
+      if (defaultValue?.id) {
+        await onFolderRename?.(defaultValue.id, values.name);
+      } else {
+        await onFolderCreate?.(values.name);
+      }
+    },
+    [folderModal.state.defaultValue, onFolderRename, onFolderCreate],
+  );
 
   return (
-    <FolderTree
-      folderGroups={folderGroups}
-      selectedKeys={treeSelectedKeys}
-      onSelect={onUnifiedSelect}
-      onRename={onUnifiedRename}
-      onDelete={onUnifiedDelete}
-      onDashboardCreate={onDashboardCreate}
-      onFolderCreate={onFolderCreate}
-      onFolderRename={onFolderRename}
-      onFolderDelete={onFolderDelete}
-      onMoveToFolder={onMoveItemToFolder}
-      onReorderFolders={onReorderFolders}
-    />
+    <SidebarContainer>
+      <FolderSelector
+        folders={folders}
+        selectedFolderId={selectedFolderId ?? 0}
+        onSelectFolder={setSelectedFolderId}
+        onCreateFolder={onFolderCreate ? handleFolderCreate : undefined}
+        onRenameFolder={onFolderRename ? handleFolderRenameFromSelector : undefined}
+        onDeleteFolder={onFolderDelete}
+      />
+      <FolderContentList
+        folderGroup={currentGroup}
+        allFolders={allFolders}
+        selectedKey={selectedKey}
+        onSelect={onItemSelect}
+        onRename={onUnifiedRename}
+        onDelete={onUnifiedDelete}
+        onDashboardCreate={onDashboardCreate}
+        onMoveToFolder={onMoveItemToFolder}
+      />
+      <FolderModal
+        {...folderModal.state}
+        onSubmit={handleFolderModalSubmit}
+        onClose={folderModal.closeModal}
+      />
+    </SidebarContainer>
   );
 }
