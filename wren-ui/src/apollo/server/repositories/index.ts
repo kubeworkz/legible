@@ -31,3 +31,4 @@ export * from './rlsPolicyRepository';
 export * from './userSessionPropertyValueRepository';
 export * from './folderRepository';
 export * from './folderAccessRepository';
+export * from './spreadsheetRepository';

@@ -18,6 +18,7 @@ export class FolderResolver {
     this.setFolderAccess = this.setFolderAccess.bind(this);
     this.moveDashboardToFolder = this.moveDashboardToFolder.bind(this);
     this.moveThreadToFolder = this.moveThreadToFolder.bind(this);
+    this.moveSpreadsheetToFolder = this.moveSpreadsheetToFolder.bind(this);
     this.reorderFolders = this.reorderFolders.bind(this);
   }
 
@@ -148,6 +149,17 @@ export class FolderResolver {
   ): Promise<boolean> {
     return ctx.folderService.moveThreadToFolder(
       args.data.threadId,
+      args.data.folderId,
+    );
+  }
+
+  public async moveSpreadsheetToFolder(
+    _root: any,
+    args: { data: { spreadsheetId: number; folderId: number | null } },
+    ctx: IContext,
+  ): Promise<boolean> {
+    return ctx.folderService.moveSpreadsheetToFolder(
+      args.data.spreadsheetId,
       args.data.folderId,
     );
   }

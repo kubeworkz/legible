@@ -11,6 +11,7 @@ import {
 } from '@server/repositories/folderAccessRepository';
 import { IDashboardRepository } from '@server/repositories';
 import { IThreadRepository } from '@server/repositories';
+import { ISpreadsheetRepository } from '@server/repositories/spreadsheetRepository';
 import { getLogger } from '@server/utils';
 
 const logger = getLogger('FolderService');
@@ -72,6 +73,10 @@ export interface IFolderService {
     threadId: number,
     folderId: number | null,
   ): Promise<boolean>;
+  moveSpreadsheetToFolder(
+    spreadsheetId: number,
+    folderId: number | null,
+  ): Promise<boolean>;
 
   // Reorder folders
   reorderFolders(
@@ -84,6 +89,7 @@ export class FolderService implements IFolderService {
   private folderAccessRepository: IFolderAccessRepository;
   private dashboardRepository: IDashboardRepository;
   private threadRepository: IThreadRepository;
+  private spreadsheetRepository: ISpreadsheetRepository;
 
   constructor({
     folderRepository,
@@ -95,11 +101,13 @@ export class FolderService implements IFolderService {
     folderAccessRepository: IFolderAccessRepository;
     dashboardRepository: IDashboardRepository;
     threadRepository: IThreadRepository;
+    spreadsheetRepository: ISpreadsheetRepository;
   }) {
     this.folderRepository = folderRepository;
     this.folderAccessRepository = folderAccessRepository;
     this.dashboardRepository = dashboardRepository;
     this.threadRepository = threadRepository;
+    this.spreadsheetRepository = spreadsheetRepository;
   }
 
   public async listFolders(
@@ -273,6 +281,24 @@ export class FolderService implements IFolderService {
     });
 
     logger.info(`Moved thread ${threadId} to folder ${folderId ?? 'none'}`);
+    return true;
+  }
+
+  public async moveSpreadsheetToFolder(
+    spreadsheetId: number,
+    folderId: number | null,
+  ): Promise<boolean> {
+    if (folderId !== null) {
+      await this.getFolder(folderId);
+    }
+
+    await this.spreadsheetRepository.updateOne(spreadsheetId, {
+      folderId,
+    });
+
+    logger.info(
+      `Moved spreadsheet ${spreadsheetId} to folder ${folderId ?? 'none'}`,
+    );
     return true;
   }
 

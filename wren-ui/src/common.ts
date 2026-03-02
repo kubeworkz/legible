@@ -31,8 +31,10 @@ import {
   UserSessionPropertyValueRepository,
   FolderRepository,
   FolderAccessRepository,
+  SpreadsheetRepository,
 } from '@server/repositories';
 import { FolderService } from '@server/services/folderService';
+import { SpreadsheetService } from '@server/services/spreadsheetService';
 import {
   WrenEngineAdaptor,
   WrenAIAdaptor,
@@ -107,6 +109,7 @@ export const initComponents = () => {
     new UserSessionPropertyValueRepository(knex);
   const folderRepository = new FolderRepository(knex);
   const folderAccessRepository = new FolderAccessRepository(knex);
+  const spreadsheetRepository = new SpreadsheetRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -220,6 +223,11 @@ export const initComponents = () => {
     folderAccessRepository,
     dashboardRepository,
     threadRepository,
+    spreadsheetRepository,
+  });
+  const spreadsheetService = new SpreadsheetService({
+    projectService,
+    spreadsheetRepository,
   });
 
   // background trackers
@@ -279,6 +287,7 @@ export const initComponents = () => {
     userSessionPropertyValueRepository,
     folderRepository,
     folderAccessRepository,
+    spreadsheetRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -303,6 +312,7 @@ export const initComponents = () => {
     projectApiKeyService,
     rlsPolicyService,
     folderService,
+    spreadsheetService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

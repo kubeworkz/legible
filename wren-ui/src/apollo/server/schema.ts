@@ -1263,6 +1263,43 @@ export const typeDefs = gql`
     description: String
   }
 
+  # Spreadsheet
+  type Spreadsheet {
+    id: Int!
+    projectId: Int!
+    name: String!
+    description: String
+    folderId: Int
+    sortOrder: Int!
+    sourceSql: String
+    columnsMetadata: String
+    createdAt: String
+    updatedAt: String
+  }
+
+  input SpreadsheetWhereInput {
+    id: Int!
+  }
+
+  input CreateSpreadsheetInput {
+    name: String!
+    folderId: Int
+    sourceSql: String
+  }
+
+  input UpdateSpreadsheetInput {
+    name: String
+    description: String
+    sourceSql: String
+    columnsMetadata: String
+  }
+
+  input PreviewSpreadsheetDataInput {
+    spreadsheetId: Int!
+    sql: String
+    limit: Int
+  }
+
   type SqlPair {
     id: Int!
     projectId: Int!
@@ -1484,6 +1521,11 @@ export const typeDefs = gql`
     folderId: Int
   }
 
+  input MoveSpreadsheetToFolderInput {
+    spreadsheetId: Int!
+    folderId: Int
+  }
+
   input FolderOrderInput {
     id: Int!
     sortOrder: Int!
@@ -1556,6 +1598,10 @@ export const typeDefs = gql`
     dashboards(folderId: Int): [Dashboard!]!
     dashboard(where: DashboardWhereInput): DetailedDashboard!
     dashboardItems: [DashboardItem!]!
+
+    # Spreadsheets
+    spreadsheets(folderId: Int): [Spreadsheet!]!
+    spreadsheet(where: SpreadsheetWhereInput!): Spreadsheet!
 
     # SQL Pairs
     sqlPairs: [SqlPair]!
@@ -1752,6 +1798,15 @@ export const typeDefs = gql`
     previewItemSQL(data: PreviewItemSQLInput!): PreviewItemResponse!
     setDashboardSchedule(data: SetDashboardScheduleInput!): Dashboard!
 
+    # Spreadsheets
+    createSpreadsheet(data: CreateSpreadsheetInput!): Spreadsheet!
+    updateSpreadsheet(
+      where: SpreadsheetWhereInput!
+      data: UpdateSpreadsheetInput!
+    ): Spreadsheet!
+    deleteSpreadsheet(where: SpreadsheetWhereInput!): Boolean!
+    previewSpreadsheetData(data: PreviewSpreadsheetDataInput!): JSON!
+
     # SQL Pairs
     createSqlPair(data: CreateSqlPairInput!): SqlPair!
     updateSqlPair(
@@ -1798,6 +1853,7 @@ export const typeDefs = gql`
     setFolderAccess(where: FolderAccessWhereInput!, data: SetFolderAccessInput!): [FolderAccess!]!
     moveDashboardToFolder(data: MoveDashboardToFolderInput!): Boolean!
     moveThreadToFolder(data: MoveThreadToFolderInput!): Boolean!
+    moveSpreadsheetToFolder(data: MoveSpreadsheetToFolderInput!): Boolean!
     reorderFolders(data: ReorderFoldersInput!): [Folder!]!
   }
 `;

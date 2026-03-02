@@ -14,6 +14,7 @@ import { OrgApiKeyResolver } from './resolvers/orgApiKeyResolver';
 import { ProjectApiKeyResolver } from './resolvers/projectApiKeyResolver';
 import { RlsPolicyResolver } from './resolvers/rlsPolicyResolver';
 import { FolderResolver } from './resolvers/folderResolver';
+import { SpreadsheetResolver } from './resolvers/spreadsheetResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -32,6 +33,7 @@ const orgApiKeyResolver = new OrgApiKeyResolver();
 const projectApiKeyResolver = new ProjectApiKeyResolver();
 const rlsPolicyResolver = new RlsPolicyResolver();
 const folderResolver = new FolderResolver();
+const spreadsheetResolver = new SpreadsheetResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -115,6 +117,10 @@ const resolvers = {
     folders: folderResolver.listFolders,
     folder: folderResolver.getFolder,
     folderAccess: folderResolver.getFolderAccess,
+
+    // Spreadsheets
+    spreadsheets: spreadsheetResolver.getSpreadsheets,
+    spreadsheet: spreadsheetResolver.getSpreadsheet,
   },
   Mutation: {
     // Auth
@@ -278,7 +284,14 @@ const resolvers = {
     setFolderAccess: folderResolver.setFolderAccess,
     moveDashboardToFolder: folderResolver.moveDashboardToFolder,
     moveThreadToFolder: folderResolver.moveThreadToFolder,
+    moveSpreadsheetToFolder: folderResolver.moveSpreadsheetToFolder,
     reorderFolders: folderResolver.reorderFolders,
+
+    // Spreadsheets
+    createSpreadsheet: spreadsheetResolver.createSpreadsheet,
+    updateSpreadsheet: spreadsheetResolver.updateSpreadsheet,
+    deleteSpreadsheet: spreadsheetResolver.deleteSpreadsheet,
+    previewSpreadsheetData: spreadsheetResolver.previewSpreadsheetData,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),

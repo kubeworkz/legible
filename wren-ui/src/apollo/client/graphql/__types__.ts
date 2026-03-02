@@ -1926,6 +1926,11 @@ export type MoveThreadToFolderInput = {
   folderId?: Scalars['Int'] | null;
 };
 
+export type MoveSpreadsheetToFolderInput = {
+  spreadsheetId: Scalars['Int'];
+  folderId?: Scalars['Int'] | null;
+};
+
 export type FolderOrderInput = {
   id: Scalars['Int'];
   sortOrder: Scalars['Int'];
@@ -1971,6 +1976,73 @@ export type MutationMoveThreadToFolderArgs = {
   data: MoveThreadToFolderInput;
 };
 
+export type MutationMoveSpreadsheetToFolderArgs = {
+  data: MoveSpreadsheetToFolderInput;
+};
+
 export type MutationReorderFoldersArgs = {
   data: ReorderFoldersInput;
+};
+
+// Spreadsheet types
+export type Spreadsheet = {
+  __typename?: 'Spreadsheet';
+  id: Scalars['Int'];
+  projectId: Scalars['Int'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  folderId?: Maybe<Scalars['Int']>;
+  sortOrder: Scalars['Int'];
+  sourceSql?: Maybe<Scalars['String']>;
+  columnsMetadata?: Maybe<Scalars['String']>;
+  createdAt?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['String']>;
+};
+
+export type SpreadsheetWhereInput = {
+  id: Scalars['Int'];
+};
+
+export type CreateSpreadsheetInput = {
+  name: Scalars['String'];
+  folderId?: InputMaybe<Scalars['Int']>;
+  sourceSql?: InputMaybe<Scalars['String']>;
+};
+
+export type UpdateSpreadsheetInput = {
+  name?: InputMaybe<Scalars['String']>;
+  description?: InputMaybe<Scalars['String']>;
+  sourceSql?: InputMaybe<Scalars['String']>;
+  columnsMetadata?: InputMaybe<Scalars['String']>;
+};
+
+export type PreviewSpreadsheetDataInput = {
+  spreadsheetId: Scalars['Int'];
+  sql?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Int']>;
+};
+
+export type QuerySpreadsheetsArgs = {
+  folderId?: InputMaybe<Scalars['Int']>;
+};
+
+export type QuerySpreadsheetArgs = {
+  where: SpreadsheetWhereInput;
+};
+
+export type MutationCreateSpreadsheetArgs = {
+  data: CreateSpreadsheetInput;
+};
+
+export type MutationUpdateSpreadsheetArgs = {
+  where: SpreadsheetWhereInput;
+  data: UpdateSpreadsheetInput;
+};
+
+export type MutationDeleteSpreadsheetArgs = {
+  where: SpreadsheetWhereInput;
+};
+
+export type MutationPreviewSpreadsheetDataArgs = {
+  data: PreviewSpreadsheetDataInput;
 };

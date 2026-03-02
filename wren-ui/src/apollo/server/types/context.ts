@@ -32,6 +32,7 @@ import { IRlsPolicyRepository } from '@server/repositories/rlsPolicyRepository';
 import { IUserSessionPropertyValueRepository } from '@server/repositories/userSessionPropertyValueRepository';
 import { IFolderRepository } from '@server/repositories/folderRepository';
 import { IFolderAccessRepository } from '@server/repositories/folderAccessRepository';
+import { ISpreadsheetRepository } from '@server/repositories/spreadsheetRepository';
 import {
   IQueryService,
   IAskingService,
@@ -49,6 +50,7 @@ import {
 import { IProjectApiKeyService } from '../services/projectApiKeyService';
 import { IRlsPolicyService } from '../services/rlsPolicyService';
 import { IFolderService } from '../services/folderService';
+import { ISpreadsheetService } from '../services/spreadsheetService';
 import { ITelemetry } from '@server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -95,6 +97,7 @@ export interface IContext {
   projectApiKeyService: IProjectApiKeyService;
   rlsPolicyService: IRlsPolicyService;
   folderService: IFolderService;
+  spreadsheetService: ISpreadsheetService;
 
   // repository
   projectRepository: IProjectRepository;
@@ -123,6 +126,7 @@ export interface IContext {
   userSessionPropertyValueRepository: IUserSessionPropertyValueRepository;
   folderRepository: IFolderRepository;
   folderAccessRepository: IFolderAccessRepository;
+  spreadsheetRepository: ISpreadsheetRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;

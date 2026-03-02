@@ -14,3 +14,4 @@ export * from './memberService';
 export * from './orgApiKeyService';
 export * from './projectApiKeyService';
 export * from './folderService';
+export * from './spreadsheetService';
