@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { message, Input, Button, Tooltip } from 'antd';
 import styled from 'styled-components';
 import EditOutlined from '@ant-design/icons/EditOutlined';
@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
 import SpreadsheetSqlEditor from '@/components/spreadsheet/SpreadsheetSqlEditor';
+import SpreadsheetToolbar from '@/components/spreadsheet/SpreadsheetToolbar';
 import UniverSheetDynamic from '@/components/spreadsheet/UniverSheetDynamic';
 import DataSourceOverlay from '@/components/spreadsheet/DataSourceOverlay';
 import {
@@ -191,6 +192,26 @@ export default function SpreadsheetDetail() {
     }
   }, [spreadsheet?.sourceSql, spreadsheetId]);
 
+  // ── Toolbar handlers ──────────────────────────────────
+  const handleToolbarSave = useCallback(() => {
+    if (currentSql) handleSaveSql(currentSql);
+  }, [currentSql, handleSaveSql]);
+
+  const handleDiscard = useCallback(() => {
+    const savedSql = spreadsheet?.sourceSql || '';
+    setCurrentSql(savedSql);
+    setExternalSql(savedSql); // Push back into the editor
+    setSqlDirty(false);
+    if (savedSql) {
+      handleRunSql(savedSql);
+    }
+    message.info('Changes discarded');
+  }, [spreadsheet?.sourceSql, handleRunSql]);
+
+  const handleToggleSqlEditor = useCallback(() => {
+    setShowSqlEditor((prev) => !prev);
+  }, []);
+
   // ── Data source overlay handlers ─────────────────────
   const handleSelectModelView = useCallback(
     (sql: string, _name: string) => {
@@ -255,6 +276,17 @@ export default function SpreadsheetDetail() {
             )}
           </div>
         </Header>
+
+        {hasRun && (
+          <SpreadsheetToolbar
+            dirty={sqlDirty}
+            loading={previewLoading}
+            sqlEditorVisible={showSqlEditor}
+            onSave={handleToolbarSave}
+            onDiscard={handleDiscard}
+            onToggleSqlEditor={handleToggleSqlEditor}
+          />
+        )}
 
         {showSqlEditor && (
           <SpreadsheetSqlEditor
