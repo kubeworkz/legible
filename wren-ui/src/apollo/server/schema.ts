@@ -1410,6 +1410,7 @@ export const typeDefs = gql`
   enum FolderVisibility {
     private
     shared
+    specific
   }
 
   enum FolderAccessRole {

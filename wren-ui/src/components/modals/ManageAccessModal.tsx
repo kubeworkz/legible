@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Button, Modal, Select } from 'antd';
 import GlobalOutlined from '@ant-design/icons/GlobalOutlined';
 import LockOutlined from '@ant-design/icons/LockOutlined';
+import UsergroupAddOutlined from '@ant-design/icons/UsergroupAddOutlined';
 import { FolderVisibility } from '@/apollo/client/graphql/__types__';
 
 const { Option } = Select;
@@ -73,6 +74,12 @@ const ACCESS_MODES: AccessModeConfig[] = [
     icon: <GlobalOutlined className="access-icon" />,
     label: 'Anyone in the project',
     description: 'Anyone in your project can view this folder',
+  },
+  {
+    value: FolderVisibility.specific,
+    icon: <UsergroupAddOutlined className="access-icon" />,
+    label: 'Specific people',
+    description: 'Only people you invite can view this folder',
   },
   {
     value: FolderVisibility.private,

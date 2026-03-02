@@ -1849,6 +1849,7 @@ export enum FolderType {
 export enum FolderVisibility {
   private = 'private',
   shared = 'shared',
+  specific = 'specific',
 }
 
 export enum FolderAccessRole {
