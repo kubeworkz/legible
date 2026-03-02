@@ -284,10 +284,25 @@ export class AskingResolver {
 
     const eventName = TelemetryEvent.HOME_CREATE_THREAD;
     try {
+      // Auto-assign to public folder if no folderId specified
+      let folderId = data.folderId;
+      if (folderId === undefined || folderId === null) {
+        try {
+          const project = await ctx.projectService.getCurrentProject(ctx.projectId);
+          const userId = ctx.currentUser?.id;
+          if (userId) {
+            const systemFolders = await ctx.folderService.ensureSystemFolders(project.id, userId);
+            folderId = systemFolders.public.id;
+          }
+        } catch (e) {
+          // Fall back to no folder if folder lookup fails
+        }
+      }
+
       const thread = await askingService.createThread(
         threadInput,
         ctx.projectId,
-        data.folderId,
+        folderId,
       );
       ctx.telemetry.sendEvent(eventName, {});
       return thread;

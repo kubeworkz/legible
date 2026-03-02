@@ -167,14 +167,14 @@ export default function useHomeSidebar() {
     }
   };
 
-  const onDashboardCreate = async () => {
-    // Assign new dashboards to the public folder if available
-    const publicFolder = folders.find((f) => f.type === 'public');
+  const onDashboardCreate = async (folderId?: number) => {
+    // Assign to specified folder, or public folder as fallback
+    const targetFolderId = folderId ?? folders.find((f) => f.type === 'public')?.id;
     const result = await createDashboard({
       variables: {
         data: {
           name: 'Untitled Dashboard',
-          ...(publicFolder ? { folderId: publicFolder.id } : {}),
+          ...(targetFolderId ? { folderId: targetFolderId } : {}),
         },
       },
     });

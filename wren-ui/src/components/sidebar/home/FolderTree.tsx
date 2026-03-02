@@ -115,7 +115,7 @@ interface Props {
   onSelect: (selectKeys: React.Key[], info: any) => void;
   onRename: (id: string, newName: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
-  onDashboardCreate: () => Promise<void>;
+  onDashboardCreate: (folderId?: number) => Promise<void>;
   onFolderCreate?: (name: string) => Promise<void>;
   onFolderRename?: (id: number, name: string) => Promise<void>;
   onFolderDelete?: (id: number) => Promise<void>;
@@ -361,16 +361,21 @@ export default function FolderTree(props: Props) {
       // Empty state
       if (children.length === 0) {
         children.push({
-          title: 'No items',
+          title: (
+            <span style={{ color: 'var(--gray-6)', fontStyle: 'italic' }}>
+              No dashboards or threads yet
+            </span>
+          ),
           key: `${folderKey}-empty`,
           selectable: false,
           isLeaf: true,
-          className: 'adm-treeNode adm-treeNode--empty adm-treeNode--selectNode',
+          className: 'adm-treeNode adm-treeNode--empty adm-treeNode--selectNone',
         });
       }
 
       // Build folder header with context menu for custom folders
       const isCustomFolder = folder.type === 'custom';
+      const showNewButton = folder.type === 'public' || isCustomFolder;
 
       treeData.push({
         className: 'adm-treeNode--folder-header',
@@ -383,13 +388,13 @@ export default function FolderTree(props: Props) {
               {folder.name}
             </span>
             <span className="folder-actions">
-              {folder.type === 'public' && (
+              {showNewButton && (
                 <GroupActionButton
                   size="small"
                   icon={<PlusOutlined />}
                   onClick={async (e) => {
                     e.stopPropagation();
-                    await onDashboardCreate();
+                    await onDashboardCreate(folder.id);
                   }}
                 >
                   New

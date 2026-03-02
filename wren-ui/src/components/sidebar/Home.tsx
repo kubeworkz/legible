@@ -20,7 +20,7 @@ export interface Props {
   onDashboardSelect: (selectKeys: string[]) => void;
   onDashboardRename: (id: string, newName: string) => Promise<void>;
   onDashboardDelete: (id: string) => Promise<void>;
-  onDashboardCreate: () => Promise<void>;
+  onDashboardCreate: (folderId?: number) => Promise<void>;
   onFolderCreate?: (name: string) => Promise<void>;
   onFolderRename?: (id: number, name: string) => Promise<void>;
   onFolderDelete?: (id: number) => Promise<void>;
