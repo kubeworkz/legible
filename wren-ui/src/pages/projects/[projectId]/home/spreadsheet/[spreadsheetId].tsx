@@ -138,6 +138,7 @@ export default function SpreadsheetDetail() {
   const [hasRun, setHasRun] = useState(false);
   const [showSqlEditor, setShowSqlEditor] = useState(false);
   const [externalSql, setExternalSql] = useState<string | undefined>(undefined);
+  const [fetchLimit, setFetchLimit] = useState(500);
 
   // Sync initial SQL from the loaded spreadsheet
   useEffect(() => {
@@ -157,7 +158,8 @@ export default function SpreadsheetDetail() {
   }, [previewResult]);
 
   const handleRunSql = useCallback(
-    async (sql: string) => {
+    async (sql: string, limit?: number) => {
+      const effectiveLimit = limit ?? fetchLimit;
       setCurrentSql(sql);
       setHasRun(true);
       setSqlDirty(sql !== spreadsheet?.sourceSql);
@@ -167,7 +169,7 @@ export default function SpreadsheetDetail() {
             data: {
               spreadsheetId: Number(spreadsheetId),
               sql,
-              limit: 500,
+              limit: effectiveLimit,
             },
           },
         });
@@ -175,7 +177,7 @@ export default function SpreadsheetDetail() {
         // Error is handled in the grid via previewError
       }
     },
-    [spreadsheetId, spreadsheet?.sourceSql, previewSpreadsheetData],
+    [spreadsheetId, spreadsheet?.sourceSql, previewSpreadsheetData, fetchLimit],
   );
 
   const handleSaveSql = useCallback(
@@ -238,6 +240,18 @@ export default function SpreadsheetDetail() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // ── Load More (pagination) ────────────────────────────
+  const loadedRowCount = resultData?.data?.length ?? 0;
+  const isAtLimit = loadedRowCount >= fetchLimit;
+
+  const handleLoadMore = useCallback(() => {
+    const newLimit = fetchLimit + 500;
+    setFetchLimit(newLimit);
+    if (currentSql) {
+      handleRunSql(currentSql, newLimit);
+    }
+  }, [fetchLimit, currentSql, handleRunSql]);
 
   // Initialize column configs when query results arrive
   useEffect(() => {
@@ -343,6 +357,7 @@ export default function SpreadsheetDetail() {
     setExternalSql(savedSql); // Push back into the editor
     setSqlDirty(false);
     setSort(null); // Clear sort on discard
+    setFetchLimit(500); // Reset fetch limit
 
     // Reset column configs to saved state
     if (spreadsheet?.columnsMetadata) {
@@ -518,6 +533,10 @@ export default function SpreadsheetDetail() {
             sort={sort}
             searchMatches={searchMatches}
             activeMatchIndex={activeMatchIndex}
+            isAtLimit={isAtLimit}
+            loadedRowCount={loadedRowCount}
+            fetchLimit={fetchLimit}
+            onLoadMore={handleLoadMore}
             searchOverlay={
               searchVisible ? (
                 <SpreadsheetSearch

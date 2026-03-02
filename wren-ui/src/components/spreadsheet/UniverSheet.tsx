@@ -87,6 +87,32 @@ const ErrorContainer = styled.div`
   padding: 40px;
 `;
 
+const LoadMoreBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--gold-1, #fffbe6);
+  border-top: 1px solid var(--gold-3, #ffe58f);
+  font-size: 12px;
+  color: var(--gray-8, #595959);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--gold-2, #fff1b8);
+  }
+
+  .load-more-btn {
+    color: var(--geekblue-6, #2f54eb);
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+`;
+
 // ── Types ───────────────────────────────────────────────
 
 interface ColumnMeta {
@@ -113,6 +139,14 @@ export interface UniverSheetProps {
   activeMatchIndex?: number;
   /** Search bar overlay element */
   searchOverlay?: React.ReactNode;
+  /** Whether loaded row count has reached the fetch limit */
+  isAtLimit?: boolean;
+  /** How many rows are currently loaded */
+  loadedRowCount?: number;
+  /** Current fetch limit */
+  fetchLimit?: number;
+  /** Called when "Load More" is clicked */
+  onLoadMore?: () => void;
 }
 
 // ── Type classification helpers ─────────────────────────
@@ -385,7 +419,7 @@ export default function UniverSheet(props: UniverSheetProps) {
   const {
     columns = [], data = [], loading = false, error, overlay,
     columnConfigs, sort, searchTerm, searchMatches, activeMatchIndex,
-    searchOverlay,
+    searchOverlay, isAtLimit, loadedRowCount, fetchLimit, onLoadMore,
   } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<FUniver | null>(null);
@@ -556,6 +590,14 @@ export default function UniverSheet(props: UniverSheetProps) {
 
       {/* Data source selection overlay (when no data yet) */}
       {!hasData && !loading && overlay}
+
+      {/* Load More bar — shown when the fetched row count equals the limit */}
+      {hasData && isAtLimit && !loading && (
+        <LoadMoreBar onClick={onLoadMore}>
+          Showing {loadedRowCount?.toLocaleString()} rows (limit: {fetchLimit?.toLocaleString()}).
+          <span className="load-more-btn">Load 500 more rows</span>
+        </LoadMoreBar>
+      )}
 
       {/* Status bar */}
       {hasData && (
