@@ -463,7 +463,7 @@ export default function FolderTree(props: Props) {
             size="small"
             icon={<FolderOutlined />}
             onClick={() => folderModal.openModal()}
-            style={{ padding: '4px 0', marginTop: 4 }}
+            style={{ padding: '4px 8px', marginTop: 4 }}
           >
             New Folder
           </GroupActionButton>
