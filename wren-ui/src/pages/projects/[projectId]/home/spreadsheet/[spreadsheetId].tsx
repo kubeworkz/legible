@@ -21,10 +21,15 @@ import {
 } from '@/components/spreadsheet/exportSpreadsheet';
 import UniverSheetDynamic from '@/components/spreadsheet/UniverSheetDynamic';
 import DataSourceOverlay from '@/components/spreadsheet/DataSourceOverlay';
+import SpreadsheetHistoryDrawer from '@/components/spreadsheet/SpreadsheetHistoryDrawer';
 import {
   useSpreadsheetQuery,
   useUpdateSpreadsheetMutation,
   usePreviewSpreadsheetDataMutation,
+  useSpreadsheetHistoryQuery,
+  useSaveSpreadsheetWithHistoryMutation,
+  useRestoreSpreadsheetVersionMutation,
+  useDuplicateSpreadsheetMutation,
 } from '@/apollo/client/graphql/spreadsheet.generated';
 
 const PageContainer = styled.div`
@@ -106,6 +111,33 @@ export default function SpreadsheetDetail() {
   const [editName, setEditName] = useState('');
 
   const [updateSpreadsheet] = useUpdateSpreadsheetMutation({
+    onError: (err) => message.error(err.message),
+  });
+
+  // ── History, Duplicate, Restore hooks ─────────────────
+  const [historyDrawerVisible, setHistoryDrawerVisible] = useState(false);
+  const [restoringId, setRestoringId] = useState<number | null>(null);
+
+  const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useSpreadsheetHistoryQuery({
+    variables: { where: { spreadsheetId: Number(spreadsheetId) } },
+    skip: !spreadsheetId || !historyDrawerVisible,
+    fetchPolicy: 'network-only',
+  });
+
+  const historyEntries = useMemo(
+    () => historyData?.spreadsheetHistory ?? [],
+    [historyData],
+  );
+
+  const [saveWithHistory] = useSaveSpreadsheetWithHistoryMutation({
+    onError: (err) => message.error(err.message),
+  });
+
+  const [restoreVersion] = useRestoreSpreadsheetVersionMutation({
+    onError: (err) => message.error(err.message),
+  });
+
+  const [duplicateSpreadsheet] = useDuplicateSpreadsheetMutation({
     onError: (err) => message.error(err.message),
   });
 
@@ -334,22 +366,22 @@ export default function SpreadsheetDetail() {
 
   // ── Toolbar handlers ──────────────────────────────────
   const handleToolbarSave = useCallback(() => {
-    // Save both SQL and column configs
-    const saveData: Record<string, any> = {};
-    if (currentSql) saveData.sourceSql = currentSql;
-    saveData.columnsMetadata = JSON.stringify(columnConfigs);
+    // Save with history tracking
+    const saveInput: any = {
+      spreadsheetId: Number(spreadsheetId),
+    };
+    if (currentSql) saveInput.sourceSql = currentSql;
+    saveInput.columnsMetadata = JSON.stringify(columnConfigs);
 
-    updateSpreadsheet({
-      variables: {
-        where: { id: Number(spreadsheetId) },
-        data: saveData,
-      },
+    saveWithHistory({
+      variables: { data: saveInput },
     }).then(() => {
       setSqlDirty(false);
       refetch();
+      if (historyDrawerVisible) refetchHistory();
       message.success('Saved');
     });
-  }, [currentSql, columnConfigs, spreadsheetId, updateSpreadsheet, refetch]);
+  }, [currentSql, columnConfigs, spreadsheetId, saveWithHistory, refetch, historyDrawerVisible, refetchHistory]);
 
   const handleDiscard = useCallback(() => {
     const savedSql = spreadsheet?.sourceSql || '';
@@ -426,6 +458,77 @@ export default function SpreadsheetDetail() {
       message.error('Failed to export Excel file');
     }
   }, [getExportPayload]);
+
+  // ── History handlers ─────────────────────────────────
+  const handleOpenHistory = useCallback(() => {
+    setHistoryDrawerVisible(true);
+  }, []);
+
+  const handleCloseHistory = useCallback(() => {
+    setHistoryDrawerVisible(false);
+  }, []);
+
+  const handleRestore = useCallback(
+    async (historyId: number) => {
+      setRestoringId(historyId);
+      try {
+        await restoreVersion({
+          variables: {
+            data: {
+              spreadsheetId: Number(spreadsheetId),
+              historyId,
+            },
+          },
+        });
+        await refetch();
+        await refetchHistory();
+        // Re-run the restored SQL
+        const updated = await refetch();
+        const restoredSql = updated.data?.spreadsheet?.sourceSql;
+        if (restoredSql) {
+          setCurrentSql(restoredSql);
+          setExternalSql(restoredSql);
+          setSqlDirty(false);
+          handleRunSql(restoredSql);
+        }
+        // Restore column configs
+        const restoredMeta = updated.data?.spreadsheet?.columnsMetadata;
+        if (restoredMeta) {
+          try {
+            setColumnConfigs(JSON.parse(restoredMeta));
+          } catch {
+            // leave current
+          }
+        }
+        message.success('Version restored');
+      } catch {
+        // Error handled in mutation hook
+      } finally {
+        setRestoringId(null);
+      }
+    },
+    [spreadsheetId, restoreVersion, refetch, refetchHistory, handleRunSql],
+  );
+
+  const handleDuplicate = useCallback(async () => {
+    try {
+      const result = await duplicateSpreadsheet({
+        variables: {
+          data: { spreadsheetId: Number(spreadsheetId) },
+        },
+      });
+      const newId = result.data?.duplicateSpreadsheet?.id;
+      homeSidebar.refetchSpreadsheets();
+      message.success('Spreadsheet duplicated');
+      if (newId) {
+        router.push(
+          buildPath(Path.Home, currentProjectId) + `/spreadsheet/${newId}`,
+        );
+      }
+    } catch {
+      // Error handled in mutation hook
+    }
+  }, [spreadsheetId, duplicateSpreadsheet, homeSidebar, router, currentProjectId]);
 
   // ── Data source overlay handlers ─────────────────────
   const handleSelectModelView = useCallback(
@@ -509,6 +612,9 @@ export default function SpreadsheetDetail() {
             onSortChange={handleSortChange}
             onSearch={() => setSearchVisible(true)}
             searchActive={searchVisible}
+            onHistory={handleOpenHistory}
+            historyActive={historyDrawerVisible}
+            onDuplicate={handleDuplicate}
           />
         )}
 
@@ -568,6 +674,15 @@ export default function SpreadsheetDetail() {
             }
           />
         </GridArea>
+
+        <SpreadsheetHistoryDrawer
+          visible={historyDrawerVisible}
+          onClose={handleCloseHistory}
+          entries={historyEntries as any[]}
+          loading={historyLoading}
+          onRestore={handleRestore}
+          restoringId={restoringId}
+        />
       </PageContainer>
     </SiderLayout>
   );

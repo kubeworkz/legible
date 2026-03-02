@@ -12,6 +12,7 @@ import ExportOutlined from '@ant-design/icons/ExportOutlined';
 import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
 import FileTextOutlined from '@ant-design/icons/FileTextOutlined';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
+import CopyOutlined from '@ant-design/icons/CopyOutlined';
 import ColumnManager, { ColumnConfig, SortState } from './ColumnManager';
 
 // ── Styles ──────────────────────────────────────────────
@@ -136,6 +137,12 @@ export interface SpreadsheetToolbarProps {
   onSearch?: () => void;
   /** Whether search is currently active */
   searchActive?: boolean;
+  /** Called when History is clicked */
+  onHistory?: () => void;
+  /** Whether history drawer is open */
+  historyActive?: boolean;
+  /** Called when Duplicate is clicked */
+  onDuplicate?: () => void;
 }
 
 // ── Component ───────────────────────────────────────────
@@ -157,6 +164,9 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
     onSortChange,
     onSearch,
     searchActive = false,
+    onHistory,
+    historyActive = false,
+    onDuplicate,
   } = props;
 
   const handleSave = useCallback(() => {
@@ -216,13 +226,24 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
           </ToolbarButton>
         </Tooltip>
 
-        <Tooltip title="History">
+        <Tooltip title="Version History">
           <ToolbarButton
             size="small"
             icon={<HistoryOutlined />}
-            disabled
+            onClick={onHistory}
+            style={historyActive ? { background: 'var(--gray-3)', borderColor: 'var(--gray-5)' } : undefined}
           >
             History
+          </ToolbarButton>
+        </Tooltip>
+
+        <Tooltip title="Duplicate Spreadsheet">
+          <ToolbarButton
+            size="small"
+            icon={<CopyOutlined />}
+            onClick={onDuplicate}
+          >
+            Duplicate
           </ToolbarButton>
         </Tooltip>
       </ToolbarSection>

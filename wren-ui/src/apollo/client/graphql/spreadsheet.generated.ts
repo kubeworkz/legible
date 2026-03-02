@@ -178,3 +178,122 @@ export function usePreviewSpreadsheetDataMutation(baseOptions?: Apollo.MutationH
 export type PreviewSpreadsheetDataMutationHookResult = ReturnType<typeof usePreviewSpreadsheetDataMutation>;
 export type PreviewSpreadsheetDataMutationResult = Apollo.MutationResult<PreviewSpreadsheetDataMutation>;
 export type PreviewSpreadsheetDataMutationOptions = Apollo.BaseMutationOptions<PreviewSpreadsheetDataMutation, PreviewSpreadsheetDataMutationVariables>;
+
+// --- Spreadsheet History ---
+export type SpreadsheetHistoryQueryVariables = Types.Exact<{
+  where: Types.SpreadsheetHistoryWhereInput;
+}>;
+
+export type SpreadsheetHistoryQuery = { __typename?: 'Query', spreadsheetHistory: Array<{ __typename?: 'SpreadsheetHistoryEntry', id: number, spreadsheetId: number, version: number, changeType: string, sourceSql?: string | null, columnsMetadata?: string | null, changeSummary?: string | null, createdAt: string }> };
+
+export const SpreadsheetHistoryDocument = gql`
+    query SpreadsheetHistory($where: SpreadsheetHistoryWhereInput!) {
+  spreadsheetHistory(where: $where) {
+    id
+    spreadsheetId
+    version
+    changeType
+    sourceSql
+    columnsMetadata
+    changeSummary
+    createdAt
+  }
+}
+    `;
+
+export function useSpreadsheetHistoryQuery(baseOptions: Apollo.QueryHookOptions<SpreadsheetHistoryQuery, SpreadsheetHistoryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SpreadsheetHistoryQuery, SpreadsheetHistoryQueryVariables>(SpreadsheetHistoryDocument, options);
+      }
+export function useSpreadsheetHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SpreadsheetHistoryQuery, SpreadsheetHistoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SpreadsheetHistoryQuery, SpreadsheetHistoryQueryVariables>(SpreadsheetHistoryDocument, options);
+        }
+export type SpreadsheetHistoryQueryHookResult = ReturnType<typeof useSpreadsheetHistoryQuery>;
+export type SpreadsheetHistoryLazyQueryHookResult = ReturnType<typeof useSpreadsheetHistoryLazyQuery>;
+export type SpreadsheetHistoryQueryResult = Apollo.QueryResult<SpreadsheetHistoryQuery, SpreadsheetHistoryQueryVariables>;
+
+// --- Save Spreadsheet With History ---
+export type SaveSpreadsheetWithHistoryMutationVariables = Types.Exact<{
+  data: Types.SaveSpreadsheetWithHistoryInput;
+}>;
+
+export type SaveSpreadsheetWithHistoryMutation = { __typename?: 'Mutation', saveSpreadsheetWithHistory: { __typename?: 'Spreadsheet', id: number, name: string, sourceSql?: string | null, columnsMetadata?: string | null, updatedAt?: string | null } };
+
+export const SaveSpreadsheetWithHistoryDocument = gql`
+    mutation SaveSpreadsheetWithHistory($data: SaveSpreadsheetWithHistoryInput!) {
+  saveSpreadsheetWithHistory(data: $data) {
+    id
+    name
+    sourceSql
+    columnsMetadata
+    updatedAt
+  }
+}
+    `;
+export type SaveSpreadsheetWithHistoryMutationFn = Apollo.MutationFunction<SaveSpreadsheetWithHistoryMutation, SaveSpreadsheetWithHistoryMutationVariables>;
+
+export function useSaveSpreadsheetWithHistoryMutation(baseOptions?: Apollo.MutationHookOptions<SaveSpreadsheetWithHistoryMutation, SaveSpreadsheetWithHistoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SaveSpreadsheetWithHistoryMutation, SaveSpreadsheetWithHistoryMutationVariables>(SaveSpreadsheetWithHistoryDocument, options);
+      }
+export type SaveSpreadsheetWithHistoryMutationHookResult = ReturnType<typeof useSaveSpreadsheetWithHistoryMutation>;
+export type SaveSpreadsheetWithHistoryMutationResult = Apollo.MutationResult<SaveSpreadsheetWithHistoryMutation>;
+export type SaveSpreadsheetWithHistoryMutationOptions = Apollo.BaseMutationOptions<SaveSpreadsheetWithHistoryMutation, SaveSpreadsheetWithHistoryMutationVariables>;
+
+// --- Restore Spreadsheet Version ---
+export type RestoreSpreadsheetVersionMutationVariables = Types.Exact<{
+  data: Types.RestoreSpreadsheetVersionInput;
+}>;
+
+export type RestoreSpreadsheetVersionMutation = { __typename?: 'Mutation', restoreSpreadsheetVersion: { __typename?: 'Spreadsheet', id: number, name: string, sourceSql?: string | null, columnsMetadata?: string | null, updatedAt?: string | null } };
+
+export const RestoreSpreadsheetVersionDocument = gql`
+    mutation RestoreSpreadsheetVersion($data: RestoreSpreadsheetVersionInput!) {
+  restoreSpreadsheetVersion(data: $data) {
+    id
+    name
+    sourceSql
+    columnsMetadata
+    updatedAt
+  }
+}
+    `;
+export type RestoreSpreadsheetVersionMutationFn = Apollo.MutationFunction<RestoreSpreadsheetVersionMutation, RestoreSpreadsheetVersionMutationVariables>;
+
+export function useRestoreSpreadsheetVersionMutation(baseOptions?: Apollo.MutationHookOptions<RestoreSpreadsheetVersionMutation, RestoreSpreadsheetVersionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RestoreSpreadsheetVersionMutation, RestoreSpreadsheetVersionMutationVariables>(RestoreSpreadsheetVersionDocument, options);
+      }
+export type RestoreSpreadsheetVersionMutationHookResult = ReturnType<typeof useRestoreSpreadsheetVersionMutation>;
+export type RestoreSpreadsheetVersionMutationResult = Apollo.MutationResult<RestoreSpreadsheetVersionMutation>;
+export type RestoreSpreadsheetVersionMutationOptions = Apollo.BaseMutationOptions<RestoreSpreadsheetVersionMutation, RestoreSpreadsheetVersionMutationVariables>;
+
+// --- Duplicate Spreadsheet ---
+export type DuplicateSpreadsheetMutationVariables = Types.Exact<{
+  data: Types.DuplicateSpreadsheetInput;
+}>;
+
+export type DuplicateSpreadsheetMutation = { __typename?: 'Mutation', duplicateSpreadsheet: { __typename?: 'Spreadsheet', id: number, projectId: number, name: string, folderId?: number | null, sortOrder: number, sourceSql?: string | null } };
+
+export const DuplicateSpreadsheetDocument = gql`
+    mutation DuplicateSpreadsheet($data: DuplicateSpreadsheetInput!) {
+  duplicateSpreadsheet(data: $data) {
+    id
+    projectId
+    name
+    folderId
+    sortOrder
+    sourceSql
+  }
+}
+    `;
+export type DuplicateSpreadsheetMutationFn = Apollo.MutationFunction<DuplicateSpreadsheetMutation, DuplicateSpreadsheetMutationVariables>;
+
+export function useDuplicateSpreadsheetMutation(baseOptions?: Apollo.MutationHookOptions<DuplicateSpreadsheetMutation, DuplicateSpreadsheetMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DuplicateSpreadsheetMutation, DuplicateSpreadsheetMutationVariables>(DuplicateSpreadsheetDocument, options);
+      }
+export type DuplicateSpreadsheetMutationHookResult = ReturnType<typeof useDuplicateSpreadsheetMutation>;
+export type DuplicateSpreadsheetMutationResult = Apollo.MutationResult<DuplicateSpreadsheetMutation>;
+export type DuplicateSpreadsheetMutationOptions = Apollo.BaseMutationOptions<DuplicateSpreadsheetMutation, DuplicateSpreadsheetMutationVariables>;

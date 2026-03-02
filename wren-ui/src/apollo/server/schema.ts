@@ -1300,6 +1300,39 @@ export const typeDefs = gql`
     limit: Int
   }
 
+  # Spreadsheet History (version tracking)
+  type SpreadsheetHistoryEntry {
+    id: Int!
+    spreadsheetId: Int!
+    version: Int!
+    changeType: String!
+    sourceSql: String
+    columnsMetadata: String
+    changeSummary: String
+    createdAt: String!
+  }
+
+  input SpreadsheetHistoryWhereInput {
+    spreadsheetId: Int!
+  }
+
+  input RestoreSpreadsheetVersionInput {
+    spreadsheetId: Int!
+    historyId: Int!
+  }
+
+  input DuplicateSpreadsheetInput {
+    spreadsheetId: Int!
+    name: String
+  }
+
+  input SaveSpreadsheetWithHistoryInput {
+    spreadsheetId: Int!
+    sourceSql: String
+    columnsMetadata: String
+    changeSummary: String
+  }
+
   type SqlPair {
     id: Int!
     projectId: Int!
@@ -1602,6 +1635,7 @@ export const typeDefs = gql`
     # Spreadsheets
     spreadsheets(folderId: Int): [Spreadsheet!]!
     spreadsheet(where: SpreadsheetWhereInput!): Spreadsheet!
+    spreadsheetHistory(where: SpreadsheetHistoryWhereInput!): [SpreadsheetHistoryEntry!]!
 
     # SQL Pairs
     sqlPairs: [SqlPair]!
@@ -1806,6 +1840,9 @@ export const typeDefs = gql`
     ): Spreadsheet!
     deleteSpreadsheet(where: SpreadsheetWhereInput!): Boolean!
     previewSpreadsheetData(data: PreviewSpreadsheetDataInput!): JSON!
+    saveSpreadsheetWithHistory(data: SaveSpreadsheetWithHistoryInput!): Spreadsheet!
+    restoreSpreadsheetVersion(data: RestoreSpreadsheetVersionInput!): Spreadsheet!
+    duplicateSpreadsheet(data: DuplicateSpreadsheetInput!): Spreadsheet!
 
     # SQL Pairs
     createSqlPair(data: CreateSqlPairInput!): SqlPair!

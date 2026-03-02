@@ -2046,3 +2046,53 @@ export type MutationDeleteSpreadsheetArgs = {
 export type MutationPreviewSpreadsheetDataArgs = {
   data: PreviewSpreadsheetDataInput;
 };
+
+// Spreadsheet History types
+export type SpreadsheetHistoryEntry = {
+  __typename?: 'SpreadsheetHistoryEntry';
+  id: Scalars['Int'];
+  spreadsheetId: Scalars['Int'];
+  version: Scalars['Int'];
+  changeType: Scalars['String'];
+  sourceSql?: Maybe<Scalars['String']>;
+  columnsMetadata?: Maybe<Scalars['String']>;
+  changeSummary?: Maybe<Scalars['String']>;
+  createdAt: Scalars['String'];
+};
+
+export type SpreadsheetHistoryWhereInput = {
+  spreadsheetId: Scalars['Int'];
+};
+
+export type RestoreSpreadsheetVersionInput = {
+  spreadsheetId: Scalars['Int'];
+  historyId: Scalars['Int'];
+};
+
+export type DuplicateSpreadsheetInput = {
+  spreadsheetId: Scalars['Int'];
+  name?: InputMaybe<Scalars['String']>;
+};
+
+export type SaveSpreadsheetWithHistoryInput = {
+  spreadsheetId: Scalars['Int'];
+  sourceSql?: InputMaybe<Scalars['String']>;
+  columnsMetadata?: InputMaybe<Scalars['String']>;
+  changeSummary?: InputMaybe<Scalars['String']>;
+};
+
+export type QuerySpreadsheetHistoryArgs = {
+  where: SpreadsheetHistoryWhereInput;
+};
+
+export type MutationSaveSpreadsheetWithHistoryArgs = {
+  data: SaveSpreadsheetWithHistoryInput;
+};
+
+export type MutationRestoreSpreadsheetVersionArgs = {
+  data: RestoreSpreadsheetVersionInput;
+};
+
+export type MutationDuplicateSpreadsheetArgs = {
+  data: DuplicateSpreadsheetInput;
+};

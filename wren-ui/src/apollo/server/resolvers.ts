@@ -121,6 +121,7 @@ const resolvers = {
     // Spreadsheets
     spreadsheets: spreadsheetResolver.getSpreadsheets,
     spreadsheet: spreadsheetResolver.getSpreadsheet,
+    spreadsheetHistory: spreadsheetResolver.getSpreadsheetHistory,
   },
   Mutation: {
     // Auth
@@ -292,6 +293,9 @@ const resolvers = {
     updateSpreadsheet: spreadsheetResolver.updateSpreadsheet,
     deleteSpreadsheet: spreadsheetResolver.deleteSpreadsheet,
     previewSpreadsheetData: spreadsheetResolver.previewSpreadsheetData,
+    saveSpreadsheetWithHistory: spreadsheetResolver.saveSpreadsheetWithHistory,
+    restoreSpreadsheetVersion: spreadsheetResolver.restoreSpreadsheetVersion,
+    duplicateSpreadsheet: spreadsheetResolver.duplicateSpreadsheet,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),

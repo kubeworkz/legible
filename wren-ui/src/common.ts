@@ -32,6 +32,7 @@ import {
   FolderRepository,
   FolderAccessRepository,
   SpreadsheetRepository,
+  SpreadsheetHistoryRepository,
 } from '@server/repositories';
 import { FolderService } from '@server/services/folderService';
 import { SpreadsheetService } from '@server/services/spreadsheetService';
@@ -110,6 +111,7 @@ export const initComponents = () => {
   const folderRepository = new FolderRepository(knex);
   const folderAccessRepository = new FolderAccessRepository(knex);
   const spreadsheetRepository = new SpreadsheetRepository(knex);
+  const spreadsheetHistoryRepository = new SpreadsheetHistoryRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -228,6 +230,7 @@ export const initComponents = () => {
   const spreadsheetService = new SpreadsheetService({
     projectService,
     spreadsheetRepository,
+    spreadsheetHistoryRepository,
   });
 
   // background trackers

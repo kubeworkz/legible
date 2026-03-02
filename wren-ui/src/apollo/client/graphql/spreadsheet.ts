@@ -74,3 +74,55 @@ export const PREVIEW_SPREADSHEET_DATA = gql`
     previewSpreadsheetData(data: $data)
   }
 `;
+
+export const SPREADSHEET_HISTORY = gql`
+  query SpreadsheetHistory($where: SpreadsheetHistoryWhereInput!) {
+    spreadsheetHistory(where: $where) {
+      id
+      spreadsheetId
+      version
+      changeType
+      sourceSql
+      columnsMetadata
+      changeSummary
+      createdAt
+    }
+  }
+`;
+
+export const SAVE_SPREADSHEET_WITH_HISTORY = gql`
+  mutation SaveSpreadsheetWithHistory($data: SaveSpreadsheetWithHistoryInput!) {
+    saveSpreadsheetWithHistory(data: $data) {
+      id
+      name
+      sourceSql
+      columnsMetadata
+      updatedAt
+    }
+  }
+`;
+
+export const RESTORE_SPREADSHEET_VERSION = gql`
+  mutation RestoreSpreadsheetVersion($data: RestoreSpreadsheetVersionInput!) {
+    restoreSpreadsheetVersion(data: $data) {
+      id
+      name
+      sourceSql
+      columnsMetadata
+      updatedAt
+    }
+  }
+`;
+
+export const DUPLICATE_SPREADSHEET = gql`
+  mutation DuplicateSpreadsheet($data: DuplicateSpreadsheetInput!) {
+    duplicateSpreadsheet(data: $data) {
+      id
+      projectId
+      name
+      folderId
+      sortOrder
+      sourceSql
+    }
+  }
+`;

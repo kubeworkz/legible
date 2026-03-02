@@ -32,3 +32,4 @@ export * from './userSessionPropertyValueRepository';
 export * from './folderRepository';
 export * from './folderAccessRepository';
 export * from './spreadsheetRepository';
+export * from './spreadsheetHistoryRepository';
