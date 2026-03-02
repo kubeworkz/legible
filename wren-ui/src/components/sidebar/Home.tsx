@@ -204,6 +204,10 @@ export default function Home(props: Props) {
     [folderModal.state.defaultValue, onFolderRename, onFolderCreate],
   );
 
+  const handleNewThread = useCallback(() => {
+    router.push(bp(Path.Home));
+  }, [router, bp]);
+
   return (
     <SidebarContainer>
       <FolderSelector
@@ -223,6 +227,7 @@ export default function Home(props: Props) {
         onRename={onUnifiedRename}
         onDelete={onUnifiedDelete}
         onDashboardCreate={onDashboardCreate}
+        onThreadCreate={handleNewThread}
         onMoveToFolder={onMoveItemToFolder}
       />
       <FolderModal

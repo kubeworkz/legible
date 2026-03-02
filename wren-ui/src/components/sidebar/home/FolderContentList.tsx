@@ -172,6 +172,7 @@ interface Props {
   onRename: (id: string, newName: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onDashboardCreate: (folderId?: number) => Promise<void>;
+  onThreadCreate?: () => void;
   onMoveToFolder?: (itemId: string, folderId: number) => void;
 }
 
@@ -389,6 +390,7 @@ export default function FolderContentList(props: Props) {
     onRename,
     onDelete,
     onDashboardCreate,
+    onThreadCreate,
     onMoveToFolder,
   } = props;
 
@@ -407,7 +409,6 @@ export default function FolderContentList(props: Props) {
   }
 
   const { folder, dashboards, threads } = folderGroup;
-  const showNewButton = folder.type === 'public' || folder.type === 'custom';
 
   // Exclude current folder from move-to options
   const moveOptions = allFolders.filter((f) => f.id !== folder.id);
@@ -423,7 +424,7 @@ export default function FolderContentList(props: Props) {
         deleteModal="dashboard"
         selectedKey={selectedKey}
         moveToFolderOptions={moveOptions}
-        onNew={showNewButton ? handleNewDashboard : undefined}
+        onNew={handleNewDashboard}
         onSelect={onSelect}
         onRename={onRename}
         onDelete={onDelete}
@@ -439,6 +440,7 @@ export default function FolderContentList(props: Props) {
         deleteModal="thread"
         selectedKey={selectedKey}
         moveToFolderOptions={moveOptions}
+        onNew={onThreadCreate}
         onSelect={onSelect}
         onRename={onRename}
         onDelete={onDelete}
