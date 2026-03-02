@@ -6,9 +6,11 @@ import { Path, buildPath } from '@/utils/enum';
 import FolderSelector from './home/FolderSelector';
 import FolderContentList from './home/FolderContentList';
 import FolderModal from '@/components/modals/FolderModal';
+import ManageAccessModal from '@/components/modals/ManageAccessModal';
 import useModalAction from '@/hooks/useModalAction';
 import useProject from '@/hooks/useProject';
 import type { FolderGroup, SidebarItem } from '@/hooks/useHomeSidebar';
+import { FolderVisibility } from '@/apollo/client/graphql/__types__';
 
 const SidebarContainer = styled.div`
   display: flex;
@@ -33,6 +35,7 @@ export interface Props {
   onFolderCreate?: (name: string) => Promise<void>;
   onFolderRename?: (id: number, name: string) => Promise<void>;
   onFolderDelete?: (id: number) => Promise<void>;
+  onUpdateFolderVisibility?: (id: number, visibility: string) => Promise<void>;
   onMoveDashboardToFolder?: (dashboardId: number, folderId: number | null) => Promise<void>;
   onMoveThreadToFolder?: (threadId: number, folderId: number | null) => Promise<void>;
   onReorderFolders?: (orders: Array<{ id: number; sortOrder: number }>) => Promise<void>;
@@ -51,6 +54,7 @@ export default function Home(props: Props) {
     onFolderCreate,
     onFolderRename,
     onFolderDelete,
+    onUpdateFolderVisibility,
     onMoveDashboardToFolder,
     onMoveThreadToFolder,
   } = props;
@@ -60,6 +64,13 @@ export default function Home(props: Props) {
   const { folderGroups } = data;
   const bp = (path: Path) => buildPath(path, currentProjectId);
   const folderModal = useModalAction();
+
+  // Manage access modal state
+  const [manageAccessState, setManageAccessState] = useState<{
+    visible: boolean;
+    folderId: number | null;
+    visibility: FolderVisibility | null;
+  }>({ visible: false, folderId: null, visibility: null });
 
   // ── Selected folder ──────────────────────────────────
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
@@ -185,12 +196,27 @@ export default function Home(props: Props) {
   );
 
   const handleManageAccess = useCallback(
-    (_folderId: number) => {
-      // TODO: wire to Manage Access modal (coming next)
-      console.log('Manage access for folder', _folderId);
+    (folderId: number) => {
+      const folder = folderGroups.find((g) => g.folder.id === folderId)?.folder;
+      setManageAccessState({
+        visible: true,
+        folderId,
+        visibility: (folder?.visibility as FolderVisibility) || FolderVisibility.shared,
+      });
     },
-    [],
+    [folderGroups],
   );
+
+  const handleManageAccessSubmit = useCallback(
+    async (folderId: number, visibility: FolderVisibility) => {
+      await onUpdateFolderVisibility?.(folderId, visibility);
+    },
+    [onUpdateFolderVisibility],
+  );
+
+  const closeManageAccess = useCallback(() => {
+    setManageAccessState({ visible: false, folderId: null, visibility: null });
+  }, []);
 
   const handleFolderModalSubmit = useCallback(
     async (values: { name: string }) => {
@@ -234,6 +260,13 @@ export default function Home(props: Props) {
         {...folderModal.state}
         onSubmit={handleFolderModalSubmit}
         onClose={folderModal.closeModal}
+      />
+      <ManageAccessModal
+        visible={manageAccessState.visible}
+        folderId={manageAccessState.folderId}
+        currentVisibility={manageAccessState.visibility}
+        onSubmit={handleManageAccessSubmit}
+        onClose={closeManageAccess}
       />
     </SidebarContainer>
   );

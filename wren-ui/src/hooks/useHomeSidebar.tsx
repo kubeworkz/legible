@@ -264,6 +264,13 @@ export default function useHomeSidebar() {
     refetchFolders();
   };
 
+  const onUpdateFolderVisibility = async (id: number, visibility: string) => {
+    await updateFolder({
+      variables: { where: { id }, data: { visibility: visibility as any } },
+    });
+    refetchFolders();
+  };
+
   const onFolderDelete = async (id: number) => {
     await deleteFolderMutation({
       variables: { where: { id } },
@@ -314,6 +321,7 @@ export default function useHomeSidebar() {
     onFolderCreate,
     onFolderRename,
     onFolderDelete,
+    onUpdateFolderVisibility,
     onMoveDashboardToFolder,
     onMoveThreadToFolder,
     onReorderFolders,
