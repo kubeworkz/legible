@@ -28,7 +28,7 @@ const UniverContainer = styled.div`
   min-height: 0;
   position: relative;
 
-  /* Hide Univer's own toolbar, formula bar, sheet tabs — we only want the grid */
+  /* Hide Univer's own toolbar, formula bar, sheet tabs, and context menus — we only want the grid */
   .univer-toolbar,
   .univer-formula-bar,
   .univer-sheet-bar,
@@ -36,7 +36,7 @@ const UniverContainer = styled.div`
     display: none !important;
   }
   .univer-context-menu {
-    z-index: 1050 !important;
+    display: none !important;
   }
 `;
 
