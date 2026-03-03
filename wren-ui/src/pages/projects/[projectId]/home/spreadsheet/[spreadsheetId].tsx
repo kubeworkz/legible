@@ -1,9 +1,17 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { message, Input, Button, Tooltip } from 'antd';
+import dynamic from 'next/dynamic';
+import { message, Input, Button, Tooltip, Modal } from 'antd';
 import styled from 'styled-components';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import CheckOutlined from '@ant-design/icons/CheckOutlined';
 import CloseOutlined from '@ant-design/icons/CloseOutlined';
+import InfoCircleOutlined from '@ant-design/icons/InfoCircleOutlined';
+import CopyOutlined from '@ant-design/icons/CopyOutlined';
+import { format as formatSQL } from 'sql-formatter';
+
+const SQLCodeBlock = dynamic(() => import('@/components/code/SQLCodeBlock'), {
+  ssr: false,
+});
 import { getCompactTime } from '@/utils/time';
 import { Path, buildPath } from '@/utils/enum';
 import useProject from '@/hooks/useProject';
@@ -212,7 +220,8 @@ export default function SpreadsheetDetail() {
 
   // ── Univer handles (undo / redo) ─────────────────────
   const univerHandlesRef = useRef<{ undo: () => void; redo: () => void } | null>(null);
-
+  // ── Show SQL modal ────────────────────────────────────
+  const [showSqlModalVisible, setShowSqlModalVisible] = useState(false);
   // ── SQL editor state ─────────────────────────────────
   const [currentSql, setCurrentSql] = useState('');
   const [sqlDirty, setSqlDirty] = useState(false);
@@ -764,6 +773,7 @@ export default function SpreadsheetDetail() {
               onLoadMore={handleLoadMore}
               onReady={(handles) => { univerHandlesRef.current = handles; }}
               onCellEdit={() => setSqlDirty(true)}
+              onShowSQL={currentSql ? () => setShowSqlModalVisible(true) : undefined}
               searchOverlay={
                 searchVisible ? (
                   <SpreadsheetSearch
@@ -813,6 +823,58 @@ export default function SpreadsheetDetail() {
           onRestore={handleRestore}
           restoringId={restoringId}
         />
+
+        <Modal
+          title={
+            <span>
+              <InfoCircleOutlined style={{ marginRight: 8 }} />
+              SQL Statement
+            </span>
+          }
+          visible={showSqlModalVisible}
+          onCancel={() => setShowSqlModalVisible(false)}
+          footer={
+            <Button onClick={() => setShowSqlModalVisible(false)}>
+              Close
+            </Button>
+          }
+          width={680}
+          bodyStyle={{ padding: 0 }}
+        >
+          {showSqlModalVisible && currentSql && (
+            <div style={{ position: 'relative' }}>
+              <Tooltip title="Copy SQL">
+                <Button
+                  type="text"
+                  icon={<CopyOutlined />}
+                  size="small"
+                  style={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    zIndex: 1,
+                    color: 'var(--gray-6)',
+                  }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(currentSql);
+                    message.success('SQL copied to clipboard');
+                  }}
+                />
+              </Tooltip>
+              <SQLCodeBlock
+                code={(() => {
+                  try {
+                    return formatSQL(currentSql, { language: 'postgresql' });
+                  } catch {
+                    return currentSql;
+                  }
+                })()}
+                maxHeight="400"
+                showLineNumbers
+              />
+            </div>
+          )}
+        </Modal>
       </PageContainer>
     </SiderLayout>
   );

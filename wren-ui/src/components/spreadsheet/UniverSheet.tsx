@@ -171,6 +171,8 @@ export interface UniverSheetProps {
   onCellEdit?: () => void;
   /** Called when Univer is ready, providing imperative handles */
   onReady?: (handles: { undo: () => void; redo: () => void }) => void;
+  /** Called when "Show SQL" is clicked */
+  onShowSQL?: () => void;
 }
 
 // ── Type classification helpers ─────────────────────────
@@ -705,6 +707,21 @@ export default function UniverSheet(props: UniverSheetProps) {
             {sort && (
               <span style={{ color: 'var(--geekblue-6, #2f54eb)' }}>
                 Sorted by {sort.columnName} {sort.direction === 'asc' ? '↑' : '↓'}
+              </span>
+            )}
+            {props.onShowSQL && (
+              <span
+                onClick={props.onShowSQL}
+                style={{
+                  color: 'var(--geekblue-6, #2f54eb)',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                ☐ Show SQL
               </span>
             )}
           </StatusSection>
