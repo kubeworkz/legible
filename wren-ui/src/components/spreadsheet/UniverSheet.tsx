@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { Alert, Spin } from 'antd';
 import { ApolloError } from '@apollo/client';
@@ -23,13 +23,10 @@ const Container = styled.div`
   position: relative;
 `;
 
-const UniverContainer = styled.div<{ $ready: boolean }>`
+const UniverContainer = styled.div`
   flex: 1;
   min-height: 0;
   position: relative;
-  /* Fade in after Univer finishes mounting to prevent toolbar/formula-bar flicker */
-  opacity: ${(props) => (props.$ready ? 1 : 0)};
-  transition: opacity 0.15s ease-in;
 `;
 
 const StatusBar = styled.div`
@@ -415,7 +412,6 @@ export default function UniverSheet(props: UniverSheetProps) {
   } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<FUniver | null>(null);
-  const [univerReady, setUniverReady] = useState(false);
 
   // Apply column configs: filter visible + reorder
   const { filteredColumns, filteredData } = useMemo(() => {
@@ -501,8 +497,21 @@ export default function UniverSheet(props: UniverSheetProps) {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Hide container while Univer mounts to prevent toolbar/menu flicker
-    setUniverReady(false);
+    // ── Flicker prevention ──────────────────────────────────
+    // Univer renders toolbar / formula-bar / popup elements both inside the
+    // container AND as portals on document.body.  React state updates are
+    // async, so by the time a state-driven "opacity: 0" is committed the
+    // browser may already have painted a frame with Univer's UI.  To solve
+    // this we inject a <style> tag into <head> *synchronously* so the very
+    // first paint after createUniver() already has the hiding rules applied.
+    const hideStyle = document.createElement('style');
+    hideStyle.setAttribute('data-univer-hide', 'true');
+    hideStyle.textContent = `
+      [data-univer-hide-container] { opacity: 0 !important; }
+      .univer-popup, .univer-context-menu, .univer-menu-submenu-popup { display: none !important; }
+    `;
+    document.head.appendChild(hideStyle);
+    containerRef.current.setAttribute('data-univer-hide-container', '');
 
     // Clean up previous instance
     if (univerAPIRef.current) {
@@ -529,12 +538,18 @@ export default function UniverSheet(props: UniverSheetProps) {
     univerAPIRef.current = univerAPI;
     univerAPI.createWorkbook(workbookData as any);
 
-    // Reveal after Univer has finished its initial render pass
-    requestAnimationFrame(() => {
-      setUniverReady(true);
-    });
+    // Reveal after a short delay to let Univer fully render its UI.
+    // The 100ms covers toolbar + formula bar + sheet-bar layout passes.
+    const revealTimer = setTimeout(() => {
+      if (containerRef.current) {
+        containerRef.current.removeAttribute('data-univer-hide-container');
+      }
+      hideStyle.remove();
+    }, 100);
 
     return () => {
+      clearTimeout(revealTimer);
+      hideStyle.remove();
       try {
         univerAPI.dispose();
       } catch {
@@ -580,7 +595,7 @@ export default function UniverSheet(props: UniverSheetProps) {
       {/* Search overlay (floating bar) */}
       {searchOverlay}
 
-      <UniverContainer ref={containerRef} $ready={univerReady} />
+      <UniverContainer ref={containerRef} />
 
       {/* Loading spinner overlay */}
       {loading && (
