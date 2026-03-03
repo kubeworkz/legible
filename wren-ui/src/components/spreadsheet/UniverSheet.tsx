@@ -508,6 +508,7 @@ export default function UniverSheet(props: UniverSheetProps) {
     hideStyle.setAttribute('data-univer-hide', 'true');
     hideStyle.textContent = `
       [data-univer-hide-container] { opacity: 0 !important; }
+      [data-univer-fade-in] { transition: opacity 0.2s ease-in; }
       .univer-popup, .univer-context-menu, .univer-menu-submenu-popup { display: none !important; }
     `;
     document.head.appendChild(hideStyle);
@@ -538,14 +539,17 @@ export default function UniverSheet(props: UniverSheetProps) {
     univerAPIRef.current = univerAPI;
     univerAPI.createWorkbook(workbookData as any);
 
-    // Reveal after a short delay to let Univer fully render its UI.
-    // The 100ms covers toolbar + formula bar + sheet-bar layout passes.
+    // Reveal after Univer fully renders its toolbar / formula bar / sheet-bar.
+    // 500ms is generous enough for all async layout passes to settle.
+    // A CSS transition on opacity makes the reveal smooth.
     const revealTimer = setTimeout(() => {
       if (containerRef.current) {
+        containerRef.current.setAttribute('data-univer-fade-in', '');
         containerRef.current.removeAttribute('data-univer-hide-container');
       }
-      hideStyle.remove();
-    }, 100);
+      // Remove the portal-hiding rules after fade-in completes
+      setTimeout(() => hideStyle.remove(), 250);
+    }, 500);
 
     return () => {
       clearTimeout(revealTimer);
