@@ -691,25 +691,6 @@ export default function SpreadsheetDetail() {
                     {getRelativeTime(spreadsheet.updatedAt)}
                   </span>
                 )}
-                {!spreadsheet.creatorName && (
-                  <span
-                    className="meta-item"
-                    style={{ cursor: 'pointer', color: 'var(--geekblue-6, #2f54eb)' }}
-                    onClick={() => {
-                      const name = prompt('Enter creator name:');
-                      if (name?.trim()) {
-                        updateSpreadsheet({
-                          variables: {
-                            where: { id: Number(spreadsheetId) },
-                            data: { creatorName: name.trim() },
-                          },
-                        }).then(() => refetch());
-                      }
-                    }}
-                  >
-                    + Set creator
-                  </span>
-                )}
               </div>
             )}
             {spreadsheet?.description && (

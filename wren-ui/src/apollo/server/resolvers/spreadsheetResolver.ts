@@ -49,11 +49,17 @@ export class SpreadsheetResolver {
     ctx: IContext,
   ): Promise<Spreadsheet> {
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
+    // Auto-set creator name from the logged-in user if not explicitly provided
+    const creatorName =
+      args.data.creatorName ||
+      ctx.currentUser?.displayName ||
+      ctx.currentUser?.email ||
+      null;
     return await ctx.spreadsheetService.createSpreadsheet(project.id, {
       name: args.data.name,
       folderId: args.data.folderId,
       sourceSql: args.data.sourceSql,
-      creatorName: args.data.creatorName,
+      creatorName,
     });
   }
 
