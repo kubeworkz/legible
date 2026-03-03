@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import CheckOutlined from '@ant-design/icons/CheckOutlined';
 import CloseOutlined from '@ant-design/icons/CloseOutlined';
+import { getRelativeTime } from '@/utils/time';
 import { Path, buildPath } from '@/utils/enum';
 import useProject from '@/hooks/useProject';
 import { useRouter } from 'next/router';
@@ -58,6 +59,31 @@ const Header = styled.div`
     font-size: 20px;
     font-weight: 600;
     color: var(--gray-9);
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--gray-7, #8c8c8c);
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--gray-3, #f5f5f5);
+    border-radius: 4px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+
+  .meta-label {
+    font-weight: 500;
+    color: var(--gray-8, #595959);
   }
 
   .description {
@@ -643,6 +669,22 @@ export default function SpreadsheetDetail() {
                     onClick={startEditingName}
                   />
                 </Tooltip>
+              </div>
+            )}
+            {spreadsheet && (
+              <div className="meta-row">
+                {spreadsheet.createdAt && (
+                  <span className="meta-item">
+                    <span className="meta-label">Created</span>
+                    {getRelativeTime(spreadsheet.createdAt)}
+                  </span>
+                )}
+                {spreadsheet.updatedAt && (
+                  <span className="meta-item">
+                    <span className="meta-label">Last updated</span>
+                    {getRelativeTime(spreadsheet.updatedAt)}
+                  </span>
+                )}
               </div>
             )}
             {spreadsheet?.description && (
