@@ -199,8 +199,15 @@ export default function SpreadsheetDetail() {
   // ── Sort state ────────────────────────────────────────
   const [sort, setSort] = useState<SortState | null>(null);
 
+  // ── Preview data (run SQL) ───────────────────────────
+  const [previewSpreadsheetData, { data: previewResult, loading: previewLoading, error: previewError, reset: resetPreview }] =
+    usePreviewSpreadsheetDataMutation();
+
   // Reset all transient state when navigating to a different spreadsheet
+  const prevSpreadsheetIdRef = useRef(spreadsheetId);
   useEffect(() => {
+    if (prevSpreadsheetIdRef.current === spreadsheetId) return;
+    prevSpreadsheetIdRef.current = spreadsheetId;
     setCurrentSql('');
     setSqlDirty(false);
     setHasRun(false);
@@ -214,7 +221,8 @@ export default function SpreadsheetDetail() {
     setSearchMatches([]);
     setActiveMatchIndex(0);
     setSort(null);
-  }, [spreadsheetId]);
+    resetPreview();
+  }, [spreadsheetId, resetPreview]);
 
   // Sync initial SQL from the loaded spreadsheet
   useEffect(() => {
@@ -222,10 +230,6 @@ export default function SpreadsheetDetail() {
       setCurrentSql(spreadsheet.sourceSql);
     }
   }, [spreadsheet?.sourceSql]);
-
-  // ── Preview data (run SQL) ───────────────────────────
-  const [previewSpreadsheetData, { data: previewResult, loading: previewLoading, error: previewError }] =
-    usePreviewSpreadsheetDataMutation();
 
   const resultData = useMemo(() => {
     if (!previewResult?.previewSpreadsheetData) return null;
@@ -281,11 +285,17 @@ export default function SpreadsheetDetail() {
   );
 
   // Auto-run if spreadsheet already has SQL
+  // Guard: only run when the loaded spreadsheet ID matches the current route
   useEffect(() => {
-    if (spreadsheet?.sourceSql && !hasRun && spreadsheetId) {
+    if (
+      spreadsheet?.sourceSql &&
+      !hasRun &&
+      spreadsheetId &&
+      String(spreadsheet.id) === spreadsheetId
+    ) {
       handleRunSql(spreadsheet.sourceSql);
     }
-  }, [spreadsheet?.sourceSql, spreadsheetId]);
+  }, [spreadsheet?.sourceSql, spreadsheet?.id, spreadsheetId]);
 
   // ── Column config state ──────────────────────────────
   const [columnConfigs, setColumnConfigs] = useState<ColumnConfig[]>([]);
