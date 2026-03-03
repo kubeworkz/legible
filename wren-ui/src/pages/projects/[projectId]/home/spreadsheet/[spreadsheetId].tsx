@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import CheckOutlined from '@ant-design/icons/CheckOutlined';
 import CloseOutlined from '@ant-design/icons/CloseOutlined';
-import { getRelativeTime } from '@/utils/time';
+import { getCompactTime } from '@/utils/time';
 import { Path, buildPath } from '@/utils/enum';
 import useProject from '@/hooks/useProject';
 import { useRouter } from 'next/router';
@@ -679,16 +679,10 @@ export default function SpreadsheetDetail() {
                     {spreadsheet.creatorName}
                   </span>
                 )}
-                {spreadsheet.createdAt && (
-                  <span className="meta-item">
-                    <span className="meta-label">Created</span>
-                    {getRelativeTime(spreadsheet.createdAt)}
-                  </span>
-                )}
                 {spreadsheet.updatedAt && (
                   <span className="meta-item">
                     <span className="meta-label">Last updated</span>
-                    {getRelativeTime(spreadsheet.updatedAt)}
+                    {getCompactTime(spreadsheet.updatedAt)}
                   </span>
                 )}
               </div>
