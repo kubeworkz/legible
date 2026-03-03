@@ -184,58 +184,54 @@ const FILTER_TEMPLATES: TemplateItem[] = [
 
 const CLEANING_TEMPLATES: TemplateItem[] = [
   {
-    label: <>Remove rows where <Placeholder>&lt;column&gt;</Placeholder> is empty</>,
-    prompt: 'Remove rows where <column> is empty',
+    label: <>Remove duplicates in <Placeholder>&lt;column&gt;</Placeholder></>,
+    prompt: 'Remove duplicates in <column>',
   },
   {
-    label: <>Trim whitespace in <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Trim whitespace in <column>',
+    label: <>Trim spaces from text in <Placeholder>&lt;column&gt;</Placeholder></>,
+    prompt: 'Trim spaces from text in <column>',
   },
   {
-    label: <>Replace <Placeholder>&quot;old&quot;</Placeholder> with <Placeholder>&quot;new&quot;</Placeholder> in <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Replace "old" with "new" in <column>',
+    label: <>Standardize dates in <Placeholder>&lt;column&gt;</Placeholder> to <Placeholder>&lt;YYYY-MM-DD&gt;</Placeholder></>,
+    prompt: 'Standardize dates in <column> to <YYYY-MM-DD>',
   },
   {
-    label: <>Remove duplicate rows</>,
-    prompt: 'Remove duplicate rows',
+    label: <>Convert <Placeholder>&lt;column&gt;</Placeholder> to numbers only</>,
+    prompt: 'Convert <column> to numbers only',
   },
 ];
 
 const GROUPING_TEMPLATES: TemplateItem[] = [
   {
-    label: <>Group by <Placeholder>&lt;column&gt;</Placeholder> and count rows</>,
-    prompt: 'Group by <column> and count rows',
+    label: <>Count rows for each <Placeholder>category</Placeholder></>,
+    prompt: 'Count rows for each category',
   },
   {
-    label: <>Group by <Placeholder>&lt;column&gt;</Placeholder> and sum <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Group by <column> and sum <column>',
+    label: <>Sum <Placeholder>sales</Placeholder> for each <Placeholder>region</Placeholder></>,
+    prompt: 'Sum sales for each region',
   },
   {
-    label: <>Group by <Placeholder>&lt;column&gt;</Placeholder> and average <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Group by <column> and average <column>',
+    label: <>Find average <Placeholder>salary</Placeholder> for each <Placeholder>department</Placeholder></>,
+    prompt: 'Find average salary for each department',
   },
   {
-    label: <>Pivot by <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Pivot by <column>',
+    label: <>Get earliest/latest order date for each <Placeholder>customer</Placeholder></>,
+    prompt: 'Get earliest/latest order date for each customer',
   },
 ];
 
 const ENRICHMENT_TEMPLATES: TemplateItem[] = [
   {
-    label: <>Add a column that categorizes <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Add a column that categorizes <column>',
+    label: <>Add <Placeholder>&lt;new column&gt;</Placeholder> from <Placeholder>&lt;another model&gt;</Placeholder></>,
+    prompt: 'Add <new column> from <another model>',
   },
   {
-    label: <>Add a column with the rank of <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Add a column with the rank of <column>',
+    label: <>Add <Placeholder>age</Placeholder> by <Placeholder>calculating age</Placeholder> from <Placeholder>date of birth</Placeholder></>,
+    prompt: 'Add age by calculating age from date of birth',
   },
   {
-    label: <>Add a running total of <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Add a running total of <column>',
-  },
-  {
-    label: <>Extract year and month from <Placeholder>&lt;column&gt;</Placeholder></>,
-    prompt: 'Extract year and month from <column>',
+    label: <>Extract <Placeholder>company name</Placeholder> from <Placeholder>email address</Placeholder></>,
+    prompt: 'Extract company name from email address',
   },
 ];
 
@@ -372,7 +368,7 @@ export default function AIOperationsBar(props: AIOperationsBarProps) {
         content={
           <OperationPopover
             title="Cleaning"
-            placeholder="Describe how to clean your data using natural language."
+            placeholder="Clean your data using natural language. Tip: Use @model to specify models."
             templates={CLEANING_TEMPLATES}
             value={cleaningText}
             onChange={setCleaningText}
@@ -399,7 +395,7 @@ export default function AIOperationsBar(props: AIOperationsBarProps) {
         content={
           <OperationPopover
             title="Grouping"
-            placeholder="Describe how to group your data using natural language."
+            placeholder="Group and aggregate your data using natural language. Tip: Use @model to specify models."
             templates={GROUPING_TEMPLATES}
             value={groupingText}
             onChange={setGroupingText}
@@ -426,7 +422,7 @@ export default function AIOperationsBar(props: AIOperationsBarProps) {
         content={
           <OperationPopover
             title="Enrichment"
-            placeholder="Describe how to enrich your data using natural language."
+            placeholder="Enrich your data using natural language. Tip: Use @model to specify models."
             templates={ENRICHMENT_TEMPLATES}
             value={enrichmentText}
             onChange={setEnrichmentText}
