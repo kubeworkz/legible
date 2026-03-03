@@ -1,5 +1,5 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
+import styled from 'styled-components';
 import { Alert, Spin } from 'antd';
 import { ApolloError } from '@apollo/client';
 import { parseGraphQLError } from '@/utils/errorHandler';
@@ -23,18 +23,13 @@ const Container = styled.div`
   position: relative;
 `;
 
-const UniverContainer = styled.div`
+const UniverContainer = styled.div<{ $ready: boolean }>`
   flex: 1;
   min-height: 0;
   position: relative;
-
-  /* Hide Univer's own toolbar, formula bar, sheet tabs — we only want the grid */
-  .univer-toolbar,
-  .univer-formula-bar,
-  .univer-sheet-bar,
-  .univer-header {
-    display: none !important;
-  }
+  /* Fade in after Univer finishes mounting to prevent toolbar/formula-bar flicker */
+  opacity: ${(props) => (props.$ready ? 1 : 0)};
+  transition: opacity 0.15s ease-in;
 `;
 
 const StatusBar = styled.div`
@@ -64,18 +59,6 @@ const StatusDot = styled.span<{ $color: string }>`
   border-radius: 50%;
   background: ${(props) => props.$color};
   margin-right: 4px;
-`;
-
-/**
- * Global override to hide Univer context menus and popups that are
- * rendered as portals outside the container element (attached to body).
- */
-const HideUniverPopups = createGlobalStyle`
-  .univer-context-menu,
-  .univer-popup,
-  .univer-menu-submenu-popup {
-    display: none !important;
-  }
 `;
 
 const SpinOverlay = styled.div`
@@ -432,6 +415,7 @@ export default function UniverSheet(props: UniverSheetProps) {
   } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<FUniver | null>(null);
+  const [univerReady, setUniverReady] = useState(false);
 
   // Apply column configs: filter visible + reorder
   const { filteredColumns, filteredData } = useMemo(() => {
@@ -517,6 +501,9 @@ export default function UniverSheet(props: UniverSheetProps) {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Hide container while Univer mounts to prevent toolbar/menu flicker
+    setUniverReady(false);
+
     // Clean up previous instance
     if (univerAPIRef.current) {
       try {
@@ -535,17 +522,17 @@ export default function UniverSheet(props: UniverSheetProps) {
       presets: [
         UniverSheetsCorePreset({
           container: containerRef.current,
-          header: false,
-          toolbar: false,
-          formulaBar: false,
-          footer: false,
-          contextMenu: false,
         }),
       ],
     });
 
     univerAPIRef.current = univerAPI;
     univerAPI.createWorkbook(workbookData as any);
+
+    // Reveal after Univer has finished its initial render pass
+    requestAnimationFrame(() => {
+      setUniverReady(true);
+    });
 
     return () => {
       try {
@@ -590,11 +577,10 @@ export default function UniverSheet(props: UniverSheetProps) {
 
   return (
     <Container>
-      <HideUniverPopups />
       {/* Search overlay (floating bar) */}
       {searchOverlay}
 
-      <UniverContainer ref={containerRef} />
+      <UniverContainer ref={containerRef} $ready={univerReady} />
 
       {/* Loading spinner overlay */}
       {loading && (
