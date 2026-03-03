@@ -24,6 +24,7 @@ import UniverSheetDynamic from '@/components/spreadsheet/UniverSheetDynamic';
 import DataSourceOverlay from '@/components/spreadsheet/DataSourceOverlay';
 import SpreadsheetHistoryDrawer from '@/components/spreadsheet/SpreadsheetHistoryDrawer';
 import SpreadsheetAIPanel from '@/components/spreadsheet/SpreadsheetAIPanel';
+import AIOperationsBar from '@/components/spreadsheet/AIOperationsBar';
 import {
   useSpreadsheetQuery,
   useUpdateSpreadsheetMutation,
@@ -715,6 +716,18 @@ export default function SpreadsheetDetail() {
             onDuplicate={handleDuplicate}
             onAIAssistant={handleToggleAIPanel}
             aiAssistantActive={aiPanelVisible}
+          />
+        )}
+
+        {hasRun && (
+          <AIOperationsBar
+            hasData={!!resultData?.columns && resultData.columns.length > 0}
+            loading={previewLoading}
+            onConfirm={(operation, prompt) => {
+              // Send the AI operation prompt to the AI panel
+              handleAIApplySql(`-- AI ${operation}: ${prompt}`);
+              message.info(`AI ${operation} requested`);
+            }}
           />
         )}
 
