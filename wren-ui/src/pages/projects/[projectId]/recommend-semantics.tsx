@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
-import { Button, Checkbox, Input, Typography } from 'antd';
+import { Button, Input, Typography } from 'antd';
+import Checkbox from 'antd/lib/checkbox';
 import ArrowLeftOutlined from '@ant-design/icons/ArrowLeftOutlined';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import { Path, buildPath } from '@/utils/enum';
