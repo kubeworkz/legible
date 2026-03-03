@@ -86,7 +86,7 @@ export interface ModelingAIAssistantProps {
 
 export default function ModelingAIAssistant(props: ModelingAIAssistantProps) {
   const { onRecommendSemantics, onRecommendRelationships } = props;
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <Container>
