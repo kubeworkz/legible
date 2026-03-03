@@ -38,7 +38,7 @@ const SearchBarContainer = styled.div`
   position: absolute;
   top: 8px;
   right: 16px;
-  z-index: 20;
+  z-index: 1100;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -101,6 +101,28 @@ export default function SpreadsheetSearch(props: SpreadsheetSearchProps) {
   const [matches, setMatches] = useState<SearchMatch[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close when clicking outside
+  useEffect(() => {
+    if (!visible) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        onClose();
+      }
+    };
+    // Use timeout so the opening click doesn't immediately close it
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [visible, onClose]);
 
   // Focus input when search becomes visible
   useEffect(() => {
@@ -192,7 +214,7 @@ export default function SpreadsheetSearch(props: SpreadsheetSearchProps) {
   if (!visible) return null;
 
   return (
-    <SearchBarContainer>
+    <SearchBarContainer ref={containerRef}>
       <SearchOutlined style={{ color: 'var(--gray-6)', fontSize: 14 }} />
       <SearchInput
         ref={inputRef}

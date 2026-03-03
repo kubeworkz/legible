@@ -289,16 +289,17 @@ export default function SpreadsheetDetail() {
     [],
   );
 
-  // Ctrl+F / Cmd+F to open search
+  // Ctrl+F / Cmd+F to open search (only from real user events)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f' && e.isTrusted) {
         e.preventDefault();
-        setSearchVisible(true);
+        e.stopPropagation();
+        setSearchVisible((prev) => !prev);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, []);
 
   // ── Load More (pagination) ────────────────────────────
@@ -638,7 +639,7 @@ export default function SpreadsheetDetail() {
             onExportExcel={handleExportExcel}
             sort={sort}
             onSortChange={handleSortChange}
-            onSearch={() => setSearchVisible(true)}
+            onSearch={() => setSearchVisible((prev) => !prev)}
             searchActive={searchVisible}
             onHistory={handleOpenHistory}
             historyActive={historyDrawerVisible}
