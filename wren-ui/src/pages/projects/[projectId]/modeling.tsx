@@ -8,6 +8,7 @@ import { MORE_ACTION, NODE_TYPE } from '@/utils/enum';
 import { editCalculatedField } from '@/utils/modelingHelper';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import MetadataDrawer from '@/components/pages/modeling/MetadataDrawer';
+import ModelingAIAssistant from '@/components/pages/modeling/ModelingAIAssistant';
 import EditMetadataModal from '@/components/pages/modeling/EditMetadataModal';
 import CalculatedFieldModal from '@/components/modals/CalculatedFieldModal';
 import ModelDrawer from '@/components/pages/modeling/ModelDrawer';
@@ -394,6 +395,14 @@ export default function Modeling() {
             onMoreClick={onMoreClick}
             onNodeClick={onNodeClick}
             onAddClick={onAddClick}
+          />
+          <ModelingAIAssistant
+            onRecommendSemantics={() => {
+              message.info('Recommend semantics coming soon');
+            }}
+            onRecommendRelationships={() => {
+              message.info('Recommend relationships coming soon');
+            }}
           />
         </DiagramWrapper>
         <MetadataDrawer
