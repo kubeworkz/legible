@@ -167,6 +167,8 @@ export interface UniverSheetProps {
   fetchLimit?: number;
   /** Called when "Load More" is clicked */
   onLoadMore?: () => void;
+  /** Called when the user edits a cell directly in the grid */
+  onCellEdit?: () => void;
 }
 
 // ── Type classification helpers ─────────────────────────
@@ -440,9 +442,12 @@ export default function UniverSheet(props: UniverSheetProps) {
     columns = [], data = [], loading = false, error, overlay,
     columnConfigs, sort, searchTerm, searchMatches, activeMatchIndex,
     searchOverlay, isAtLimit, loadedRowCount, fetchLimit, onLoadMore,
+    onCellEdit,
   } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const univerAPIRef = useRef<FUniver | null>(null);
+  const onCellEditRef = useRef(onCellEdit);
+  onCellEditRef.current = onCellEdit;
 
   // Apply column configs: filter visible + reorder
   const { filteredColumns, filteredData } = useMemo(() => {
@@ -571,6 +576,17 @@ export default function UniverSheet(props: UniverSheetProps) {
     univerAPIRef.current = univerAPI;
     univerAPI.createWorkbook(workbookData as any);
 
+    // Listen for cell edit commands to flag dirty state
+    const CELL_EDIT_COMMANDS = new Set([
+      'sheet.command.set-range-values',
+      'sheet.mutation.set-range-values',
+    ]);
+    const commandDisposable = univerAPI.onCommandExecuted((commandInfo) => {
+      if (CELL_EDIT_COMMANDS.has(commandInfo.id)) {
+        onCellEditRef.current?.();
+      }
+    });
+
     // Reveal after Univer fully renders its toolbar / formula bar / sheet-bar.
     // 500ms is generous enough for all async layout passes to settle.
     // A CSS transition on opacity makes the reveal smooth.
@@ -586,6 +602,7 @@ export default function UniverSheet(props: UniverSheetProps) {
     return () => {
       clearTimeout(revealTimer);
       hideStyle.remove();
+      commandDisposable.dispose();
       try {
         univerAPI.dispose();
       } catch {

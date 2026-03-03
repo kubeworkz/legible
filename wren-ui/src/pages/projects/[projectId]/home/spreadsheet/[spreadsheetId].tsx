@@ -702,6 +702,7 @@ export default function SpreadsheetDetail() {
               loadedRowCount={loadedRowCount}
               fetchLimit={fetchLimit}
               onLoadMore={handleLoadMore}
+              onCellEdit={() => setSqlDirty(true)}
               searchOverlay={
                 searchVisible ? (
                   <SpreadsheetSearch
