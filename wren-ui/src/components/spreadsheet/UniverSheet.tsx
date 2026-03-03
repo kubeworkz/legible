@@ -9,9 +9,40 @@ import type { SearchMatch } from './SpreadsheetSearch';
 // Univer imports — these are client-only (canvas-based rendering)
 import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core';
 import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US';
-import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets';
+import { createUniver, LocaleType, mergeLocales, defaultTheme } from '@univerjs/presets';
 import type { FUniver } from '@univerjs/presets';
 import '@univerjs/preset-sheets-core/lib/index.css';
+
+// ── Custom theme matching the site's Ant Design color palette ──────
+// Lightens Univer's default grays to align with the site's neutral tones
+// and maps primary to the site's geekblue palette.
+const siteTheme = {
+  ...defaultTheme,
+  primary: {
+    50:  '#f0f5ff',  // geekblue-1
+    100: '#d6e4ff',  // geekblue-2
+    200: '#adc6ff',  // geekblue-3
+    300: '#85a5ff',  // geekblue-4
+    400: '#597ef7',  // geekblue-5
+    500: '#2f54eb',  // geekblue-6 (site primary)
+    600: '#1d39c4',  // geekblue-7
+    700: '#10239e',  // geekblue-8
+    800: '#061178',  // geekblue-9
+    900: '#030852',  // geekblue-10
+  },
+  gray: {
+    50:  '#ffffff',  // gray-1  (white)
+    100: '#fafafa',  // gray-2
+    200: '#f5f5f5',  // gray-3
+    300: '#f0f0f0',  // gray-4
+    400: '#d9d9d9',  // gray-5
+    500: '#bfbfbf',  // gray-6
+    600: '#8c8c8c',  // gray-7
+    700: '#65676c',  // gray-8
+    800: '#434343',  // gray-9
+    900: '#262626',  // gray-10
+  },
+};
 
 // ── Styles ──────────────────────────────────────────────
 
@@ -529,6 +560,7 @@ export default function UniverSheet(props: UniverSheetProps) {
       locales: {
         [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
       },
+      theme: siteTheme,
       presets: [
         UniverSheetsCorePreset({
           container: containerRef.current,
