@@ -135,7 +135,7 @@ export default function SpreadsheetHistoryDrawer(props: SpreadsheetHistoryDrawer
         </span>
       }
       placement="right"
-      width={380}
+      width={480}
       visible={visible}
       onClose={onClose}
       mask={false}
