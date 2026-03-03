@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo, useCallback } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { Alert, Spin } from 'antd';
 import { ApolloError } from '@apollo/client';
 import { parseGraphQLError } from '@/utils/errorHandler';
@@ -28,14 +28,11 @@ const UniverContainer = styled.div`
   min-height: 0;
   position: relative;
 
-  /* Hide Univer's own toolbar, formula bar, sheet tabs, and context menus — we only want the grid */
+  /* Hide Univer's own toolbar, formula bar, sheet tabs — we only want the grid */
   .univer-toolbar,
   .univer-formula-bar,
   .univer-sheet-bar,
   .univer-header {
-    display: none !important;
-  }
-  .univer-context-menu {
     display: none !important;
   }
 `;
@@ -67,6 +64,18 @@ const StatusDot = styled.span<{ $color: string }>`
   border-radius: 50%;
   background: ${(props) => props.$color};
   margin-right: 4px;
+`;
+
+/**
+ * Global override to hide Univer context menus and popups that are
+ * rendered as portals outside the container element (attached to body).
+ */
+const HideUniverPopups = createGlobalStyle`
+  .univer-context-menu,
+  .univer-popup,
+  .univer-menu-submenu-popup {
+    display: none !important;
+  }
 `;
 
 const SpinOverlay = styled.div`
@@ -526,6 +535,11 @@ export default function UniverSheet(props: UniverSheetProps) {
       presets: [
         UniverSheetsCorePreset({
           container: containerRef.current,
+          header: false,
+          toolbar: false,
+          formulaBar: false,
+          footer: false,
+          contextMenu: false,
         }),
       ],
     });
@@ -576,6 +590,7 @@ export default function UniverSheet(props: UniverSheetProps) {
 
   return (
     <Container>
+      <HideUniverPopups />
       {/* Search overlay (floating bar) */}
       {searchOverlay}
 
