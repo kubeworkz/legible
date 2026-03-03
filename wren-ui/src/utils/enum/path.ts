@@ -6,6 +6,7 @@ export enum Path {
   HomeSpreadsheetDetail = '/projects/[projectId]/home/spreadsheet/[spreadsheetId]',
   Thread = '/projects/[projectId]/home/[id]',
   Modeling = '/projects/[projectId]/modeling',
+  RecommendSemantics = '/projects/[projectId]/recommend-semantics',
   Onboarding = '/projects/[projectId]/setup',
   OnboardingConnection = '/projects/[projectId]/setup/connection',
   OnboardingModels = '/projects/[projectId]/setup/models',

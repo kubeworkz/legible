@@ -5,6 +5,7 @@ import { forwardRef, useEffect, useMemo, useRef } from 'react';
 import { message } from 'antd';
 import styled from 'styled-components';
 import { MORE_ACTION, NODE_TYPE } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import { editCalculatedField } from '@/utils/modelingHelper';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import MetadataDrawer from '@/components/pages/modeling/MetadataDrawer';
@@ -398,7 +399,7 @@ export default function Modeling() {
           />
           <ModelingAIAssistant
             onRecommendSemantics={() => {
-              message.info('Recommend semantics coming soon');
+              router.push(buildPath(Path.RecommendSemantics, router.query.projectId as string));
             }}
             onRecommendRelationships={() => {
               message.info('Recommend relationships coming soon');
