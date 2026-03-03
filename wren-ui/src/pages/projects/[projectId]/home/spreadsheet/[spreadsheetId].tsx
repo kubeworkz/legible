@@ -195,7 +195,6 @@ export default function SpreadsheetDetail() {
   useEffect(() => {
     if (spreadsheet?.sourceSql && !hasRun) {
       setCurrentSql(spreadsheet.sourceSql);
-      setShowSqlEditor(true); // Show editor if spreadsheet already has SQL
     }
   }, [spreadsheet?.sourceSql]);
 
