@@ -118,6 +118,10 @@ export interface SpreadsheetToolbarProps {
   onSave?: () => void;
   /** Called when Discard Changes is clicked */
   onDiscard?: () => void;
+  /** Called when Undo is clicked */
+  onUndo?: () => void;
+  /** Called when Redo is clicked */
+  onRedo?: () => void;
   /** Called to toggle SQL editor visibility */
   onToggleSqlEditor?: () => void;
   /** Column configs for the column manager */
@@ -159,6 +163,8 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
     sqlEditorVisible = false,
     onSave,
     onDiscard,
+    onUndo,
+    onRedo,
     onToggleSqlEditor,
     columnConfigs = [],
     onColumnConfigsChange,
@@ -198,7 +204,8 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
             size="small"
             type="text"
             icon={<UndoOutlined />}
-            disabled
+            onClick={onUndo}
+            disabled={!onUndo || !dirty}
           />
         </Tooltip>
         <Tooltip title="Redo">
@@ -206,7 +213,8 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
             size="small"
             type="text"
             icon={<RedoOutlined />}
-            disabled
+            onClick={onRedo}
+            disabled={!onRedo || !dirty}
           />
         </Tooltip>
 

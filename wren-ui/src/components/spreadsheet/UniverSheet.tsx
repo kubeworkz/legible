@@ -169,6 +169,8 @@ export interface UniverSheetProps {
   onLoadMore?: () => void;
   /** Called when the user edits a cell directly in the grid */
   onCellEdit?: () => void;
+  /** Called when Univer is ready, providing imperative handles */
+  onReady?: (handles: { undo: () => void; redo: () => void }) => void;
 }
 
 // ── Type classification helpers ─────────────────────────
@@ -448,6 +450,8 @@ export default function UniverSheet(props: UniverSheetProps) {
   const univerAPIRef = useRef<FUniver | null>(null);
   const onCellEditRef = useRef(onCellEdit);
   onCellEditRef.current = onCellEdit;
+  const onReadyRef = useRef(props.onReady);
+  onReadyRef.current = props.onReady;
 
   // Apply column configs: filter visible + reorder
   const { filteredColumns, filteredData } = useMemo(() => {
@@ -575,6 +579,12 @@ export default function UniverSheet(props: UniverSheetProps) {
 
     univerAPIRef.current = univerAPI;
     univerAPI.createWorkbook(workbookData as any);
+
+    // Expose undo/redo handles to parent
+    onReadyRef.current?.({
+      undo: () => { univerAPI.undo(); },
+      redo: () => { univerAPI.redo(); },
+    });
 
     // Listen for cell edit commands to flag dirty state
     const CELL_EDIT_COMMANDS = new Set([

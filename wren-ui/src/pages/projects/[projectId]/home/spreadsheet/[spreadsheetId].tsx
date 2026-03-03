@@ -210,6 +210,9 @@ export default function SpreadsheetDetail() {
     setIsEditingName(false);
   }, []);
 
+  // ── Univer handles (undo / redo) ─────────────────────
+  const univerHandlesRef = useRef<{ undo: () => void; redo: () => void } | null>(null);
+
   // ── SQL editor state ─────────────────────────────────
   const [currentSql, setCurrentSql] = useState('');
   const [sqlDirty, setSqlDirty] = useState(false);
@@ -716,6 +719,8 @@ export default function SpreadsheetDetail() {
             onDuplicate={handleDuplicate}
             onAIAssistant={handleToggleAIPanel}
             aiAssistantActive={aiPanelVisible}
+            onUndo={() => univerHandlesRef.current?.undo()}
+            onRedo={() => univerHandlesRef.current?.redo()}
           />
         )}
 
@@ -757,6 +762,7 @@ export default function SpreadsheetDetail() {
               loadedRowCount={loadedRowCount}
               fetchLimit={fetchLimit}
               onLoadMore={handleLoadMore}
+              onReady={(handles) => { univerHandlesRef.current = handles; }}
               onCellEdit={() => setSqlDirty(true)}
               searchOverlay={
                 searchVisible ? (
