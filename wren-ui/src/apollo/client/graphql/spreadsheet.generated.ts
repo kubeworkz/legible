@@ -8,13 +8,13 @@ export type SpreadsheetsQueryVariables = Types.Exact<{
   folderId?: Types.InputMaybe<Types.Scalars['Int']>;
 }>;
 
-export type SpreadsheetsQuery = { __typename?: 'Query', spreadsheets: Array<{ __typename?: 'Spreadsheet', id: number, projectId: number, name: string, description?: string | null, folderId?: number | null, sortOrder: number, sourceSql?: string | null, createdAt?: string | null, updatedAt?: string | null }> };
+export type SpreadsheetsQuery = { __typename?: 'Query', spreadsheets: Array<{ __typename?: 'Spreadsheet', id: number, projectId: number, name: string, description?: string | null, folderId?: number | null, sortOrder: number, sourceSql?: string | null, creatorName?: string | null, createdAt?: string | null, updatedAt?: string | null }> };
 
 export type SpreadsheetQueryVariables = Types.Exact<{
   where: Types.SpreadsheetWhereInput;
 }>;
 
-export type SpreadsheetQuery = { __typename?: 'Query', spreadsheet: { __typename?: 'Spreadsheet', id: number, projectId: number, name: string, description?: string | null, folderId?: number | null, sortOrder: number, sourceSql?: string | null, columnsMetadata?: string | null, createdAt?: string | null, updatedAt?: string | null } };
+export type SpreadsheetQuery = { __typename?: 'Query', spreadsheet: { __typename?: 'Spreadsheet', id: number, projectId: number, name: string, description?: string | null, folderId?: number | null, sortOrder: number, sourceSql?: string | null, columnsMetadata?: string | null, creatorName?: string | null, createdAt?: string | null, updatedAt?: string | null } };
 
 export type CreateSpreadsheetMutationVariables = Types.Exact<{
   data: Types.CreateSpreadsheetInput;
@@ -52,6 +52,7 @@ export const SpreadsheetsDocument = gql`
     folderId
     sortOrder
     sourceSql
+    creatorName
     createdAt
     updatedAt
   }
@@ -82,6 +83,7 @@ export const SpreadsheetDocument = gql`
     sortOrder
     sourceSql
     columnsMetadata
+    creatorName
     createdAt
     updatedAt
   }

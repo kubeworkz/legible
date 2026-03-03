@@ -12,6 +12,7 @@ export interface Spreadsheet {
   sortOrder: number;
   sourceSql: string | null;
   columnsMetadata: string | null; // JSON string
+  creatorName: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1995,6 +1995,7 @@ export type Spreadsheet = {
   sortOrder: Scalars['Int'];
   sourceSql?: Maybe<Scalars['String']>;
   columnsMetadata?: Maybe<Scalars['String']>;
+  creatorName?: Maybe<Scalars['String']>;
   createdAt?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['String']>;
 };
@@ -2007,6 +2008,7 @@ export type CreateSpreadsheetInput = {
   name: Scalars['String'];
   folderId?: InputMaybe<Scalars['Int']>;
   sourceSql?: InputMaybe<Scalars['String']>;
+  creatorName?: InputMaybe<Scalars['String']>;
 };
 
 export type UpdateSpreadsheetInput = {
@@ -2014,6 +2016,7 @@ export type UpdateSpreadsheetInput = {
   description?: InputMaybe<Scalars['String']>;
   sourceSql?: InputMaybe<Scalars['String']>;
   columnsMetadata?: InputMaybe<Scalars['String']>;
+  creatorName?: InputMaybe<Scalars['String']>;
 };
 
 export type PreviewSpreadsheetDataInput = {

@@ -673,6 +673,12 @@ export default function SpreadsheetDetail() {
             )}
             {spreadsheet && (
               <div className="meta-row">
+                {spreadsheet.creatorName && (
+                  <span className="meta-item">
+                    <span className="meta-label">Creator</span>
+                    {spreadsheet.creatorName}
+                  </span>
+                )}
                 {spreadsheet.createdAt && (
                   <span className="meta-item">
                     <span className="meta-label">Created</span>
@@ -683,6 +689,25 @@ export default function SpreadsheetDetail() {
                   <span className="meta-item">
                     <span className="meta-label">Last updated</span>
                     {getRelativeTime(spreadsheet.updatedAt)}
+                  </span>
+                )}
+                {!spreadsheet.creatorName && (
+                  <span
+                    className="meta-item"
+                    style={{ cursor: 'pointer', color: 'var(--geekblue-6, #2f54eb)' }}
+                    onClick={() => {
+                      const name = prompt('Enter creator name:');
+                      if (name?.trim()) {
+                        updateSpreadsheet({
+                          variables: {
+                            where: { id: Number(spreadsheetId) },
+                            data: { creatorName: name.trim() },
+                          },
+                        }).then(() => refetch());
+                      }
+                    }}
+                  >
+                    + Set creator
                   </span>
                 )}
               </div>

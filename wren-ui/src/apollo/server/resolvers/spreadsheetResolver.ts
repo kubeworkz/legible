@@ -44,7 +44,7 @@ export class SpreadsheetResolver {
   public async createSpreadsheet(
     _root: any,
     args: {
-      data: { name: string; folderId?: number; sourceSql?: string };
+      data: { name: string; folderId?: number; sourceSql?: string; creatorName?: string };
     },
     ctx: IContext,
   ): Promise<Spreadsheet> {
@@ -53,6 +53,7 @@ export class SpreadsheetResolver {
       name: args.data.name,
       folderId: args.data.folderId,
       sourceSql: args.data.sourceSql,
+      creatorName: args.data.creatorName,
     });
   }
 
@@ -65,6 +66,7 @@ export class SpreadsheetResolver {
         description?: string;
         sourceSql?: string;
         columnsMetadata?: string;
+        creatorName?: string;
       };
     },
     ctx: IContext,

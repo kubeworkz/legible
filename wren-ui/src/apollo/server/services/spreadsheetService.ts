@@ -16,6 +16,7 @@ export interface CreateSpreadsheetInput {
   name: string;
   folderId?: number | null;
   sourceSql?: string | null;
+  creatorName?: string | null;
 }
 
 export interface UpdateSpreadsheetInput {
@@ -23,6 +24,7 @@ export interface UpdateSpreadsheetInput {
   description?: string | null;
   sourceSql?: string | null;
   columnsMetadata?: string | null;
+  creatorName?: string | null;
 }
 
 export interface ISpreadsheetService {
@@ -108,6 +110,9 @@ export class SpreadsheetService implements ISpreadsheetService {
     }
     if (input.sourceSql !== undefined) {
       createData.sourceSql = input.sourceSql;
+    }
+    if (input.creatorName !== undefined) {
+      createData.creatorName = input.creatorName;
     }
     return await this.spreadsheetRepository.createOne(createData);
   }

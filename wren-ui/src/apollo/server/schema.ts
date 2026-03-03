@@ -1273,6 +1273,7 @@ export const typeDefs = gql`
     sortOrder: Int!
     sourceSql: String
     columnsMetadata: String
+    creatorName: String
     createdAt: String
     updatedAt: String
   }
@@ -1285,6 +1286,7 @@ export const typeDefs = gql`
     name: String!
     folderId: Int
     sourceSql: String
+    creatorName: String
   }
 
   input UpdateSpreadsheetInput {
@@ -1292,6 +1294,7 @@ export const typeDefs = gql`
     description: String
     sourceSql: String
     columnsMetadata: String
+    creatorName: String
   }
 
   input PreviewSpreadsheetDataInput {
