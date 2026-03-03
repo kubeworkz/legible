@@ -331,7 +331,6 @@ export default function HeaderBar() {
             )}
           </Space>
           <Space size={[4, 0]} align="center">
-            {isModeling && <Deploy />}
             {currentOrganization && (
               <>
                 <Dropdown
