@@ -38,65 +38,45 @@ export default function ModelViewSelector({ onSelect }: Props) {
     const models = modelsData?.listModels || [];
     const views = viewsData?.listViews || [];
 
-    if (models.length > 0) {
-      items.push({
-        key: 'models-header',
-        label: (
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#8c8c8c', textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>
-            Models
-          </span>
-        ),
-        disabled: true,
-      });
+    // Models submenu with cascading children
+    const modelChildren = models.map((model) => ({
+      key: `model-${model.id}`,
+      label: model.displayName,
+      onClick: () => {
+        const sql = `SELECT * FROM "${model.referenceName}"`;
+        onSelect(sql, model.displayName);
+      },
+    }));
 
-      models.forEach((model) => {
-        items.push({
-          key: `model-${model.id}`,
-          icon: <TableOutlined />,
-          label: model.displayName,
-          onClick: () => {
-            const sql = `SELECT * FROM "${model.referenceName}"`;
-            onSelect(sql, model.displayName);
-          },
-        });
-      });
-    }
+    items.push({
+      key: 'models',
+      icon: <TableOutlined />,
+      label: 'Models',
+      children:
+        modelChildren.length > 0
+          ? modelChildren
+          : [{ key: 'no-models', label: 'No models available', disabled: true }],
+    });
 
-    if (views.length > 0) {
-      if (models.length > 0) {
-        items.push({ type: 'divider' });
-      }
+    // Views submenu with cascading children
+    const viewChildren = views.map((view) => ({
+      key: `view-${view.id}`,
+      label: view.displayName || view.name,
+      onClick: () => {
+        const sql = `SELECT * FROM "${view.name}"`;
+        onSelect(sql, view.displayName || view.name);
+      },
+    }));
 
-      items.push({
-        key: 'views-header',
-        label: (
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#8c8c8c', textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>
-            Views
-          </span>
-        ),
-        disabled: true,
-      });
-
-      views.forEach((view) => {
-        items.push({
-          key: `view-${view.id}`,
-          icon: <EyeOutlined />,
-          label: view.displayName || view.name,
-          onClick: () => {
-            const sql = `SELECT * FROM "${view.name}"`;
-            onSelect(sql, view.displayName || view.name);
-          },
-        });
-      });
-    }
-
-    if (items.length === 0) {
-      items.push({
-        key: 'empty',
-        label: 'No models or views available',
-        disabled: true,
-      });
-    }
+    items.push({
+      key: 'views',
+      icon: <EyeOutlined />,
+      label: 'Views',
+      children:
+        viewChildren.length > 0
+          ? viewChildren
+          : [{ key: 'no-views', label: 'No views available', disabled: true }],
+    });
 
     return items;
   }, [modelsData, viewsData, onSelect]);
