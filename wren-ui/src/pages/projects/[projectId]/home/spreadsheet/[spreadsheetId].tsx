@@ -191,6 +191,31 @@ export default function SpreadsheetDetail() {
   const [externalSql, setExternalSql] = useState<string | undefined>(undefined);
   const [fetchLimit, setFetchLimit] = useState(500);
 
+  // ── Search state ──────────────────────────────────────
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchMatches, setSearchMatches] = useState<SearchMatch[]>([]);
+  const [activeMatchIndex, setActiveMatchIndex] = useState(0);
+
+  // ── Sort state ────────────────────────────────────────
+  const [sort, setSort] = useState<SortState | null>(null);
+
+  // Reset all transient state when navigating to a different spreadsheet
+  useEffect(() => {
+    setCurrentSql('');
+    setSqlDirty(false);
+    setHasRun(false);
+    setShowSqlEditor(false);
+    setExternalSql(undefined);
+    setFetchLimit(500);
+    setIsEditingName(false);
+    setHistoryDrawerVisible(false);
+    setAIPanelVisible(false);
+    setSearchVisible(false);
+    setSearchMatches([]);
+    setActiveMatchIndex(0);
+    setSort(null);
+  }, [spreadsheetId]);
+
   // Sync initial SQL from the loaded spreadsheet
   useEffect(() => {
     if (spreadsheet?.sourceSql && !hasRun) {
@@ -266,20 +291,12 @@ export default function SpreadsheetDetail() {
   const [columnConfigs, setColumnConfigs] = useState<ColumnConfig[]>([]);
   const columnConfigsInitialized = useRef(false);
 
-  // ── Sort state ────────────────────────────────────────
-  const [sort, setSort] = useState<SortState | null>(null);
-
   const handleSortChange = useCallback(
     (newSort: SortState | null) => {
       setSort(newSort);
     },
     [],
   );
-
-  // ── Search state ──────────────────────────────────────
-  const [searchVisible, setSearchVisible] = useState(false);
-  const [searchMatches, setSearchMatches] = useState<SearchMatch[]>([]);
-  const [activeMatchIndex, setActiveMatchIndex] = useState(0);
 
   const handleSearchChange = useCallback(
     (_term: string, matches: SearchMatch[], activeIdx: number) => {
