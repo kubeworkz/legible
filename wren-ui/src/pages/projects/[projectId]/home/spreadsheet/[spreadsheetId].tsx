@@ -22,6 +22,7 @@ import {
 import UniverSheetDynamic from '@/components/spreadsheet/UniverSheetDynamic';
 import DataSourceOverlay from '@/components/spreadsheet/DataSourceOverlay';
 import SpreadsheetHistoryDrawer from '@/components/spreadsheet/SpreadsheetHistoryDrawer';
+import SpreadsheetAIPanel from '@/components/spreadsheet/SpreadsheetAIPanel';
 import {
   useSpreadsheetQuery,
   useUpdateSpreadsheetMutation,
@@ -84,8 +85,15 @@ const TitleInput = styled(Input)`
 const GridArea = styled.div`
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 0;
+`;
+
+const GridMain = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 `;
 
 export default function SpreadsheetDetail() {
@@ -140,6 +148,17 @@ export default function SpreadsheetDetail() {
   const [duplicateSpreadsheet] = useDuplicateSpreadsheetMutation({
     onError: (err) => message.error(err.message),
   });
+
+  // ── AI Assistant state ────────────────────────────────
+  const [aiPanelVisible, setAIPanelVisible] = useState(false);
+
+  const handleToggleAIPanel = useCallback(() => {
+    setAIPanelVisible((prev) => !prev);
+  }, []);
+
+  const handleCloseAIPanel = useCallback(() => {
+    setAIPanelVisible(false);
+  }, []);
 
   const startEditingName = useCallback(() => {
     setEditName(spreadsheet?.name || '');
@@ -210,6 +229,16 @@ export default function SpreadsheetDetail() {
       }
     },
     [spreadsheetId, spreadsheet?.sourceSql, previewSpreadsheetData, fetchLimit],
+  );
+
+  const handleAIApplySql = useCallback(
+    (sql: string) => {
+      setExternalSql(sql);
+      setShowSqlEditor(true);
+      handleRunSql(sql);
+      message.success('SQL applied from AI Assistant');
+    },
+    [handleRunSql],
   );
 
   const handleSaveSql = useCallback(
@@ -615,6 +644,8 @@ export default function SpreadsheetDetail() {
             onHistory={handleOpenHistory}
             historyActive={historyDrawerVisible}
             onDuplicate={handleDuplicate}
+            onAIAssistant={handleToggleAIPanel}
+            aiAssistantActive={aiPanelVisible}
           />
         )}
 
@@ -630,48 +661,58 @@ export default function SpreadsheetDetail() {
         )}
 
         <GridArea>
-          <UniverSheetDynamic
-            columns={resultData?.columns}
-            data={resultData?.data}
-            loading={previewLoading}
-            error={previewError || null}
-            columnConfigs={columnConfigs}
-            sort={sort}
-            searchMatches={searchMatches}
-            activeMatchIndex={activeMatchIndex}
-            isAtLimit={isAtLimit}
-            loadedRowCount={loadedRowCount}
-            fetchLimit={fetchLimit}
-            onLoadMore={handleLoadMore}
-            searchOverlay={
-              searchVisible ? (
-                <SpreadsheetSearch
-                  visible={searchVisible}
-                  onClose={() => {
-                    setSearchVisible(false);
-                    setSearchMatches([]);
-                    setActiveMatchIndex(0);
-                  }}
-                  columnCount={resultData?.columns?.length || 0}
-                  rowCount={resultData?.data?.length || 0}
-                  onSearchChange={handleSearchChange}
-                  data={resultData?.data as any[][] | undefined}
-                  columnNames={
-                    (resultData?.columns as { name: string }[] | undefined)?.map(
-                      (c) => c.name,
-                    ) || []
-                  }
-                />
-              ) : undefined
-            }
-            overlay={
-              !hasRun ? (
-                <DataSourceOverlay
-                  onSelectModelView={handleSelectModelView}
-                  onCreateFromSql={handleCreateFromSql}
-                />
-              ) : undefined
-            }
+          <GridMain>
+            <UniverSheetDynamic
+              columns={resultData?.columns}
+              data={resultData?.data}
+              loading={previewLoading}
+              error={previewError || null}
+              columnConfigs={columnConfigs}
+              sort={sort}
+              searchMatches={searchMatches}
+              activeMatchIndex={activeMatchIndex}
+              isAtLimit={isAtLimit}
+              loadedRowCount={loadedRowCount}
+              fetchLimit={fetchLimit}
+              onLoadMore={handleLoadMore}
+              searchOverlay={
+                searchVisible ? (
+                  <SpreadsheetSearch
+                    visible={searchVisible}
+                    onClose={() => {
+                      setSearchVisible(false);
+                      setSearchMatches([]);
+                      setActiveMatchIndex(0);
+                    }}
+                    columnCount={resultData?.columns?.length || 0}
+                    rowCount={resultData?.data?.length || 0}
+                    onSearchChange={handleSearchChange}
+                    data={resultData?.data as any[][] | undefined}
+                    columnNames={
+                      (resultData?.columns as { name: string }[] | undefined)?.map(
+                        (c) => c.name,
+                      ) || []
+                    }
+                  />
+                ) : undefined
+              }
+              overlay={
+                !hasRun ? (
+                  <DataSourceOverlay
+                    onSelectModelView={handleSelectModelView}
+                    onCreateFromSql={handleCreateFromSql}
+                  />
+                ) : undefined
+              }
+            />
+          </GridMain>
+
+          <SpreadsheetAIPanel
+            visible={aiPanelVisible}
+            onClose={handleCloseAIPanel}
+            currentSql={currentSql}
+            onApplySql={handleAIApplySql}
+            spreadsheetName={spreadsheet?.name}
           />
         </GridArea>
 

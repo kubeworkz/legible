@@ -13,6 +13,7 @@ import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
 import FileTextOutlined from '@ant-design/icons/FileTextOutlined';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import CopyOutlined from '@ant-design/icons/CopyOutlined';
+import ThunderboltOutlined from '@ant-design/icons/ThunderboltOutlined';
 import ColumnManager, { ColumnConfig, SortState } from './ColumnManager';
 
 // ── Styles ──────────────────────────────────────────────
@@ -143,6 +144,10 @@ export interface SpreadsheetToolbarProps {
   historyActive?: boolean;
   /** Called when Duplicate is clicked */
   onDuplicate?: () => void;
+  /** Called when AI Assistant is clicked */
+  onAIAssistant?: () => void;
+  /** Whether AI assistant panel is open */
+  aiAssistantActive?: boolean;
 }
 
 // ── Component ───────────────────────────────────────────
@@ -167,6 +172,8 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
     onHistory,
     historyActive = false,
     onDuplicate,
+    onAIAssistant,
+    aiAssistantActive = false,
   } = props;
 
   const handleSave = useCallback(() => {
@@ -342,6 +349,30 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
             style={searchActive ? { background: 'var(--gray-3)', borderColor: 'var(--gray-5)' } : undefined}
           >
             Search
+          </ToolbarButton>
+        </Tooltip>
+      </ToolbarSection>
+
+      <StyledDivider type="vertical" />
+
+      {/* ── AI Assistant ── */}
+      <ToolbarSection>
+        <Tooltip title="AI Assistant">
+          <ToolbarButton
+            size="small"
+            icon={<ThunderboltOutlined />}
+            onClick={onAIAssistant}
+            style={
+              aiAssistantActive
+                ? {
+                    background: 'var(--purple-1, #f9f0ff)',
+                    borderColor: 'var(--purple-4, #b37feb)',
+                    color: 'var(--purple-6, #722ed1)',
+                  }
+                : undefined
+            }
+          >
+            AI Assistant
           </ToolbarButton>
         </Tooltip>
       </ToolbarSection>
