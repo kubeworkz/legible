@@ -573,12 +573,14 @@ export default function RecommendSemantics() {
             User Prompt
           </Title>
 
-          <Description>
-            Help AI better understand your data by providing a{' '}
-            <span className="bold-intro">brief description</span> of your
-            dataset's purpose. Modeling AI Assistant will use this context to
-            generate more relevant semantics.
-          </Description>
+          {!generated && !generating && (
+            <Description>
+              Help AI better understand your data by providing a{' '}
+              <span className="bold-intro">brief description</span> of your
+              dataset's purpose. Modeling AI Assistant will use this context to
+              generate more relevant semantics.
+            </Description>
+          )}
 
           <PromptRow>
             <Input.TextArea
@@ -587,6 +589,7 @@ export default function RecommendSemantics() {
               onChange={(e) => setUserPrompt(e.target.value)}
               autoSize={{ minRows: 2, maxRows: 5 }}
               style={{ flex: 1 }}
+              disabled={generating}
             />
             <Button
               type={generated ? 'default' : 'primary'}
@@ -599,31 +602,33 @@ export default function RecommendSemantics() {
             </Button>
           </PromptRow>
 
-          <StyledCollapse
-            defaultActiveKey={generated ? [] : ['examples']}
-            expandIcon={({ isActive }) =>
-              isActive ? <MinusOutlined /> : <PlusOutlined />
-            }
-            expandIconPosition="right"
-          >
-            <Panel header="Example prompt" key="examples">
-              <div className="example-intro">
-                Following, we provide some example prompts based on some real world datasets.
-              </div>
-              {EXAMPLE_PROMPTS.map((example, idx) => (
-                <ExampleCard key={idx}>
-                  <Tag
-                    color="blue"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setUserPrompt(example.text)}
-                  >
-                    {example.tag}
-                  </Tag>
-                  <div className="example-text">{example.text}</div>
-                </ExampleCard>
-              ))}
-            </Panel>
-          </StyledCollapse>
+          {!generated && !generating && (
+            <StyledCollapse
+              defaultActiveKey={['examples']}
+              expandIcon={({ isActive }) =>
+                isActive ? <MinusOutlined /> : <PlusOutlined />
+              }
+              expandIconPosition="right"
+            >
+              <Panel header="Example prompt" key="examples">
+                <div className="example-intro">
+                  Following, we provide some example prompts based on some real world datasets.
+                </div>
+                {EXAMPLE_PROMPTS.map((example, idx) => (
+                  <ExampleCard key={idx}>
+                    <Tag
+                      color="blue"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setUserPrompt(example.text)}
+                    >
+                      {example.tag}
+                    </Tag>
+                    <div className="example-text">{example.text}</div>
+                  </ExampleCard>
+                ))}
+              </Panel>
+            </StyledCollapse>
+          )}
 
           {generating && (
             <GeneratingOverlay>
