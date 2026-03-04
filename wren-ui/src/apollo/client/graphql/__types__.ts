@@ -878,6 +878,8 @@ export type Mutation = {
   updateViewMetadata: Scalars['Boolean'];
   validateCalculatedField: CalculatedFieldValidationResponse;
   validateView: ViewValidationResponse;
+  updateBillingConfig: BillingConfig;
+  recomputeMonthlyBilling: MonthlyBillingSummary;
 };
 
 
@@ -1324,6 +1326,10 @@ export type Query = {
   apiHistory: ApiHistoryPaginatedResponse;
   apiKeyRateLimitStatus: ApiKeyRateLimitStatus;
   apiUsageDashboard: ApiUsageDashboard;
+  apiMonthlyUsage: Array<ApiMonthlyUsage>;
+  billingConfig: BillingConfig;
+  billingOverview: BillingOverview;
+  monthlyBilling: MonthlyBillingSummary;
   askingTask?: Maybe<AskingTask>;
   autoGenerateRelation: Array<RecommendRelations>;
   dashboard: DetailedDashboard;
@@ -1383,6 +1389,96 @@ export type QueryApiHistoryArgs = {
 export type QueryApiKeyRateLimitStatusArgs = {
   keyId: Scalars['Int'];
   keyType: Scalars['String'];
+};
+
+// ─── Billing & Cost Types ──────────────────────────────────
+
+export type BillingConfig = {
+  __typename?: 'BillingConfig';
+  costPer1kInputTokens: Scalars['Float'];
+  costPer1kOutputTokens: Scalars['Float'];
+  currency: Scalars['String'];
+  monthlySpendAlert?: Maybe<Scalars['Float']>;
+  billingPeriodAnchorDay: Scalars['Int'];
+};
+
+export type UpdateBillingConfigInput = {
+  costPer1kInputTokens?: Maybe<Scalars['Float']>;
+  costPer1kOutputTokens?: Maybe<Scalars['Float']>;
+  currency?: Maybe<Scalars['String']>;
+  monthlySpendAlert?: Maybe<Scalars['Float']>;
+  billingPeriodAnchorDay?: Maybe<Scalars['Int']>;
+};
+
+export type KeyCostBreakdown = {
+  __typename?: 'KeyCostBreakdown';
+  apiKeyId: Scalars['Int'];
+  apiKeyType: Scalars['String'];
+  totalRequests: Scalars['Int'];
+  tokensTotal: Scalars['Float'];
+  estimatedCost: Scalars['Float'];
+};
+
+export type ApiTypeCostBreakdown = {
+  __typename?: 'ApiTypeCostBreakdown';
+  apiType: Scalars['String'];
+  totalRequests: Scalars['Int'];
+  tokensTotal: Scalars['Float'];
+  estimatedCost: Scalars['Float'];
+};
+
+export type MonthlyBillingSummary = {
+  __typename?: 'MonthlyBillingSummary';
+  year: Scalars['Int'];
+  month: Scalars['Int'];
+  totalRequests: Scalars['Int'];
+  successfulRequests: Scalars['Int'];
+  failedRequests: Scalars['Int'];
+  tokensInput: Scalars['Float'];
+  tokensOutput: Scalars['Float'];
+  tokensTotal: Scalars['Float'];
+  estimatedCost: Scalars['Float'];
+  perKeyBreakdown: Array<KeyCostBreakdown>;
+  perApiTypeBreakdown: Array<ApiTypeCostBreakdown>;
+};
+
+export type BillingOverview = {
+  __typename?: 'BillingOverview';
+  config: BillingConfig;
+  currentMonth: MonthlyBillingSummary;
+  history: Array<MonthlyBillingSummary>;
+};
+
+export type ApiMonthlyUsage = {
+  __typename?: 'ApiMonthlyUsage';
+  year: Scalars['Int'];
+  month: Scalars['Int'];
+  totalRequests: Scalars['Int'];
+  successfulRequests: Scalars['Int'];
+  failedRequests: Scalars['Int'];
+  tokensInput: Scalars['Float'];
+  tokensOutput: Scalars['Float'];
+  tokensTotal: Scalars['Float'];
+};
+
+export type QueryApiMonthlyUsageArgs = {
+  filter?: InputMaybe<ApiUsageFilterInput>;
+};
+
+export type QueryBillingOverviewArgs = {};
+
+export type QueryMonthlyBillingArgs = {
+  year: Scalars['Int'];
+  month: Scalars['Int'];
+};
+
+export type MutationUpdateBillingConfigArgs = {
+  data: UpdateBillingConfigInput;
+};
+
+export type MutationRecomputeMonthlyBillingArgs = {
+  year: Scalars['Int'];
+  month: Scalars['Int'];
 };
 
 

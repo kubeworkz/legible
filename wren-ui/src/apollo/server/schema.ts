@@ -157,6 +157,72 @@ export const typeDefs = gql`
 
   # ─── End API Key Types ─────────────────────────────────────
 
+  # ─── Billing & Cost Types ──────────────────────────────────
+
+  type BillingConfig {
+    costPer1kInputTokens: Float!
+    costPer1kOutputTokens: Float!
+    currency: String!
+    monthlySpendAlert: Float
+    billingPeriodAnchorDay: Int!
+  }
+
+  input UpdateBillingConfigInput {
+    costPer1kInputTokens: Float
+    costPer1kOutputTokens: Float
+    currency: String
+    monthlySpendAlert: Float
+    billingPeriodAnchorDay: Int
+  }
+
+  type KeyCostBreakdown {
+    apiKeyId: Int!
+    apiKeyType: String!
+    totalRequests: Int!
+    tokensTotal: Float!
+    estimatedCost: Float!
+  }
+
+  type ApiTypeCostBreakdown {
+    apiType: String!
+    totalRequests: Int!
+    tokensTotal: Float!
+    estimatedCost: Float!
+  }
+
+  type MonthlyBillingSummary {
+    year: Int!
+    month: Int!
+    totalRequests: Int!
+    successfulRequests: Int!
+    failedRequests: Int!
+    tokensInput: Float!
+    tokensOutput: Float!
+    tokensTotal: Float!
+    estimatedCost: Float!
+    perKeyBreakdown: [KeyCostBreakdown!]!
+    perApiTypeBreakdown: [ApiTypeCostBreakdown!]!
+  }
+
+  type BillingOverview {
+    config: BillingConfig!
+    currentMonth: MonthlyBillingSummary!
+    history: [MonthlyBillingSummary!]!
+  }
+
+  type ApiMonthlyUsage {
+    year: Int!
+    month: Int!
+    totalRequests: Int!
+    successfulRequests: Int!
+    failedRequests: Int!
+    tokensInput: Float!
+    tokensOutput: Float!
+    tokensTotal: Float!
+  }
+
+  # ─── End Billing Types ────────────────────────────────────
+
   # ─── Project API Key Types ─────────────────────────────────
 
   type ProjectApiKey {
@@ -1768,6 +1834,12 @@ export const typeDefs = gql`
 
     # Api Usage
     apiUsageDashboard(filter: ApiUsageFilterInput): ApiUsageDashboard!
+    apiMonthlyUsage(filter: ApiUsageFilterInput): [ApiMonthlyUsage!]!
+
+    # Billing
+    billingConfig: BillingConfig!
+    billingOverview: BillingOverview!
+    monthlyBilling(year: Int!, month: Int!): MonthlyBillingSummary!
 
     # Data Security
     sessionProperties: [SessionProperty!]!
@@ -1819,6 +1891,10 @@ export const typeDefs = gql`
     deleteProjectApiKey(keyId: Int!, projectId: Int!): Boolean!
     updateProjectApiKeyRateLimits(data: UpdateProjectApiKeyRateLimitsInput!): ProjectApiKey!
     resetProjectApiKeyTokenQuota(keyId: Int!, projectId: Int!): Boolean!
+
+    # Billing
+    updateBillingConfig(data: UpdateBillingConfigInput!): BillingConfig!
+    recomputeMonthlyBilling(year: Int!, month: Int!): MonthlyBillingSummary!
 
     # On Boarding Steps
     saveDataSource(data: DataSourceInput!): DataSource!

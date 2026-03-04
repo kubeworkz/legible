@@ -15,6 +15,7 @@ import { ProjectApiKeyResolver } from './resolvers/projectApiKeyResolver';
 import { RlsPolicyResolver } from './resolvers/rlsPolicyResolver';
 import { FolderResolver } from './resolvers/folderResolver';
 import { SpreadsheetResolver } from './resolvers/spreadsheetResolver';
+import { BillingResolver } from './resolvers/billingResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -34,6 +35,7 @@ const projectApiKeyResolver = new ProjectApiKeyResolver();
 const rlsPolicyResolver = new RlsPolicyResolver();
 const folderResolver = new FolderResolver();
 const spreadsheetResolver = new SpreadsheetResolver();
+const billingResolver = new BillingResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -110,6 +112,12 @@ const resolvers = {
 
     // Api Usage
     apiUsageDashboard: apiHistoryResolver.getApiUsageDashboard,
+    apiMonthlyUsage: billingResolver.apiMonthlyUsage,
+
+    // Billing
+    billingConfig: billingResolver.billingConfig,
+    billingOverview: billingResolver.billingOverview,
+    monthlyBilling: billingResolver.monthlyBilling,
 
     // Data Security
     sessionProperties: rlsPolicyResolver.listSessionProperties,
@@ -164,6 +172,10 @@ const resolvers = {
       projectApiKeyResolver.updateProjectApiKeyRateLimits,
     resetProjectApiKeyTokenQuota:
       projectApiKeyResolver.resetProjectApiKeyTokenQuota,
+
+    // Billing
+    updateBillingConfig: billingResolver.updateBillingConfig,
+    recomputeMonthlyBilling: billingResolver.recomputeMonthlyBilling,
 
     deploy: modelResolver.deploy,
     saveDataSource: projectResolver.saveDataSource,

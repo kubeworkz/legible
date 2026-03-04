@@ -6,6 +6,7 @@ import { OpenInNewIcon } from '@/utils/icons';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import ReadOutlined from '@ant-design/icons/ReadOutlined';
 import BarChartOutlined from '@ant-design/icons/BarChartOutlined';
+import DollarOutlined from '@ant-design/icons/DollarOutlined';
 import SidebarMenu from '@/components/sidebar/SidebarMenu';
 import useProject from '@/hooks/useProject';
 
@@ -23,6 +24,7 @@ const Layout = styled.div`
 const MENU_KEY_MAP = {
   [Path.APIManagementHistory]: MENU_KEY.API_HISTORY,
   [Path.APIManagementUsage]: MENU_KEY.API_USAGE,
+  [Path.APIManagementBilling]: MENU_KEY.API_BILLING,
 };
 
 const linkStyle = { color: 'inherit', transition: 'none' };
@@ -58,6 +60,20 @@ export default function APIManagement() {
       ),
       icon: <BarChartOutlined />,
       key: MENU_KEY.API_USAGE,
+      className: 'pl-4',
+    },
+    {
+      'data-guideid': 'api-billing',
+      label: (
+        <Link
+          style={linkStyle}
+          href={buildPath(Path.APIManagementBilling, currentProjectId)}
+        >
+          Billing
+        </Link>
+      ),
+      icon: <DollarOutlined />,
+      key: MENU_KEY.API_BILLING,
       className: 'pl-4',
     },
     {

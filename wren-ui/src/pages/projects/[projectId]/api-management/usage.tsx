@@ -10,11 +10,13 @@ import {
   Typography,
   Spin,
   Empty,
+  Button,
 } from 'antd';
 import styled from 'styled-components';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import BarChartOutlined from '@ant-design/icons/BarChartOutlined';
+import DownloadOutlined from '@ant-design/icons/DownloadOutlined';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import CloseCircleOutlined from '@ant-design/icons/CloseCircleOutlined';
 import ClockCircleOutlined from '@ant-design/icons/ClockCircleOutlined';
@@ -273,6 +275,20 @@ export default function APIUsage() {
           </>
         }
         description="Monitor your API usage across endpoints and API keys."
+        titleExtra={
+          <Button
+            icon={<DownloadOutlined />}
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (dateRange[0]) params.set('startDate', dateRange[0]);
+              if (dateRange[1]) params.set('endDate', dateRange[1]);
+              const qs = params.toString();
+              window.open(`/api/export/usage${qs ? `?${qs}` : ''}`, '_blank');
+            }}
+          >
+            Export CSV
+          </Button>
+        }
       >
         {/* Date Range Filter */}
         <div className="mb-4">

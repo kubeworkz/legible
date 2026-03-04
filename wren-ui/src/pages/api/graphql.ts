@@ -85,6 +85,7 @@ const bootstrapServer = async () => {
     folderService,
     spreadsheetService,
     rateLimitService,
+    billingService,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
     threadRecommendQuestionBackgroundTracker,
@@ -265,6 +266,8 @@ const bootstrapServer = async () => {
         spreadsheetRepository,
         // rate limiting
         rateLimitService,
+        // billing
+        billingService,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

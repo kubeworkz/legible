@@ -8,6 +8,7 @@ import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
+import DownloadOutlined from '@ant-design/icons/DownloadOutlined';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import CloseCircleOutlined from '@ant-design/icons/CloseCircleOutlined';
 import SQLCodeBlock from '@/components/code/SQLCodeBlock';
@@ -184,6 +185,19 @@ export default function APIHistory() {
               </Link>
             </div>
           </>
+        }
+        titleExtra={
+          <Button
+            icon={<DownloadOutlined />}
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (filters['apiType']?.[0]) params.set('apiType', filters['apiType'][0]);
+              const qs = params.toString();
+              window.open(`/api/export/history${qs ? `?${qs}` : ''}`, '_blank');
+            }}
+          >
+            Export CSV
+          </Button>
         }
       >
         <Table

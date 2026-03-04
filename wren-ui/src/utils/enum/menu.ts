@@ -3,6 +3,7 @@ export enum MENU_KEY {
   INSTRUCTIONS = 'instructions',
   API_HISTORY = 'api-history',
   API_USAGE = 'api-usage',
+  API_BILLING = 'api-billing',
   API_REFERENCE = 'api-reference',
   ROW_LEVEL_SECURITY = 'row-level-security',
   SESSION_PROPERTY = 'session-property',

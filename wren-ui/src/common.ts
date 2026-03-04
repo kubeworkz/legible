@@ -59,6 +59,11 @@ import {
 } from '@server/services';
 import { RlsPolicyService } from './apollo/server/services/rlsPolicyService';
 import { RateLimitService } from './apollo/server/services/rateLimitService';
+import { BillingService } from './apollo/server/services/billingService';
+import {
+  BillingConfigRepository,
+  MonthlyUsageCacheRepository,
+} from './apollo/server/repositories/billingRepository';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -113,6 +118,8 @@ export const initComponents = () => {
   const folderAccessRepository = new FolderAccessRepository(knex);
   const spreadsheetRepository = new SpreadsheetRepository(knex);
   const spreadsheetHistoryRepository = new SpreadsheetHistoryRepository(knex);
+  const billingConfigRepository = new BillingConfigRepository(knex);
+  const monthlyUsageCacheRepository = new MonthlyUsageCacheRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -220,6 +227,11 @@ export const initComponents = () => {
     orgApiKeyRepository,
     projectApiKeyRepository,
   });
+  const billingService = new BillingService({
+    billingConfigRepository,
+    monthlyUsageCacheRepository,
+    apiHistoryRepository,
+  });
   const rlsPolicyService = new RlsPolicyService({
     sessionPropertyRepository,
     rlsPolicyRepository,
@@ -319,6 +331,7 @@ export const initComponents = () => {
     orgApiKeyService,
     projectApiKeyService,
     rateLimitService,
+    billingService,
     rlsPolicyService,
     folderService,
     spreadsheetService,

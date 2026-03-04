@@ -50,6 +50,7 @@ import {
 import { IProjectApiKeyService } from '../services/projectApiKeyService';
 import { IRlsPolicyService } from '../services/rlsPolicyService';
 import { IRateLimitService } from '../services/rateLimitService';
+import { IBillingService } from '../services/billingService';
 import { IFolderService } from '../services/folderService';
 import { ISpreadsheetService } from '../services/spreadsheetService';
 import { ITelemetry } from '@server/telemetry/telemetry';
@@ -97,6 +98,7 @@ export interface IContext {
   orgApiKeyService: IOrgApiKeyService;
   projectApiKeyService: IProjectApiKeyService;
   rateLimitService: IRateLimitService;
+  billingService: IBillingService;
   rlsPolicyService: IRlsPolicyService;
   folderService: IFolderService;
   spreadsheetService: ISpreadsheetService;
