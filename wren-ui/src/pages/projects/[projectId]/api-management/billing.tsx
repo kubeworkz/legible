@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Table,
   TableColumnsType,
@@ -16,7 +16,6 @@ import {
   Input,
   message,
   Tooltip,
-  Popconfirm,
   Space,
 } from 'antd';
 import styled from 'styled-components';
@@ -41,7 +40,7 @@ import type {
   BillingConfig,
 } from '@/apollo/client/graphql/__types__';
 
-const { Text, Title, Paragraph } = Typography;
+const { Text } = Typography;
 
 // ── Styled Components ─────────────────────────────────
 
@@ -407,13 +406,11 @@ export default function BillingPage() {
 
   if (loading && !data) {
     return (
-      <SiderLayout loading>
+      <SiderLayout loading={false} sidebar={null}>
         <PageLayout
           title={<><DollarOutlined className="mr-2 gray-8" />Billing &amp; Cost</>}
         >
-          <div
-            style={{ textAlign: 'center', padding: 48 }}
-          >
+          <div style={{ textAlign: 'center', padding: 48 }}>
             <Spin size="large" />
           </div>
         </PageLayout>
@@ -428,7 +425,7 @@ export default function BillingPage() {
     currentMonth.estimatedCost > spendAlert;
 
   return (
-    <SiderLayout>
+    <SiderLayout loading={false} sidebar={null}>
       <PageLayout
         title={<><DollarOutlined className="mr-2 gray-8" />Billing &amp; Cost</>}
         description="Token usage costs based on your configured pricing. Configure per-token rates to see estimated costs."
@@ -606,12 +603,14 @@ export default function BillingPage() {
           }}
         />
 
-        <ConfigModal
-          visible={configVisible}
-          config={config || null}
-          onClose={() => setConfigVisible(false)}
-          onSave={handleUpdateConfig}
-        />
+        {configVisible && (
+          <ConfigModal
+            visible={configVisible}
+            config={config || null}
+            onClose={() => setConfigVisible(false)}
+            onSave={handleUpdateConfig}
+          />
+        )}
       </PageLayout>
     </SiderLayout>
   );
