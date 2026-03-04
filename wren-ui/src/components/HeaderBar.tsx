@@ -30,18 +30,20 @@ import { useApolloClient } from '@apollo/client';
 const { Header } = Layout;
 
 const StyledButton = styled(Button)<{ $isHighlight: boolean }>`
-  background: ${(props) =>
-    props.$isHighlight ? 'rgba(255, 255, 255, 0.20)' : 'transparent'};
-  font-weight: ${(props) => (props.$isHighlight ? '700' : 'normal')};
-  border: none;
-  color: var(--gray-1);
+  &&& {
+    background: ${(props) =>
+      props.$isHighlight ? 'rgba(255, 255, 255, 0.20)' : 'transparent'};
+    font-weight: ${(props) => (props.$isHighlight ? '700' : 'normal')};
+    border: none;
+    color: var(--gray-1);
+  }
 
-  &:hover,
-  &:focus {
+  &&&:hover,
+  &&&:focus {
     background: ${(props) =>
       props.$isHighlight
-        ? 'rgba(255, 255, 255, 0.20)'
-        : 'rgba(255, 255, 255, 0.05)'};
+        ? 'rgba(255, 255, 255, 0.25)'
+        : 'rgba(255, 255, 255, 0.15)'};
     color: var(--gray-1);
   }
 `;
@@ -54,30 +56,34 @@ const StyledHeader = styled(Header)`
 `;
 
 const AvatarButton = styled(Button)`
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  color: var(--gray-1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  &&& {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: var(--gray-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-  &:hover,
-  &:focus {
+  &&&:hover,
+  &&&:focus {
     background: rgba(255, 255, 255, 0.25);
     color: var(--gray-1);
   }
 `;
 
 const BreadcrumbButton = styled(Button)`
-  background: transparent;
-  border: none;
-  color: var(--gray-3);
-  display: flex;
-  align-items: center;
-  padding: 2px 8px;
-  height: 28px;
-  font-size: 13px;
-  font-weight: 500;
+  &&& {
+    background: transparent;
+    border: none;
+    color: var(--gray-3);
+    display: flex;
+    align-items: center;
+    padding: 2px 8px;
+    height: 28px;
+    font-size: 13px;
+    font-weight: 500;
+  }
 
   .anticon-down {
     font-size: 10px;
@@ -85,9 +91,9 @@ const BreadcrumbButton = styled(Button)`
     opacity: 0.7;
   }
 
-  &:hover,
-  &:focus {
-    background: rgba(255, 255, 255, 0.1);
+  &&&:hover,
+  &&&:focus {
+    background: rgba(255, 255, 255, 0.15);
     color: var(--gray-1);
   }
 `;
