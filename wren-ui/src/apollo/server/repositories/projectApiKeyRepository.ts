@@ -13,6 +13,12 @@ export interface ProjectApiKey {
   expiresAt: string | null;
   createdBy: number;
   revokedAt: string | null;
+  // Rate limiting & quota
+  rateLimitRpm: number | null; // requests per minute
+  rateLimitRpd: number | null; // requests per day
+  tokenQuotaMonthly: number | null; // monthly token budget
+  tokenQuotaUsed: number; // tokens consumed this period
+  quotaResetAt: string | null; // next reset timestamp
   createdAt: string;
   updatedAt: string;
 }
@@ -24,6 +30,16 @@ export interface IProjectApiKeyRepository
   findActiveByPrefix(keyPrefix: string): Promise<ProjectApiKey | null>;
   updateLastUsed(id: number): Promise<void>;
   revoke(id: number): Promise<ProjectApiKey>;
+  updateRateLimits(
+    id: number,
+    limits: {
+      rateLimitRpm?: number | null;
+      rateLimitRpd?: number | null;
+      tokenQuotaMonthly?: number | null;
+    },
+  ): Promise<ProjectApiKey>;
+  incrementTokenUsage(id: number, tokens: number): Promise<void>;
+  resetTokenQuota(id: number): Promise<void>;
 }
 
 export class ProjectApiKeyRepository
@@ -71,5 +87,51 @@ export class ProjectApiKeyRepository
       .update({ revoked_at: new Date().toISOString() })
       .returning('*');
     return this.transformFromDBData(result);
+  }
+
+  public async updateRateLimits(
+    id: number,
+    limits: {
+      rateLimitRpm?: number | null;
+      rateLimitRpd?: number | null;
+      tokenQuotaMonthly?: number | null;
+    },
+  ): Promise<ProjectApiKey> {
+    const updateData: Record<string, any> = {};
+    if (limits.rateLimitRpm !== undefined)
+      updateData.rate_limit_rpm = limits.rateLimitRpm;
+    if (limits.rateLimitRpd !== undefined)
+      updateData.rate_limit_rpd = limits.rateLimitRpd;
+    if (limits.tokenQuotaMonthly !== undefined)
+      updateData.token_quota_monthly = limits.tokenQuotaMonthly;
+
+    const [result] = await this.knex(this.tableName)
+      .where({ id })
+      .update(updateData)
+      .returning('*');
+    return this.transformFromDBData(result);
+  }
+
+  public async incrementTokenUsage(
+    id: number,
+    tokens: number,
+  ): Promise<void> {
+    await this.knex(this.tableName)
+      .where({ id })
+      .increment('token_quota_used', tokens);
+  }
+
+  public async resetTokenQuota(id: number): Promise<void> {
+    const nextReset = new Date();
+    nextReset.setMonth(nextReset.getMonth() + 1);
+    nextReset.setDate(1);
+    nextReset.setHours(0, 0, 0, 0);
+
+    await this.knex(this.tableName)
+      .where({ id })
+      .update({
+        token_quota_used: 0,
+        quota_reset_at: nextReset.toISOString(),
+      });
   }
 }

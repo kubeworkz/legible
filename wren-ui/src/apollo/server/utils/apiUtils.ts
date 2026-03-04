@@ -15,6 +15,34 @@ import {
 
 const { apiHistoryRepository } = components;
 
+/**
+ * After a response is sent, record any token usage against the rate limiter.
+ * Fire-and-forget — errors are logged but do not affect the response.
+ */
+const recordTokenUsageIfNeeded = (
+  apiKeyAttribution?: Pick<ApiHistory, 'apiKeyId' | 'apiKeyType' | 'organizationId'>,
+  tokensTotal?: number,
+) => {
+  if (
+    !apiKeyAttribution?.apiKeyId ||
+    !apiKeyAttribution?.apiKeyType ||
+    !tokensTotal ||
+    tokensTotal <= 0
+  ) {
+    return;
+  }
+
+  const { rateLimitService } = components;
+  if (!rateLimitService) return;
+
+  rateLimitService
+    .recordTokenUsage(
+      { keyId: apiKeyAttribution.apiKeyId, keyType: apiKeyAttribution.apiKeyType },
+      tokensTotal,
+    )
+    .catch(() => {}); // fire-and-forget
+};
+
 export const MAX_WAIT_TIME = 1000 * 60 * 3; // 3 minutes
 
 export const isAskResultFinished = (result: AskResult) => {
@@ -226,6 +254,11 @@ export const respondWith = async ({
     ...apiKeyAttribution,
   });
 
+  // Record token usage for rate limiting (fire-and-forget)
+  const tokensTotal =
+    responsePayload?.tokensTotal || responsePayload?.tokens_total;
+  recordTokenUsageIfNeeded(apiKeyAttribution, tokensTotal);
+
   return res.status(statusCode).json({
     id: responseId,
     ...responsePayload,
@@ -270,6 +303,11 @@ export const respondWithSimple = async ({
     durationMs,
     ...apiKeyAttribution,
   });
+
+  // Record token usage for rate limiting (fire-and-forget)
+  const simpleTokTotal =
+    responsePayload?.tokensTotal || responsePayload?.tokens_total;
+  recordTokenUsageIfNeeded(apiKeyAttribution, simpleTokTotal);
 
   return res.status(statusCode).json(responsePayload);
 };

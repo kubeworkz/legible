@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
 import { getLogger } from '@server/utils';
+import { IRateLimitService } from '@server/services/rateLimitService';
 
 const logger = getLogger('API_KEY_AUTH');
 
@@ -141,6 +142,42 @@ export function withApiKeyAuth(handler: NextApiHandler): NextApiHandler {
         logger.debug(
           `API key auth success: keyId=${result.keyId}, type=${result.keyType}, orgId=${result.organizationId}${result.projectId ? `, projectId=${result.projectId}` : ''}`,
         );
+
+        // ── Rate limit check ──
+        const { rateLimitService } = components;
+        if (rateLimitService) {
+          const rateLimitResult = await rateLimitService.checkAndRecord({
+            keyId: result.keyId,
+            keyType: result.keyType,
+          });
+
+          if (!rateLimitResult.allowed) {
+            const headers: Record<string, string> = {};
+            if (rateLimitResult.limit) {
+              headers['X-RateLimit-Limit'] = String(rateLimitResult.limit);
+            }
+            headers['X-RateLimit-Remaining'] = '0';
+            if (rateLimitResult.resetAt) {
+              headers['X-RateLimit-Reset'] = rateLimitResult.resetAt;
+            }
+            if (rateLimitResult.retryAfterMs) {
+              headers['Retry-After'] = String(
+                Math.ceil(rateLimitResult.retryAfterMs / 1000),
+              );
+            }
+
+            Object.entries(headers).forEach(([k, v]) =>
+              res.setHeader(k, v),
+            );
+
+            return res.status(429).json({
+              error: 'Rate limit exceeded',
+              message: rateLimitResult.reason || 'Too many requests',
+              retryAfterMs: rateLimitResult.retryAfterMs,
+              resetAt: rateLimitResult.resetAt,
+            });
+          }
+        }
       } catch (err) {
         logger.error(`API key validation error: ${(err as Error).message}`);
         return res.status(500).json({

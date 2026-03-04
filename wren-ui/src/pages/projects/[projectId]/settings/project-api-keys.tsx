@@ -7,6 +7,7 @@ import {
   Modal,
   Form,
   Input,
+  InputNumber,
   DatePicker,
   message,
   Popconfirm,
@@ -20,6 +21,7 @@ import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import StopOutlined from '@ant-design/icons/StopOutlined';
 import CopyOutlined from '@ant-design/icons/CopyOutlined';
 import KeyOutlined from '@ant-design/icons/KeyOutlined';
+import EditOutlined from '@ant-design/icons/EditOutlined';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
 import useProject from '@/hooks/useProject';
 import useOrganization from '@/hooks/useOrganization';
@@ -29,6 +31,8 @@ import {
   CREATE_PROJECT_API_KEY,
   REVOKE_PROJECT_API_KEY,
   DELETE_PROJECT_API_KEY,
+  UPDATE_PROJECT_API_KEY_RATE_LIMITS,
+  RESET_PROJECT_API_KEY_TOKEN_QUOTA,
 } from '@/apollo/client/graphql/projectApiKeys';
 
 const { Title, Text, Paragraph } = Typography;
@@ -77,6 +81,147 @@ interface ProjectApiKeyRecord {
   createdByEmail: string | null;
   createdAt: string;
   revokedAt: string | null;
+  rateLimitRpm: number | null;
+  rateLimitRpd: number | null;
+  tokenQuotaMonthly: number | null;
+  tokenQuotaUsed: number;
+  quotaResetAt: string | null;
+}
+
+// ── Edit Rate Limits Modal ────────────────────────────────────
+
+interface EditRateLimitsModalProps {
+  visible: boolean;
+  record: ProjectApiKeyRecord | null;
+  onClose: () => void;
+  onSave: (
+    keyId: number,
+    limits: {
+      rateLimitRpm?: number | null;
+      rateLimitRpd?: number | null;
+      tokenQuotaMonthly?: number | null;
+    },
+  ) => Promise<void>;
+  onResetQuota: (keyId: number) => Promise<void>;
+}
+
+function EditRateLimitsModal({
+  visible,
+  record,
+  onClose,
+  onSave,
+  onResetQuota,
+}: EditRateLimitsModalProps) {
+  const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSave = useCallback(async () => {
+    try {
+      const values = await form.validateFields();
+      setSubmitting(true);
+      await onSave(record!.id, {
+        rateLimitRpm: values.rateLimitRpm || null,
+        rateLimitRpd: values.rateLimitRpd || null,
+        tokenQuotaMonthly: values.tokenQuotaMonthly || null,
+      });
+      message.success('Rate limits updated');
+      onClose();
+    } catch (error) {
+      if ((error as any)?.errorFields) return;
+      message.error('Failed to update rate limits');
+    } finally {
+      setSubmitting(false);
+    }
+  }, [form, record, onSave, onClose]);
+
+  const handleResetQuota = useCallback(async () => {
+    if (!record) return;
+    try {
+      await onResetQuota(record.id);
+      message.success('Token quota reset');
+      onClose();
+    } catch {
+      message.error('Failed to reset quota');
+    }
+  }, [record, onResetQuota, onClose]);
+
+  return (
+    <Modal
+      title={`Rate limits — ${record?.name || ''}`}
+      visible={visible}
+      onOk={handleSave}
+      onCancel={onClose}
+      confirmLoading={submitting}
+      okText="Save"
+      destroyOnClose
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{
+          rateLimitRpm: record?.rateLimitRpm ?? undefined,
+          rateLimitRpd: record?.rateLimitRpd ?? undefined,
+          tokenQuotaMonthly: record?.tokenQuotaMonthly ?? undefined,
+        }}
+      >
+        <Form.Item
+          label="Requests per minute (RPM)"
+          name="rateLimitRpm"
+          extra="Leave empty for unlimited."
+        >
+          <InputNumber
+            min={1}
+            max={100000}
+            style={{ width: '100%' }}
+            placeholder="Unlimited"
+          />
+        </Form.Item>
+        <Form.Item
+          label="Requests per day (RPD)"
+          name="rateLimitRpd"
+          extra="Leave empty for unlimited."
+        >
+          <InputNumber
+            min={1}
+            max={10000000}
+            style={{ width: '100%' }}
+            placeholder="Unlimited"
+          />
+        </Form.Item>
+        <Form.Item
+          label="Monthly token quota"
+          name="tokenQuotaMonthly"
+          extra="Total LLM tokens allowed per calendar month. Leave empty for unlimited."
+        >
+          <InputNumber
+            min={1000}
+            style={{ width: '100%' }}
+            placeholder="Unlimited"
+            formatter={(v) =>
+              v ? `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''
+            }
+          />
+        </Form.Item>
+      </Form>
+      {record?.tokenQuotaMonthly != null && (
+        <div style={{ borderTop: '1px solid var(--gray-4)', paddingTop: 12 }}>
+          <Text className="gray-7">
+            Used: {(record.tokenQuotaUsed || 0).toLocaleString()} /{' '}
+            {record.tokenQuotaMonthly.toLocaleString()} tokens
+          </Text>
+          <Popconfirm
+            title="Reset token usage to 0?"
+            onConfirm={handleResetQuota}
+            okText="Reset"
+          >
+            <Button size="small" type="link" danger className="ml-2">
+              Reset usage
+            </Button>
+          </Popconfirm>
+        </div>
+      )}
+    </Modal>
+  );
 }
 
 // ── Create Project API Key Modal ──────────────────────────────
@@ -233,8 +378,13 @@ export default function SettingsProjectApiKeys() {
   const [createProjectApiKey] = useMutation(CREATE_PROJECT_API_KEY);
   const [revokeProjectApiKey] = useMutation(REVOKE_PROJECT_API_KEY);
   const [deleteProjectApiKey] = useMutation(DELETE_PROJECT_API_KEY);
+  const [updateRateLimits] = useMutation(UPDATE_PROJECT_API_KEY_RATE_LIMITS);
+  const [resetTokenQuota] = useMutation(RESET_PROJECT_API_KEY_TOKEN_QUOTA);
 
   const apiKeys: ProjectApiKeyRecord[] = data?.listProjectApiKeys || [];
+
+  const [editRateLimitRecord, setEditRateLimitRecord] =
+    useState<ProjectApiKeyRecord | null>(null);
 
   const handleCreate = useCallback(
     async (name: string, expiresAt?: string): Promise<string | null> => {
@@ -279,6 +429,33 @@ export default function SettingsProjectApiKeys() {
       }
     },
     [deleteProjectApiKey, refetch, currentProjectId],
+  );
+
+  const handleUpdateRateLimits = useCallback(
+    async (
+      keyId: number,
+      limits: {
+        rateLimitRpm?: number | null;
+        rateLimitRpd?: number | null;
+        tokenQuotaMonthly?: number | null;
+      },
+    ) => {
+      await updateRateLimits({
+        variables: { data: { keyId, projectId: currentProjectId, ...limits } },
+      });
+      await refetch();
+    },
+    [updateRateLimits, refetch, currentProjectId],
+  );
+
+  const handleResetTokenQuota = useCallback(
+    async (keyId: number) => {
+      await resetTokenQuota({
+        variables: { keyId, projectId: currentProjectId },
+      });
+      await refetch();
+    },
+    [resetTokenQuota, refetch, currentProjectId],
   );
 
   const formatDate = (dateStr: string | null) => {
@@ -375,14 +552,52 @@ export default function SettingsProjectApiKeys() {
         );
       },
     },
+    {
+      title: 'Rate Limits',
+      key: 'rateLimits',
+      width: 200,
+      render: (_: any, record: ProjectApiKeyRecord) => {
+        const parts: string[] = [];
+        if (record.rateLimitRpm) parts.push(`${record.rateLimitRpm} RPM`);
+        if (record.rateLimitRpd) parts.push(`${record.rateLimitRpd} RPD`);
+        if (!parts.length && !record.tokenQuotaMonthly)
+          return <Text className="gray-6">No limits</Text>;
+        return (
+          <div>
+            {parts.length > 0 && (
+              <Text style={{ fontSize: 12 }}>{parts.join(' · ')}</Text>
+            )}
+            {record.tokenQuotaMonthly != null && (
+              <div style={{ fontSize: 12 }}>
+                <Text className="gray-7">
+                  Tokens:{' '}
+                  {(record.tokenQuotaUsed || 0).toLocaleString()} /{' '}
+                  {record.tokenQuotaMonthly.toLocaleString()}
+                </Text>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
     ...(isAdmin
       ? [
           {
             title: '',
             key: 'actions',
-            width: 100,
+            width: 130,
             render: (_: any, record: ProjectApiKeyRecord) => (
               <Space size={4}>
+                {!record.revokedAt && (
+                  <Tooltip title="Edit rate limits">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<EditOutlined />}
+                      onClick={() => setEditRateLimitRecord(record)}
+                    />
+                  </Tooltip>
+                )}
                 {!record.revokedAt && (
                   <Popconfirm
                     title="Revoke this API key? It will stop working immediately."
@@ -480,6 +695,14 @@ export default function SettingsProjectApiKeys() {
           visible={createVisible}
           onClose={() => setCreateVisible(false)}
           onCreate={handleCreate}
+        />
+
+        <EditRateLimitsModal
+          visible={!!editRateLimitRecord}
+          record={editRateLimitRecord}
+          onClose={() => setEditRateLimitRecord(null)}
+          onSave={handleUpdateRateLimits}
+          onResetQuota={handleResetTokenQuota}
         />
       </PageContainer>
     </SettingsLayout>

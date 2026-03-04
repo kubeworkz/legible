@@ -84,6 +84,7 @@ const bootstrapServer = async () => {
     rlsPolicyService,
     folderService,
     spreadsheetService,
+    rateLimitService,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
     threadRecommendQuestionBackgroundTracker,
@@ -262,6 +263,8 @@ const bootstrapServer = async () => {
         folderRepository,
         folderAccessRepository,
         spreadsheetRepository,
+        // rate limiting
+        rateLimitService,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

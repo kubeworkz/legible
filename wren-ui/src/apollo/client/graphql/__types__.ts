@@ -161,6 +161,45 @@ export type ApiUsageDashboard = {
   dailyUsage: Array<ApiDailyUsage>;
 };
 
+// ─── Rate Limiting & Quota Types ─────────────────────────────
+
+export type UpdateApiKeyRateLimitsInput = {
+  keyId: Scalars['Int'];
+  rateLimitRpm?: Maybe<Scalars['Int']>;
+  rateLimitRpd?: Maybe<Scalars['Int']>;
+  tokenQuotaMonthly?: Maybe<Scalars['Float']>;
+};
+
+export type UpdateProjectApiKeyRateLimitsInput = {
+  keyId: Scalars['Int'];
+  projectId: Scalars['Int'];
+  rateLimitRpm?: Maybe<Scalars['Int']>;
+  rateLimitRpd?: Maybe<Scalars['Int']>;
+  tokenQuotaMonthly?: Maybe<Scalars['Float']>;
+};
+
+export type RateLimitWindow = {
+  __typename?: 'RateLimitWindow';
+  limit?: Maybe<Scalars['Int']>;
+  used: Scalars['Int'];
+  remaining?: Maybe<Scalars['Int']>;
+};
+
+export type TokenQuotaStatus = {
+  __typename?: 'TokenQuotaStatus';
+  limit?: Maybe<Scalars['Float']>;
+  used: Scalars['Float'];
+  remaining?: Maybe<Scalars['Float']>;
+  resetAt?: Maybe<Scalars['String']>;
+};
+
+export type ApiKeyRateLimitStatus = {
+  __typename?: 'ApiKeyRateLimitStatus';
+  rpm: RateLimitWindow;
+  rpd: RateLimitWindow;
+  tokenQuota: TokenQuotaStatus;
+};
+
 export type AskingTask = {
   __typename?: 'AskingTask';
   candidates: Array<ResultCandidate>;
@@ -1283,6 +1322,7 @@ export type Query = {
   __typename?: 'Query';
   adjustmentTask?: Maybe<AdjustmentTask>;
   apiHistory: ApiHistoryPaginatedResponse;
+  apiKeyRateLimitStatus: ApiKeyRateLimitStatus;
   apiUsageDashboard: ApiUsageDashboard;
   askingTask?: Maybe<AskingTask>;
   autoGenerateRelation: Array<RecommendRelations>;
@@ -1337,6 +1377,12 @@ export type QueryAdjustmentTaskArgs = {
 export type QueryApiHistoryArgs = {
   filter?: InputMaybe<ApiHistoryFilterInput>;
   pagination: ApiHistoryPaginationInput;
+};
+
+
+export type QueryApiKeyRateLimitStatusArgs = {
+  keyId: Scalars['Int'];
+  keyType: Scalars['String'];
 };
 
 

@@ -46,6 +46,7 @@ const resolvers = {
 
     // API Keys
     listApiKeys: orgApiKeyResolver.listApiKeys,
+    apiKeyRateLimitStatus: orgApiKeyResolver.apiKeyRateLimitStatus,
 
     // Project API Keys
     listProjectApiKeys: projectApiKeyResolver.listProjectApiKeys,
@@ -152,11 +153,17 @@ const resolvers = {
     createApiKey: orgApiKeyResolver.createApiKey,
     revokeApiKey: orgApiKeyResolver.revokeApiKey,
     deleteApiKey: orgApiKeyResolver.deleteApiKey,
+    updateApiKeyRateLimits: orgApiKeyResolver.updateApiKeyRateLimits,
+    resetApiKeyTokenQuota: orgApiKeyResolver.resetApiKeyTokenQuota,
 
     // Project API Keys
     createProjectApiKey: projectApiKeyResolver.createProjectApiKey,
     revokeProjectApiKey: projectApiKeyResolver.revokeProjectApiKey,
     deleteProjectApiKey: projectApiKeyResolver.deleteProjectApiKey,
+    updateProjectApiKeyRateLimits:
+      projectApiKeyResolver.updateProjectApiKeyRateLimits,
+    resetProjectApiKeyTokenQuota:
+      projectApiKeyResolver.resetProjectApiKeyTokenQuota,
 
     deploy: modelResolver.deploy,
     saveDataSource: projectResolver.saveDataSource,

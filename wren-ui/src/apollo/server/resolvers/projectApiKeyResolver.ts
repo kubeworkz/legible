@@ -8,6 +8,10 @@ export class ProjectApiKeyResolver {
     this.createProjectApiKey = this.createProjectApiKey.bind(this);
     this.revokeProjectApiKey = this.revokeProjectApiKey.bind(this);
     this.deleteProjectApiKey = this.deleteProjectApiKey.bind(this);
+    this.updateProjectApiKeyRateLimits =
+      this.updateProjectApiKeyRateLimits.bind(this);
+    this.resetProjectApiKeyTokenQuota =
+      this.resetProjectApiKeyTokenQuota.bind(this);
   }
 
   public async listProjectApiKeys(
@@ -44,6 +48,9 @@ export class ProjectApiKeyResolver {
         name: string;
         permissions?: string[];
         expiresAt?: string;
+        rateLimitRpm?: number;
+        rateLimitRpd?: number;
+        tokenQuotaMonthly?: number;
       };
     },
     ctx: IContext,
@@ -76,6 +83,9 @@ export class ProjectApiKeyResolver {
         permissions: args.data.permissions,
         createdBy: user.id,
         expiresAt: args.data.expiresAt,
+        rateLimitRpm: args.data.rateLimitRpm,
+        rateLimitRpd: args.data.rateLimitRpd,
+        tokenQuotaMonthly: args.data.tokenQuotaMonthly,
       });
     } catch (error) {
       console.error('[createProjectApiKey] Error:', error);
@@ -133,5 +143,76 @@ export class ProjectApiKeyResolver {
     }
 
     return ctx.projectApiKeyService.deleteKey(args.keyId, args.projectId);
+  }
+
+  public async updateProjectApiKeyRateLimits(
+    _root: any,
+    args: {
+      data: {
+        keyId: number;
+        projectId: number;
+        rateLimitRpm?: number;
+        rateLimitRpd?: number;
+        tokenQuotaMonthly?: number;
+      };
+    },
+    ctx: IContext,
+  ) {
+    const user = requireAuth(ctx);
+    const organizationId = requireOrganization(ctx);
+    await ctx.memberService.requireRole(organizationId, user.id, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
+
+    const project = await ctx.projectRepository.getProjectById(
+      args.data.projectId,
+    );
+    if (
+      (project as any).organizationId &&
+      (project as any).organizationId !== organizationId
+    ) {
+      throw new Error(
+        'Access denied: project does not belong to your organization',
+      );
+    }
+
+    return ctx.projectApiKeyService.updateRateLimits(
+      args.data.keyId,
+      args.data.projectId,
+      {
+        rateLimitRpm: args.data.rateLimitRpm,
+        rateLimitRpd: args.data.rateLimitRpd,
+        tokenQuotaMonthly: args.data.tokenQuotaMonthly,
+      },
+    );
+  }
+
+  public async resetProjectApiKeyTokenQuota(
+    _root: any,
+    args: { keyId: number; projectId: number },
+    ctx: IContext,
+  ) {
+    const user = requireAuth(ctx);
+    const organizationId = requireOrganization(ctx);
+    await ctx.memberService.requireRole(organizationId, user.id, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
+
+    const project = await ctx.projectRepository.getProjectById(args.projectId);
+    if (
+      (project as any).organizationId &&
+      (project as any).organizationId !== organizationId
+    ) {
+      throw new Error(
+        'Access denied: project does not belong to your organization',
+      );
+    }
+
+    return ctx.projectApiKeyService.resetTokenQuota(
+      args.keyId,
+      args.projectId,
+    );
   }
 }

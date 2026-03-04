@@ -26,6 +26,9 @@ export interface CreateApiKeyInput {
   permissions?: string[];
   createdBy: number;
   expiresAt?: string;
+  rateLimitRpm?: number | null;
+  rateLimitRpd?: number | null;
+  tokenQuotaMonthly?: number | null;
 }
 
 export interface ApiKeyInfo {
@@ -40,6 +43,12 @@ export interface ApiKeyInfo {
   createdByEmail?: string;
   createdAt: string;
   revokedAt: string | null;
+  // Rate limiting & quota
+  rateLimitRpm: number | null;
+  rateLimitRpd: number | null;
+  tokenQuotaMonthly: number | null;
+  tokenQuotaUsed: number;
+  quotaResetAt: string | null;
 }
 
 export interface CreateApiKeyResult {
@@ -59,6 +68,16 @@ export interface IOrgApiKeyService {
   validateKey(rawKey: string): Promise<ValidateApiKeyResult | null>;
   revokeKey(keyId: number, organizationId: number): Promise<boolean>;
   deleteKey(keyId: number, organizationId: number): Promise<boolean>;
+  updateRateLimits(
+    keyId: number,
+    organizationId: number,
+    limits: {
+      rateLimitRpm?: number | null;
+      rateLimitRpd?: number | null;
+      tokenQuotaMonthly?: number | null;
+    },
+  ): Promise<ApiKeyInfo>;
+  resetTokenQuota(keyId: number, organizationId: number): Promise<boolean>;
 }
 
 export class OrgApiKeyService implements IOrgApiKeyService {
@@ -108,6 +127,9 @@ export class OrgApiKeyService implements IOrgApiKeyService {
       permissions: permissionsJson,
       createdBy,
       expiresAt: expiresAt || null,
+      rateLimitRpm: input.rateLimitRpm ?? null,
+      rateLimitRpd: input.rateLimitRpd ?? null,
+      tokenQuotaMonthly: input.tokenQuotaMonthly ?? null,
     } as Partial<OrgApiKey>);
 
     const creator = await this.userRepository.findOneBy({ id: createdBy });
@@ -232,6 +254,54 @@ export class OrgApiKeyService implements IOrgApiKeyService {
       createdByEmail,
       createdAt: record.createdAt,
       revokedAt: record.revokedAt,
+      rateLimitRpm: record.rateLimitRpm,
+      rateLimitRpd: record.rateLimitRpd,
+      tokenQuotaMonthly: record.tokenQuotaMonthly,
+      tokenQuotaUsed: record.tokenQuotaUsed ?? 0,
+      quotaResetAt: record.quotaResetAt,
     };
+  }
+
+  public async updateRateLimits(
+    keyId: number,
+    organizationId: number,
+    limits: {
+      rateLimitRpm?: number | null;
+      rateLimitRpd?: number | null;
+      tokenQuotaMonthly?: number | null;
+    },
+  ): Promise<ApiKeyInfo> {
+    const record = await this.orgApiKeyRepository.findOneBy({
+      id: keyId,
+    } as Partial<OrgApiKey>);
+
+    if (!record || record.organizationId !== organizationId) {
+      throw new Error('API key not found');
+    }
+
+    const updated = await this.orgApiKeyRepository.updateRateLimits(
+      keyId,
+      limits,
+    );
+    const creator = await this.userRepository.findOneBy({
+      id: updated.createdBy,
+    });
+    return this.toApiKeyInfo(updated, creator?.email);
+  }
+
+  public async resetTokenQuota(
+    keyId: number,
+    organizationId: number,
+  ): Promise<boolean> {
+    const record = await this.orgApiKeyRepository.findOneBy({
+      id: keyId,
+    } as Partial<OrgApiKey>);
+
+    if (!record || record.organizationId !== organizationId) {
+      throw new Error('API key not found');
+    }
+
+    await this.orgApiKeyRepository.resetTokenQuota(keyId);
+    return true;
   }
 }

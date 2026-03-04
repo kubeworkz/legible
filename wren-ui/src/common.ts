@@ -58,6 +58,7 @@ import {
   ProjectApiKeyService,
 } from '@server/services';
 import { RlsPolicyService } from './apollo/server/services/rlsPolicyService';
+import { RateLimitService } from './apollo/server/services/rateLimitService';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -215,6 +216,10 @@ export const initComponents = () => {
     projectApiKeyRepository,
     userRepository,
   });
+  const rateLimitService = new RateLimitService({
+    orgApiKeyRepository,
+    projectApiKeyRepository,
+  });
   const rlsPolicyService = new RlsPolicyService({
     sessionPropertyRepository,
     rlsPolicyRepository,
@@ -313,6 +318,7 @@ export const initComponents = () => {
     memberService,
     orgApiKeyService,
     projectApiKeyService,
+    rateLimitService,
     rlsPolicyService,
     folderService,
     spreadsheetService,

@@ -16,6 +16,9 @@ export interface CreateProjectApiKeyInput {
   permissions?: string[];
   createdBy: number;
   expiresAt?: string;
+  rateLimitRpm?: number | null;
+  rateLimitRpd?: number | null;
+  tokenQuotaMonthly?: number | null;
 }
 
 export interface ProjectApiKeyInfo {
@@ -31,6 +34,12 @@ export interface ProjectApiKeyInfo {
   createdByEmail?: string;
   createdAt: string;
   revokedAt: string | null;
+  // Rate limiting & quota
+  rateLimitRpm: number | null;
+  rateLimitRpd: number | null;
+  tokenQuotaMonthly: number | null;
+  tokenQuotaUsed: number;
+  quotaResetAt: string | null;
 }
 
 export interface CreateProjectApiKeyResult {
@@ -55,6 +64,16 @@ export interface IProjectApiKeyService {
   ): Promise<ValidateProjectApiKeyResult | null>;
   revokeKey(keyId: number, projectId: number): Promise<boolean>;
   deleteKey(keyId: number, projectId: number): Promise<boolean>;
+  updateRateLimits(
+    keyId: number,
+    projectId: number,
+    limits: {
+      rateLimitRpm?: number | null;
+      rateLimitRpd?: number | null;
+      tokenQuotaMonthly?: number | null;
+    },
+  ): Promise<ProjectApiKeyInfo>;
+  resetTokenQuota(keyId: number, projectId: number): Promise<boolean>;
 }
 
 export class ProjectApiKeyService implements IProjectApiKeyService {
@@ -108,6 +127,9 @@ export class ProjectApiKeyService implements IProjectApiKeyService {
       permissions: permissionsJson,
       createdBy,
       expiresAt: expiresAt || null,
+      rateLimitRpm: input.rateLimitRpm ?? null,
+      rateLimitRpd: input.rateLimitRpd ?? null,
+      tokenQuotaMonthly: input.tokenQuotaMonthly ?? null,
     } as Partial<ProjectApiKey>);
 
     const creator = await this.userRepository.findOneBy({ id: createdBy });
@@ -235,6 +257,54 @@ export class ProjectApiKeyService implements IProjectApiKeyService {
       createdByEmail,
       createdAt: record.createdAt,
       revokedAt: record.revokedAt,
+      rateLimitRpm: record.rateLimitRpm,
+      rateLimitRpd: record.rateLimitRpd,
+      tokenQuotaMonthly: record.tokenQuotaMonthly,
+      tokenQuotaUsed: record.tokenQuotaUsed ?? 0,
+      quotaResetAt: record.quotaResetAt,
     };
+  }
+
+  public async updateRateLimits(
+    keyId: number,
+    projectId: number,
+    limits: {
+      rateLimitRpm?: number | null;
+      rateLimitRpd?: number | null;
+      tokenQuotaMonthly?: number | null;
+    },
+  ): Promise<ProjectApiKeyInfo> {
+    const record = await this.projectApiKeyRepository.findOneBy({
+      id: keyId,
+    } as Partial<ProjectApiKey>);
+
+    if (!record || record.projectId !== projectId) {
+      throw new Error('Project API key not found');
+    }
+
+    const updated = await this.projectApiKeyRepository.updateRateLimits(
+      keyId,
+      limits,
+    );
+    const creator = await this.userRepository.findOneBy({
+      id: updated.createdBy,
+    });
+    return this.toApiKeyInfo(updated, creator?.email);
+  }
+
+  public async resetTokenQuota(
+    keyId: number,
+    projectId: number,
+  ): Promise<boolean> {
+    const record = await this.projectApiKeyRepository.findOneBy({
+      id: keyId,
+    } as Partial<ProjectApiKey>);
+
+    if (!record || record.projectId !== projectId) {
+      throw new Error('Project API key not found');
+    }
+
+    await this.projectApiKeyRepository.resetTokenQuota(keyId);
+    return true;
   }
 }

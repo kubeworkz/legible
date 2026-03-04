@@ -107,6 +107,12 @@ export const typeDefs = gql`
     createdByEmail: String
     createdAt: String!
     revokedAt: String
+    # Rate limiting & quota
+    rateLimitRpm: Int
+    rateLimitRpd: Int
+    tokenQuotaMonthly: Float
+    tokenQuotaUsed: Float
+    quotaResetAt: String
   }
 
   type CreateApiKeyResult {
@@ -118,6 +124,35 @@ export const typeDefs = gql`
     name: String!
     permissions: [String!]
     expiresAt: String
+    rateLimitRpm: Int
+    rateLimitRpd: Int
+    tokenQuotaMonthly: Float
+  }
+
+  input UpdateApiKeyRateLimitsInput {
+    keyId: Int!
+    rateLimitRpm: Int
+    rateLimitRpd: Int
+    tokenQuotaMonthly: Float
+  }
+
+  type ApiKeyRateLimitStatus {
+    rpm: RateLimitWindow!
+    rpd: RateLimitWindow!
+    tokenQuota: TokenQuotaStatus!
+  }
+
+  type RateLimitWindow {
+    limit: Int
+    used: Int!
+    remaining: Int
+  }
+
+  type TokenQuotaStatus {
+    limit: Float
+    used: Float!
+    remaining: Float
+    resetAt: String
   }
 
   # ─── End API Key Types ─────────────────────────────────────
@@ -137,6 +172,12 @@ export const typeDefs = gql`
     createdByEmail: String
     createdAt: String!
     revokedAt: String
+    # Rate limiting & quota
+    rateLimitRpm: Int
+    rateLimitRpd: Int
+    tokenQuotaMonthly: Float
+    tokenQuotaUsed: Float
+    quotaResetAt: String
   }
 
   type CreateProjectApiKeyResult {
@@ -149,6 +190,17 @@ export const typeDefs = gql`
     name: String!
     permissions: [String!]
     expiresAt: String
+    rateLimitRpm: Int
+    rateLimitRpd: Int
+    tokenQuotaMonthly: Float
+  }
+
+  input UpdateProjectApiKeyRateLimitsInput {
+    keyId: Int!
+    projectId: Int!
+    rateLimitRpm: Int
+    rateLimitRpd: Int
+    tokenQuotaMonthly: Float
   }
 
   # ─── End Project API Key Types ─────────────────────────────
@@ -1643,6 +1695,7 @@ export const typeDefs = gql`
 
     # API Keys
     listApiKeys: [OrgApiKey!]!
+    apiKeyRateLimitStatus(keyId: Int!, keyType: String!): ApiKeyRateLimitStatus!
 
     # Project API Keys
     listProjectApiKeys(projectId: Int!): [ProjectApiKey!]!
@@ -1757,11 +1810,15 @@ export const typeDefs = gql`
     createApiKey(data: CreateApiKeyInput!): CreateApiKeyResult!
     revokeApiKey(keyId: Int!): Boolean!
     deleteApiKey(keyId: Int!): Boolean!
+    updateApiKeyRateLimits(data: UpdateApiKeyRateLimitsInput!): OrgApiKey!
+    resetApiKeyTokenQuota(keyId: Int!): Boolean!
 
     # Project API Keys
     createProjectApiKey(data: CreateProjectApiKeyInput!): CreateProjectApiKeyResult!
     revokeProjectApiKey(keyId: Int!, projectId: Int!): Boolean!
     deleteProjectApiKey(keyId: Int!, projectId: Int!): Boolean!
+    updateProjectApiKeyRateLimits(data: UpdateProjectApiKeyRateLimitsInput!): ProjectApiKey!
+    resetProjectApiKeyTokenQuota(keyId: Int!, projectId: Int!): Boolean!
 
     # On Boarding Steps
     saveDataSource(data: DataSourceInput!): DataSource!

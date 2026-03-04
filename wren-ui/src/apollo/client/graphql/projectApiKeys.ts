@@ -15,6 +15,11 @@ export const LIST_PROJECT_API_KEYS = gql`
       createdByEmail
       createdAt
       revokedAt
+      rateLimitRpm
+      rateLimitRpd
+      tokenQuotaMonthly
+      tokenQuotaUsed
+      quotaResetAt
     }
   }
 `;
@@ -35,6 +40,11 @@ export const CREATE_PROJECT_API_KEY = gql`
         createdByEmail
         createdAt
         revokedAt
+        rateLimitRpm
+        rateLimitRpd
+        tokenQuotaMonthly
+        tokenQuotaUsed
+        quotaResetAt
       }
       secretKey
     }
@@ -50,5 +60,26 @@ export const REVOKE_PROJECT_API_KEY = gql`
 export const DELETE_PROJECT_API_KEY = gql`
   mutation DeleteProjectApiKey($keyId: Int!, $projectId: Int!) {
     deleteProjectApiKey(keyId: $keyId, projectId: $projectId)
+  }
+`;
+
+export const UPDATE_PROJECT_API_KEY_RATE_LIMITS = gql`
+  mutation UpdateProjectApiKeyRateLimits(
+    $data: UpdateProjectApiKeyRateLimitsInput!
+  ) {
+    updateProjectApiKeyRateLimits(data: $data) {
+      id
+      rateLimitRpm
+      rateLimitRpd
+      tokenQuotaMonthly
+      tokenQuotaUsed
+      quotaResetAt
+    }
+  }
+`;
+
+export const RESET_PROJECT_API_KEY_TOKEN_QUOTA = gql`
+  mutation ResetProjectApiKeyTokenQuota($keyId: Int!, $projectId: Int!) {
+    resetProjectApiKeyTokenQuota(keyId: $keyId, projectId: $projectId)
   }
 `;
