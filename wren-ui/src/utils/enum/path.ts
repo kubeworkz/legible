@@ -17,6 +17,7 @@ export enum Path {
   KnowledgeInstructions = '/projects/[projectId]/knowledge/instructions',
   APIManagement = '/projects/[projectId]/api-management',
   APIManagementHistory = '/projects/[projectId]/api-management/history',
+  APIManagementUsage = '/projects/[projectId]/api-management/usage',
   DataSecurity = '/projects/[projectId]/data-security',
   DataSecurityRowLevel = '/projects/[projectId]/data-security/row-level-security',
   DataSecuritySessionProperty = '/projects/[projectId]/data-security/session-property',

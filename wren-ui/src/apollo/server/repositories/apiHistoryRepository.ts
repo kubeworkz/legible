@@ -55,6 +55,52 @@ export interface PaginationOptions {
   orderBy?: Record<string, 'asc' | 'desc'>;
 }
 
+export interface UsageSummary {
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  avgDurationMs: number;
+  tokensInput: number;
+  tokensOutput: number;
+  tokensTotal: number;
+}
+
+export interface UsageByApiType {
+  apiType: ApiType;
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  avgDurationMs: number;
+  tokensTotal: number;
+}
+
+export interface UsageByApiKey {
+  apiKeyId: number;
+  apiKeyType: string;
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  avgDurationMs: number;
+  tokensTotal: number;
+  lastUsedAt: string;
+}
+
+export interface DailyUsage {
+  date: string;
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  tokensTotal: number;
+}
+
+export interface UsageFilter {
+  organizationId?: number;
+  projectId?: number;
+  apiKeyId?: number;
+  startDate?: Date;
+  endDate?: Date;
+}
+
 export interface IApiHistoryRepository extends IBasicRepository<ApiHistory> {
   count(
     filter?: Partial<ApiHistory>,
@@ -65,6 +111,10 @@ export interface IApiHistoryRepository extends IBasicRepository<ApiHistory> {
     dateFilter?: { startDate?: Date; endDate?: Date },
     pagination?: PaginationOptions,
   ): Promise<ApiHistory[]>;
+  getUsageSummary(filter: UsageFilter): Promise<UsageSummary>;
+  getUsageByApiType(filter: UsageFilter): Promise<UsageByApiType[]>;
+  getUsageByApiKey(filter: UsageFilter): Promise<UsageByApiKey[]>;
+  getDailyUsage(filter: UsageFilter): Promise<DailyUsage[]>;
 }
 
 export class ApiHistoryRepository
@@ -193,5 +243,144 @@ export class ApiHistoryRepository
    */
   private camelToSnakeCase(str: string): string {
     return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+  }
+
+  /**
+   * Apply common usage filter conditions to a query
+   */
+  private applyUsageFilter(query: Knex.QueryBuilder, filter: UsageFilter): Knex.QueryBuilder {
+    if (filter.organizationId) {
+      query = query.where('organization_id', filter.organizationId);
+    }
+    if (filter.projectId) {
+      query = query.where('project_id', filter.projectId);
+    }
+    if (filter.apiKeyId) {
+      query = query.where('api_key_id', filter.apiKeyId);
+    }
+    if (filter.startDate) {
+      query = query.where('created_at', '>=', filter.startDate);
+    }
+    if (filter.endDate) {
+      query = query.where('created_at', '<=', filter.endDate);
+    }
+    return query;
+  }
+
+  /**
+   * Get overall usage summary (totals, averages, token counts)
+   */
+  public async getUsageSummary(filter: UsageFilter): Promise<UsageSummary> {
+    let query = this.knex(this.tableName)
+      .count('id as totalRequests')
+      .sum({ tokensInput: 'tokens_input', tokensOutput: 'tokens_output', tokensTotal: 'tokens_total' })
+      .avg({ avgDurationMs: 'duration_ms' })
+      .select(
+        this.knex.raw('COUNT(CASE WHEN status_code >= 200 AND status_code < 300 THEN 1 END) as "successfulRequests"'),
+        this.knex.raw('COUNT(CASE WHEN status_code >= 400 THEN 1 END) as "failedRequests"'),
+      );
+
+    query = this.applyUsageFilter(query, filter);
+    const result = await query;
+    const row: any = result[0] || {};
+
+    return {
+      totalRequests: parseInt(row.totalRequests as string, 10) || 0,
+      successfulRequests: parseInt(row.successfulRequests as string, 10) || 0,
+      failedRequests: parseInt(row.failedRequests as string, 10) || 0,
+      avgDurationMs: Math.round(parseFloat(row.avgDurationMs as string) || 0),
+      tokensInput: parseInt(row.tokensInput as string, 10) || 0,
+      tokensOutput: parseInt(row.tokensOutput as string, 10) || 0,
+      tokensTotal: parseInt(row.tokensTotal as string, 10) || 0,
+    };
+  }
+
+  /**
+   * Get usage broken down by API type
+   */
+  public async getUsageByApiType(filter: UsageFilter): Promise<UsageByApiType[]> {
+    let query = this.knex(this.tableName)
+      .select('api_type as apiType')
+      .count('id as totalRequests')
+      .sum({ tokensTotal: 'tokens_total' })
+      .avg({ avgDurationMs: 'duration_ms' })
+      .select(
+        this.knex.raw('COUNT(CASE WHEN status_code >= 200 AND status_code < 300 THEN 1 END) as "successfulRequests"'),
+        this.knex.raw('COUNT(CASE WHEN status_code >= 400 THEN 1 END) as "failedRequests"'),
+      )
+      .groupBy('api_type')
+      .orderBy('totalRequests', 'desc');
+
+    query = this.applyUsageFilter(query, filter);
+    const rows = await query;
+
+    return rows.map((row: any) => ({
+      apiType: row.apiType as ApiType,
+      totalRequests: parseInt(row.totalRequests as string, 10) || 0,
+      successfulRequests: parseInt(row.successfulRequests as string, 10) || 0,
+      failedRequests: parseInt(row.failedRequests as string, 10) || 0,
+      avgDurationMs: Math.round(parseFloat(row.avgDurationMs as string) || 0),
+      tokensTotal: parseInt(row.tokensTotal as string, 10) || 0,
+    }));
+  }
+
+  /**
+   * Get usage broken down by API key
+   */
+  public async getUsageByApiKey(filter: UsageFilter): Promise<UsageByApiKey[]> {
+    let query = this.knex(this.tableName)
+      .select('api_key_id as apiKeyId', 'api_key_type as apiKeyType')
+      .count('id as totalRequests')
+      .sum({ tokensTotal: 'tokens_total' })
+      .avg({ avgDurationMs: 'duration_ms' })
+      .max({ lastUsedAt: 'created_at' })
+      .select(
+        this.knex.raw('COUNT(CASE WHEN status_code >= 200 AND status_code < 300 THEN 1 END) as "successfulRequests"'),
+        this.knex.raw('COUNT(CASE WHEN status_code >= 400 THEN 1 END) as "failedRequests"'),
+      )
+      .whereNotNull('api_key_id')
+      .groupBy('api_key_id', 'api_key_type')
+      .orderBy('totalRequests', 'desc');
+
+    query = this.applyUsageFilter(query, filter);
+    const rows = await query;
+
+    return rows.map((row: any) => ({
+      apiKeyId: row.apiKeyId,
+      apiKeyType: row.apiKeyType || 'unknown',
+      totalRequests: parseInt(row.totalRequests as string, 10) || 0,
+      successfulRequests: parseInt(row.successfulRequests as string, 10) || 0,
+      failedRequests: parseInt(row.failedRequests as string, 10) || 0,
+      avgDurationMs: Math.round(parseFloat(row.avgDurationMs as string) || 0),
+      tokensTotal: parseInt(row.tokensTotal as string, 10) || 0,
+      lastUsedAt: row.lastUsedAt,
+    }));
+  }
+
+  /**
+   * Get daily usage time series
+   */
+  public async getDailyUsage(filter: UsageFilter): Promise<DailyUsage[]> {
+    let query = this.knex(this.tableName)
+      .select(this.knex.raw("DATE(created_at) as date"))
+      .count('id as totalRequests')
+      .sum({ tokensTotal: 'tokens_total' })
+      .select(
+        this.knex.raw('COUNT(CASE WHEN status_code >= 200 AND status_code < 300 THEN 1 END) as "successfulRequests"'),
+        this.knex.raw('COUNT(CASE WHEN status_code >= 400 THEN 1 END) as "failedRequests"'),
+      )
+      .groupByRaw('DATE(created_at)')
+      .orderBy('date', 'asc');
+
+    query = this.applyUsageFilter(query, filter);
+    const rows = await query;
+
+    return rows.map((row: any) => ({
+      date: row.date,
+      totalRequests: parseInt(row.totalRequests as string, 10) || 0,
+      successfulRequests: parseInt(row.successfulRequests as string, 10) || 0,
+      failedRequests: parseInt(row.failedRequests as string, 10) || 0,
+      tokensTotal: parseInt(row.tokensTotal as string, 10) || 0,
+    }));
   }
 }

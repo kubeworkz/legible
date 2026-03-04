@@ -16,11 +16,58 @@ export const API_HISTORY = gql`
         responsePayload
         statusCode
         durationMs
+        apiKeyId
+        apiKeyType
+        organizationId
+        tokensInput
+        tokensOutput
+        tokensTotal
         createdAt
         updatedAt
       }
       total
       hasMore
+    }
+  }
+`;
+
+export const API_USAGE_DASHBOARD = gql`
+  query ApiUsageDashboard($filter: ApiUsageFilterInput) {
+    apiUsageDashboard(filter: $filter) {
+      summary {
+        totalRequests
+        successfulRequests
+        failedRequests
+        avgDurationMs
+        tokensInput
+        tokensOutput
+        tokensTotal
+      }
+      byApiType {
+        apiType
+        totalRequests
+        successfulRequests
+        failedRequests
+        avgDurationMs
+        tokensTotal
+      }
+      byApiKey {
+        apiKeyId
+        apiKeyType
+        totalRequests
+        successfulRequests
+        failedRequests
+        avgDurationMs
+        tokensTotal
+        lastUsedAt
+      }
+      dailyUsage {
+        date
+        totalRequests
+        successfulRequests
+        failedRequests
+        tokensTotal
+      }
     }
   }
 `;

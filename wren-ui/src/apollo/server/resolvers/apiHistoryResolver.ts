@@ -1,4 +1,4 @@
-import { ApiType, ApiHistory } from '@server/repositories/apiHistoryRepository';
+import { ApiType, ApiHistory, UsageFilter } from '@server/repositories/apiHistoryRepository';
 import { IContext } from '@server/types';
 
 export interface ApiHistoryFilter {
@@ -7,6 +7,14 @@ export interface ApiHistoryFilter {
   threadId?: string;
   projectId?: number;
   organizationId?: number;
+  apiKeyId?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface ApiUsageFilterInput {
+  organizationId?: number;
+  projectId?: number;
   apiKeyId?: number;
   startDate?: string;
   endDate?: string;
@@ -55,6 +63,7 @@ const sanitizeResponsePayload = (payload: any, apiType?: ApiType): any => {
 export class ApiHistoryResolver {
   constructor() {
     this.getApiHistory = this.getApiHistory.bind(this);
+    this.getApiUsageDashboard = this.getApiUsageDashboard.bind(this);
   }
 
   /**
@@ -138,6 +147,42 @@ export class ApiHistoryResolver {
       items,
       total,
       hasMore: offset + limit < total,
+    };
+  }
+
+  /**
+   * Get API usage dashboard with aggregated data
+   */
+  public async getApiUsageDashboard(
+    _root: unknown,
+    args: { filter?: ApiUsageFilterInput },
+    ctx: IContext,
+  ) {
+    const { filter } = args;
+
+    // Build usage filter
+    const usageFilter: UsageFilter = {};
+    if (filter) {
+      if (filter.organizationId) usageFilter.organizationId = filter.organizationId;
+      if (filter.projectId) usageFilter.projectId = filter.projectId;
+      if (filter.apiKeyId) usageFilter.apiKeyId = filter.apiKeyId;
+      if (filter.startDate) usageFilter.startDate = new Date(filter.startDate);
+      if (filter.endDate) usageFilter.endDate = new Date(filter.endDate);
+    }
+
+    // Run all aggregation queries in parallel
+    const [summary, byApiType, byApiKey, dailyUsage] = await Promise.all([
+      ctx.apiHistoryRepository.getUsageSummary(usageFilter),
+      ctx.apiHistoryRepository.getUsageByApiType(usageFilter),
+      ctx.apiHistoryRepository.getUsageByApiKey(usageFilter),
+      ctx.apiHistoryRepository.getDailyUsage(usageFilter),
+    ]);
+
+    return {
+      summary,
+      byApiType,
+      byApiKey,
+      dailyUsage,
     };
   }
 

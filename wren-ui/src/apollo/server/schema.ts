@@ -228,6 +228,60 @@ export const typeDefs = gql`
     hasMore: Boolean!
   }
 
+  # Usage Aggregation Types
+  input ApiUsageFilterInput {
+    organizationId: Int
+    projectId: Int
+    apiKeyId: Int
+    startDate: String
+    endDate: String
+  }
+
+  type ApiUsageSummary {
+    totalRequests: Int!
+    successfulRequests: Int!
+    failedRequests: Int!
+    avgDurationMs: Int!
+    tokensInput: Int!
+    tokensOutput: Int!
+    tokensTotal: Int!
+  }
+
+  type ApiUsageByApiType {
+    apiType: ApiType!
+    totalRequests: Int!
+    successfulRequests: Int!
+    failedRequests: Int!
+    avgDurationMs: Int!
+    tokensTotal: Int!
+  }
+
+  type ApiUsageByApiKey {
+    apiKeyId: Int!
+    apiKeyType: String!
+    totalRequests: Int!
+    successfulRequests: Int!
+    failedRequests: Int!
+    avgDurationMs: Int!
+    tokensTotal: Int!
+    lastUsedAt: String
+  }
+
+  type ApiDailyUsage {
+    date: String!
+    totalRequests: Int!
+    successfulRequests: Int!
+    failedRequests: Int!
+    tokensTotal: Int!
+  }
+
+  type ApiUsageDashboard {
+    summary: ApiUsageSummary!
+    byApiType: [ApiUsageByApiType!]!
+    byApiKey: [ApiUsageByApiKey!]!
+    dailyUsage: [ApiDailyUsage!]!
+  }
+
   enum DataSourceName {
     ATHENA
     BIG_QUERY
@@ -1658,6 +1712,9 @@ export const typeDefs = gql`
       filter: ApiHistoryFilterInput
       pagination: ApiHistoryPaginationInput!
     ): ApiHistoryPaginatedResponse!
+
+    # Api Usage
+    apiUsageDashboard(filter: ApiUsageFilterInput): ApiUsageDashboard!
 
     # Data Security
     sessionProperties: [SessionProperty!]!

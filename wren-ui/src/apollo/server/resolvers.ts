@@ -107,6 +107,9 @@ const resolvers = {
     // API History
     apiHistory: apiHistoryResolver.getApiHistory,
 
+    // Api Usage
+    apiUsageDashboard: apiHistoryResolver.getApiUsageDashboard,
+
     // Data Security
     sessionProperties: rlsPolicyResolver.listSessionProperties,
     rlsPolicies: rlsPolicyResolver.listRlsPolicies,

@@ -41,8 +41,10 @@ export type AdjustmentTask = {
 };
 
 export type ApiHistoryFilterInput = {
+  apiKeyId?: InputMaybe<Scalars['Int']>;
   apiType?: InputMaybe<ApiType>;
   endDate?: InputMaybe<Scalars['String']>;
+  organizationId?: InputMaybe<Scalars['Int']>;
   projectId?: InputMaybe<Scalars['Int']>;
   startDate?: InputMaybe<Scalars['String']>;
   statusCode?: InputMaybe<Scalars['Int']>;
@@ -63,16 +65,22 @@ export type ApiHistoryPaginationInput = {
 
 export type ApiHistoryResponse = {
   __typename?: 'ApiHistoryResponse';
+  apiKeyId?: Maybe<Scalars['Int']>;
+  apiKeyType?: Maybe<Scalars['String']>;
   apiType: ApiType;
   createdAt: Scalars['String'];
   durationMs?: Maybe<Scalars['Int']>;
   headers?: Maybe<Scalars['JSON']>;
   id: Scalars['String'];
+  organizationId?: Maybe<Scalars['Int']>;
   projectId: Scalars['Int'];
   requestPayload?: Maybe<Scalars['JSON']>;
   responsePayload?: Maybe<Scalars['JSON']>;
   statusCode?: Maybe<Scalars['Int']>;
   threadId?: Maybe<Scalars['String']>;
+  tokensInput?: Maybe<Scalars['Int']>;
+  tokensOutput?: Maybe<Scalars['Int']>;
+  tokensTotal?: Maybe<Scalars['Int']>;
   updatedAt: Scalars['String'];
 };
 
@@ -94,6 +102,64 @@ export enum ApiType {
   UPDATE_INSTRUCTION = 'UPDATE_INSTRUCTION',
   UPDATE_SQL_PAIR = 'UPDATE_SQL_PAIR'
 }
+
+export type ApiUsageFilterInput = {
+  organizationId?: InputMaybe<Scalars['Int']>;
+  projectId?: InputMaybe<Scalars['Int']>;
+  apiKeyId?: InputMaybe<Scalars['Int']>;
+  startDate?: InputMaybe<Scalars['String']>;
+  endDate?: InputMaybe<Scalars['String']>;
+};
+
+export type ApiUsageSummary = {
+  __typename?: 'ApiUsageSummary';
+  totalRequests: Scalars['Int'];
+  successfulRequests: Scalars['Int'];
+  failedRequests: Scalars['Int'];
+  avgDurationMs: Scalars['Int'];
+  tokensInput: Scalars['Int'];
+  tokensOutput: Scalars['Int'];
+  tokensTotal: Scalars['Int'];
+};
+
+export type ApiUsageByApiType = {
+  __typename?: 'ApiUsageByApiType';
+  apiType: ApiType;
+  totalRequests: Scalars['Int'];
+  successfulRequests: Scalars['Int'];
+  failedRequests: Scalars['Int'];
+  avgDurationMs: Scalars['Int'];
+  tokensTotal: Scalars['Int'];
+};
+
+export type ApiUsageByApiKey = {
+  __typename?: 'ApiUsageByApiKey';
+  apiKeyId: Scalars['Int'];
+  apiKeyType: Scalars['String'];
+  totalRequests: Scalars['Int'];
+  successfulRequests: Scalars['Int'];
+  failedRequests: Scalars['Int'];
+  avgDurationMs: Scalars['Int'];
+  tokensTotal: Scalars['Int'];
+  lastUsedAt?: Maybe<Scalars['String']>;
+};
+
+export type ApiDailyUsage = {
+  __typename?: 'ApiDailyUsage';
+  date: Scalars['String'];
+  totalRequests: Scalars['Int'];
+  successfulRequests: Scalars['Int'];
+  failedRequests: Scalars['Int'];
+  tokensTotal: Scalars['Int'];
+};
+
+export type ApiUsageDashboard = {
+  __typename?: 'ApiUsageDashboard';
+  summary: ApiUsageSummary;
+  byApiType: Array<ApiUsageByApiType>;
+  byApiKey: Array<ApiUsageByApiKey>;
+  dailyUsage: Array<ApiDailyUsage>;
+};
 
 export type AskingTask = {
   __typename?: 'AskingTask';
@@ -1217,6 +1283,7 @@ export type Query = {
   __typename?: 'Query';
   adjustmentTask?: Maybe<AdjustmentTask>;
   apiHistory: ApiHistoryPaginatedResponse;
+  apiUsageDashboard: ApiUsageDashboard;
   askingTask?: Maybe<AskingTask>;
   autoGenerateRelation: Array<RecommendRelations>;
   dashboard: DetailedDashboard;
@@ -1270,6 +1337,11 @@ export type QueryAdjustmentTaskArgs = {
 export type QueryApiHistoryArgs = {
   filter?: InputMaybe<ApiHistoryFilterInput>;
   pagination: ApiHistoryPaginationInput;
+};
+
+
+export type QueryApiUsageDashboardArgs = {
+  filter?: InputMaybe<ApiUsageFilterInput>;
 };
 
 

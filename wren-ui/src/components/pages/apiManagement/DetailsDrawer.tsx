@@ -22,6 +22,12 @@ export default function DetailsDrawer(props: Props) {
     headers,
     requestPayload,
     responsePayload,
+    apiKeyId,
+    apiKeyType,
+    organizationId,
+    tokensInput,
+    tokensOutput,
+    tokensTotal,
   } = defaultValue || {};
 
   const getStatusTag = (status: number) => {
@@ -84,7 +90,48 @@ export default function DetailsDrawer(props: Props) {
           </Typography.Text>
           <div>{getStatusTag(statusCode)}</div>
         </Col>
+        <Col span={12}>
+          <Typography.Text className="d-block gray-7 mb-2">
+            API Key
+          </Typography.Text>
+          <div>
+            {apiKeyId ? (
+              <>
+                <Tag color={apiKeyType === 'org' ? 'blue' : 'green'}>
+                  {apiKeyType}
+                </Tag>
+                #{apiKeyId}
+                {organizationId ? ` (org: ${organizationId})` : ''}
+              </>
+            ) : (
+              '-'
+            )}
+          </div>
+        </Col>
       </Row>
+
+      {(tokensInput || tokensOutput || tokensTotal) ? (
+        <Row className="mb-6">
+          <Col span={8}>
+            <Typography.Text className="d-block gray-7 mb-2">
+              Tokens (input)
+            </Typography.Text>
+            <div>{tokensInput?.toLocaleString() || '-'}</div>
+          </Col>
+          <Col span={8}>
+            <Typography.Text className="d-block gray-7 mb-2">
+              Tokens (output)
+            </Typography.Text>
+            <div>{tokensOutput?.toLocaleString() || '-'}</div>
+          </Col>
+          <Col span={8}>
+            <Typography.Text className="d-block gray-7 mb-2">
+              Tokens (total)
+            </Typography.Text>
+            <div>{tokensTotal?.toLocaleString() || '-'}</div>
+          </Col>
+        </Row>
+      ) : null}
 
       <div className="mb-6">
         <Typography.Text className="d-block gray-7 mb-2">
