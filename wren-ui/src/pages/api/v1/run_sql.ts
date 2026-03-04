@@ -10,6 +10,7 @@ import {
   ApiError,
   respondWith,
   handleApiError,
+  extractApiKeyAttribution,
 } from '@/apollo/server/utils/apiUtils';
 import { transformToObjects } from '@server/utils/dataUtils';
 
@@ -45,6 +46,7 @@ async function handler(
 ) {
   const { sql, threadId, limit = 1000 } = req.body as RunSqlRequest;
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -110,6 +112,7 @@ async function handler(
         requestPayload: req.body,
         threadId: newThreadId,
         headers: req.headers as Record<string, string>,
+        apiKeyAttribution,
       });
     } catch (queryError) {
       logger.error('Error executing SQL:', queryError);
@@ -130,6 +133,7 @@ async function handler(
       headers: req.headers as Record<string, string>,
       startTime,
       logger,
+      apiKeyAttribution,
     });
   }
 }

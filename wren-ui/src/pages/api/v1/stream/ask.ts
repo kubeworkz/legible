@@ -10,6 +10,7 @@ import {
   isAskResultFinished,
   validateSummaryResult,
   transformHistoryInput,
+  extractApiKeyAttribution,
 } from '@/apollo/server/utils/apiUtils';
 import {
   AskResult,
@@ -100,6 +101,7 @@ async function handler(
   const { question, sampleSize, language, threadId } =
     req.body as AsyncAskRequest;
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -286,6 +288,7 @@ async function handler(
         },
         statusCode: 200,
         durationMs: Date.now() - startTime,
+        ...apiKeyAttribution,
       });
 
       endStream(res, newThreadId, startTime);
@@ -445,6 +448,7 @@ async function handler(
       },
       statusCode: 200,
       durationMs: Date.now() - startTime,
+      ...apiKeyAttribution,
     });
 
     endStream(res, newThreadId, startTime);
@@ -464,6 +468,7 @@ async function handler(
       },
       statusCode: 500,
       durationMs: Date.now() - startTime,
+      ...apiKeyAttribution,
     });
 
     sendError(

@@ -6,6 +6,8 @@ export interface ApiHistoryFilter {
   statusCode?: number;
   threadId?: string;
   projectId?: number;
+  organizationId?: number;
+  apiKeyId?: number;
   startDate?: string;
   endDate?: string;
 }
@@ -87,6 +89,14 @@ export class ApiHistoryResolver {
 
       if (filter.projectId) {
         filterCriteria.projectId = filter.projectId;
+      }
+
+      if (filter.organizationId) {
+        filterCriteria.organizationId = filter.organizationId;
+      }
+
+      if (filter.apiKeyId) {
+        filterCriteria.apiKeyId = filter.apiKeyId;
       }
     }
 

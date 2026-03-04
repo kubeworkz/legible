@@ -6,6 +6,7 @@ import {
   ApiError,
   respondWithSimple,
   handleApiError,
+  extractApiKeyAttribution,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
 import { isNil } from 'lodash';
@@ -42,6 +43,7 @@ const handleGetInstructions = async (
   res: NextApiResponse,
   project: any,
   startTime: number,
+  apiKeyAttribution: ReturnType<typeof extractApiKeyAttribution>,
 ) => {
   // Get all instructions for the current project
   const instructions = (
@@ -69,6 +71,7 @@ const handleGetInstructions = async (
     startTime,
     requestPayload: {},
     headers: req.headers as Record<string, string>,
+    apiKeyAttribution,
   });
 };
 
@@ -80,6 +83,7 @@ const handleCreateInstruction = async (
   res: NextApiResponse,
   project: any,
   startTime: number,
+  apiKeyAttribution: ReturnType<typeof extractApiKeyAttribution>,
 ) => {
   const { instruction, questions, isGlobal } =
     req.body as CreateInstructionRequest;
@@ -163,6 +167,7 @@ const handleCreateInstruction = async (
     startTime,
     requestPayload: req.body,
     headers: req.headers as Record<string, string>,
+    apiKeyAttribution,
   });
 };
 
@@ -171,6 +176,7 @@ async function handler(
   res: NextApiResponse,
 ) {
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -180,13 +186,13 @@ async function handler(
 
     // Handle GET method - list instructions
     if (req.method === 'GET') {
-      await handleGetInstructions(req, res, project, startTime);
+      await handleGetInstructions(req, res, project, startTime, apiKeyAttribution);
       return;
     }
 
     // Handle POST method - create instruction
     if (req.method === 'POST') {
-      await handleCreateInstruction(req, res, project, startTime);
+      await handleCreateInstruction(req, res, project, startTime, apiKeyAttribution);
       return;
     }
 
@@ -205,6 +211,7 @@ async function handler(
       headers: req.headers as Record<string, string>,
       startTime,
       logger,
+      apiKeyAttribution,
     });
   }
 }

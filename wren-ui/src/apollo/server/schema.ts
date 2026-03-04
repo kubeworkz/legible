@@ -191,6 +191,8 @@ export const typeDefs = gql`
     statusCode: Int
     threadId: String
     projectId: Int
+    organizationId: Int
+    apiKeyId: Int
     startDate: String
     endDate: String
   }
@@ -210,6 +212,12 @@ export const typeDefs = gql`
     responsePayload: JSON
     statusCode: Int
     durationMs: Int
+    apiKeyId: Int
+    apiKeyType: String
+    organizationId: Int
+    tokensInput: Int
+    tokensOutput: Int
+    tokensTotal: Int
     createdAt: String!
     updatedAt: String!
   }

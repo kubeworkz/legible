@@ -1,8 +1,9 @@
-import { NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiType, ApiHistory } from '@server/repositories/apiHistoryRepository';
 import * as Errors from '@server/utils/error';
 import { components } from '@/common';
+import { AuthenticatedApiRequest, ApiKeyAuthResult } from '@server/utils/apiKeyAuth';
 import {
   AskResult,
   AskResultStatus,
@@ -170,6 +171,21 @@ export class ApiError extends Error {
 }
 
 /**
+ * Extract API key attribution from a request (set by withApiKeyAuth middleware).
+ */
+export const extractApiKeyAttribution = (
+  req: NextApiRequest,
+): Pick<ApiHistory, 'apiKeyId' | 'apiKeyType' | 'organizationId'> => {
+  const apiKeyAuth = (req as AuthenticatedApiRequest).apiKeyAuth;
+  if (!apiKeyAuth) return {};
+  return {
+    apiKeyId: apiKeyAuth.keyId,
+    apiKeyType: apiKeyAuth.keyType,
+    organizationId: apiKeyAuth.organizationId,
+  };
+};
+
+/**
  * Common response handler for API endpoints that also logs to API history
  */
 export const respondWith = async ({
@@ -182,6 +198,7 @@ export const respondWith = async ({
   headers,
   requestPayload,
   startTime,
+  apiKeyAttribution,
 }: {
   res: NextApiResponse;
   statusCode: number;
@@ -192,6 +209,7 @@ export const respondWith = async ({
   requestPayload?: Record<string, any>;
   threadId?: string;
   headers?: Record<string, string>;
+  apiKeyAttribution?: Pick<ApiHistory, 'apiKeyId' | 'apiKeyType' | 'organizationId'>;
 }) => {
   const durationMs = startTime ? Date.now() - startTime : undefined;
   const responseId = uuidv4();
@@ -205,6 +223,7 @@ export const respondWith = async ({
     responsePayload,
     statusCode,
     durationMs,
+    ...apiKeyAttribution,
   });
 
   return res.status(statusCode).json({
@@ -226,6 +245,7 @@ export const respondWithSimple = async ({
   headers,
   requestPayload,
   startTime,
+  apiKeyAttribution,
 }: {
   res: NextApiResponse;
   statusCode: number;
@@ -235,6 +255,7 @@ export const respondWithSimple = async ({
   startTime: number;
   requestPayload?: Record<string, any>;
   headers?: Record<string, string>;
+  apiKeyAttribution?: Pick<ApiHistory, 'apiKeyId' | 'apiKeyType' | 'organizationId'>;
 }) => {
   const durationMs = startTime ? Date.now() - startTime : undefined;
   const responseId = uuidv4();
@@ -247,6 +268,7 @@ export const respondWithSimple = async ({
     responsePayload,
     statusCode,
     durationMs,
+    ...apiKeyAttribution,
   });
 
   return res.status(statusCode).json(responsePayload);
@@ -265,6 +287,7 @@ export const handleApiError = async ({
   headers,
   startTime,
   logger,
+  apiKeyAttribution,
 }: {
   error: any;
   res: NextApiResponse;
@@ -275,6 +298,7 @@ export const handleApiError = async ({
   headers?: Record<string, string>;
   startTime: number;
   logger?: any;
+  apiKeyAttribution?: Pick<ApiHistory, 'apiKeyId' | 'apiKeyType' | 'organizationId'>;
 }) => {
   if (logger) {
     logger.error(`Error in ${apiType} API:`, error);
@@ -307,5 +331,6 @@ export const handleApiError = async ({
     requestPayload,
     threadId,
     headers,
+    apiKeyAttribution,
   });
 };

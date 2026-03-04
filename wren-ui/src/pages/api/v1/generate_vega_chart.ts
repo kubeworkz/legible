@@ -8,6 +8,7 @@ import {
   ApiError,
   respondWith,
   handleApiError,
+  extractApiKeyAttribution,
 } from '@/apollo/server/utils/apiUtils';
 import {
   ChartResult,
@@ -62,6 +63,7 @@ async function handler(
     sampleSize = 10000,
   } = req.body as GenerateVegaSpecRequest;
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -187,6 +189,7 @@ async function handler(
       requestPayload: req.body,
       threadId: newThreadId,
       headers: req.headers as Record<string, string>,
+      apiKeyAttribution,
     });
   } catch (error) {
     await handleApiError({
@@ -198,6 +201,7 @@ async function handler(
       threadId,
       headers: req.headers as Record<string, string>,
       startTime,
+      apiKeyAttribution,
     });
   }
 }

@@ -37,6 +37,14 @@ export interface ApiHistory {
   responsePayload?: Record<string, any>;
   statusCode?: number;
   durationMs?: number;
+  // API key attribution
+  apiKeyId?: number;
+  apiKeyType?: 'org' | 'project';
+  organizationId?: number;
+  // Token usage tracking
+  tokensInput?: number;
+  tokensOutput?: number;
+  tokensTotal?: number;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -6,6 +6,7 @@ import {
   ApiError,
   respondWithSimple,
   handleApiError,
+  extractApiKeyAttribution,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
 
@@ -57,6 +58,7 @@ const handleUpdateInstruction = async (
   res: NextApiResponse,
   project: any,
   startTime: number,
+  apiKeyAttribution: ReturnType<typeof extractApiKeyAttribution>,
 ) => {
   const { id } = req.query;
   const instructionId = validateInstructionId(id);
@@ -112,6 +114,7 @@ const handleUpdateInstruction = async (
     startTime,
     requestPayload: req.body,
     headers: req.headers as Record<string, string>,
+    apiKeyAttribution,
   });
 };
 
@@ -123,6 +126,7 @@ const handleDeleteInstruction = async (
   res: NextApiResponse,
   project: any,
   startTime: number,
+  apiKeyAttribution: ReturnType<typeof extractApiKeyAttribution>,
 ) => {
   const { id } = req.query;
   const instructionId = validateInstructionId(id);
@@ -140,6 +144,7 @@ const handleDeleteInstruction = async (
     startTime,
     requestPayload: { id: instructionId },
     headers: req.headers as Record<string, string>,
+    apiKeyAttribution,
   });
 };
 
@@ -148,6 +153,7 @@ async function handler(
   res: NextApiResponse,
 ) {
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -157,13 +163,13 @@ async function handler(
 
     // Handle PUT method - update instruction
     if (req.method === 'PUT') {
-      await handleUpdateInstruction(req, res, project, startTime);
+      await handleUpdateInstruction(req, res, project, startTime, apiKeyAttribution);
       return;
     }
 
     // Handle DELETE method - delete instruction
     if (req.method === 'DELETE') {
-      await handleDeleteInstruction(req, res, project, startTime);
+      await handleDeleteInstruction(req, res, project, startTime, apiKeyAttribution);
       return;
     }
 
@@ -182,6 +188,7 @@ async function handler(
       headers: req.headers as Record<string, string>,
       startTime,
       logger,
+      apiKeyAttribution,
     });
   }
 }

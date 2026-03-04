@@ -10,6 +10,7 @@ import {
   ApiError,
   respondWith,
   handleApiError,
+  extractApiKeyAttribution,
   MAX_WAIT_TIME,
   isAskResultFinished,
   validateAskResult,
@@ -47,6 +48,7 @@ async function handler(
     returnSqlDialect = false,
   } = req.body as GenerateSqlRequest;
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -152,6 +154,7 @@ async function handler(
       requestPayload: req.body,
       threadId: newThreadId,
       headers: req.headers as Record<string, string>,
+      apiKeyAttribution,
     });
   } catch (error) {
     await handleApiError({
@@ -164,6 +167,7 @@ async function handler(
       headers: req.headers as Record<string, string>,
       startTime,
       logger,
+      apiKeyAttribution,
     });
   }
 }

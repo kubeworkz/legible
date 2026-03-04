@@ -8,6 +8,7 @@ import {
   ApiError,
   respondWith,
   handleApiError,
+  extractApiKeyAttribution,
   MAX_WAIT_TIME,
   isAskResultFinished,
   validateSummaryResult,
@@ -48,6 +49,7 @@ async function handler(
 ) {
   const { question, sampleSize, language, threadId } = req.body as AskRequest;
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -182,6 +184,7 @@ async function handler(
         requestPayload: req.body,
         threadId: newThreadId,
         headers: req.headers as Record<string, string>,
+        apiKeyAttribution,
       });
       return;
     }
@@ -307,6 +310,7 @@ async function handler(
       requestPayload: req.body,
       threadId: newThreadId,
       headers: req.headers as Record<string, string>,
+      apiKeyAttribution,
     });
   } catch (error) {
     await handleApiError({
@@ -319,6 +323,7 @@ async function handler(
       headers: req.headers as Record<string, string>,
       startTime,
       logger,
+      apiKeyAttribution,
     });
   }
 }

@@ -6,6 +6,7 @@ import {
   ApiError,
   respondWithSimple,
   handleApiError,
+  extractApiKeyAttribution,
   validateSql,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
@@ -32,6 +33,7 @@ const handleGetSqlPairs = async (
   res: NextApiResponse,
   project: any,
   startTime: number,
+  apiKeyAttribution: ReturnType<typeof extractApiKeyAttribution>,
 ) => {
   // Get all SQL pairs for the current project
   const sqlPairs = await sqlPairService.getProjectSqlPairs(project.id);
@@ -46,6 +48,7 @@ const handleGetSqlPairs = async (
     startTime,
     requestPayload: {},
     headers: req.headers as Record<string, string>,
+    apiKeyAttribution,
   });
 };
 
@@ -57,6 +60,7 @@ const handleCreateSqlPair = async (
   res: NextApiResponse,
   project: any,
   startTime: number,
+  apiKeyAttribution: ReturnType<typeof extractApiKeyAttribution>,
 ) => {
   const { sql, question } = req.body as CreateSqlPairRequest;
 
@@ -96,6 +100,7 @@ const handleCreateSqlPair = async (
     startTime,
     requestPayload: req.body,
     headers: req.headers as Record<string, string>,
+    apiKeyAttribution,
   });
 };
 
@@ -104,6 +109,7 @@ async function handler(
   res: NextApiResponse,
 ) {
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -113,13 +119,13 @@ async function handler(
 
     // Handle GET method - list SQL pairs
     if (req.method === 'GET') {
-      await handleGetSqlPairs(req, res, project, startTime);
+      await handleGetSqlPairs(req, res, project, startTime, apiKeyAttribution);
       return;
     }
 
     // Handle POST method - create SQL pair
     if (req.method === 'POST') {
-      await handleCreateSqlPair(req, res, project, startTime);
+      await handleCreateSqlPair(req, res, project, startTime, apiKeyAttribution);
       return;
     }
 
@@ -136,6 +142,7 @@ async function handler(
       headers: req.headers as Record<string, string>,
       startTime,
       logger,
+      apiKeyAttribution,
     });
   }
 }

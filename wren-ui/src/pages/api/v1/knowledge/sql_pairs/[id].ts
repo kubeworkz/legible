@@ -6,6 +6,7 @@ import {
   ApiError,
   respondWithSimple,
   handleApiError,
+  extractApiKeyAttribution,
   validateSql,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
@@ -48,6 +49,7 @@ const handleUpdateSqlPair = async (
   res: NextApiResponse,
   project: any,
   startTime: number,
+  apiKeyAttribution: ReturnType<typeof extractApiKeyAttribution>,
 ) => {
   const { id } = req.query;
   const sqlPairId = validateSqlPairId(id);
@@ -95,6 +97,7 @@ const handleUpdateSqlPair = async (
     startTime,
     requestPayload: req.body,
     headers: req.headers as Record<string, string>,
+    apiKeyAttribution,
   });
 };
 
@@ -106,6 +109,7 @@ const handleDeleteSqlPair = async (
   res: NextApiResponse,
   project: any,
   startTime: number,
+  apiKeyAttribution: ReturnType<typeof extractApiKeyAttribution>,
 ) => {
   const { id } = req.query;
   const sqlPairId = validateSqlPairId(id);
@@ -123,6 +127,7 @@ const handleDeleteSqlPair = async (
     startTime,
     requestPayload: { id: sqlPairId },
     headers: req.headers as Record<string, string>,
+    apiKeyAttribution,
   });
 };
 
@@ -131,6 +136,7 @@ async function handler(
   res: NextApiResponse,
 ) {
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -140,13 +146,13 @@ async function handler(
 
     // Handle PUT method - update SQL pair
     if (req.method === 'PUT') {
-      await handleUpdateSqlPair(req, res, project, startTime);
+      await handleUpdateSqlPair(req, res, project, startTime, apiKeyAttribution);
       return;
     }
 
     // Handle DELETE method - delete SQL pair
     if (req.method === 'DELETE') {
-      await handleDeleteSqlPair(req, res, project, startTime);
+      await handleDeleteSqlPair(req, res, project, startTime, apiKeyAttribution);
       return;
     }
 
@@ -165,6 +171,7 @@ async function handler(
       headers: req.headers as Record<string, string>,
       startTime,
       logger,
+      apiKeyAttribution,
     });
   }
 }

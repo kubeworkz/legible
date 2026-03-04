@@ -7,6 +7,7 @@ import {
   ApiError,
   respondWithSimple,
   handleApiError,
+  extractApiKeyAttribution,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
 
@@ -20,6 +21,7 @@ async function handler(
   res: NextApiResponse,
 ) {
   const startTime = Date.now();
+  const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;
   const projectIdHeader = req.headers['x-project-id'] as string;
   const projectId = projectIdHeader ? Number(projectIdHeader) : undefined;
@@ -64,6 +66,7 @@ async function handler(
       apiType: ApiType.GET_MODELS,
       startTime,
       headers: req.headers as Record<string, string>,
+      apiKeyAttribution,
     });
   } catch (error) {
     await handleApiError({
@@ -74,6 +77,7 @@ async function handler(
       headers: req.headers as Record<string, string>,
       startTime,
       logger,
+      apiKeyAttribution,
     });
   }
 }
