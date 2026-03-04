@@ -36,6 +36,10 @@ const StyledButton = styled(Button)<{ $isHighlight: boolean }>`
     font-weight: ${(props) => (props.$isHighlight ? '700' : 'normal')};
     border: none;
     color: var(--gray-1);
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    padding: 4px 12px;
   }
 
   &&&:hover,
@@ -49,10 +53,14 @@ const StyledButton = styled(Button)<{ $isHighlight: boolean }>`
 `;
 
 const StyledHeader = styled(Header)`
-  height: 48px;
-  border-bottom: 1px solid var(--gray-5);
-  background: var(--gray-10);
-  padding: 10px 16px;
+  &&& {
+    height: 48px;
+    border-bottom: 1px solid var(--gray-5);
+    background: var(--gray-10);
+    padding: 0 16px;
+    line-height: 48px;
+    width: 100%;
+  }
 `;
 
 const AvatarButton = styled(Button)`
@@ -287,7 +295,7 @@ export default function HeaderBar() {
       <StyledHeader>
         <div
           className="d-flex justify-space-between align-center"
-          style={{ marginTop: -2 }}
+          style={{ height: '100%' }}
         >
           <Space size={[48, 0]}>
             <LogoBar />

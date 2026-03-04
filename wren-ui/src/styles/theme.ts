@@ -34,7 +34,8 @@ export const admTheme: ThemeConfig = {
   components: {
     Layout: {
       headerBg: '#fff',
-      headerHeight: 20,
+      headerHeight: 48,
+      headerPadding: '0 16px',
       bodyBg: '#fff',
     },
     Table: {
