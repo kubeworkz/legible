@@ -485,12 +485,26 @@ body {
   min-height: 100vh;
   height: 100%;
 }
+.adm-main.ant-layout {
+  padding: 0;
+  margin: 0;
+  gap: 0;
+}
 .adm-layout {
   height: 100%;
+}
+.adm-layout.ant-layout {
+  padding: 0;
+  margin: 0;
+  gap: 0;
 }
 .adm-content {
   height: calc(100vh - 48px);
   overflow: auto;
+}
+.adm-content.ant-layout-content {
+  padding: 0;
+  margin: 0;
 }
 
 /* ============================================================

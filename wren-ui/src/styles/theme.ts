@@ -37,6 +37,7 @@ export const admTheme: ThemeConfig = {
       headerHeight: 48,
       headerPadding: '0 16px',
       bodyBg: '#fff',
+      siderBg: '#fff',
     },
     Table: {
       cellPaddingBlock: 12, // @table-padding-vertical

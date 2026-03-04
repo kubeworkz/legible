@@ -58,8 +58,10 @@ const StyledHeader = styled(Header)`
     border-bottom: 1px solid var(--gray-5);
     background: var(--gray-10);
     padding: 0 16px;
-    line-height: 48px;
+    line-height: normal;
     width: 100%;
+    display: flex;
+    align-items: center;
   }
 `;
 
@@ -297,7 +299,7 @@ export default function HeaderBar() {
           className="d-flex justify-space-between align-center"
           style={{ height: '100%' }}
         >
-          <Space size={[48, 0]}>
+          <Space size={[48, 0]} align="center">
             <LogoBar />
             {showNav && (
               <Space size={[16, 0]}>
