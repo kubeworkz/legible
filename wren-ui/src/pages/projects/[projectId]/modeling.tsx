@@ -402,7 +402,7 @@ export default function Modeling() {
               router.push(buildPath(Path.RecommendSemantics, router.query.projectId as string));
             }}
             onRecommendRelationships={() => {
-              message.info('Recommend relationships coming soon');
+              router.push(buildPath(Path.RecommendRelationships, router.query.projectId as string));
             }}
           />
         </DiagramWrapper>

@@ -7,6 +7,7 @@ export enum Path {
   Thread = '/projects/[projectId]/home/[id]',
   Modeling = '/projects/[projectId]/modeling',
   RecommendSemantics = '/projects/[projectId]/recommend-semantics',
+  RecommendRelationships = '/projects/[projectId]/recommend-relationships',
   Onboarding = '/projects/[projectId]/setup',
   OnboardingConnection = '/projects/[projectId]/setup/connection',
   OnboardingModels = '/projects/[projectId]/setup/models',
