@@ -3,9 +3,10 @@ import styled from 'styled-components';
 import { Menu, MenuProps } from 'antd';
 
 const StyledMenu = styled(Menu)`
-  &.ant-menu {
+  &&&.ant-menu {
     background-color: transparent;
     border-right: 0;
+    border-inline-end: 0 !important;
     color: var(--gray-8);
 
     &:not(.ant-menu-horizontal) {
@@ -31,13 +32,15 @@ const StyledMenu = styled(Menu)`
 
     .ant-menu-item {
       line-height: 28px;
-      height: auto;
-      margin: 0;
+      height: 28px;
+      margin-top: 0;
+      margin-bottom: 0;
+      margin-inline: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      width: 100%;
+      border-radius: 0;
       font-weight: 500;
-
-      &:not(last-child) {
-        margin-bottom: 0;
-      }
 
       &:not(.ant-menu-item-disabled):hover {
         color: inherit;
