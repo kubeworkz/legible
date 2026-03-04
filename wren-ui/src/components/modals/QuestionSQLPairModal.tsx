@@ -198,7 +198,7 @@ export default function QuestionSQLPairModal(props: Props) {
         destroyOnClose
         maskClosable={false}
         onCancel={onClose}
-        visible={visible}
+        open={visible}
         width={640}
         cancelButtonProps={{ disabled: confirmLoading }}
         okButtonProps={{ disabled: previewSqlResult.loading }}

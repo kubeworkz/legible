@@ -36,12 +36,12 @@ export default function ModelDrawer(props: Props) {
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       title={getDrawerTitle(formMode, defaultValue?.displayName)}
       width={750}
       closable
       destroyOnClose
-      afterVisibleChange={afterVisibleChange}
+      afterOpenChange={afterVisibleChange}
       onClose={onClose}
       footer={
         <Space className="d-flex justify-end">

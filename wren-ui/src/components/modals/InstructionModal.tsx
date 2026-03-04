@@ -56,7 +56,7 @@ export default function InstructionModal(props: Props) {
       destroyOnClose
       maskClosable={false}
       onCancel={onClose}
-      visible={visible}
+      open={visible}
       width={720}
       cancelButtonProps={{ disabled: loading }}
       okText="Submit"

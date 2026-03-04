@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Dropdown, Menu } from 'antd';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import type { MenuProps } from 'antd';
+type ItemType = NonNullable<MenuProps['items']>[number];
 import { MORE_ACTION, NODE_TYPE } from '@/utils/enum';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
@@ -46,14 +47,14 @@ const makeDropdown =
       <Dropdown
         trigger={['click']}
         overlayStyle={{ minWidth: 100, userSelect: 'none' }}
-        overlay={
+        dropdownRender={() => (
           <StyledMenu
             onClick={(e) => e.domEvent.stopPropagation()}
             items={items}
             onMouseEnter={onMenuEnter}
           />
-        }
-        onVisibleChange={onDropdownVisibleChange}
+        )}
+        onOpenChange={onDropdownVisibleChange}
       >
         {children}
       </Dropdown>

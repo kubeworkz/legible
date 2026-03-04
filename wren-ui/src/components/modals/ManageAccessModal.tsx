@@ -138,7 +138,7 @@ export default function ManageAccessModal(props: Props) {
       destroyOnClose
       onCancel={onClose}
       maskClosable={false}
-      visible={visible}
+      open={visible}
       width={480}
       afterClose={() => setSelectedMode(FolderVisibility.shared)}
       footer={

@@ -58,7 +58,7 @@ export default function SessionPropertyModal(props: Props) {
       destroyOnClose
       maskClosable={false}
       onCancel={onClose}
-      visible={visible}
+      open={visible}
       width={560}
       cancelButtonProps={{ disabled: loading }}
       okText="Submit"

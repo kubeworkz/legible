@@ -18,7 +18,7 @@ export default function InstructionDrawer(props: Props) {
       destroyOnClose
       onClose={onClose}
       title="View instruction"
-      visible={visible}
+      open={visible}
       width={760}
     >
       <div className="mb-6">

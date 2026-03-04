@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { DataNode } from 'antd/lib/tree';
+import type { TreeProps } from 'antd';
+type DataNode = NonNullable<TreeProps['treeData']>[number];
 import { Path, buildPath } from '@/utils/enum';
 import { useParams, useRouter } from 'next/navigation';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';

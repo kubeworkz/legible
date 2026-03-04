@@ -336,8 +336,8 @@ export default function AIOperationsBar(props: AIOperationsBarProps) {
       <Popover
         trigger="click"
         placement="bottomLeft"
-        visible={activeOp === 'filter'}
-        onVisibleChange={(v) => handleVisibleChange('filter', v)}
+        open={activeOp === 'filter'}
+        onOpenChange={(v) => handleVisibleChange('filter', v)}
         content={
           <OperationPopover
             title="Filter"
@@ -363,8 +363,8 @@ export default function AIOperationsBar(props: AIOperationsBarProps) {
       <Popover
         trigger="click"
         placement="bottomLeft"
-        visible={activeOp === 'cleaning'}
-        onVisibleChange={(v) => handleVisibleChange('cleaning', v)}
+        open={activeOp === 'cleaning'}
+        onOpenChange={(v) => handleVisibleChange('cleaning', v)}
         content={
           <OperationPopover
             title="Cleaning"
@@ -390,8 +390,8 @@ export default function AIOperationsBar(props: AIOperationsBarProps) {
       <Popover
         trigger="click"
         placement="bottomLeft"
-        visible={activeOp === 'grouping'}
-        onVisibleChange={(v) => handleVisibleChange('grouping', v)}
+        open={activeOp === 'grouping'}
+        onOpenChange={(v) => handleVisibleChange('grouping', v)}
         content={
           <OperationPopover
             title="Grouping"
@@ -417,8 +417,8 @@ export default function AIOperationsBar(props: AIOperationsBarProps) {
       <Popover
         trigger="click"
         placement="bottomLeft"
-        visible={activeOp === 'enrichment'}
-        onVisibleChange={(v) => handleVisibleChange('enrichment', v)}
+        open={activeOp === 'enrichment'}
+        onOpenChange={(v) => handleVisibleChange('enrichment', v)}
         content={
           <OperationPopover
             title="Enrichment"

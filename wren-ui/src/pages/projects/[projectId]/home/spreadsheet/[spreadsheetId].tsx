@@ -831,7 +831,7 @@ export default function SpreadsheetDetail() {
               SQL Statement
             </span>
           }
-          visible={showSqlModalVisible}
+          open={showSqlModalVisible}
           onCancel={() => setShowSqlModalVisible(false)}
           footer={
             <Button onClick={() => setShowSqlModalVisible(false)}>

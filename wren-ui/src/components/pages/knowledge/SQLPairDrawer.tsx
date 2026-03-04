@@ -15,7 +15,7 @@ export default function SQLPairDrawer(props: Props) {
       destroyOnClose
       onClose={onClose}
       title="View question-SQL pair"
-      visible={visible}
+      open={visible}
       width={760}
     >
       <div className="mb-6">

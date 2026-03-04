@@ -295,7 +295,7 @@ function ContentItem(props: {
       <span className="item-actions">
         <Dropdown
           trigger={['click']}
-          overlay={<StyledMenu items={menuItems} />}
+          dropdownRender={() => <StyledMenu items={menuItems} />}
           overlayStyle={{ minWidth: 150 }}
         >
           <KebabIcon

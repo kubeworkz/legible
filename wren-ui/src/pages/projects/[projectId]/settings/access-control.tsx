@@ -148,7 +148,7 @@ function AddMemberModal({ visible, members, onClose, onAdd }: AddMemberModalProp
   return (
     <Modal
       title="Add member"
-      visible={visible}
+      open={visible}
       onOk={handleOk}
       onCancel={handleCancel}
       confirmLoading={submitting}
@@ -512,7 +512,7 @@ function ManageGroupsTab({ isAdmin }: { isAdmin: boolean }) {
       />
       <Modal
         title="Create group"
-        visible={addVisible}
+        open={addVisible}
         onOk={handleAdd}
         onCancel={() => {
           form.resetFields();
@@ -744,7 +744,7 @@ function RolePermissionsTab({ isAdmin }: { isAdmin: boolean }) {
 
       <Modal
         title={`${editingRole} permission`}
-        visible={modalVisible}
+        open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={
           <div className="d-flex justify-content-end" style={{ gap: 8 }}>

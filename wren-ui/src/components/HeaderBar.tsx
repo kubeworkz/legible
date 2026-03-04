@@ -334,7 +334,7 @@ export default function HeaderBar() {
             {currentOrganization && (
               <>
                 <Dropdown
-                  overlay={orgMenuOverlay}
+                  dropdownRender={() => orgMenuOverlay}
                   trigger={['click']}
                   placement="bottomRight"
                 >
@@ -345,7 +345,7 @@ export default function HeaderBar() {
                 </Dropdown>
                 <BreadcrumbSeparator>/</BreadcrumbSeparator>
                 <Dropdown
-                  overlay={projectMenuOverlay}
+                  dropdownRender={() => projectMenuOverlay}
                   trigger={['click']}
                   placement="bottomRight"
                 >
@@ -358,7 +358,7 @@ export default function HeaderBar() {
             )}
             {user && (
               <Dropdown
-                overlay={
+                dropdownRender={() => (
                   <Menu
                     items={[
                       {
@@ -386,7 +386,7 @@ export default function HeaderBar() {
                       },
                     ]}
                   />
-                }
+                )}
                 trigger={['click']}
                 placement="bottomRight"
               >
@@ -401,7 +401,7 @@ export default function HeaderBar() {
 
       <Modal
         title="Create Organization"
-        visible={newOrgModalVisible}
+        open={newOrgModalVisible}
         onOk={handleCreateOrg}
         onCancel={() => {
           setNewOrgModalVisible(false);

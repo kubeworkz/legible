@@ -83,12 +83,12 @@ export default function ModelViewSelector({ onSelect }: Props) {
 
   return (
     <Dropdown
-      overlay={
+      dropdownRender={() => (
         <Menu
           items={menuItems}
           style={{ maxHeight: 400, overflow: 'auto' }}
         />
-      }
+      )}
       trigger={['click']}
       placement="bottomCenter"
     >

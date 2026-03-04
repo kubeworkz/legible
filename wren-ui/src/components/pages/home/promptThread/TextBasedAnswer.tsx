@@ -164,7 +164,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
     <AdjustAnswerDropdown
       onMoreClick={onMoreClick}
       data={adjustAnswerDropdownData}
-      onDropdownVisibleChange={adjustResultsDropdown.onVisibleChange}
+      onDropdownVisibleChange={adjustResultsDropdown.onOpenChange}
     >
       <Button
         className="px-0"

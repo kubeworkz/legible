@@ -75,7 +75,7 @@ export function FixSQLModal(props: Props) {
     <Modal
       title="Fix SQL"
       width={640}
-      visible={visible}
+      open={visible}
       okText="Submit"
       onOk={submit}
       onCancel={onClose}

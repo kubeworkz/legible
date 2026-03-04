@@ -20,7 +20,7 @@ export interface RelationsDataType {
 }
 
 interface Props {
-  columns: ColumnsType<RelationsDataType>;
+  columns: ColumnsType<any>;
   dataSource: RelationsDataType[];
   enableRowSelection?: boolean;
   extra?: (

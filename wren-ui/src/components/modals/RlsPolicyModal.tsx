@@ -172,8 +172,8 @@ function PolicyPreview({
           content={popoverContent}
           title="Set session properties"
           trigger="click"
-          visible={popoverVisible}
-          onVisibleChange={setPopoverVisible}
+          open={popoverVisible}
+          onOpenChange={setPopoverVisible}
           placement="bottomLeft"
         >
           <Badge count={spCount} size="small" offset={[-4, 0]}>
@@ -327,12 +327,12 @@ export default function RlsPolicyDrawer(props: Props) {
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       title={`${isCreateMode ? 'Add' : 'Update'} a policy`}
       width={640}
       closable
       destroyOnClose
-      afterVisibleChange={afterVisibleChange}
+      afterOpenChange={afterVisibleChange}
       onClose={onClose}
       footer={
         <Space className="d-flex justify-end">

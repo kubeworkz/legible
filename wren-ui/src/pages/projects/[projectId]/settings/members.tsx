@@ -86,7 +86,7 @@ function InviteMemberModal({ visible, onClose, onInvite }: InviteModalProps) {
   return (
     <Modal
       title="Invite Member"
-      visible={visible}
+      open={visible}
       onOk={handleOk}
       onCancel={handleCancel}
       confirmLoading={submitting}

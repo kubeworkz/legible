@@ -44,7 +44,7 @@ export default function DetailsDrawer(props: Props) {
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       className="gray-8"
       title="API details"
       width={760}

@@ -1,12 +1,12 @@
 import clsx from 'clsx';
 import { Button, Mentions, Typography } from 'antd';
 import styled from 'styled-components';
-import { useState, useContext, useRef } from 'react';
+import { useState, useRef } from 'react';
 import ReadOutlined from '@ant-design/icons/ReadOutlined';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import { nextTick } from '@/utils/time';
 import { Mention } from '@/hooks/useAutoComplete';
-import { FormItemInputContext } from 'antd/lib/form/context';
+import { Form } from 'antd';
 import MarkdownBlock from './MarkdownBlock';
 
 const Wrapper = styled.div`
@@ -96,14 +96,16 @@ const MentionOption = (props: Mention) => {
 export default function MarkdownEditor(props: Props) {
   const { value, onChange, maxLength, autoFocus, mentions } = props;
   const $wrapper = useRef<HTMLDivElement>(null);
-  const $textarea = useRef<HTMLElement & { textarea: HTMLTextAreaElement }>(
-    null,
-  );
+  const $textarea = useRef<{
+    focus: () => void;
+    blur: () => void;
+    textarea: HTMLTextAreaElement | null;
+    nativeElement: HTMLElement;
+  }>(null);
   const [focused, setFocused] = useState<boolean>(false);
   const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
 
-  const formItemContext = useContext(FormItemInputContext);
-  const { status } = formItemContext;
+  const { status } = Form.Item.useStatus();
 
   const change = (targetValue: string) => {
     onChange?.(targetValue);

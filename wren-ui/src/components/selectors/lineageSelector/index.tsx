@@ -1,4 +1,4 @@
-import { useRef, useContext, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { compact } from 'lodash';
 import FieldSelect, {
@@ -10,10 +10,7 @@ import { nextTick } from '@/utils/time';
 import { makeIterable } from '@/utils/iteration';
 import { NODE_TYPE } from '@/utils/enum';
 import { compactObject, parseJson } from '@/utils/helper';
-import {
-  FormItemInputContext,
-  FormItemStatusContextProps,
-} from 'antd/lib/form/context';
+import { Form } from 'antd';
 import { DiagramModel } from '@/utils/data';
 import { getNodeTypeIcon } from '@/utils/nodeType';
 import { aggregations } from '@/utils/expressionType';
@@ -46,9 +43,7 @@ export default function LineageSelector(props: Props) {
   const wrapper = useRef<HTMLDivElement | null>(null);
   const { sourceModel, value = [], onChange, onFetchOptions } = props;
 
-  const formItemContext =
-    useContext<FormItemStatusContextProps>(FormItemInputContext);
-  const { status } = formItemContext;
+  const { status } = Form.Item.useStatus();
 
   // prepare value & options here
   const data = useMemo(() => {

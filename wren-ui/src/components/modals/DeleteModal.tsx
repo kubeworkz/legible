@@ -1,11 +1,12 @@
 import { ReactNode } from 'react';
-import { ButtonProps, Modal, ModalProps } from 'antd';
+import { ButtonProps, Modal } from 'antd';
+import type { ModalFuncProps } from 'antd';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 
 type DeleteModalProps = {
   disabled?: boolean;
-  modalProps?: ModalProps;
+  modalProps?: ModalFuncProps;
   onConfirm: () => void;
   style?: any;
 } & Partial<ButtonProps>;

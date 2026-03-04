@@ -115,7 +115,7 @@ export default function AdjustReasoningStepsModal(props: Props) {
     <Modal
       title="Adjust steps"
       width={640}
-      visible={visible}
+      open={visible}
       okText="Regenerate answer"
       onOk={submit}
       onCancel={onClose}

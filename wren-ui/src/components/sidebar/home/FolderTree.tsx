@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { DataNode } from 'antd/lib/tree';
+import type { TreeProps } from 'antd';
+type DataNode = NonNullable<TreeProps['treeData']>[number];
 import { Dropdown, Menu } from 'antd';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import FolderOutlined from '@ant-design/icons/FolderOutlined';
@@ -404,7 +405,7 @@ export default function FolderTree(props: Props) {
                 <Dropdown
                   trigger={['click']}
                   overlayStyle={{ userSelect: 'none', minWidth: 150 }}
-                  overlay={
+                  dropdownRender={() => (
                     <Menu
                       items={[
                         {
@@ -436,7 +437,7 @@ export default function FolderTree(props: Props) {
                         },
                       ]}
                     />
-                  }
+                  )}
                 >
                   <MoreOutlined
                     onClick={(e) => e.stopPropagation()}

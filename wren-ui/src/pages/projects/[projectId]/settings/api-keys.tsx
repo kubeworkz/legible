@@ -146,7 +146,7 @@ function EditRateLimitsModal({
   return (
     <Modal
       title={`Rate limits — ${record?.name || ''}`}
-      visible={visible}
+      open={visible}
       onOk={handleSave}
       onCancel={onClose}
       confirmLoading={submitting}
@@ -271,7 +271,7 @@ function CreateKeyModal({ visible, onClose, onCreate }: CreateKeyModalProps) {
     return (
       <Modal
         title="API Key Created"
-        visible={visible}
+        open={visible}
         onCancel={handleClose}
         footer={[
           <Button key="done" type="primary" onClick={handleClose}>
@@ -319,7 +319,7 @@ function CreateKeyModal({ visible, onClose, onCreate }: CreateKeyModalProps) {
   return (
     <Modal
       title="Create API Key"
-      visible={visible}
+      open={visible}
       onOk={handleCreate}
       onCancel={handleClose}
       confirmLoading={submitting}

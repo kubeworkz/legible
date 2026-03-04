@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { Button } from 'antd';
-import { DataNode } from 'antd/lib/tree';
+import type { TreeProps } from 'antd';
+type DataNode = NonNullable<TreeProps['treeData']>[number];
 import { getColumnTypeIcon } from '@/utils/columnType';
 import { PrimaryKeyIcon, RelationshipIcon } from '@/utils/icons';
 import { ComposeDiagramField } from '@/utils/data';

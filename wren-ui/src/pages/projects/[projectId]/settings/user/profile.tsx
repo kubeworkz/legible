@@ -170,7 +170,7 @@ export default function SettingsUserProfile() {
 
         <Modal
           title="Change Password"
-          visible={passwordModalVisible}
+          open={passwordModalVisible}
           onOk={handleChangePassword}
           onCancel={() => {
             passwordForm.resetFields();

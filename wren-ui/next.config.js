@@ -1,15 +1,9 @@
-const path = require('path');
-const withLess = require('next-with-less');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const resolveAlias = {
-  antd$: path.resolve(__dirname, 'src/import/antd'),
-};
-
 /** @type {import('next').NextConfig} */
-const nextConfig = withLess({
+const nextConfig = {
   output: 'standalone',
   staticPageGenerationTimeout: 1000,
   compiler: {
@@ -19,16 +13,7 @@ const nextConfig = withLess({
       ssr: true,
     },
   },
-  lessLoaderOptions: {
-    additionalData: `@import "@/styles/antd-variables.less";`,
-  },
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      ...resolveAlias,
-    };
-    return config;
-  },
+  transpilePackages: ['antd', '@ant-design/icons', '@ant-design/cssinjs'],
   // routes redirect
   async redirects() {
     return [
@@ -45,6 +30,6 @@ const nextConfig = withLess({
       },
     ];
   },
-});
+};
 
 module.exports = withBundleAnalyzer(nextConfig);

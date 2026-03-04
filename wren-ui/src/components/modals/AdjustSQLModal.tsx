@@ -126,7 +126,7 @@ export default function AdjustSQLModal(props: Props) {
       destroyOnClose
       maskClosable={false}
       onCancel={onClose}
-      visible={visible}
+      open={visible}
       width={640}
       cancelButtonProps={{ disabled: confirmLoading }}
       okButtonProps={{ disabled: previewSqlResult.loading }}

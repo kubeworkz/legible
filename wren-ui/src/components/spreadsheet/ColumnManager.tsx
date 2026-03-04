@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Popover, Button, Tooltip, Typography, Empty } from 'antd';
-import Checkbox from 'antd/lib/checkbox';
+import { Checkbox } from 'antd';
 import UpOutlined from '@ant-design/icons/UpOutlined';
 import DownOutlined from '@ant-design/icons/DownOutlined';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
@@ -326,8 +326,8 @@ export default function ColumnManager(props: ColumnManagerProps) {
     <Popover
       content={content}
       trigger="click"
-      visible={visible}
-      onVisibleChange={setVisible}
+      open={visible}
+      onOpenChange={setVisible}
       placement="bottomRight"
       overlayStyle={{ padding: 0 }}
       destroyTooltipOnHide

@@ -97,7 +97,7 @@ export default function RelationModal(props: Props) {
     <Modal
       title={`${isEmpty(defaultValue) ? 'Add' : 'Update'} relationship`}
       width={750}
-      visible={visible}
+      open={visible}
       okText="Submit"
       onOk={submit}
       onCancel={onClose}

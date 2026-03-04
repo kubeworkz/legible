@@ -1,13 +1,10 @@
-import { useState, useMemo, useContext } from 'react';
+import { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { isString, difference } from 'lodash';
 import { Input, Table } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
+import type { TableColumnsType } from 'antd';
+import { Form as AntdForm } from 'antd';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
-import {
-  FormItemInputContext,
-  FormItemStatusContextProps,
-} from 'antd/lib/form/context';
 
 const StyledBox = styled.div`
   border: 1px solid var(--gray-5);
@@ -32,7 +29,7 @@ const StyledTotal = styled.div`
 `;
 
 interface Props {
-  columns: ColumnsType<any>;
+  columns: TableColumnsType<any>;
   loading: boolean;
   items: { [key: string]: any; value: string }[];
   value?: string[];
@@ -45,9 +42,7 @@ export default function MultiSelectBox(props: Props) {
     new Set(value),
   );
   const [searchValue, setSearchValue] = useState<string>('');
-  const formItemContext =
-    useContext<FormItemStatusContextProps>(FormItemInputContext);
-  const { status } = formItemContext;
+  const { status } = AntdForm.Item.useStatus();
 
   const dataSource = useMemo(() => {
     return searchValue

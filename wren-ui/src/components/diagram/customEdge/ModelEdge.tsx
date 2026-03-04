@@ -66,7 +66,7 @@ const ModelEdge = ({
       />
       <EdgeLabelRenderer>
         <CustomPopover
-          visible={isPopoverShow}
+          open={isPopoverShow}
           title="Relationship"
           content={
             <CustomPopover.Row gutter={16}>

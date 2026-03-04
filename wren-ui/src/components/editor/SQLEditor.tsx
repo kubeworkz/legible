@@ -1,8 +1,8 @@
 import clsx from 'clsx';
-import { useState, useContext, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import AceEditor from '@/components/editor/AceEditor';
-import { FormItemInputContext } from 'antd/lib/form/context';
+import { Form } from 'antd';
 import useAutoComplete from '@/hooks/useAutoComplete';
 
 const Wrapper = styled.div`
@@ -57,8 +57,7 @@ export default function SQLEditor(props: Props) {
   const $wrapper = useRef<HTMLDivElement>(null);
   const [focused, setFocused] = useState<boolean>(false);
 
-  const formItemContext = useContext(FormItemInputContext);
-  const { status } = formItemContext;
+  const { status } = Form.Item.useStatus();
 
   const completers = useAutoComplete({
     includeColumns: true,

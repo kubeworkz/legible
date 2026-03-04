@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { Button, Input, Typography, Collapse, Tag, Table, Spin, message } from 'antd';
-import Checkbox from 'antd/lib/checkbox';
+import { Checkbox } from 'antd';
 import ArrowLeftOutlined from '@ant-design/icons/ArrowLeftOutlined';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import MinusOutlined from '@ant-design/icons/MinusOutlined';

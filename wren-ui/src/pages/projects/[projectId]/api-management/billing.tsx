@@ -142,7 +142,7 @@ function ConfigModal({
   return (
     <Modal
       title="Billing Configuration"
-      visible={visible}
+      open={visible}
       onOk={handleSave}
       onCancel={onClose}
       confirmLoading={saving}

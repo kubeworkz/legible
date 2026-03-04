@@ -10,7 +10,7 @@ import {
   Tag,
   message,
 } from 'antd';
-import Checkbox from 'antd/lib/checkbox';
+import { Checkbox } from 'antd';
 import ArrowLeftOutlined from '@ant-design/icons/ArrowLeftOutlined';
 import ArrowRightOutlined from '@ant-design/icons/ArrowRightOutlined';
 import BranchesOutlined from '@ant-design/icons/BranchesOutlined';

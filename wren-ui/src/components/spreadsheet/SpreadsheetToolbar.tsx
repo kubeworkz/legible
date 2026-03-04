@@ -313,7 +313,7 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
         </SectionLabel>
         <Dropdown
           disabled={!hasData || loading}
-          overlay={
+          dropdownRender={() => (
             <Menu>
               <Menu.Item
                 key="csv"
@@ -330,7 +330,7 @@ export default function SpreadsheetToolbar(props: SpreadsheetToolbarProps) {
                 Export as Excel
               </Menu.Item>
             </Menu>
-          }
+          )}
           trigger={['click']}
         >
           <ToolbarButton

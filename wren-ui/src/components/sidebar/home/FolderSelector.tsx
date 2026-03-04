@@ -262,7 +262,7 @@ export default function FolderSelector(props: Props) {
     <SelectorBar>
       <Dropdown
         trigger={['click']}
-        overlay={<StyledMenu items={menuItems} />}
+        dropdownRender={() => <StyledMenu items={menuItems} />}
         overlayStyle={{ minWidth: 180 }}
       >
         <TriggerButton>
@@ -275,7 +275,7 @@ export default function FolderSelector(props: Props) {
       {folderActionMenu && (
         <Dropdown
           trigger={['click']}
-          overlay={folderActionMenu}
+          dropdownRender={() => folderActionMenu}
           overlayStyle={{ minWidth: 180 }}
         >
           <KebabButton>

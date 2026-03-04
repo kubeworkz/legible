@@ -139,7 +139,7 @@ export default function AddCalculatedFieldModal(props: Props) {
     <Modal
       title={`${isEditMode ? 'Update' : 'Add'} calculated field`}
       width={750}
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       confirmLoading={loading}
       maskClosable={false}

@@ -84,7 +84,7 @@ export default function TreeTitle(props: TreeTitleProps) {
         <Dropdown
           trigger={['click']}
           overlayStyle={{ userSelect: 'none', minWidth: 150 }}
-          overlay={
+          dropdownRender={() => (
             <StyledMenu
               items={[
                 {
@@ -135,7 +135,7 @@ export default function TreeTitle(props: TreeTitleProps) {
                 },
               ]}
             />
-          }
+          )}
         >
           <MoreOutlined onClick={(event) => event.stopPropagation()} />
         </Dropdown>

@@ -40,7 +40,7 @@ export default function FolderModal(props: Props) {
       destroyOnClose
       onCancel={onClose}
       maskClosable={false}
-      visible={visible}
+      open={visible}
       width={400}
       afterClose={() => form.resetFields()}
       footer={

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Input, Button, Space, DatePicker, Divider } from 'antd';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import CalendarOutlined from '@ant-design/icons/CalendarOutlined';
@@ -99,8 +99,8 @@ const DateFilter = ({
         <DatePicker.RangePicker
           placeholder={['Start Date', 'End Date']}
           value={[
-            selectedKeys[0] ? moment(selectedKeys[0]) : null,
-            selectedKeys[1] ? moment(selectedKeys[1]) : null,
+            selectedKeys[0] ? dayjs(selectedKeys[0]) : null,
+            selectedKeys[1] ? dayjs(selectedKeys[1]) : null,
           ]}
           onChange={(dates) => {
             const values = dates
