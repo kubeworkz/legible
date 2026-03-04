@@ -1,18 +1,21 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
-import { Button, Input, Typography, Collapse, Tag, message } from 'antd';
+import { Button, Input, Typography, Collapse, Tag, Table, Spin, message } from 'antd';
 import Checkbox from 'antd/lib/checkbox';
 import ArrowLeftOutlined from '@ant-design/icons/ArrowLeftOutlined';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import MinusOutlined from '@ant-design/icons/MinusOutlined';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
+import TableOutlined from '@ant-design/icons/TableOutlined';
 import { Path, buildPath } from '@/utils/enum';
 import useProject from '@/hooks/useProject';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
+import { useUpdateModelMetadataMutation } from '@/apollo/client/graphql/metadata.generated';
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
+const { TextArea } = Input;
 
 // ── Shared styled components ──────────────────────────
 
@@ -159,6 +162,7 @@ const StyledCollapse = styled(Collapse)`
   border: 1px solid var(--gray-4, #d9d9d9) !important;
   border-radius: 6px !important;
   overflow: hidden;
+  margin-bottom: 16px;
 
   .ant-collapse-header {
     font-weight: 600 !important;
@@ -176,6 +180,94 @@ const StyledCollapse = styled(Collapse)`
     border-bottom: 1px solid var(--gray-4, #f0f0f0);
   }
 `;
+
+// ── Generated semantics styled components ─────────────
+
+const ModelSection = styled.div`
+  border-bottom: 1px solid var(--gray-4, #f0f0f0);
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ModelSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+
+  &:hover {
+    background: var(--gray-2, #fafafa);
+  }
+
+  .model-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-9, #262626);
+  }
+
+  .column-count {
+    font-size: 13px;
+    color: var(--gray-7, #8c8c8c);
+  }
+`;
+
+const ModelSectionBody = styled.div`
+  padding: 0 16px 16px;
+`;
+
+const MetaRow = styled.div`
+  display: flex;
+  padding: 8px 0;
+  font-size: 13px;
+
+  .meta-label {
+    width: 100px;
+    color: var(--gray-7, #8c8c8c);
+    flex-shrink: 0;
+  }
+
+  .meta-value {
+    color: var(--gray-9, #262626);
+  }
+`;
+
+const DescriptionBox = styled.div`
+  margin: 8px 0 16px;
+
+  .desc-label {
+    font-size: 13px;
+    color: var(--gray-7, #8c8c8c);
+    margin-bottom: 4px;
+  }
+`;
+
+const GeneratingOverlay = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+  gap: 16px;
+`;
+
+// ── Types ─────────────────────────────────────────────
+
+interface SemanticsColumn {
+  name: string;
+  description: string;
+}
+
+interface SemanticsModel {
+  name: string;
+  description: string;
+  columns: SemanticsColumn[];
+}
 
 // ── Example prompts data ─────────────────────────────
 
@@ -271,6 +363,66 @@ export default function RecommendSemantics() {
   const [userPrompt, setUserPrompt] = useState('');
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const [generatedResults, setGeneratedResults] = useState<SemanticsModel[]>([]);
+  const [expandedModels, setExpandedModels] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState(false);
+  const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [updateModelMetadata] = useUpdateModelMetadataMutation();
+
+  // Build a lookup from referenceName → model info
+  const modelLookup = useMemo(() => {
+    const map = new Map<string, { id: number; displayName: string; referenceName: string; fields?: any[] }>();
+    if (data?.listModels) {
+      data.listModels.forEach((m) => {
+        map.set(m.referenceName, {
+          id: m.id,
+          displayName: m.displayName,
+          referenceName: m.referenceName,
+          fields: m.fields,
+        });
+      });
+    }
+    return map;
+  }, [data]);
+
+  // Get selected model reference names from query params
+  const selectedModelNames = useMemo(() => {
+    if (!selectedModelsParam) return [];
+    const ids = selectedModelsParam.split(',').map(Number);
+    return models
+      .filter((m) => ids.includes(m.id))
+      .map((m) => m.referenceName);
+  }, [selectedModelsParam, models]);
+
+  const pollForResult = useCallback(async (jobId: string) => {
+    try {
+      const res = await fetch(`/api/v1/semantics-descriptions?id=${jobId}`);
+      const data = await res.json();
+
+      if (data.status === 'finished' && data.response) {
+        setGeneratedResults(data.response);
+        // Auto-expand all models
+        setExpandedModels(new Set(data.response.map((m: SemanticsModel) => m.name)));
+        setGenerated(true);
+        setGenerating(false);
+        message.success('Semantics generated successfully.');
+        return;
+      }
+
+      if (data.status === 'failed') {
+        setGenerating(false);
+        message.error(data.error?.message || 'Failed to generate semantics.');
+        return;
+      }
+
+      // Still generating — poll again
+      pollingRef.current = setTimeout(() => pollForResult(jobId), 2000);
+    } catch (err) {
+      setGenerating(false);
+      message.error('Failed to check generation status.');
+    }
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     if (!userPrompt.trim()) {
@@ -278,29 +430,85 @@ export default function RecommendSemantics() {
       return;
     }
     setGenerating(true);
+    setGenerated(false);
+    setGeneratedResults([]);
+
     try {
-      // TODO: Wire to AI service POST /v1/semantics-descriptions
-      // For now simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setGenerated(true);
-      message.success('Semantics generated successfully.');
-    } catch (err) {
-      message.error('Failed to generate semantics.');
-    } finally {
+      const res = await fetch('/api/v1/semantics-descriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          selectedModels: selectedModelNames,
+          userPrompt: userPrompt.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to start generation');
+      }
+
+      const { id: jobId } = await res.json();
+      // Start polling
+      pollingRef.current = setTimeout(() => pollForResult(jobId), 2000);
+    } catch (err: any) {
       setGenerating(false);
+      message.error(err.message || 'Failed to generate semantics.');
     }
-  }, [userPrompt]);
+  }, [userPrompt, selectedModelNames, pollForResult]);
 
   const handleBackToStep1 = () => {
+    if (pollingRef.current) clearTimeout(pollingRef.current);
     router.push({
       pathname: buildPath(Path.RecommendSemantics, currentProjectId),
     });
   };
 
-  const handleSave = useCallback(() => {
-    // TODO: Save generated semantics to models
-    message.info('Save semantics — coming soon');
-  }, []);
+  const toggleModelExpanded = (modelName: string) => {
+    setExpandedModels((prev) => {
+      const next = new Set(prev);
+      if (next.has(modelName)) next.delete(modelName);
+      else next.add(modelName);
+      return next;
+    });
+  };
+
+  const handleSave = useCallback(async () => {
+    setSaving(true);
+    try {
+      for (const result of generatedResults) {
+        const modelInfo = modelLookup.get(result.name);
+        if (!modelInfo) continue;
+
+        // Map column descriptions — need column IDs
+        const columnUpdates = result.columns
+          .map((col) => {
+            const field = modelInfo.fields?.find(
+              (f) => f.referenceName === col.name,
+            );
+            if (!field) return null;
+            return { id: field.id, description: col.description };
+          })
+          .filter(Boolean);
+
+        await updateModelMetadata({
+          variables: {
+            where: { id: modelInfo.id },
+            data: {
+              description: result.description,
+              columns: columnUpdates,
+            },
+          },
+        });
+      }
+      message.success('Semantics saved to models.');
+      router.push(buildPath(Path.Modeling, currentProjectId));
+    } catch (err: any) {
+      message.error('Failed to save semantics.');
+    } finally {
+      setSaving(false);
+    }
+  }, [generatedResults, modelLookup, updateModelMetadata, router, currentProjectId]);
 
   const goBackToModeling = () => {
     router.push(buildPath(Path.Modeling, currentProjectId));
@@ -319,6 +527,34 @@ export default function RecommendSemantics() {
 
   // ── Step 2: Generate semantics ────────────────────
   if (step === 2) {
+    const columnTableColumns = [
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        key: 'name',
+        width: '25%',
+        render: (text: string) => <Text code>{text}</Text>,
+      },
+      {
+        title: 'Alias',
+        dataIndex: 'alias',
+        key: 'alias',
+        width: '20%',
+        ellipsis: true,
+      },
+      {
+        title: 'Type',
+        dataIndex: 'type',
+        key: 'type',
+        width: '15%',
+      },
+      {
+        title: 'Description',
+        dataIndex: 'description',
+        key: 'description',
+      },
+    ];
+
     return (
       <PageWrapper>
         <BackLink>
@@ -345,26 +581,26 @@ export default function RecommendSemantics() {
           </Description>
 
           <PromptRow>
-            <Input
+            <Input.TextArea
               placeholder="This dataset is to ..."
               value={userPrompt}
               onChange={(e) => setUserPrompt(e.target.value)}
-              size="large"
-              onPressEnter={handleGenerate}
+              autoSize={{ minRows: 2, maxRows: 5 }}
+              style={{ flex: 1 }}
             />
             <Button
-              type="primary"
+              type={generated ? 'default' : 'primary'}
               size="large"
               onClick={handleGenerate}
               loading={generating}
-              style={{ minWidth: 110 }}
+              style={{ minWidth: 120, marginTop: 2 }}
             >
-              Generate
+              {generated ? 'Regenerate' : 'Generate'}
             </Button>
           </PromptRow>
 
           <StyledCollapse
-            defaultActiveKey={['examples']}
+            defaultActiveKey={generated ? [] : ['examples']}
             expandIcon={({ isActive }) =>
               isActive ? <MinusOutlined /> : <PlusOutlined />
             }
@@ -389,6 +625,105 @@ export default function RecommendSemantics() {
             </Panel>
           </StyledCollapse>
 
+          {generating && (
+            <GeneratingOverlay>
+              <Spin size="large" />
+              <Text type="secondary">Generating semantics...</Text>
+            </GeneratingOverlay>
+          )}
+
+          {generated && generatedResults.length > 0 && (
+            <StyledCollapse
+              defaultActiveKey={['generated']}
+              expandIcon={({ isActive }) =>
+                isActive ? <MinusOutlined /> : <PlusOutlined />
+              }
+              expandIconPosition="right"
+            >
+              <Panel header="Generated semantics" key="generated">
+                <div className="example-intro">
+                  Review the semantics generated by AI.
+                </div>
+                {generatedResults.map((result) => {
+                  const modelInfo = modelLookup.get(result.name);
+                  const isExpanded = expandedModels.has(result.name);
+                  const displayName = modelInfo?.displayName || result.name;
+
+                  // Build column table data by merging with model field info
+                  const columnData = result.columns.map((col) => {
+                    const field = modelInfo?.fields?.find(
+                      (f) => f.referenceName === col.name,
+                    );
+                    return {
+                      key: col.name,
+                      name: col.name,
+                      alias: field?.displayName || col.name.replace(/_/g, ' '),
+                      type: field?.type || '',
+                      description: col.description,
+                    };
+                  });
+
+                  return (
+                    <ModelSection key={result.name}>
+                      <ModelSectionHeader onClick={() => toggleModelExpanded(result.name)}>
+                        <span className="model-name">
+                          <TableOutlined />
+                          {displayName}
+                        </span>
+                        <span className="column-count">
+                          {result.columns.length} column(s)
+                        </span>
+                      </ModelSectionHeader>
+
+                      {isExpanded && (
+                        <ModelSectionBody>
+                          <MetaRow>
+                            <span className="meta-label">Name</span>
+                            <span className="meta-value">
+                              <Text code>{result.name}</Text>
+                            </span>
+                          </MetaRow>
+                          <MetaRow>
+                            <span className="meta-label">Alias</span>
+                            <span className="meta-value">{displayName}</span>
+                          </MetaRow>
+
+                          <DescriptionBox>
+                            <div className="desc-label">Description</div>
+                            <TextArea
+                              value={result.description}
+                              autoSize={{ minRows: 2, maxRows: 5 }}
+                              onChange={(e) => {
+                                setGeneratedResults((prev) =>
+                                  prev.map((m) =>
+                                    m.name === result.name
+                                      ? { ...m, description: e.target.value }
+                                      : m,
+                                  ),
+                                );
+                              }}
+                            />
+                          </DescriptionBox>
+
+                          <Text type="secondary" style={{ fontSize: 13, marginBottom: 8, display: 'block' }}>
+                            Columns ({columnData.length})
+                          </Text>
+                          <Table
+                            columns={columnTableColumns}
+                            dataSource={columnData}
+                            pagination={false}
+                            size="small"
+                            bordered
+                          />
+                        </ModelSectionBody>
+                      )}
+                    </ModelSection>
+                  );
+                })}
+              </Panel>
+            </StyledCollapse>
+          )}
+
           <FooterRow>
             <Button size="large" onClick={handleBackToStep1} style={{ minWidth: 100 }}>
               Back
@@ -396,7 +731,8 @@ export default function RecommendSemantics() {
             <Button
               type="primary"
               size="large"
-              disabled={!generated}
+              disabled={!generated || saving}
+              loading={saving}
               onClick={handleSave}
               style={{ minWidth: 100 }}
             >
