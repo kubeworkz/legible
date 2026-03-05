@@ -27,6 +27,8 @@ import useProject from '@/hooks/useProject';
 import useAuth from '@/hooks/useAuth';
 import useOrganization from '@/hooks/useOrganization';
 import { useApolloClient } from '@apollo/client';
+import { ProjectLanguage } from '@/apollo/client/graphql/__types__';
+import { getLanguageText } from '@/utils/language';
 
 const { Header } = Layout;
 
@@ -161,6 +163,7 @@ export default function HeaderBar() {
     currentProjectId,
     setCurrentProjectId,
     clearCurrentProjectId,
+    createProject,
   } = useProject();
   const { user, logout } = useAuth();
   const {
@@ -177,6 +180,20 @@ export default function HeaderBar() {
   const [newOrgModalVisible, setNewOrgModalVisible] = useState(false);
   const [newOrgForm] = Form.useForm();
   const [creatingOrg, setCreatingOrg] = useState(false);
+
+  const [newProjectModalVisible, setNewProjectModalVisible] = useState(false);
+  const [newProjectForm] = Form.useForm();
+  const [creatingProject, setCreatingProject] = useState(false);
+
+  // Build language options from the ProjectLanguage enum
+  const languageOptions = useMemo(
+    () =>
+      Object.keys(ProjectLanguage).map((key) => ({
+        label: getLanguageText(key as ProjectLanguage),
+        value: key,
+      })),
+    [],
+  );
 
   // Build timezone options from the browser's Intl API
   const timezoneOptions = useMemo(() => {
@@ -326,9 +343,7 @@ export default function HeaderBar() {
       <Menu.Item
         key="__new"
         icon={<PlusOutlined />}
-        onClick={() =>
-          router.push(buildPath(Path.OnboardingConnection, currentProjectId || 0))
-        }
+        onClick={() => setNewProjectModalVisible(true)}
       >
         New project
       </Menu.Item>
@@ -471,6 +486,94 @@ export default function HeaderBar() {
           </Space>
         </div>
       </StyledHeader>
+
+      <Modal
+        title="Create a new project"
+        open={newProjectModalVisible}
+        onOk={async () => {
+          try {
+            const values = await newProjectForm.validateFields();
+            setCreatingProject(true);
+            const project = await createProject({
+              displayName: values.displayName,
+              language: values.language,
+              timezone: values.timezone,
+            });
+            setNewProjectModalVisible(false);
+            newProjectForm.resetFields();
+            message.success('Project created');
+            setCurrentProjectId(project.id);
+            await apolloClient.clearStore();
+            router.push(buildPath(Path.OnboardingConnection, project.id));
+          } catch (err) {
+            if (err?.errorFields) return;
+            message.error('Failed to create project');
+          } finally {
+            setCreatingProject(false);
+          }
+        }}
+        onCancel={() => {
+          setNewProjectModalVisible(false);
+          newProjectForm.resetFields();
+        }}
+        confirmLoading={creatingProject}
+        okText="Submit"
+        destroyOnClose
+      >
+        <Form
+          form={newProjectForm}
+          layout="vertical"
+          initialValues={{ language: 'EN', timezone: browserTimezone }}
+        >
+          <Form.Item
+            name="displayName"
+            label="Project name"
+            rules={[
+              { required: true, message: 'Please enter a project name' },
+              { min: 2, message: 'Name must be at least 2 characters' },
+            ]}
+          >
+            <Input placeholder="Project name" autoFocus />
+          </Form.Item>
+          <Form.Item
+            name="language"
+            label="Project language"
+            extra="This setting will affect the language in which the AI responds to you."
+            rules={[
+              { required: true, message: 'Please select a language' },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder="Select a language"
+              options={languageOptions}
+              filterOption={(input, option) =>
+                (option?.label as string)
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            name="timezone"
+            label="Timezone"
+            rules={[
+              { required: true, message: 'Please select a timezone' },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder="Select a timezone"
+              options={timezoneOptions}
+              filterOption={(input, option) =>
+                (option?.label as string)
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <Modal
         title="Create an organization"

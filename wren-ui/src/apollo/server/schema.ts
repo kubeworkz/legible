@@ -1207,6 +1207,8 @@ export const typeDefs = gql`
 
   input CreateProjectInput {
     displayName: String!
+    language: ProjectLanguage
+    timezone: String
   }
 
   input UpdateProjectInput {

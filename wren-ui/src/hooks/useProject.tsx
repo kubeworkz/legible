@@ -47,7 +47,8 @@ interface ProjectContextValue {
   /** Create a new project (returns the created project) */
   createProject: (data: {
     displayName: string;
-    type: string;
+    language?: string;
+    timezone?: string;
   }) => Promise<ProjectInfo>;
   /** Update a project */
   updateProject: (
@@ -169,7 +170,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   }, [refetch]);
 
   const handleCreateProject = useCallback(
-    async (input: { displayName: string; type: string }) => {
+    async (input: { displayName: string; language?: string; timezone?: string }) => {
       const { data: result } = await createProjectMutation({
         variables: { data: input },
       });

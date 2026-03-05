@@ -89,10 +89,10 @@ export class ProjectResolver {
 
   public async createProject(
     _root: any,
-    arg: { data: { displayName: string } },
+    arg: { data: { displayName: string; language?: string; timezone?: string } },
     ctx: IContext,
   ) {
-    const { displayName } = arg.data;
+    const { displayName, language, timezone } = arg.data;
     if (!displayName || displayName.trim().length === 0) {
       throw new Error('Project display name is required');
     }
@@ -101,8 +101,11 @@ export class ProjectResolver {
       displayName: displayName.trim(),
       catalog: 'wrenai',
       schema: 'public',
-      language: 'EN',
+      language: language || 'EN',
     };
+    if (timezone) {
+      projectValue.timezone = timezone;
+    }
     if (ctx.organizationId) {
       projectValue.organizationId = ctx.organizationId;
     }
