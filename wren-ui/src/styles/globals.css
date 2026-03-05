@@ -468,6 +468,11 @@ body .driver-popover-footer button + button {
    Layouts (replaces layouts/*.less)
    ============================================================ */
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   min-width: 360px;
 }
