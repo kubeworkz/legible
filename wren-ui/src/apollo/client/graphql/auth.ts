@@ -59,6 +59,7 @@ export const LIST_ORGANIZATIONS = gql`
       displayName
       slug
       logoUrl
+      timezone
       currentUserRole
       createdAt
       updatedAt
@@ -73,6 +74,7 @@ export const GET_ORGANIZATION = gql`
       displayName
       slug
       logoUrl
+      timezone
       currentUserRole
       createdAt
       updatedAt
@@ -106,6 +108,7 @@ export const CREATE_ORGANIZATION = gql`
       displayName
       slug
       logoUrl
+      timezone
       createdAt
       updatedAt
     }
@@ -122,6 +125,7 @@ export const UPDATE_ORGANIZATION = gql`
       displayName
       slug
       logoUrl
+      timezone
       createdAt
       updatedAt
     }

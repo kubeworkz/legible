@@ -52,6 +52,7 @@ export interface OrganizationInfo {
   displayName: string;
   slug: string;
   logoUrl?: string;
+  timezone?: string;
   currentUserRole?: MemberRole;
   createdAt: string;
   updatedAt: string;
@@ -100,12 +101,14 @@ interface OrganizationContextValue {
     displayName: string;
     slug: string;
     logoUrl?: string;
+    timezone?: string;
   }) => Promise<OrganizationInfo>;
   /** Update current organization */
   updateOrganization: (data: {
     displayName?: string;
     slug?: string;
     logoUrl?: string;
+    timezone?: string;
   }) => Promise<OrganizationInfo>;
   /** Delete current organization */
   deleteOrganization: () => Promise<void>;
@@ -213,7 +216,7 @@ export function OrganizationProvider({
   }, [currentOrgId, refetchMembersQuery]);
 
   const handleCreateOrganization = useCallback(
-    async (data: { displayName: string; slug: string; logoUrl?: string }) => {
+    async (data: { displayName: string; slug: string; logoUrl?: string; timezone?: string }) => {
       const { data: result } = await createOrgMutation({
         variables: { data },
       });
@@ -227,7 +230,7 @@ export function OrganizationProvider({
   );
 
   const handleUpdateOrganization = useCallback(
-    async (data: { displayName?: string; slug?: string; logoUrl?: string }) => {
+    async (data: { displayName?: string; slug?: string; logoUrl?: string; timezone?: string }) => {
       if (!currentOrgId) throw new Error('No organization selected');
       const { data: result } = await updateOrgMutation({
         variables: { organizationId: currentOrgId, data },

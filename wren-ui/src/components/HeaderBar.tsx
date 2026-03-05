@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import {
   Button,
@@ -7,6 +7,7 @@ import {
   Layout,
   Menu,
   Modal,
+  Select,
   Space,
   Typography,
   Form,
@@ -177,6 +178,57 @@ export default function HeaderBar() {
   const [newOrgForm] = Form.useForm();
   const [creatingOrg, setCreatingOrg] = useState(false);
 
+  // Build timezone options from the browser's Intl API
+  const timezoneOptions = useMemo(() => {
+    try {
+      const zones = (Intl as any).supportedValuesOf('timeZone') as string[];
+      return zones.map((tz: string) => {
+        let offset = '';
+        try {
+          const fmt = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz,
+            timeZoneName: 'shortOffset',
+          });
+          const parts = fmt.formatToParts(new Date());
+          const tzPart = parts.find((p) => p.type === 'timeZoneName');
+          offset = tzPart?.value || '';
+        } catch {
+          // ignore
+        }
+        return { label: `${tz} (${offset})`, value: tz };
+      });
+    } catch {
+      // Fallback for older browsers
+      const common = [
+        'UTC',
+        'America/New_York',
+        'America/Chicago',
+        'America/Denver',
+        'America/Los_Angeles',
+        'America/Toronto',
+        'America/Vancouver',
+        'Europe/London',
+        'Europe/Paris',
+        'Europe/Berlin',
+        'Asia/Tokyo',
+        'Asia/Shanghai',
+        'Asia/Kolkata',
+        'Australia/Sydney',
+        'Pacific/Auckland',
+      ];
+      return common.map((tz) => ({ label: tz, value: tz }));
+    }
+  }, []);
+
+  // Detect user's timezone for the default
+  const browserTimezone = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return 'UTC';
+    }
+  }, []);
+
   const handleCreateOrg = useCallback(async () => {
     try {
       const values = await newOrgForm.validateFields();
@@ -188,6 +240,7 @@ export default function HeaderBar() {
       await createOrganization({
         displayName: values.displayName,
         slug: slug + '-' + Math.random().toString(36).slice(2, 6),
+        timezone: values.timezone,
       });
       setNewOrgModalVisible(false);
       newOrgForm.resetFields();
@@ -420,7 +473,7 @@ export default function HeaderBar() {
       </StyledHeader>
 
       <Modal
-        title="Create Organization"
+        title="Create an organization"
         open={newOrgModalVisible}
         onOk={handleCreateOrg}
         onCancel={() => {
@@ -428,10 +481,10 @@ export default function HeaderBar() {
           newOrgForm.resetFields();
         }}
         confirmLoading={creatingOrg}
-        okText="Create"
+        okText="Submit"
         destroyOnClose
       >
-        <Form form={newOrgForm} layout="vertical">
+        <Form form={newOrgForm} layout="vertical" initialValues={{ timezone: browserTimezone }}>
           <Form.Item
             name="displayName"
             label="Organization name"
@@ -440,7 +493,25 @@ export default function HeaderBar() {
               { min: 2, message: 'Name must be at least 2 characters' },
             ]}
           >
-            <Input placeholder="e.g. My Company" autoFocus />
+            <Input placeholder="Organization name" autoFocus />
+          </Form.Item>
+          <Form.Item
+            name="timezone"
+            label="Timezone"
+            rules={[
+              { required: true, message: 'Please select a timezone' },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder="Select a timezone"
+              options={timezoneOptions}
+              filterOption={(input, option) =>
+                (option?.label as string)
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            />
           </Form.Item>
         </Form>
       </Modal>

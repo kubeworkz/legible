@@ -6,6 +6,7 @@ export interface Organization {
   displayName: string;
   slug: string;
   logoUrl: string | null;
+  timezone: string | null;
   createdAt: string;
   updatedAt: string;
 }

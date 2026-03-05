@@ -32,6 +32,7 @@ export const typeDefs = gql`
     displayName: String!
     slug: String!
     logoUrl: String
+    timezone: String
     currentUserRole: MemberRole
     createdAt: String!
     updatedAt: String!
@@ -74,12 +75,14 @@ export const typeDefs = gql`
     displayName: String!
     slug: String!
     logoUrl: String
+    timezone: String
   }
 
   input UpdateOrganizationInput {
     displayName: String
     slug: String
     logoUrl: String
+    timezone: String
   }
 
   input InviteMemberInput {

@@ -14,12 +14,14 @@ export interface CreateOrganizationInput {
   displayName: string;
   slug: string;
   logoUrl?: string;
+  timezone?: string;
 }
 
 export interface UpdateOrganizationInput {
   displayName?: string;
   slug?: string;
   logoUrl?: string;
+  timezone?: string;
 }
 
 export interface OrganizationWithRole extends Organization {
@@ -83,6 +85,7 @@ export class OrganizationService implements IOrganizationService {
       displayName: input.displayName,
       slug: input.slug,
       logoUrl: input.logoUrl || null,
+      timezone: input.timezone || null,
     });
 
     // Add creator as owner
