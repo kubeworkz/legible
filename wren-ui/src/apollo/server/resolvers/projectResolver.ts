@@ -192,7 +192,7 @@ export class ProjectResolver {
     return {
       id: project.id,
       type: project.type || null,
-      displayName: project.displayName,
+      displayName: project.displayName || `Project ${project.id}`,
       language: project.language || 'EN',
       timezone: project.timezone || null,
       sampleDataset: project.sampleDataset || null,
