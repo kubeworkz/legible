@@ -1870,7 +1870,7 @@ export const sampleDatasets: Record<string, SampleDataset> = {
         tableName: 'users',
         primaryKey: 'id',
         filePath:
-          'https://assets.getwren.ai/sample_data/card_transaction/users.parquet',
+          'http://wren-ui:3000/sample_data/card_transaction/users.parquet',
         properties: {
           displayName: 'users',
           description:
@@ -2000,7 +2000,7 @@ export const sampleDatasets: Record<string, SampleDataset> = {
         tableName: 'cards',
         primaryKey: 'id',
         filePath:
-          'https://assets.getwren.ai/sample_data/card_transaction/cards.parquet',
+          'http://wren-ui:3000/sample_data/card_transaction/cards.parquet',
         properties: {
           displayName: 'cards',
           description:
@@ -2128,7 +2128,7 @@ export const sampleDatasets: Record<string, SampleDataset> = {
         tableName: 'transactions',
         primaryKey: 'id',
         filePath:
-          'https://assets.getwren.ai/sample_data/card_transaction/transactions.parquet',
+          'http://wren-ui:3000/sample_data/card_transaction/transactions.parquet',
         properties: {
           displayName: 'transactions',
           description:
@@ -2258,7 +2258,7 @@ export const sampleDatasets: Record<string, SampleDataset> = {
         tableName: 'mcc_codes',
         primaryKey: 'mcc_code',
         filePath:
-          'https://assets.getwren.ai/sample_data/card_transaction/mcc_codes.parquet',
+          'http://wren-ui:3000/sample_data/card_transaction/mcc_codes.parquet',
         properties: {
           displayName: 'mcc_codes',
           description:
