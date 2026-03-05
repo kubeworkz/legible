@@ -297,7 +297,7 @@ export default function HeaderBar() {
       <StyledHeader>
         <div
           className="d-flex justify-space-between align-center"
-          style={{ height: '100%' }}
+          style={{ height: '100%', width: '100%' }}
         >
           <Space size={[48, 0]} align="center">
             <LogoBar />
