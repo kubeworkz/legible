@@ -18,7 +18,7 @@ export default function useSetupConnectionSampleDataset() {
         if (projectId && typeof window !== 'undefined') {
           localStorage.setItem('wren-current-project-id', String(projectId));
         }
-        router.push(buildPath(Path.Home, projectId || 0));
+        router.push(buildPath(Path.Modeling, projectId || 0));
       },
       refetchQueries: [{ query: ONBOARDING_STATUS }],
       awaitRefetchQueries: true,
