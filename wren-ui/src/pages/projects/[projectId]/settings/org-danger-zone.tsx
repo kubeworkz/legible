@@ -1,8 +1,10 @@
 import { useRouter } from 'next/router';
 import { Button, Modal, Typography, message } from 'antd';
 import styled from 'styled-components';
+import { useApolloClient } from '@apollo/client';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
 import useOrganization from '@/hooks/useOrganization';
+import useProject from '@/hooks/useProject';
 import useAuth from '@/hooks/useAuth';
 
 const { Title, Text } = Typography;
@@ -47,6 +49,8 @@ const SectionDescription = styled.div`
 
 export default function SettingsOrgDangerZone() {
   const router = useRouter();
+  const apolloClient = useApolloClient();
+  const { clearCurrentProjectId } = useProject();
   const {
     currentOrganization,
     organizations,
@@ -82,6 +86,8 @@ export default function SettingsOrgDangerZone() {
           if (remaining.length === 0) {
             await logout();
           } else {
+            clearCurrentProjectId();
+            await apolloClient.clearStore();
             router.push('/');
           }
         } catch (err: any) {
@@ -113,6 +119,8 @@ export default function SettingsOrgDangerZone() {
           if (remaining.length === 0) {
             await logout();
           } else {
+            clearCurrentProjectId();
+            await apolloClient.clearStore();
             router.push('/');
           }
         } catch (err: any) {
