@@ -64,7 +64,7 @@ export default function Modeling() {
   const searchParams = useSearchParams();
   const diagramRef = useRef(null);
 
-  const { data } = useDiagramQuery({
+  const { data, error: diagramError } = useDiagramQuery({
     fetchPolicy: 'cache-and-network',
     onCompleted: () => {
       diagramRef.current?.fitView();
@@ -206,6 +206,9 @@ export default function Modeling() {
     if (!data) return null;
     return data?.diagram;
   }, [data]);
+
+  // Don't show infinite loading if the diagram query failed
+  const diagramLoading = diagramData === null && !diagramError;
 
   const metadataDrawer = useDrawerAction();
   const modelDrawer = useDrawerAction();
@@ -382,7 +385,7 @@ export default function Modeling() {
   return (
     <DeployStatusContext.Provider value={{ ...deployStatusQueryResult }}>
       <SiderLayout
-        loading={diagramData === null}
+        loading={diagramLoading}
         sidebar={{
           data: diagramData,
           onOpenModelDrawer: modelDrawer.openDrawer,

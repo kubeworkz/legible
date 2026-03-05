@@ -159,6 +159,7 @@ export default function HeaderBar() {
     projects,
     currentProjectId,
     setCurrentProjectId,
+    clearCurrentProjectId,
   } = useProject();
   const { user, logout } = useAuth();
   const {
@@ -192,8 +193,8 @@ export default function HeaderBar() {
       newOrgForm.resetFields();
       message.success('Organization created');
       // Clear stale project so the new org's project is auto-selected
-      localStorage.removeItem('wren-current-project-id');
-      await apolloClient.resetStore();
+      clearCurrentProjectId();
+      await apolloClient.clearStore();
       router.push('/');
     } catch (err) {
       if (err?.errorFields) return; // validation error
@@ -201,18 +202,18 @@ export default function HeaderBar() {
     } finally {
       setCreatingOrg(false);
     }
-  }, [newOrgForm, createOrganization, apolloClient, router]);
+  }, [newOrgForm, createOrganization, clearCurrentProjectId, apolloClient, router]);
 
   const handleOrgSwitch = useCallback(
     async (orgId: number) => {
       if (orgId === currentOrganization?.id) return;
       setCurrentOrgId(orgId);
       // Clear stale project so the target org's project is auto-selected
-      localStorage.removeItem('wren-current-project-id');
-      await apolloClient.resetStore();
+      clearCurrentProjectId();
+      await apolloClient.clearStore();
       router.push('/');
     },
-    [currentOrganization, setCurrentOrgId, apolloClient, router],
+    [currentOrganization, setCurrentOrgId, clearCurrentProjectId, apolloClient, router],
   );
 
   const handleProjectSwitch = useCallback(

@@ -22,7 +22,7 @@ export default function useSetupRelations() {
   const autoGenerateRelation = data?.autoGenerateRelation;
 
   const onFinish = () => {
-    router.push(buildPath(Path.Modeling, currentProjectId));
+    router.push(buildPath(Path.Home, currentProjectId));
     refetchOnboardingStatus();
   };
 

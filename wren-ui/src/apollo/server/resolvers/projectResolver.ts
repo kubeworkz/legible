@@ -148,13 +148,7 @@ export class ProjectResolver {
   ) {
     const { projectId } = arg;
 
-    // Prevent deleting the last remaining project in the organization
     const allProjects = await ctx.projectService.listProjects(ctx.organizationId);
-    if (allProjects.length <= 1) {
-      throw new Error(
-        'Cannot delete the last project. At least one project must exist.',
-      );
-    }
 
     const project = await ctx.projectService.getProjectById(projectId);
 
@@ -173,6 +167,18 @@ export class ProjectResolver {
       logger.warn(
         `Failed to clean up AI service for project ${projectId}: ${err.message}`,
       );
+    }
+
+    // If this was the last project in the org, create a fresh default project
+    // so the organization always has at least one project for onboarding.
+    if (allProjects.length <= 1 && ctx.organizationId) {
+      await ctx.projectRepository.createOne({
+        displayName: 'Default Project',
+        catalog: 'wrenai',
+        schema: 'public',
+        language: 'EN',
+        organizationId: ctx.organizationId,
+      } as any);
     }
 
     logger.debug(`Project deleted: ${projectId}`);

@@ -34,7 +34,8 @@ const SectionDescription = styled.div`
 
 export default function SettingsDangerZone() {
   const router = useRouter();
-  const { currentProject, currentProjectId, deleteProject, projects } =
+  const { currentProject, currentProjectId, deleteProject, projects,
+    clearCurrentProjectId } =
     useProject();
   const [resetCurrentProject, { client }] = useResetCurrentProjectMutation({
     onError: (error) => console.error(error),
@@ -58,15 +59,6 @@ export default function SettingsDangerZone() {
   const onDelete = () => {
     if (!currentProject) return;
 
-    if (projects.length <= 1) {
-      Modal.warning({
-        title: 'Cannot delete the only project',
-        content:
-          'You must have at least one project. Create another project before deleting this one.',
-      });
-      return;
-    }
-
     Modal.confirm({
       title: `Are you sure you want to delete "${currentProject.displayName}"?`,
       content:
@@ -74,11 +66,13 @@ export default function SettingsDangerZone() {
       okButtonProps: { danger: true },
       okText: 'Delete',
       onOk: async () => {
-        // Navigate to first remaining project's home
-        const remaining = projects.filter((p) => p.id !== currentProject.id);
-        const targetId = remaining.length > 0 ? remaining[0].id : 0;
         await deleteProject(currentProject.id);
-        router.push(buildPath(Path.Home, targetId));
+        // Server auto-creates a new Default Project if we deleted the last one.
+        // Clear stale project state and navigate to index so the new project
+        // is auto-selected and onboarding kicks in.
+        clearCurrentProjectId();
+        await client.clearStore();
+        router.push('/');
       },
     });
   };

@@ -38,6 +38,8 @@ interface ProjectContextValue {
   currentProjectId: number | undefined;
   /** Switch to a different project by ID */
   setCurrentProjectId: (id: number) => void;
+  /** Clear the current project selection (e.g. during org switch) */
+  clearCurrentProjectId: () => void;
   /** Whether the project list is still loading */
   loading: boolean;
   /** Refetch the project list */
@@ -157,6 +159,11 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     setStoredProjectId(id);
   }, []);
 
+  const clearCurrentProjectId = useCallback(() => {
+    setCurrentProjectIdState(undefined);
+    setStoredProjectId(undefined);
+  }, []);
+
   const refetchProjects = useCallback(async () => {
     await refetch();
   }, [refetch]);
@@ -211,6 +218,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       currentProject,
       currentProjectId,
       setCurrentProjectId,
+      clearCurrentProjectId,
       loading,
       refetchProjects,
       createProject: handleCreateProject,
@@ -222,6 +230,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       currentProject,
       currentProjectId,
       setCurrentProjectId,
+      clearCurrentProjectId,
       loading,
       refetchProjects,
       handleCreateProject,
