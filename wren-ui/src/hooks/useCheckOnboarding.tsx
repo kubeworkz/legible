@@ -9,8 +9,8 @@ import useOrganization from '@/hooks/useOrganization';
 const redirectRoute = {
   [OnboardingStatus.DATASOURCE_SAVED]: Path.OnboardingModels,
   [OnboardingStatus.NOT_STARTED]: Path.OnboardingConnection,
-  [OnboardingStatus.ONBOARDING_FINISHED]: Path.Modeling,
-  [OnboardingStatus.WITH_SAMPLE_DATASET]: Path.Modeling,
+  [OnboardingStatus.ONBOARDING_FINISHED]: Path.Home,
+  [OnboardingStatus.WITH_SAMPLE_DATASET]: Path.Home,
 };
 
 export const useWithOnboarding = () => {
@@ -48,7 +48,7 @@ export const useWithOnboarding = () => {
       const projectId = currentProjectId;
 
       // --- Onboarding NOT completed ---
-      if (newPath && newPath !== Path.Modeling) {
+      if (newPath && newPath !== Path.Home) {
         if (isIndexPage) {
           router.push(buildPath(newPath, projectId));
           return;
