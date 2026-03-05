@@ -41,27 +41,35 @@ const StyledContentLayout = styled(Layout)`
 `;
 
 const StyledMenuButton = styled(Button)<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  margin-bottom: 2px;
-  height: auto;
-  color: var(--gray-8) !important;
+  &&& {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 12px;
+    margin-bottom: 2px;
+    height: auto;
+    color: var(--gray-8);
+  }
 
   ${(props) =>
     props.$active &&
     css`
-      color: var(--geekblue-6) !important;
-      background-color: var(--gray-4) !important;
+      &&& {
+        color: var(--geekblue-6);
+        background-color: var(--gray-4);
+      }
     `}
 `;
 
 const StyledBackButton = styled(Button)`
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  height: auto;
-  color: var(--gray-7) !important;
+  &&& {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 12px;
+    height: auto;
+    color: var(--gray-7);
+  }
 `;
 
 interface MenuItem {
