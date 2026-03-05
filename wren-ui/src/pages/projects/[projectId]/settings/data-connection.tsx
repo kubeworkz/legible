@@ -207,13 +207,18 @@ function SetupPrompt() {
 }
 
 export default function SettingsDataConnection() {
+  const { currentProjectId } = useProject();
   const [fetchSettings, { data, refetch }] = useGetSettingsLazyQuery({
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   });
 
+  // Re-fetch settings whenever the active project changes so we never show
+  // stale data from a different project's cache.
   useEffect(() => {
-    fetchSettings();
-  }, []);
+    if (currentProjectId) {
+      fetchSettings();
+    }
+  }, [currentProjectId]);
 
   const settings = data?.settings;
   const dataSource = settings?.dataSource;
