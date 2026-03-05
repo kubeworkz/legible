@@ -55,7 +55,7 @@ export default function APIManagement() {
           style={linkStyle}
           href={buildPath(Path.APIManagementUsage, currentProjectId)}
         >
-          Usage
+          API Usage
         </Link>
       ),
       icon: <BarChartOutlined />,
@@ -69,7 +69,7 @@ export default function APIManagement() {
           style={linkStyle}
           href={buildPath(Path.APIManagementBilling, currentProjectId)}
         >
-          Billing
+          API Billing
         </Link>
       ),
       icon: <DollarOutlined />,
