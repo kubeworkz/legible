@@ -29,17 +29,21 @@ const Content = styled.div`
 `;
 
 const StyledButton = styled(Button)`
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding-left: 16px;
-  padding-right: 16px;
-  color: var(--gray-8) !important;
-  border-radius: 0;
+  &&& {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 16px;
+    padding-right: 16px;
+    color: var(--gray-8);
+    border-radius: 0;
+  }
 
-  &:hover,
-  &:focus {
+  &&&:hover,
+  &&&:focus {
     background-color: var(--gray-4);
+    color: var(--gray-8);
   }
 `;
 
