@@ -8,6 +8,7 @@ import {
   MemberRole,
 } from '@server/repositories/memberRepository';
 import { IUserRepository, User } from '@server/repositories/userRepository';
+import { IProjectRepository } from '@server/repositories/projectRepository';
 
 export interface CreateOrganizationInput {
   displayName: string;
@@ -49,19 +50,23 @@ export class OrganizationService implements IOrganizationService {
   private readonly organizationRepository: IOrganizationRepository;
   private readonly memberRepository: IMemberRepository;
   private readonly userRepository: IUserRepository;
+  private readonly projectRepository: IProjectRepository;
 
   constructor({
     organizationRepository,
     memberRepository,
     userRepository,
+    projectRepository,
   }: {
     organizationRepository: IOrganizationRepository;
     memberRepository: IMemberRepository;
     userRepository: IUserRepository;
+    projectRepository: IProjectRepository;
   }) {
     this.organizationRepository = organizationRepository;
     this.memberRepository = memberRepository;
     this.userRepository = userRepository;
+    this.projectRepository = projectRepository;
   }
 
   public async createOrganization(
@@ -86,6 +91,15 @@ export class OrganizationService implements IOrganizationService {
       userId: ownerId,
       role: MemberRole.OWNER,
     });
+
+    // Create a default project so onboarding can proceed
+    await this.projectRepository.createOne({
+      displayName: 'Default Project',
+      catalog: 'wrenai',
+      schema: 'public',
+      language: 'EN',
+      organizationId: org.id,
+    } as any);
 
     return org;
   }

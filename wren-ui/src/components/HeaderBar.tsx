@@ -191,7 +191,8 @@ export default function HeaderBar() {
       setNewOrgModalVisible(false);
       newOrgForm.resetFields();
       message.success('Organization created');
-      // Reset store and redirect to home
+      // Clear stale project so the new org's project is auto-selected
+      localStorage.removeItem('wren-current-project-id');
       await apolloClient.resetStore();
       router.push('/');
     } catch (err) {
@@ -206,6 +207,8 @@ export default function HeaderBar() {
     async (orgId: number) => {
       if (orgId === currentOrganization?.id) return;
       setCurrentOrgId(orgId);
+      // Clear stale project so the target org's project is auto-selected
+      localStorage.removeItem('wren-current-project-id');
       await apolloClient.resetStore();
       router.push('/');
     },
