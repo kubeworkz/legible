@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { Button, Modal, Typography } from 'antd';
+import { Button, Modal, Typography, message } from 'antd';
 import styled from 'styled-components';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
 import useOrganization from '@/hooks/useOrganization';
@@ -47,8 +47,16 @@ const SectionDescription = styled.div`
 
 export default function SettingsOrgDangerZone() {
   const router = useRouter();
-  const { currentOrganization, loading, isAdmin } = useOrganization();
-  const { user } = useAuth();
+  const {
+    currentOrganization,
+    organizations,
+    loading,
+    isAdmin,
+    members,
+    deleteOrganization,
+    removeMember,
+  } = useOrganization();
+  const { user, logout } = useAuth();
 
   const onLeave = () => {
     if (!currentOrganization) return;
@@ -60,8 +68,27 @@ export default function SettingsOrgDangerZone() {
       okButtonProps: { danger: true },
       okText: 'Leave organization',
       onOk: async () => {
-        // TODO: Implement leave organization mutation
-        router.push('/');
+        try {
+          const currentMember = members.find(
+            (m) => m.user.id === user?.id,
+          );
+          if (!currentMember) throw new Error('Member not found');
+          await removeMember(currentMember.id);
+
+          // If this was the last org, log out; otherwise go home
+          const remaining = organizations.filter(
+            (o) => o.id !== currentOrganization.id,
+          );
+          if (remaining.length === 0) {
+            await logout();
+          } else {
+            router.push('/');
+          }
+        } catch (err: any) {
+          message.error(
+            err?.message || 'Failed to leave organization',
+          );
+        }
       },
     });
   };
@@ -76,8 +103,23 @@ export default function SettingsOrgDangerZone() {
       okButtonProps: { danger: true },
       okText: 'Delete organization',
       onOk: async () => {
-        // TODO: Implement delete organization mutation
-        router.push('/');
+        try {
+          await deleteOrganization();
+
+          // If no organizations remain, log out; otherwise go home
+          const remaining = organizations.filter(
+            (o) => o.id !== currentOrganization.id,
+          );
+          if (remaining.length === 0) {
+            await logout();
+          } else {
+            router.push('/');
+          }
+        } catch (err: any) {
+          message.error(
+            err?.message || 'Failed to delete organization',
+          );
+        }
       },
     });
   };
