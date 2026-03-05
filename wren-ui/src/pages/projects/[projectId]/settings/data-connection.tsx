@@ -171,6 +171,7 @@ const SetupPromptContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: calc(100vh - 200px);
   padding: 64px 32px;
   text-align: center;
 `;
