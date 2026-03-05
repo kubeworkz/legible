@@ -2286,6 +2286,39 @@ export const sampleDatasets: Record<string, SampleDataset> = {
           { columnName: 'description', dataType: 'VARCHAR' },
         ],
       },
+      {
+        tableName: 'train_fraud_labels',
+        primaryKey: 'transaction_id',
+        filePath:
+          'http://wren-ui:3000/sample_data/card_transaction/train_fraud_labels.parquet',
+        properties: {
+          displayName: 'train_fraud_labels',
+          description:
+            'Binary classification labels indicating whether each transaction is fraudulent (1) or legitimate (0). Used for training supervised fraud detection models.',
+        },
+        columns: [
+          {
+            name: 'transaction_id',
+            properties: {
+              description:
+                'Identifier of the transaction this label applies to.',
+              displayName: 'transaction_id',
+            },
+          },
+          {
+            name: 'is_fraud',
+            properties: {
+              description:
+                'Binary fraud label: 1 indicates a fraudulent transaction, 0 indicates a legitimate transaction.',
+              displayName: 'is_fraud',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'transaction_id', dataType: 'INTEGER' },
+          { columnName: 'is_fraud', dataType: 'INTEGER' },
+        ],
+      },
     ],
     questions: [
       {
@@ -2336,6 +2369,14 @@ export const sampleDatasets: Record<string, SampleDataset> = {
         toModelName: 'transactions',
         toColumnName: 'mcc',
         type: RelationType.ONE_TO_MANY,
+      },
+      // transactions -> train_fraud_labels (one transaction has one fraud label)
+      {
+        fromModelName: 'transactions',
+        fromColumnName: 'id',
+        toModelName: 'train_fraud_labels',
+        toColumnName: 'transaction_id',
+        type: RelationType.ONE_TO_ONE,
       },
     ],
   },
