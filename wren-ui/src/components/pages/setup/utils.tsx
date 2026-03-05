@@ -2,6 +2,7 @@ import { merge } from 'lodash';
 import { IconComponentProps } from '@/import/icon';
 import ShoppingCartOutlined from '@ant-design/icons/ShoppingCartOutlined';
 import IdCardOutlined from '@ant-design/icons/IdcardOutlined';
+import CreditCardOutlined from '@ant-design/icons/CreditCardOutlined';
 import { SETUP, DATA_SOURCES } from '@/utils/enum';
 import Starter from './Starter';
 import ConnectDataSource from './ConnectDataSource';
@@ -129,6 +130,11 @@ export const TEMPLATE_OPTIONS = {
     label: 'Human Resource',
     IconComponent: IdCardOutlined,
     guide: 'https://docs.getwren.ai/oss/getting_started/sample_data/hr',
+  },
+  [SampleDatasetName.CARD_TRANSACTION]: {
+    label: 'Card Transaction',
+    IconComponent: CreditCardOutlined,
+    guide: 'https://docs.getwren.ai/oss/getting_started/sample_data/card_transaction',
   },
 };
 

@@ -1863,6 +1863,482 @@ export const sampleDatasets: Record<string, SampleDataset> = {
       },
     ],
   },
+  card_transaction: {
+    name: SampleDatasetName.CARD_TRANSACTION,
+    tables: [
+      {
+        tableName: 'users',
+        primaryKey: 'id',
+        filePath:
+          'https://assets.getwren.ai/sample_data/card_transaction/users.parquet',
+        properties: {
+          displayName: 'users',
+          description:
+            'Contains demographic and financial profile information about customers, including age, income, debt, and credit score.',
+        },
+        columns: [
+          {
+            name: 'id',
+            properties: {
+              description: 'Unique identifier for the customer.',
+              displayName: 'id',
+            },
+          },
+          {
+            name: 'current_age',
+            properties: {
+              description: 'Current age of the customer.',
+              displayName: 'current_age',
+            },
+          },
+          {
+            name: 'retirement_age',
+            properties: {
+              description: 'Expected retirement age of the customer.',
+              displayName: 'retirement_age',
+            },
+          },
+          {
+            name: 'birth_year',
+            properties: {
+              description: 'Year the customer was born.',
+              displayName: 'birth_year',
+            },
+          },
+          {
+            name: 'birth_month',
+            properties: {
+              description: 'Month the customer was born.',
+              displayName: 'birth_month',
+            },
+          },
+          {
+            name: 'gender',
+            properties: {
+              description:
+                'Gender of the customer (e.g., Male, Female).',
+              displayName: 'gender',
+            },
+          },
+          {
+            name: 'address',
+            properties: {
+              description: 'Street address of the customer.',
+              displayName: 'address',
+            },
+          },
+          {
+            name: 'latitude',
+            properties: {
+              description: 'Latitude coordinate of the customer location.',
+              displayName: 'latitude',
+            },
+          },
+          {
+            name: 'longitude',
+            properties: {
+              description: 'Longitude coordinate of the customer location.',
+              displayName: 'longitude',
+            },
+          },
+          {
+            name: 'per_capita_income',
+            properties: {
+              description:
+                'Per capita income of the customer area in USD.',
+              displayName: 'per_capita_income',
+            },
+          },
+          {
+            name: 'yearly_income',
+            properties: {
+              description: 'Annual income of the customer in USD.',
+              displayName: 'yearly_income',
+            },
+          },
+          {
+            name: 'total_debt',
+            properties: {
+              description: 'Total outstanding debt of the customer in USD.',
+              displayName: 'total_debt',
+            },
+          },
+          {
+            name: 'credit_score',
+            properties: {
+              description: 'Credit score of the customer.',
+              displayName: 'credit_score',
+            },
+          },
+          {
+            name: 'num_credit_cards',
+            properties: {
+              description:
+                'Number of credit cards held by the customer.',
+              displayName: 'num_credit_cards',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'id', dataType: 'INTEGER' },
+          { columnName: 'current_age', dataType: 'INTEGER' },
+          { columnName: 'retirement_age', dataType: 'INTEGER' },
+          { columnName: 'birth_year', dataType: 'INTEGER' },
+          { columnName: 'birth_month', dataType: 'INTEGER' },
+          { columnName: 'gender', dataType: 'VARCHAR' },
+          { columnName: 'address', dataType: 'VARCHAR' },
+          { columnName: 'latitude', dataType: 'DOUBLE' },
+          { columnName: 'longitude', dataType: 'DOUBLE' },
+          { columnName: 'per_capita_income', dataType: 'DOUBLE' },
+          { columnName: 'yearly_income', dataType: 'DOUBLE' },
+          { columnName: 'total_debt', dataType: 'DOUBLE' },
+          { columnName: 'credit_score', dataType: 'INTEGER' },
+          { columnName: 'num_credit_cards', dataType: 'INTEGER' },
+        ],
+      },
+      {
+        tableName: 'cards',
+        primaryKey: 'id',
+        filePath:
+          'https://assets.getwren.ai/sample_data/card_transaction/cards.parquet',
+        properties: {
+          displayName: 'cards',
+          description:
+            'Contains credit and debit card details including card brand, type, credit limit, and activation dates.',
+        },
+        columns: [
+          {
+            name: 'id',
+            properties: {
+              description: 'Unique identifier for the card.',
+              displayName: 'id',
+            },
+          },
+          {
+            name: 'client_id',
+            properties: {
+              description:
+                'Identifier of the customer who owns this card.',
+              displayName: 'client_id',
+            },
+          },
+          {
+            name: 'card_brand',
+            properties: {
+              description:
+                'Brand of the card (e.g., Visa, Mastercard, Amex).',
+              displayName: 'card_brand',
+            },
+          },
+          {
+            name: 'card_type',
+            properties: {
+              description:
+                'Type of the card (e.g., Debit, Credit, Prepaid).',
+              displayName: 'card_type',
+            },
+          },
+          {
+            name: 'card_number',
+            properties: {
+              description: 'Card number.',
+              displayName: 'card_number',
+            },
+          },
+          {
+            name: 'expires',
+            properties: {
+              description:
+                'Expiration date of the card (MM/YYYY).',
+              displayName: 'expires',
+            },
+          },
+          {
+            name: 'cvv',
+            properties: {
+              description: 'Card verification value.',
+              displayName: 'cvv',
+            },
+          },
+          {
+            name: 'has_chip',
+            properties: {
+              description:
+                'Whether the card has chip technology (YES/NO).',
+              displayName: 'has_chip',
+            },
+          },
+          {
+            name: 'num_cards_issued',
+            properties: {
+              description:
+                'Number of cards issued for this account.',
+              displayName: 'num_cards_issued',
+            },
+          },
+          {
+            name: 'credit_limit',
+            properties: {
+              description: 'Credit limit on the card in USD.',
+              displayName: 'credit_limit',
+            },
+          },
+          {
+            name: 'acct_open_date',
+            properties: {
+              description:
+                'Date the account was opened (MM/YYYY).',
+              displayName: 'acct_open_date',
+            },
+          },
+          {
+            name: 'year_pin_last_changed',
+            properties: {
+              description:
+                'Year the card PIN was last changed.',
+              displayName: 'year_pin_last_changed',
+            },
+          },
+          {
+            name: 'card_on_dark_web',
+            properties: {
+              description:
+                'Whether the card details were found on the dark web (Yes/No).',
+              displayName: 'card_on_dark_web',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'id', dataType: 'INTEGER' },
+          { columnName: 'client_id', dataType: 'INTEGER' },
+          { columnName: 'card_brand', dataType: 'VARCHAR' },
+          { columnName: 'card_type', dataType: 'VARCHAR' },
+          { columnName: 'card_number', dataType: 'VARCHAR' },
+          { columnName: 'expires', dataType: 'VARCHAR' },
+          { columnName: 'cvv', dataType: 'VARCHAR' },
+          { columnName: 'has_chip', dataType: 'VARCHAR' },
+          { columnName: 'num_cards_issued', dataType: 'INTEGER' },
+          { columnName: 'credit_limit', dataType: 'DOUBLE' },
+          { columnName: 'acct_open_date', dataType: 'VARCHAR' },
+          { columnName: 'year_pin_last_changed', dataType: 'INTEGER' },
+          { columnName: 'card_on_dark_web', dataType: 'VARCHAR' },
+        ],
+      },
+      {
+        tableName: 'transactions',
+        primaryKey: 'id',
+        filePath:
+          'https://assets.getwren.ai/sample_data/card_transaction/transactions.parquet',
+        properties: {
+          displayName: 'transactions',
+          description:
+            'Contains detailed transaction records including amounts, timestamps, merchant details, and fraud labels.',
+        },
+        columns: [
+          {
+            name: 'id',
+            properties: {
+              description: 'Unique identifier for the transaction.',
+              displayName: 'id',
+            },
+          },
+          {
+            name: 'date',
+            properties: {
+              description:
+                'Date and time of the transaction.',
+              displayName: 'date',
+            },
+          },
+          {
+            name: 'client_id',
+            properties: {
+              description:
+                'Identifier of the customer who made the transaction.',
+              displayName: 'client_id',
+            },
+          },
+          {
+            name: 'card_id',
+            properties: {
+              description:
+                'Identifier of the card used for the transaction.',
+              displayName: 'card_id',
+            },
+          },
+          {
+            name: 'amount',
+            properties: {
+              description:
+                'Transaction amount in USD (negative values indicate refunds).',
+              displayName: 'amount',
+            },
+          },
+          {
+            name: 'use_chip',
+            properties: {
+              description:
+                'Method of transaction (e.g., Swipe Transaction, Chip Transaction, Online Transaction).',
+              displayName: 'use_chip',
+            },
+          },
+          {
+            name: 'merchant_id',
+            properties: {
+              description:
+                'Unique identifier of the merchant.',
+              displayName: 'merchant_id',
+            },
+          },
+          {
+            name: 'merchant_city',
+            properties: {
+              description:
+                'City where the merchant is located.',
+              displayName: 'merchant_city',
+            },
+          },
+          {
+            name: 'merchant_state',
+            properties: {
+              description:
+                'State where the merchant is located.',
+              displayName: 'merchant_state',
+            },
+          },
+          {
+            name: 'zip',
+            properties: {
+              description: 'ZIP code of the merchant location.',
+              displayName: 'zip',
+            },
+          },
+          {
+            name: 'mcc',
+            properties: {
+              description:
+                'Merchant Category Code classifying the type of business.',
+              displayName: 'mcc',
+            },
+          },
+          {
+            name: 'errors',
+            properties: {
+              description:
+                'Transaction error codes, if any.',
+              displayName: 'errors',
+            },
+          },
+          {
+            name: 'is_fraud',
+            properties: {
+              description:
+                'Whether the transaction was flagged as fraudulent (Yes/No).',
+              displayName: 'is_fraud',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'id', dataType: 'INTEGER' },
+          { columnName: 'date', dataType: 'TIMESTAMP' },
+          { columnName: 'client_id', dataType: 'INTEGER' },
+          { columnName: 'card_id', dataType: 'INTEGER' },
+          { columnName: 'amount', dataType: 'DOUBLE' },
+          { columnName: 'use_chip', dataType: 'VARCHAR' },
+          { columnName: 'merchant_id', dataType: 'INTEGER' },
+          { columnName: 'merchant_city', dataType: 'VARCHAR' },
+          { columnName: 'merchant_state', dataType: 'VARCHAR' },
+          { columnName: 'zip', dataType: 'VARCHAR' },
+          { columnName: 'mcc', dataType: 'INTEGER' },
+          { columnName: 'errors', dataType: 'VARCHAR' },
+          { columnName: 'is_fraud', dataType: 'VARCHAR' },
+        ],
+      },
+      {
+        tableName: 'mcc_codes',
+        primaryKey: 'mcc_code',
+        filePath:
+          'https://assets.getwren.ai/sample_data/card_transaction/mcc_codes.parquet',
+        properties: {
+          displayName: 'mcc_codes',
+          description:
+            'Standard Merchant Category Codes (MCC) that classify business types for transaction categorization.',
+        },
+        columns: [
+          {
+            name: 'mcc_code',
+            properties: {
+              description: 'The Merchant Category Code.',
+              displayName: 'mcc_code',
+            },
+          },
+          {
+            name: 'description',
+            properties: {
+              description:
+                'Description of the merchant category.',
+              displayName: 'description',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'mcc_code', dataType: 'INTEGER' },
+          { columnName: 'description', dataType: 'VARCHAR' },
+        ],
+      },
+    ],
+    questions: [
+      {
+        question:
+          'What is the total transaction amount by card brand?',
+        label: 'Spending Analysis',
+      },
+      {
+        question:
+          'Which merchant categories have the highest number of fraudulent transactions?',
+        label: 'Fraud Detection',
+      },
+      {
+        question:
+          'What is the average credit score of customers grouped by gender?',
+        label: 'Customer Analytics',
+      },
+    ],
+    relations: [
+      // users -> cards (one user has many cards)
+      {
+        fromModelName: 'users',
+        fromColumnName: 'id',
+        toModelName: 'cards',
+        toColumnName: 'client_id',
+        type: RelationType.ONE_TO_MANY,
+      },
+      // users -> transactions (one user has many transactions)
+      {
+        fromModelName: 'users',
+        fromColumnName: 'id',
+        toModelName: 'transactions',
+        toColumnName: 'client_id',
+        type: RelationType.ONE_TO_MANY,
+      },
+      // cards -> transactions (one card has many transactions)
+      {
+        fromModelName: 'cards',
+        fromColumnName: 'id',
+        toModelName: 'transactions',
+        toColumnName: 'card_id',
+        type: RelationType.ONE_TO_MANY,
+      },
+      // mcc_codes -> transactions (one mcc code has many transactions)
+      {
+        fromModelName: 'mcc_codes',
+        fromColumnName: 'mcc_code',
+        toModelName: 'transactions',
+        toColumnName: 'mcc',
+        type: RelationType.ONE_TO_MANY,
+      },
+    ],
+  },
 };
 
 export const buildInitSql = (datasetName: SampleDatasetName) => {

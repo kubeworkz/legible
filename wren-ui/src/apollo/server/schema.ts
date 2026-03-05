@@ -451,6 +451,7 @@ export const typeDefs = gql`
     ECOMMERCE
     NBA
     MUSIC
+    CARD_TRANSACTION
   }
 
   enum SyncStatus {
