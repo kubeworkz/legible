@@ -224,6 +224,16 @@ export default function SettingsDataConnection() {
   const settings = data?.settings;
   const dataSource = settings?.dataSource;
 
+  // When no data source is configured, show the full-page setup prompt
+  // matching the WrenAI cloud layout (no header, centered content).
+  if (!dataSource?.sampleDataset && !dataSource?.type) {
+    return (
+      <SettingsLayout>
+        <SetupPrompt />
+      </SettingsLayout>
+    );
+  }
+
   return (
     <SettingsLayout>
       <PageContainer>
@@ -236,14 +246,12 @@ export default function SettingsDataConnection() {
 
         {dataSource?.sampleDataset ? (
           <SampleDatasetPanel sampleDataset={dataSource.sampleDataset} />
-        ) : dataSource?.type ? (
+        ) : (
           <DataSourcePanel
             type={dataSource.type}
             properties={dataSource.properties}
             refetchSettings={() => refetch()}
           />
-        ) : (
-          <SetupPrompt />
         )}
       </PageContainer>
     </SettingsLayout>
