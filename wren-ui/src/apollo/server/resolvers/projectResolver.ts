@@ -359,6 +359,17 @@ export class ProjectResolver {
         sampleDataset: name,
       });
       await this.deploy(ctx);
+
+      // Seed sample content (dashboards, spreadsheets, threads) if defined
+      if (dataset.sampleContent) {
+        try {
+          await this.seedSampleContent(dataset.sampleContent, newProjectId, ctx);
+        } catch (seedErr: any) {
+          // Log but don't fail the overall setup if seeding fails
+          console.warn('Failed to seed sample content:', seedErr.message);
+        }
+      }
+
       // telemetry
       ctx.telemetry.sendEvent(eventName, eventProperties);
       return { name, projectId: newProjectId };
@@ -370,6 +381,56 @@ export class ProjectResolver {
         false,
       );
       throw err;
+    }
+  }
+
+  private async seedSampleContent(
+    content: import('@server/data/sample').SampleContent,
+    projectId: number,
+    ctx: IContext,
+  ) {
+    // Resolve or create the public folder for this project
+    let folderId: number | undefined;
+    try {
+      const userId = ctx.currentUser?.id;
+      if (userId) {
+        const systemFolders = await ctx.folderService.ensureSystemFolders(projectId, userId);
+        folderId = systemFolders.public.id;
+      }
+    } catch {
+      // If folder creation fails, items will have no folder
+    }
+
+    // Create sample dashboards
+    if (content.dashboards) {
+      for (const dash of content.dashboards) {
+        await ctx.dashboardService.createDashboard(projectId, {
+          name: dash.name,
+          folderId,
+        });
+      }
+    }
+
+    // Create sample spreadsheets
+    if (content.spreadsheets) {
+      for (const sheet of content.spreadsheets) {
+        await ctx.spreadsheetService.createSpreadsheet(projectId, {
+          name: sheet.name,
+          folderId,
+          sourceSql: sheet.sql,
+        });
+      }
+    }
+
+    // Create sample threads (with pre-written SQL, no AI task needed)
+    if (content.threads) {
+      for (const thread of content.threads) {
+        await ctx.askingService.createThread(
+          { question: thread.question, sql: thread.sql },
+          projectId,
+          folderId,
+        );
+      }
     }
   }
 

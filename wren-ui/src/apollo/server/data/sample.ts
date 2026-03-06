@@ -33,11 +33,32 @@ export interface SuggestedQuestion {
   label: string;
 }
 
+export interface SampleContentThread {
+  question: string;
+  sql: string;
+}
+
+export interface SampleContentSpreadsheet {
+  name: string;
+  sql: string;
+}
+
+export interface SampleContentDashboard {
+  name: string;
+}
+
+export interface SampleContent {
+  dashboards?: SampleContentDashboard[];
+  spreadsheets?: SampleContentSpreadsheet[];
+  threads?: SampleContentThread[];
+}
+
 export interface SampleDataset {
   name: string; // SampleDatasetName
   tables: SampleDatasetTable[];
   questions?: SuggestedQuestion[];
   relations?: SampleDatasetRelationship[];
+  sampleContent?: SampleContent;
 }
 
 export const sampleDatasets: Record<string, SampleDataset> = {
@@ -395,6 +416,77 @@ export const sampleDatasets: Record<string, SampleDataset> = {
         label: 'Associating',
       },
     ],
+    sampleContent: {
+      dashboards: [
+        { name: 'HR Report (2000/12/30)' },
+        { name: 'Financial Report (2000/12/30)' },
+      ],
+      spreadsheets: [
+        {
+          name: "What are the employees' information in the Marketing and Sales departments as of December 30, 2000, ordered by average salary in descending order?",
+          sql: `SELECT
+  e.emp_no,
+  e.first_name,
+  e.last_name,
+  e.gender,
+  e.hire_date,
+  d.dept_name,
+  AVG(s.salary) AS avg_salary
+FROM employees e
+JOIN dept_emp de ON e.emp_no = de.emp_no
+JOIN departments d ON de.dept_no = d.dept_no
+JOIN salaries s ON e.emp_no = s.emp_no
+WHERE d.dept_name IN ('Marketing', 'Sales')
+  AND de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'
+  AND s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'
+GROUP BY e.emp_no, e.first_name, e.last_name, e.gender, e.hire_date, d.dept_name
+ORDER BY avg_salary DESC`,
+        },
+        {
+          name: 'Who are the top 10 non-manager employees ranked by their average salary up to December 30, 2000?',
+          sql: `SELECT
+  e.emp_no,
+  e.first_name,
+  e.last_name,
+  AVG(s.salary) AS avg_salary
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+WHERE s.from_date <= DATE '2000-12-30'
+  AND e.emp_no NOT IN (
+    SELECT dm.emp_no FROM dept_manager dm
+    WHERE dm.from_date <= DATE '2000-12-30'
+      AND dm.to_date >= DATE '2000-12-30'
+  )
+GROUP BY e.emp_no, e.first_name, e.last_name
+ORDER BY avg_salary DESC
+LIMIT 10`,
+        },
+      ],
+      threads: [
+        {
+          question: 'How many employees have worked in more than one department during their career here?',
+          sql: `SELECT COUNT(*) AS multi_dept_employees
+FROM (
+  SELECT emp_no
+  FROM dept_emp
+  GROUP BY emp_no
+  HAVING COUNT(DISTINCT dept_no) > 1
+) sub`,
+        },
+        {
+          question: 'Can you give me the average salary and median salary for men and women?',
+          sql: `SELECT
+  e.gender,
+  AVG(s.salary) AS avg_salary,
+  MEDIAN(s.salary) AS median_salary
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+GROUP BY e.gender`,
+        },
+      ],
+    },
   },
   music: {
     name: SampleDatasetName.MUSIC,
