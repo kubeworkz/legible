@@ -4,6 +4,7 @@ import ShoppingCartOutlined from '@ant-design/icons/ShoppingCartOutlined';
 import IdCardOutlined from '@ant-design/icons/IdcardOutlined';
 import CreditCardOutlined from '@ant-design/icons/CreditCardOutlined';
 import StarOutlined from '@ant-design/icons/StarOutlined';
+import NodeIndexOutlined from '@ant-design/icons/NodeIndexOutlined';
 import { SETUP, DATA_SOURCES } from '@/utils/enum';
 import Starter from './Starter';
 import ConnectDataSource from './ConnectDataSource';
@@ -141,6 +142,11 @@ export const TEMPLATE_OPTIONS = {
     label: 'Hotel Rating',
     IconComponent: StarOutlined,
     guide: 'https://www.kaggle.com/datasets/alperenmyung/international-hotel-booking-analytics',
+  },
+  [SampleDatasetName.SUPPLY_CHAIN]: {
+    label: 'Supply Chain',
+    IconComponent: NodeIndexOutlined,
+    guide: 'https://www.kaggle.com/datasets/harshsingh2209/supply-chain-analysis',
   },
 };
 

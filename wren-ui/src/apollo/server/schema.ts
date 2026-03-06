@@ -456,6 +456,7 @@ export const typeDefs = gql`
     MUSIC
     CARD_TRANSACTION
     HOTEL_RATING
+    SUPPLY_CHAIN
   }
 
   enum SyncStatus {

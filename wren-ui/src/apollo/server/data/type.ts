@@ -5,4 +5,5 @@ export enum SampleDatasetName {
   HR = 'HR',
   CARD_TRANSACTION = 'CARD_TRANSACTION',
   HOTEL_RATING = 'HOTEL_RATING',
+  SUPPLY_CHAIN = 'SUPPLY_CHAIN',
 }

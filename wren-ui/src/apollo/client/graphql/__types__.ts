@@ -1626,7 +1626,8 @@ export enum SampleDatasetName {
   HOTEL_RATING = 'HOTEL_RATING',
   HR = 'HR',
   MUSIC = 'MUSIC',
-  NBA = 'NBA'
+  NBA = 'NBA',
+  SUPPLY_CHAIN = 'SUPPLY_CHAIN'
 }
 
 export type SaveLearningRecordInput = {

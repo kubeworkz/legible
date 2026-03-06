@@ -2590,6 +2590,337 @@ export const sampleDatasets: Record<string, SampleDataset> = {
       },
     ],
   },
+  supply_chain: {
+    name: SampleDatasetName.SUPPLY_CHAIN,
+    tables: [
+      {
+        tableName: 'suppliers',
+        primaryKey: 'supplier_id',
+        filePath:
+          'http://wren-ui:3000/sample_data/supply_chain/suppliers.parquet',
+        properties: {
+          displayName: 'suppliers',
+          description:
+            'Contains the supplier catalog with unique suppliers and their key attributes including location, lead times, production volumes, and manufacturing costs.',
+        },
+        columns: [
+          {
+            name: 'supplier_id',
+            properties: {
+              description: 'Unique identifier for the supplier.',
+              displayName: 'supplier_id',
+            },
+          },
+          {
+            name: 'supplier_name',
+            properties: {
+              description: 'Name of the supplier.',
+              displayName: 'supplier_name',
+            },
+          },
+          {
+            name: 'location',
+            properties: {
+              description: 'City and country where the supplier is located.',
+              displayName: 'location',
+            },
+          },
+          {
+            name: 'lead_time_days',
+            properties: {
+              description: 'Lead time in days for the supplier to deliver materials.',
+              displayName: 'lead_time_days',
+            },
+          },
+          {
+            name: 'production_volume',
+            properties: {
+              description: 'Number of units the supplier can produce.',
+              displayName: 'production_volume',
+            },
+          },
+          {
+            name: 'manufacturing_lead_time_days',
+            properties: {
+              description: 'Manufacturing lead time in days.',
+              displayName: 'manufacturing_lead_time_days',
+            },
+          },
+          {
+            name: 'manufacturing_cost',
+            properties: {
+              description: 'Manufacturing cost per unit in USD.',
+              displayName: 'manufacturing_cost',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'supplier_id', dataType: 'INTEGER' },
+          { columnName: 'supplier_name', dataType: 'VARCHAR' },
+          { columnName: 'location', dataType: 'VARCHAR' },
+          { columnName: 'lead_time_days', dataType: 'INTEGER' },
+          { columnName: 'production_volume', dataType: 'INTEGER' },
+          { columnName: 'manufacturing_lead_time_days', dataType: 'INTEGER' },
+          { columnName: 'manufacturing_cost', dataType: 'DOUBLE' },
+        ],
+      },
+      {
+        tableName: 'products',
+        primaryKey: 'product_id',
+        filePath:
+          'http://wren-ui:3000/sample_data/supply_chain/products.parquet',
+        properties: {
+          displayName: 'products',
+          description:
+            'Contains the product catalog with SKU, product type, pricing, availability, stock levels, and the supplier that manufactures each product.',
+        },
+        columns: [
+          {
+            name: 'product_id',
+            properties: {
+              description: 'Unique identifier for the product.',
+              displayName: 'product_id',
+            },
+          },
+          {
+            name: 'sku',
+            properties: {
+              description: 'Stock Keeping Unit code for the product.',
+              displayName: 'sku',
+            },
+          },
+          {
+            name: 'product_type',
+            properties: {
+              description: 'Type of the product (skincare, haircare, cosmetics).',
+              displayName: 'product_type',
+            },
+          },
+          {
+            name: 'price',
+            properties: {
+              description: 'Unit price of the product in USD.',
+              displayName: 'price',
+            },
+          },
+          {
+            name: 'availability',
+            properties: {
+              description: 'Number of units currently available for sale.',
+              displayName: 'availability',
+            },
+          },
+          {
+            name: 'stock_level',
+            properties: {
+              description: 'Current stock level in the warehouse.',
+              displayName: 'stock_level',
+            },
+          },
+          {
+            name: 'supplier_id',
+            properties: {
+              description: 'Foreign key referencing the supplier who manufactures this product.',
+              displayName: 'supplier_id',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'product_id', dataType: 'INTEGER' },
+          { columnName: 'sku', dataType: 'VARCHAR' },
+          { columnName: 'product_type', dataType: 'VARCHAR' },
+          { columnName: 'price', dataType: 'DOUBLE' },
+          { columnName: 'availability', dataType: 'INTEGER' },
+          { columnName: 'stock_level', dataType: 'INTEGER' },
+          { columnName: 'supplier_id', dataType: 'INTEGER' },
+        ],
+      },
+      {
+        tableName: 'orders',
+        primaryKey: 'order_id',
+        filePath:
+          'http://wren-ui:3000/sample_data/supply_chain/orders.parquet',
+        properties: {
+          displayName: 'orders',
+          description:
+            'Central transactional table linking products to customer orders, capturing order quantities, units sold, revenue, customer demographics, quality inspection results, and defect rates.',
+        },
+        columns: [
+          {
+            name: 'order_id',
+            properties: {
+              description: 'Unique identifier for the order.',
+              displayName: 'order_id',
+            },
+          },
+          {
+            name: 'product_id',
+            properties: {
+              description: 'Foreign key referencing the product ordered.',
+              displayName: 'product_id',
+            },
+          },
+          {
+            name: 'order_quantity',
+            properties: {
+              description: 'Number of units ordered.',
+              displayName: 'order_quantity',
+            },
+          },
+          {
+            name: 'number_sold',
+            properties: {
+              description: 'Number of units actually sold from this order.',
+              displayName: 'number_sold',
+            },
+          },
+          {
+            name: 'revenue_generated',
+            properties: {
+              description: 'Total revenue generated from this order in USD.',
+              displayName: 'revenue_generated',
+            },
+          },
+          {
+            name: 'customer_demographics',
+            properties: {
+              description: 'Gender/demographic category of the customer (Female, Male, Non-binary, Unknown).',
+              displayName: 'customer_demographics',
+            },
+          },
+          {
+            name: 'inspection_result',
+            properties: {
+              description: 'Quality inspection result for the order (Pass, Fail, Pending).',
+              displayName: 'inspection_result',
+            },
+          },
+          {
+            name: 'defect_rate',
+            properties: {
+              description: 'Percentage defect rate for the products in this order.',
+              displayName: 'defect_rate',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'order_id', dataType: 'INTEGER' },
+          { columnName: 'product_id', dataType: 'INTEGER' },
+          { columnName: 'order_quantity', dataType: 'INTEGER' },
+          { columnName: 'number_sold', dataType: 'INTEGER' },
+          { columnName: 'revenue_generated', dataType: 'DOUBLE' },
+          { columnName: 'customer_demographics', dataType: 'VARCHAR' },
+          { columnName: 'inspection_result', dataType: 'VARCHAR' },
+          { columnName: 'defect_rate', dataType: 'DOUBLE' },
+        ],
+      },
+      {
+        tableName: 'shipments',
+        primaryKey: 'shipment_id',
+        filePath:
+          'http://wren-ui:3000/sample_data/supply_chain/shipments.parquet',
+        properties: {
+          displayName: 'shipments',
+          description:
+            'Contains shipping details for each order, including carrier, transportation mode, route, shipping time, shipping cost, and total logistics cost.',
+        },
+        columns: [
+          {
+            name: 'shipment_id',
+            properties: {
+              description: 'Unique identifier for the shipment.',
+              displayName: 'shipment_id',
+            },
+          },
+          {
+            name: 'order_id',
+            properties: {
+              description: 'Foreign key referencing the order being shipped.',
+              displayName: 'order_id',
+            },
+          },
+          {
+            name: 'shipping_time_days',
+            properties: {
+              description: 'Number of days to ship the order.',
+              displayName: 'shipping_time_days',
+            },
+          },
+          {
+            name: 'shipping_carrier',
+            properties: {
+              description: 'Name of the shipping carrier.',
+              displayName: 'shipping_carrier',
+            },
+          },
+          {
+            name: 'shipping_cost',
+            properties: {
+              description: 'Cost of shipping in USD.',
+              displayName: 'shipping_cost',
+            },
+          },
+          {
+            name: 'transportation_mode',
+            properties: {
+              description: 'Mode of transportation (Road, Rail, Air, Sea).',
+              displayName: 'transportation_mode',
+            },
+          },
+          {
+            name: 'route',
+            properties: {
+              description: 'Shipping route used for delivery.',
+              displayName: 'route',
+            },
+          },
+          {
+            name: 'total_cost',
+            properties: {
+              description: 'Total logistics cost including shipping and handling in USD.',
+              displayName: 'total_cost',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'shipment_id', dataType: 'INTEGER' },
+          { columnName: 'order_id', dataType: 'INTEGER' },
+          { columnName: 'shipping_time_days', dataType: 'INTEGER' },
+          { columnName: 'shipping_carrier', dataType: 'VARCHAR' },
+          { columnName: 'shipping_cost', dataType: 'DOUBLE' },
+          { columnName: 'transportation_mode', dataType: 'VARCHAR' },
+          { columnName: 'route', dataType: 'VARCHAR' },
+          { columnName: 'total_cost', dataType: 'DOUBLE' },
+        ],
+      },
+    ],
+    relations: [
+      // suppliers -> products (one supplier has many products)
+      {
+        fromModelName: 'suppliers',
+        fromColumnName: 'supplier_id',
+        toModelName: 'products',
+        toColumnName: 'supplier_id',
+        type: RelationType.ONE_TO_MANY,
+      },
+      // products -> orders (one product has many orders)
+      {
+        fromModelName: 'products',
+        fromColumnName: 'product_id',
+        toModelName: 'orders',
+        toColumnName: 'product_id',
+        type: RelationType.ONE_TO_MANY,
+      },
+      // orders -> shipments (one order has one shipment)
+      {
+        fromModelName: 'orders',
+        fromColumnName: 'order_id',
+        toModelName: 'shipments',
+        toColumnName: 'order_id',
+        type: RelationType.ONE_TO_MANY,
+      },
+    ],
+  },
 };
 
 export const buildInitSql = (datasetName: SampleDatasetName) => {
