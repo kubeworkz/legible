@@ -301,28 +301,78 @@ export class ProjectResolver {
       datasetName: name,
     };
     try {
-      // create duckdb datasource
       const initSql = buildInitSql(name as SampleDatasetName);
       const duckdbDatasourceProperties = {
         initSql,
         extensions: [],
         configurations: {},
       };
-      const dsResult = await this.saveDataSource(
-        _root,
-        {
-          data: {
-            type: DataSourceName.DUCKDB,
-            properties: duckdbDatasourceProperties,
-          } as DataSource,
-        },
-        ctx,
-      );
-      // Use the newly created project (saveDataSource returns projectId)
-      const newProjectId = dsResult.projectId;
-      const project = await ctx.projectService.getProjectById(newProjectId);
-      // Update ctx.projectId so subsequent calls use the new project
-      ctx.projectId = newProjectId;
+
+      let projectId!: number;
+      let project!: Project;
+
+      // Check if the current project is already configured (switching datasets).
+      // If so, reset its data in-place instead of creating a new project.
+      let existingProject: Project | null = null;
+      if (ctx.projectId) {
+        try {
+          existingProject = await ctx.projectService.getCurrentProject(ctx.projectId);
+          if (existingProject && existingProject.type) {
+            // Project already has a data source — reset it in-place
+            const pid = existingProject.id;
+            await ctx.schemaChangeRepository.deleteAllBy({ projectId: pid });
+            await ctx.deployService.deleteAllByProjectId(pid);
+            await ctx.askingService.deleteAllByProjectId(pid);
+            await ctx.modelService.deleteAllViewsByProjectId(pid);
+            await ctx.modelService.deleteAllModelsByProjectId(pid);
+            await ctx.dashboardRepository.deleteAllBy({ projectId: pid });
+            await ctx.spreadsheetRepository.deleteAllBy({ projectId: pid });
+            try { await ctx.wrenAIAdaptor.delete(pid); } catch { /* ignore */ }
+
+            // Reconfigure the project as DuckDB
+            const connectionInfo = {
+              initSql: duckdbDatasourceProperties.initSql,
+              extensions: duckdbDatasourceProperties.extensions,
+              configurations: duckdbDatasourceProperties.configurations,
+            };
+            const encrypted = encryptConnectionInfo(DataSourceName.DUCKDB, connectionInfo as any);
+            project = await ctx.projectService.updateProject(pid, {
+              type: DataSourceName.DUCKDB,
+              connectionInfo: encrypted,
+            } as Partial<Project>);
+            projectId = pid;
+          }
+        } catch {
+          // No project found for ctx.projectId — fall through to create new
+        }
+      }
+
+      // If we didn't reuse an existing project, create via saveDataSource
+      if (!existingProject || !existingProject.type) {
+        const dsResult = await this.saveDataSource(
+          _root,
+          {
+            data: {
+              type: DataSourceName.DUCKDB,
+              properties: duckdbDatasourceProperties,
+            } as DataSource,
+          },
+          ctx,
+        );
+        projectId = dsResult.projectId;
+        project = await ctx.projectService.getProjectById(projectId);
+      } else {
+        // Reused existing project — set up DuckDB environment manually
+        // (saveDataSource does this internally for the new-project path)
+        await this.buildDuckDbEnvironment(ctx, {
+          initSql: duckdbDatasourceProperties.initSql,
+          extensions: duckdbDatasourceProperties.extensions,
+          configurations: duckdbDatasourceProperties.configurations,
+        });
+      }
+
+      // Update ctx.projectId so subsequent calls use the correct project
+      ctx.projectId = projectId;
 
       // list all the tables in the data source
       const tables = await this.listDataSourceTables(_root, _arg, ctx);
@@ -331,20 +381,20 @@ export class ProjectResolver {
       // save tables as model and modelColumns
       await this.overwriteModelsAndColumns(tableNames, ctx, project);
 
-      await ctx.modelService.updatePrimaryKeys(dataset.tables, newProjectId);
+      await ctx.modelService.updatePrimaryKeys(dataset.tables, projectId);
       await ctx.modelService.batchUpdateModelProperties(
         dataset.tables,
-        newProjectId,
+        projectId,
       );
       await ctx.modelService.batchUpdateColumnProperties(
         dataset.tables,
-        newProjectId,
+        projectId,
       );
 
       // save relations
       const relations = getRelations(name as SampleDatasetName);
       const models = await ctx.modelRepository.findAllBy({
-        projectId: newProjectId,
+        projectId,
       });
       const columns = await ctx.modelColumnRepository.findAll();
       const mappedRelations = this.buildRelationInput(
@@ -352,7 +402,7 @@ export class ProjectResolver {
         models,
         columns,
       );
-      await ctx.modelService.saveRelations(mappedRelations, newProjectId);
+      await ctx.modelService.saveRelations(mappedRelations, projectId);
 
       // mark current project as using sample dataset
       await ctx.projectRepository.updateOne(project.id, {
@@ -363,7 +413,7 @@ export class ProjectResolver {
       // Seed sample content (dashboards, spreadsheets, threads) if defined
       if (dataset.sampleContent) {
         try {
-          await this.seedSampleContent(dataset.sampleContent, newProjectId, ctx);
+          await this.seedSampleContent(dataset.sampleContent, projectId, ctx);
         } catch (seedErr: any) {
           // Log but don't fail the overall setup if seeding fails
           console.warn('Failed to seed sample content:', seedErr.message);
@@ -372,7 +422,7 @@ export class ProjectResolver {
 
       // telemetry
       ctx.telemetry.sendEvent(eventName, eventProperties);
-      return { name, projectId: newProjectId };
+      return { name, projectId };
     } catch (err: any) {
       ctx.telemetry.sendEvent(
         eventName,
