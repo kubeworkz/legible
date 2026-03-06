@@ -202,7 +202,11 @@ export class ProjectRepository
 
   public async getCurrentProject(projectId?: number) {
     if (projectId) {
-      return this.getProjectById(projectId);
+      // Try to find the requested project; if it doesn't exist (e.g. stale
+      // client header referencing a deleted project), fall back to the first
+      // available project instead of throwing.
+      const project = await this.findOneBy({ id: projectId });
+      if (project) return project;
     }
     const projects = await this.findAll({
       order: 'id',

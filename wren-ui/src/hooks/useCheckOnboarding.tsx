@@ -28,8 +28,10 @@ export const useWithOnboarding = () => {
 
   // Wait for projects to load and validate the currentProjectId before
   // querying onboarding status. This prevents stale project IDs (e.g. from
-  // localStorage of a different user) from being used in the X-Project-Id header.
-  const projectsReady = !projectsLoading && projects.length > 0 && !!currentProjectId;
+  // localStorage of a deleted project) from being used in the X-Project-Id header.
+  // We also verify the ID exists in the loaded projects list so the query stays
+  // skipped until the useProject hook has corrected a stale ID.
+  const projectsReady = !projectsLoading && projects.length > 0 && !!currentProjectId && projects.some((p) => p.id === currentProjectId);
 
   const { data, loading } = useOnboardingStatusQuery({
     skip: !projectsReady,
