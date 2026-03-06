@@ -17,6 +17,7 @@ import {
   IThreadResponseRepository,
   ThreadResponse,
   ThreadResponseAdjustmentType,
+  ThreadResponseBreakdownDetail,
 } from '../repositories/threadResponseRepository';
 import { getLogger } from '@server/utils';
 import { isEmpty, isNil } from 'lodash';
@@ -69,6 +70,7 @@ export interface AskingDetailTaskInput {
   question?: string;
   sql?: string;
   trackedAskingResult?: TrackedAskingResult;
+  breakdownDetail?: ThreadResponseBreakdownDetail;
 }
 
 export interface AskingDetailTaskUpdateInput {
@@ -715,6 +717,14 @@ export class AskingService implements IAskingService {
       sql: input.sql,
       askingTaskId: input.trackedAskingResult?.taskId,
     });
+
+    // if breakdownDetail is provided (e.g. for seeded sample content), update the response
+    // using updateOne which properly handles JSON serialization for JSONB columns
+    if (input.breakdownDetail) {
+      await this.threadResponseRepository.updateOne(threadResponse.id, {
+        breakdownDetail: input.breakdownDetail,
+      });
+    }
 
     // if queryId is provided, update asking task
     if (input.trackedAskingResult?.taskId) {

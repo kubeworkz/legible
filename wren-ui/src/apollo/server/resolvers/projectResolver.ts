@@ -476,7 +476,16 @@ export class ProjectResolver {
     if (content.threads) {
       for (const thread of content.threads) {
         await ctx.askingService.createThread(
-          { question: thread.question, sql: thread.sql },
+          {
+            question: thread.question,
+            sql: thread.sql,
+            breakdownDetail: {
+              queryId: '',
+              status: 'FINISHED',
+              description: '',
+              steps: [],
+            },
+          },
           projectId,
           folderId,
         );
