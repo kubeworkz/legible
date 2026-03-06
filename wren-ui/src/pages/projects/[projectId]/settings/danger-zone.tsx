@@ -56,8 +56,10 @@ export default function SettingsDangerZone() {
     });
   };
 
+  const isLastProject = projects.length <= 1;
+
   const onDelete = () => {
-    if (!currentProject) return;
+    if (!currentProject || isLastProject) return;
 
     Modal.confirm({
       title: `Are you sure you want to delete "${currentProject.displayName}"?`,
@@ -67,9 +69,6 @@ export default function SettingsDangerZone() {
       okText: 'Delete',
       onOk: async () => {
         await deleteProject(currentProject.id);
-        // Server auto-creates a new Default Project if we deleted the last one.
-        // Clear stale project state and navigate to index so the new project
-        // is auto-selected and onboarding kicks in.
         clearCurrentProjectId();
         await client.clearStore();
         router.push('/');
@@ -105,9 +104,14 @@ export default function SettingsDangerZone() {
             Permanently delete this project and all of its data. This action
             cannot be undone.
           </SectionDescription>
-          <Button danger type="primary" onClick={onDelete}>
+          <Button danger type="primary" onClick={onDelete} disabled={isLastProject}>
             Delete project
           </Button>
+          {isLastProject && (
+            <div className="gray-6 mt-2" style={{ fontSize: 13 }}>
+              You cannot delete the last project in your organization.
+            </div>
+          )}
         </DangerSection>
       </PageContainer>
     </SettingsLayout>

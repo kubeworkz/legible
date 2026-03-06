@@ -126,11 +126,11 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
   // Once projects load, ensure we have a valid currentProjectId.
   // If the URL points to a project the user doesn't have access to,
-  // redirect to their actual project.
+  // or if no project is selected at all, default to the first project.
   useEffect(() => {
     if (loading || projects.length === 0) return;
     const stored = currentProjectId;
-    const valid = projects.some((p) => p.id === stored);
+    const valid = stored && projects.some((p) => p.id === stored);
     if (!valid) {
       // Default to the first project
       const firstId = projects[0].id;
@@ -146,6 +146,10 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
           `/projects/${firstId}`,
         );
         router.replace(correctedPath);
+      } else {
+        // No project in URL (e.g. at root /) — redirect to the first project
+        // so onboarding can kick in.
+        router.replace(`/projects/${firstId}`);
       }
     }
   }, [projects, loading, currentProjectId]);
