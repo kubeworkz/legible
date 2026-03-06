@@ -479,14 +479,18 @@ export class ProjectResolver {
           {
             question: thread.question,
             sql: thread.sql,
-            // breakdownDetail with FINISHED status and no steps triggers
-            // "breakdownOnly" mode in the UI, showing the View SQL tab with
-            // parent.sql. Omitting steps avoids constructCteSql([]) which
-            // would produce invalid SQL ("WITH ").
+            // breakdownDetail with FINISHED status (no steps) lets the
+            // View SQL tab show the pre-written parent.sql.
             breakdownDetail: {
               queryId: '',
               status: 'FINISHED',
               description: '',
+            },
+            // answerDetail with FINISHED status prevents the UI from
+            // auto-triggering text answer generation via the AI service.
+            // The Answer tab shows "Click View SQL" instead of a skeleton.
+            answerDetail: {
+              status: 'FINISHED',
             },
           },
           projectId,
