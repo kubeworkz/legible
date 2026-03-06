@@ -1623,6 +1623,7 @@ export type SampleDatasetInput = {
 export enum SampleDatasetName {
   CARD_TRANSACTION = 'CARD_TRANSACTION',
   ECOMMERCE = 'ECOMMERCE',
+  HOTEL_RATING = 'HOTEL_RATING',
   HR = 'HR',
   MUSIC = 'MUSIC',
   NBA = 'NBA'

@@ -3,6 +3,7 @@ import { IconComponentProps } from '@/import/icon';
 import ShoppingCartOutlined from '@ant-design/icons/ShoppingCartOutlined';
 import IdCardOutlined from '@ant-design/icons/IdcardOutlined';
 import CreditCardOutlined from '@ant-design/icons/CreditCardOutlined';
+import StarOutlined from '@ant-design/icons/StarOutlined';
 import { SETUP, DATA_SOURCES } from '@/utils/enum';
 import Starter from './Starter';
 import ConnectDataSource from './ConnectDataSource';
@@ -135,6 +136,11 @@ export const TEMPLATE_OPTIONS = {
     label: 'Card Transaction',
     IconComponent: CreditCardOutlined,
     guide: 'https://docs.getwren.ai/oss/getting_started/sample_data/card_transaction',
+  },
+  [SampleDatasetName.HOTEL_RATING]: {
+    label: 'Hotel Rating',
+    IconComponent: StarOutlined,
+    guide: 'https://www.kaggle.com/datasets/alperenmyung/international-hotel-booking-analytics',
   },
 };
 

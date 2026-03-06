@@ -455,6 +455,7 @@ export const typeDefs = gql`
     NBA
     MUSIC
     CARD_TRANSACTION
+    HOTEL_RATING
   }
 
   enum SyncStatus {

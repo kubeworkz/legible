@@ -2380,6 +2380,216 @@ export const sampleDatasets: Record<string, SampleDataset> = {
       },
     ],
   },
+  hotel_rating: {
+    name: SampleDatasetName.HOTEL_RATING,
+    tables: [
+      {
+        tableName: 'hotels',
+        primaryKey: 'hotel_id',
+        filePath:
+          'http://wren-ui:3000/sample_data/hotel_rating/hotels.parquet',
+        properties: {
+          displayName: 'hotels',
+          description:
+            'Contains the hotel catalog with unique hotels and their key attributes including location, star rating, and base quality scores for cleanliness, comfort, and facilities.',
+        },
+        columns: [
+          {
+            name: 'hotel_id',
+            properties: {
+              description: 'Unique identifier for the hotel.',
+              displayName: 'hotel_id',
+            },
+          },
+          {
+            name: 'hotel_name',
+            properties: {
+              description: 'Name of the hotel.',
+              displayName: 'hotel_name',
+            },
+          },
+          {
+            name: 'city',
+            properties: {
+              description: 'City where the hotel is located.',
+              displayName: 'city',
+            },
+          },
+          {
+            name: 'country',
+            properties: {
+              description: 'Country where the hotel is located.',
+              displayName: 'country',
+            },
+          },
+          {
+            name: 'lat',
+            properties: {
+              description: 'Latitude coordinate of the hotel.',
+              displayName: 'lat',
+            },
+          },
+          {
+            name: 'lon',
+            properties: {
+              description: 'Longitude coordinate of the hotel.',
+              displayName: 'lon',
+            },
+          },
+          {
+            name: 'star_rating',
+            properties: {
+              description: 'Star rating of the hotel (3, 4, or 5 stars).',
+              displayName: 'star_rating',
+            },
+          },
+          {
+            name: 'cleanliness_base',
+            properties: {
+              description:
+                "Hotel's base cleanliness quality score (5.0-10.0).",
+              displayName: 'cleanliness_base',
+            },
+          },
+          {
+            name: 'comfort_base',
+            properties: {
+              description:
+                "Hotel's base comfort quality score (5.0-10.0).",
+              displayName: 'comfort_base',
+            },
+          },
+          {
+            name: 'facilities_base',
+            properties: {
+              description:
+                "Hotel's base facilities quality score (4.0-9.5).",
+              displayName: 'facilities_base',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'hotel_id', dataType: 'INTEGER' },
+          { columnName: 'hotel_name', dataType: 'VARCHAR' },
+          { columnName: 'city', dataType: 'VARCHAR' },
+          { columnName: 'country', dataType: 'VARCHAR' },
+          { columnName: 'lat', dataType: 'DOUBLE' },
+          { columnName: 'lon', dataType: 'DOUBLE' },
+          { columnName: 'star_rating', dataType: 'INTEGER' },
+          { columnName: 'cleanliness_base', dataType: 'DOUBLE' },
+          { columnName: 'comfort_base', dataType: 'DOUBLE' },
+          { columnName: 'facilities_base', dataType: 'DOUBLE' },
+        ],
+      },
+      {
+        tableName: 'users',
+        primaryKey: 'user_id',
+        filePath:
+          'http://wren-ui:3000/sample_data/hotel_rating/users.parquet',
+        properties: {
+          displayName: 'users',
+          description:
+            'Contains unique customers with demographic information including their country and age, useful for segmenting customers and understanding review behavior.',
+        },
+        columns: [
+          {
+            name: 'user_id',
+            properties: {
+              description: 'Unique identifier for the user.',
+              displayName: 'user_id',
+            },
+          },
+          {
+            name: 'country',
+            properties: {
+              description: 'Country of origin of the user.',
+              displayName: 'country',
+            },
+          },
+          {
+            name: 'age',
+            properties: {
+              description: 'Age of the user.',
+              displayName: 'age',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'user_id', dataType: 'INTEGER' },
+          { columnName: 'country', dataType: 'VARCHAR' },
+          { columnName: 'age', dataType: 'INTEGER' },
+        ],
+      },
+      {
+        tableName: 'reviews',
+        primaryKey: 'review_id',
+        filePath:
+          'http://wren-ui:3000/sample_data/hotel_rating/reviews.parquet',
+        properties: {
+          displayName: 'reviews',
+          description:
+            'Central transactional table linking users to the hotels they reviewed, capturing the review_id, hotel_id, user_id, and a numerical review_score.',
+        },
+        columns: [
+          {
+            name: 'review_id',
+            properties: {
+              description: 'Unique identifier for the review.',
+              displayName: 'review_id',
+            },
+          },
+          {
+            name: 'hotel_id',
+            properties: {
+              description:
+                'Foreign key referencing the hotel being reviewed.',
+              displayName: 'hotel_id',
+            },
+          },
+          {
+            name: 'user_id',
+            properties: {
+              description:
+                'Foreign key referencing the user who wrote the review.',
+              displayName: 'user_id',
+            },
+          },
+          {
+            name: 'review_score',
+            properties: {
+              description:
+                'Numerical review score given by the user (1.0-10.0).',
+              displayName: 'review_score',
+            },
+          },
+        ],
+        schema: [
+          { columnName: 'review_id', dataType: 'INTEGER' },
+          { columnName: 'hotel_id', dataType: 'INTEGER' },
+          { columnName: 'user_id', dataType: 'INTEGER' },
+          { columnName: 'review_score', dataType: 'DOUBLE' },
+        ],
+      },
+    ],
+    relations: [
+      // hotels -> reviews (one hotel has many reviews)
+      {
+        fromModelName: 'hotels',
+        fromColumnName: 'hotel_id',
+        toModelName: 'reviews',
+        toColumnName: 'hotel_id',
+        type: RelationType.ONE_TO_MANY,
+      },
+      // users -> reviews (one user has many reviews)
+      {
+        fromModelName: 'users',
+        fromColumnName: 'user_id',
+        toModelName: 'reviews',
+        toColumnName: 'user_id',
+        type: RelationType.ONE_TO_MANY,
+      },
+    ],
+  },
 };
 
 export const buildInitSql = (datasetName: SampleDatasetName) => {
