@@ -1,6 +1,6 @@
 import { Button, Modal, Select, Row, Col, Form, message } from 'antd';
 import { useRouter } from 'next/router';
-import { Path } from '@/utils/enum';
+import { Path, buildPath } from '@/utils/enum';
 import {
   useResetCurrentProjectMutation,
   useUpdateCurrentProjectMutation,
@@ -39,7 +39,7 @@ export default function ProjectSettings(props: Props) {
       onOk: async () => {
         await resetCurrentProject();
         client.clearStore();
-        router.push(Path.OnboardingConnection);
+        router.push(buildPath(Path.SettingsDataConnection, Number(router.query.projectId)));
       },
     });
   };
