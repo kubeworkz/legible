@@ -36,6 +36,7 @@ export interface SuggestedQuestion {
 export interface SampleContentThread {
   question: string;
   sql: string;
+  answer?: string;
 }
 
 export interface SampleContentSpreadsheet {
@@ -467,6 +468,7 @@ LIMIT 10`,
       threads: [
         {
           question: 'How many employees have worked in more than one department during their career here?',
+          answer: 'A total of 31,579 employees have worked in more than one department during their career here.',
           sql: `SELECT COUNT(*) AS multi_dept_employees
 FROM (
   SELECT emp_no
@@ -477,6 +479,7 @@ FROM (
         },
         {
           question: 'Can you give me the average salary and median salary for men and women?',
+          answer: 'For male employees, the average salary is approximately $63,838 with a median salary of $62,404. For female employees, the average salary is approximately $63,770 with a median salary of $62,329.',
           sql: `SELECT
   e.gender,
   AVG(s.salary) AS avg_salary,

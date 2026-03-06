@@ -486,11 +486,13 @@ export class ProjectResolver {
               status: 'FINISHED',
               description: '',
             },
-            // answerDetail with FINISHED status prevents the UI from
-            // auto-triggering text answer generation via the AI service.
-            // The Answer tab shows "Click View SQL" instead of a skeleton.
+            // answerDetail with FINISHED status, content, and numRowsUsedInLLM
+            // displays a pre-written text answer in the Answer tab, matching
+            // WrenAI cloud behavior. numRowsUsedInLLM > 0 shows "View results".
             answerDetail: {
               status: 'FINISHED',
+              content: thread.answer || null,
+              numRowsUsedInLLM: thread.answer ? 1 : 0,
             },
           },
           projectId,
