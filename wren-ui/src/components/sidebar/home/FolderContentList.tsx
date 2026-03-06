@@ -25,7 +25,9 @@ const Container = styled.div`
 
 const Section = styled.div`
   &:not(:first-child) {
-    margin-top: 4px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-4);
   }
 `;
 
