@@ -408,7 +408,7 @@ function buildWorkbookData(
   return {
     id: 'spreadsheet-preview',
     name: 'Preview',
-    appVersion: '0.16.0',
+    appVersion: '0.16.1',
     locale: LocaleType.EN_US,
     sheetOrder: ['sheet1'],
     styles: {},
@@ -519,7 +519,7 @@ export default function UniverSheet(props: UniverSheetProps) {
     return {
       id: 'spreadsheet-empty',
       name: 'New Spreadsheet',
-      appVersion: '0.16.0',
+      appVersion: '0.16.1',
       locale: LocaleType.EN_US,
       sheetOrder: ['sheet1'],
       styles: {},
