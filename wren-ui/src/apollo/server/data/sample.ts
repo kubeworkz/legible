@@ -642,37 +642,123 @@ ORDER BY departure_year, d.dept_name`,
         {
           name: 'Financial Report (2000/12/30)',
           items: [
+            // 1. Salary expenditure in 2000 (Billion USD) — NUMBER
             {
-              displayName: 'Average Salary',
+              displayName: 'Salary expenditure in 2000 (Billion USD)',
               type: 'NUMBER',
-              sql: `SELECT ROUND(AVG(s.salary), 2) AS avg_salary
+              sql: `SELECT ROUND(SUM(s.salary) / 1000000000.0, 2) AS salary_expenditure_billions
 FROM salaries s
 WHERE s.from_date <= DATE '2000-12-30'
   AND s.to_date >= DATE '2000-12-30'`,
-              layout: { x: 0, y: 0, w: 2, h: 2 },
+              layout: { x: 0, y: 0, w: 2, h: 4 },
             },
+            // 2. Annual Salary Expenditure and Avg Employee Salary by Year (≤2000) — BAR
             {
-              displayName: 'Total Salary Budget',
-              type: 'NUMBER',
-              sql: `SELECT SUM(s.salary) AS total_salary_budget
-FROM salaries s
-WHERE s.from_date <= DATE '2000-12-30'
-  AND s.to_date >= DATE '2000-12-30'`,
-              layout: { x: 2, y: 0, w: 2, h: 2 },
-            },
-            {
-              displayName: 'Median Salary',
-              type: 'NUMBER',
-              sql: `SELECT MEDIAN(s.salary) AS median_salary
-FROM salaries s
-WHERE s.from_date <= DATE '2000-12-30'
-  AND s.to_date >= DATE '2000-12-30'`,
-              layout: { x: 4, y: 0, w: 2, h: 2 },
-            },
-            {
-              displayName: 'Average salary by department',
+              displayName: 'Annual Salary Expenditure and Avg Employee Salary by Year (≤2000)',
               type: 'BAR',
-              sql: `SELECT d.dept_name, ROUND(AVG(s.salary), 2) AS avg_salary
+              sql: `SELECT YEAR(s.from_date) AS yr,
+  SUM(s.salary) AS total_salary_expenditure
+FROM salaries s
+WHERE YEAR(s.from_date) BETWEEN 1985 AND 2000
+GROUP BY YEAR(s.from_date)
+ORDER BY yr`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'yr', type: 'ordinal', title: 'Year' },
+                  y: { field: 'total_salary_expenditure', type: 'quantitative', title: 'Total Salary Expenditure' },
+                },
+              },
+              layout: { x: 2, y: 0, w: 4, h: 4 },
+            },
+            // 3. Average employee salary in 2000 (in thousands)(K) — NUMBER
+            {
+              displayName: 'Average employee salary in 2000 (in thousands)(K)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(s.salary) / 1000.0, 2) AS avg_salary_thousands
+FROM salaries s
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'`,
+              layout: { x: 0, y: 4, w: 2, h: 4 },
+            },
+            // 4. Avg Salary vs. Age & Tenure Group, Larger Bubbles (2000) — BUBBLE
+            {
+              displayName: 'Avg Salary vs. Age & Tenure Group, Larger Bubbles (2000)',
+              type: 'BAR',
+              sql: `SELECT
+  CASE
+    WHEN age < 35 THEN '30-34'
+    WHEN age < 40 THEN '35-39'
+    WHEN age < 45 THEN '40-44'
+    WHEN age < 50 THEN '45-49'
+    WHEN age < 55 THEN '50-54'
+    WHEN age < 60 THEN '55-59'
+    ELSE '60+'
+  END AS age_group,
+  CASE
+    WHEN tenure < 5 THEN '0-4 yrs'
+    WHEN tenure < 10 THEN '5-9 yrs'
+    WHEN tenure < 15 THEN '10-14 yrs'
+    ELSE '15+ yrs'
+  END AS tenure_group,
+  ROUND(AVG(salary), 0) AS avg_salary,
+  COUNT(*) AS employee_count
+FROM (
+  SELECT e.emp_no,
+    DATEDIFF('day', e.birth_date, DATE '2000-12-30') / 365.25 AS age,
+    DATEDIFF('day', de.from_date,
+      CASE WHEN de.to_date > DATE '2000-12-30' THEN DATE '2000-12-30' ELSE de.to_date END
+    ) / 365.25 AS tenure,
+    s.salary
+  FROM employees e
+  JOIN dept_emp de ON e.emp_no = de.emp_no
+  JOIN salaries s ON e.emp_no = s.emp_no
+  WHERE de.from_date <= DATE '2000-12-30'
+    AND de.to_date >= DATE '2000-12-30'
+    AND s.from_date <= DATE '2000-12-30'
+    AND s.to_date >= DATE '2000-12-30'
+) sub
+GROUP BY age_group, tenure_group
+ORDER BY age_group, tenure_group`,
+              chartSchema: {
+                mark: { type: 'circle', tooltip: true, opacity: 0.7 },
+                encoding: {
+                  x: { field: 'age_group', type: 'ordinal', title: 'Age Group', sort: ['30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60+'] },
+                  y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary', scale: { zero: false } },
+                  size: { field: 'employee_count', type: 'quantitative', title: 'Employees' },
+                  color: { field: 'tenure_group', type: 'nominal', title: 'Tenure Group' },
+                },
+              },
+              layout: { x: 2, y: 4, w: 4, h: 4 },
+            },
+            // 5. Salary Expenditure by Department until Year 2000 — BAR
+            {
+              displayName: 'Salary Expenditure by Department until Year 2000',
+              type: 'BAR',
+              sql: `SELECT d.dept_name, SUM(s.salary) AS total_salary_expenditure
+FROM salaries s
+JOIN dept_emp de ON s.emp_no = de.emp_no
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE s.from_date <= DATE '2000-12-30'
+  AND de.from_date <= DATE '2000-12-30'
+GROUP BY d.dept_name
+ORDER BY total_salary_expenditure DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'dept_name', type: 'nominal', title: 'Department', sort: '-y' },
+                  y: { field: 'total_salary_expenditure', type: 'quantitative', title: 'Total Salary Expenditure' },
+                },
+              },
+              layout: { x: 0, y: 8, w: 2, h: 4 },
+            },
+            // 6. Average vs. Median Salary by Department (Descending Order) — GROUPED_BAR
+            {
+              displayName: 'Average vs. Median Salary by Department (Descending Order)',
+              type: 'GROUPED_BAR',
+              sql: `SELECT d.dept_name,
+  ROUND(AVG(s.salary), 2) AS avg_salary,
+  MEDIAN(s.salary) AS median_salary
 FROM salaries s
 JOIN dept_emp de ON s.emp_no = de.emp_no
 JOIN departments d ON de.dept_no = d.dept_no
@@ -683,56 +769,178 @@ WHERE s.from_date <= DATE '2000-12-30'
 GROUP BY d.dept_name
 ORDER BY avg_salary DESC`,
               chartSchema: {
-                mark: { type: 'bar', tooltip: true },
-                encoding: {
-                  x: { field: 'dept_name', type: 'nominal', title: 'Department', sort: '-y' },
-                  y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary ($)' },
-                },
-              },
-              layout: { x: 0, y: 2, w: 6, h: 4 },
-            },
-            {
-              displayName: 'Salary trend over time',
-              type: 'LINE',
-              sql: `SELECT YEAR(s.from_date) AS salary_year,
-  ROUND(AVG(s.salary), 2) AS avg_salary
-FROM salaries s
-WHERE YEAR(s.from_date) BETWEEN 1985 AND 2000
-GROUP BY YEAR(s.from_date)
-ORDER BY salary_year`,
-              chartSchema: {
-                mark: { type: 'line', tooltip: true, point: true },
-                encoding: {
-                  x: { field: 'salary_year', type: 'ordinal', title: 'Year' },
-                  y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary ($)' },
-                },
-              },
-              layout: { x: 0, y: 6, w: 3, h: 3 },
-            },
-            {
-              displayName: 'Salary distribution by gender',
-              type: 'GROUPED_BAR',
-              sql: `SELECT e.gender,
-  ROUND(AVG(s.salary), 2) AS avg_salary,
-  MEDIAN(s.salary) AS median_salary
-FROM employees e
-JOIN salaries s ON e.emp_no = s.emp_no
-WHERE s.from_date <= DATE '2000-12-30'
-  AND s.to_date >= DATE '2000-12-30'
-GROUP BY e.gender`,
-              chartSchema: {
                 transform: [
                   { fold: ['avg_salary', 'median_salary'], as: ['Metric', 'Salary'] },
                 ],
                 mark: { type: 'bar', tooltip: true },
                 encoding: {
-                  x: { field: 'gender', type: 'nominal', title: 'Gender' },
-                  y: { field: 'Salary', type: 'quantitative', title: 'Salary ($)' },
+                  x: { field: 'dept_name', type: 'nominal', title: 'Department', sort: '-y' },
+                  y: { field: 'Salary', type: 'quantitative', title: 'Salary' },
                   xOffset: { field: 'Metric', type: 'nominal' },
                   color: { field: 'Metric', type: 'nominal', title: 'Metric' },
                 },
               },
-              layout: { x: 3, y: 6, w: 3, h: 3 },
+              layout: { x: 2, y: 8, w: 2, h: 4 },
+            },
+            // 7. Average Salary by Gender and Department (Descending Order) — GROUPED_BAR
+            {
+              displayName: 'Average Salary by Gender and Department (Descending Order)',
+              type: 'GROUPED_BAR',
+              sql: `SELECT d.dept_name, e.gender,
+  ROUND(AVG(s.salary), 2) AS avg_salary
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+JOIN dept_emp de ON e.emp_no = de.emp_no
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'
+  AND de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'
+GROUP BY d.dept_name, e.gender
+ORDER BY avg_salary DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'dept_name', type: 'nominal', title: 'Department', sort: '-y' },
+                  y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary' },
+                  xOffset: { field: 'gender', type: 'nominal' },
+                  color: { field: 'gender', type: 'nominal', title: 'Gender' },
+                },
+              },
+              layout: { x: 4, y: 8, w: 2, h: 4 },
+            },
+            // 8. Average Salary Comparison: Manager vs Non-Manager by Department — GROUPED_BAR
+            {
+              displayName: 'Average Salary Comparison: Manager vs Non-Manager by Department',
+              type: 'GROUPED_BAR',
+              sql: `SELECT d.dept_name,
+  CASE WHEN dm.emp_no IS NOT NULL THEN 'Manager' ELSE 'Non-Manager' END AS role,
+  ROUND(AVG(s.salary), 2) AS avg_salary
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+JOIN dept_emp de ON e.emp_no = de.emp_no
+JOIN departments d ON de.dept_no = d.dept_no
+LEFT JOIN dept_manager dm ON e.emp_no = dm.emp_no
+  AND dm.from_date <= DATE '2000-12-30'
+  AND dm.to_date >= DATE '2000-12-30'
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'
+  AND de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'
+GROUP BY d.dept_name, role
+ORDER BY d.dept_name, role`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'dept_name', type: 'nominal', title: 'Department' },
+                  y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary' },
+                  xOffset: { field: 'role', type: 'nominal' },
+                  color: { field: 'role', type: 'nominal', title: 'Role' },
+                },
+              },
+              layout: { x: 0, y: 12, w: 4, h: 5 },
+            },
+            // 9. Distribution of Average Salary: Manager vs Non-Manager — GROUPED_BAR
+            {
+              displayName: 'Distribution of Average Salary: Manager vs Non-Manager',
+              type: 'GROUPED_BAR',
+              sql: `SELECT
+  CASE
+    WHEN avg_salary < 50000 THEN '40-50K'
+    WHEN avg_salary < 60000 THEN '50-60K'
+    WHEN avg_salary < 70000 THEN '60-70K'
+    WHEN avg_salary < 80000 THEN '70-80K'
+    WHEN avg_salary < 90000 THEN '80-90K'
+    WHEN avg_salary < 100000 THEN '90-100K'
+    WHEN avg_salary < 110000 THEN '100-110K'
+    WHEN avg_salary < 120000 THEN '110-120K'
+    WHEN avg_salary < 130000 THEN '120-130K'
+    WHEN avg_salary < 140000 THEN '130-140K'
+    ELSE '140K+'
+  END AS salary_bucket,
+  role,
+  COUNT(*) AS frequency
+FROM (
+  SELECT e.emp_no,
+    ROUND(AVG(s.salary), 0) AS avg_salary,
+    CASE WHEN dm.emp_no IS NOT NULL THEN 'Manager' ELSE 'Non-Manager' END AS role
+  FROM employees e
+  JOIN salaries s ON e.emp_no = s.emp_no
+  LEFT JOIN dept_manager dm ON e.emp_no = dm.emp_no
+    AND dm.from_date <= DATE '2000-12-30'
+    AND dm.to_date >= DATE '2000-12-30'
+  WHERE s.from_date <= DATE '2000-12-30'
+    AND s.to_date >= DATE '2000-12-30'
+  GROUP BY e.emp_no, role
+) sub
+GROUP BY salary_bucket, role
+ORDER BY salary_bucket, role`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'salary_bucket', type: 'ordinal', title: 'Average Salary',
+                    sort: ['40-50K', '50-60K', '60-70K', '70-80K', '80-90K', '90-100K', '100-110K', '110-120K', '120-130K', '130-140K', '140K+'] },
+                  y: { field: 'frequency', type: 'quantitative', title: 'Frequency' },
+                  xOffset: { field: 'role', type: 'nominal' },
+                  color: { field: 'role', type: 'nominal', title: 'Role' },
+                },
+              },
+              layout: { x: 4, y: 12, w: 2, h: 5 },
+            },
+            // 10. Average Salary: Manager vs Non-Manager — horizontal BAR
+            {
+              displayName: 'Average Salary: Manager vs Non-Manager',
+              type: 'BAR',
+              sql: `SELECT
+  CASE WHEN dm.emp_no IS NOT NULL THEN 'Manager' ELSE 'Non-Manager' END AS manager_status,
+  ROUND(AVG(s.salary), 2) AS avg_salary
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+LEFT JOIN dept_manager dm ON e.emp_no = dm.emp_no
+  AND dm.from_date <= DATE '2000-12-30'
+  AND dm.to_date >= DATE '2000-12-30'
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'
+GROUP BY manager_status`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  y: { field: 'manager_status', type: 'nominal', title: 'Manager Status' },
+                  x: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary' },
+                },
+              },
+              layout: { x: 0, y: 17, w: 4, h: 3 },
+            },
+            // 11. Manager Salary by Year (<=2000): Gender Symbol, Dept Color — SCATTER
+            {
+              displayName: 'Manager Salary by Year (<=2000): Gender Symbol, Dept Color',
+              type: 'BAR',
+              sql: `SELECT YEAR(s.from_date) AS yr,
+  d.dept_name,
+  e.gender,
+  ROUND(AVG(s.salary), 0) AS avg_salary
+FROM employees e
+JOIN dept_manager dm ON e.emp_no = dm.emp_no
+JOIN salaries s ON e.emp_no = s.emp_no
+JOIN dept_emp de ON e.emp_no = de.emp_no
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE YEAR(s.from_date) BETWEEN 1985 AND 2000
+  AND dm.from_date <= s.to_date
+  AND dm.to_date >= s.from_date
+  AND de.from_date <= s.to_date
+  AND de.to_date >= s.from_date
+GROUP BY YEAR(s.from_date), d.dept_name, e.gender
+ORDER BY yr, d.dept_name`,
+              chartSchema: {
+                mark: { type: 'point', tooltip: true, filled: true, size: 80 },
+                encoding: {
+                  x: { field: 'yr', type: 'ordinal', title: 'Year' },
+                  y: { field: 'avg_salary', type: 'quantitative', title: 'Salary', scale: { zero: false } },
+                  color: { field: 'dept_name', type: 'nominal', title: 'Department' },
+                  shape: { field: 'gender', type: 'nominal', title: 'Gender' },
+                },
+              },
+              layout: { x: 0, y: 20, w: 6, h: 5 },
             },
           ],
         },
