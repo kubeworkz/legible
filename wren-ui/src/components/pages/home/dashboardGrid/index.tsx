@@ -79,6 +79,11 @@ const StyledDashboardGrid = styled.div`
     color: var(--gray-6);
 
     .editable-cell-value-wrap {
+      border-color: transparent !important;
+      padding-left: 0;
+    }
+
+    &.is-placeholder .editable-cell-value-wrap {
       font-style: italic;
     }
   }
@@ -457,7 +462,9 @@ const PinnedItem = forwardRef(
             </DashboardItemDropdown>
           </div>
         </div>
-        <PinnedItemDescription id={item.id} description={item.description || null} />
+        <div className={`adm-pinned-description${!item.description ? ' is-placeholder' : ''}`} onMouseDown={(e) => e.stopPropagation()}>
+          <PinnedItemDescription id={item.id} description={item.description || null} />
+        </div>
         <div className="adm-pinned-content">
           <div className="adm-pinned-content-overflow adm-scrollbar-track">
             <LoadingWrapper loading={loading} tip="Loading...">
