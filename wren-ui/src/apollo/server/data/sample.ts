@@ -483,7 +483,7 @@ FROM (
 ) sub`,
           chartDetail: {
             description: 'Employees who worked in multiple departments',
-            chartType: 'bar',
+            chartType: 'BAR',
             chartSchema: {
               mark: { type: 'bar', tooltip: true },
               encoding: {
@@ -513,7 +513,7 @@ JOIN salaries s ON e.emp_no = s.emp_no
 GROUP BY e.gender`,
           chartDetail: {
             description: 'Average and median salary comparison by gender',
-            chartType: 'grouped_bar',
+            chartType: 'GROUPED_BAR',
             chartSchema: {
               transform: [
                 {
