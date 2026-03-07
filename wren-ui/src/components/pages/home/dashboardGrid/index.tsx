@@ -75,29 +75,11 @@ const StyledDashboardGrid = styled.div`
 
   .adm-pinned-description {
     padding: 0 16px;
+    font-size: 12px;
+    color: var(--gray-6);
 
-    input {
-      width: 100%;
-      border: none;
-      outline: none;
-      font-size: 12px;
-      color: var(--gray-7);
-      background: transparent;
-      padding: 2px 0;
-      cursor: text;
-
-      &::placeholder {
-        color: var(--gray-5);
-      }
-
-      &:hover {
-        color: var(--gray-8);
-      }
-
-      &:focus {
-        color: var(--gray-9);
-        border-bottom: 1px solid var(--geekblue-6);
-      }
+    .editable-cell-value-wrap {
+      font-style: italic;
     }
   }
 
@@ -345,39 +327,37 @@ const PinnedItemDescription = (props: {
   description: string | null;
 }) => {
   const { id, description } = props;
-  const [value, setValue] = useState(description || '');
+  const [form] = Form.useForm();
 
   const [updateDashboardItem] = useUpdateDashboardItemMutation({
     onError: (error) => console.error(error),
   });
 
-  const handleBlur = () => {
-    const trimmed = value.trim();
+  const handleSave = (dashboardItemId: number, values: { description: string }) => {
+    const trimmed = (values.description || '').trim();
     if (trimmed === (description || '')) return;
     updateDashboardItem({
       variables: {
-        where: { id },
+        where: { id: dashboardItemId },
         data: { description: trimmed || null },
       },
     });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      (e.target as HTMLInputElement).blur();
-    }
-  };
+  const displayText = description || 'Add description';
 
   return (
-    <div className="adm-pinned-description" onMouseDown={(e) => e.stopPropagation()}>
-      <input
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        placeholder="Add description"
-      />
-    </div>
+    <EditableContext.Provider value={form}>
+      <Form form={form}>
+        <EditableWrapper
+          record={{ id, description: description || '' }}
+          dataIndex="description"
+          handleSave={handleSave}
+        >
+          {displayText}
+        </EditableWrapper>
+      </Form>
+    </EditableContext.Provider>
   );
 };
 
