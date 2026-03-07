@@ -49,8 +49,17 @@ export interface SampleContentSpreadsheet {
   sql: string;
 }
 
+export interface SampleContentDashboardItem {
+  displayName: string;
+  type: string; // DashboardItemType enum value
+  sql: string;
+  chartSchema?: Record<string, any>;
+  layout: { x: number; y: number; w: number; h: number };
+}
+
 export interface SampleContentDashboard {
   name: string;
+  items?: SampleContentDashboardItem[];
 }
 
 export interface SampleContent {
@@ -424,8 +433,203 @@ export const sampleDatasets: Record<string, SampleDataset> = {
     ],
     sampleContent: {
       dashboards: [
-        { name: 'HR Report (2000/12/30)' },
-        { name: 'Financial Report (2000/12/30)' },
+        {
+          name: 'HR Report (2000/12/30)',
+          items: [
+            {
+              displayName: 'Current Employee Count',
+              type: 'NUMBER',
+              sql: `SELECT COUNT(DISTINCT e.emp_no) AS current_employees
+FROM employees e
+JOIN dept_emp de ON e.emp_no = de.emp_no
+WHERE de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Average manager tenure (years)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(DATEDIFF('day', dm.from_date,
+  CASE WHEN dm.to_date > DATE '2000-12-30' THEN DATE '2000-12-30' ELSE dm.to_date END
+)) / 365.25, 2) AS avg_manager_tenure_years
+FROM dept_manager dm
+WHERE dm.from_date <= DATE '2000-12-30'`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Average employee (non-manager) tenure (years)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(DATEDIFF('day', de.from_date,
+  CASE WHEN de.to_date > DATE '2000-12-30' THEN DATE '2000-12-30' ELSE de.to_date END
+)) / 365.25, 2) AS avg_employee_tenure_years
+FROM dept_emp de
+WHERE de.from_date <= DATE '2000-12-30'
+  AND de.emp_no NOT IN (
+    SELECT dm.emp_no FROM dept_manager dm
+    WHERE dm.from_date <= DATE '2000-12-30'
+      AND dm.to_date >= DATE '2000-12-30'
+  )`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'New Hires and Headcount by Dept (Until 2000)',
+              type: 'STACKED_BAR',
+              sql: `SELECT
+  EXTRACT(YEAR FROM de.from_date) AS year,
+  d.dept_name,
+  COUNT(*) AS new_hires
+FROM dept_emp de
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE EXTRACT(YEAR FROM de.from_date) BETWEEN 1985 AND 2000
+GROUP BY EXTRACT(YEAR FROM de.from_date), d.dept_name
+ORDER BY year, d.dept_name`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'year', type: 'ordinal', title: 'Year' },
+                  y: { field: 'new_hires', type: 'quantitative', title: 'New Hires', stack: true },
+                  color: { field: 'dept_name', type: 'nominal', title: 'Department' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 6, h: 4 },
+            },
+            {
+              displayName: 'Gender distribution of employees',
+              type: 'PIE',
+              sql: `SELECT e.gender, COUNT(DISTINCT e.emp_no) AS employee_count
+FROM employees e
+JOIN dept_emp de ON e.emp_no = de.emp_no
+WHERE de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'
+GROUP BY e.gender`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'employee_count', type: 'quantitative' },
+                  color: { field: 'gender', type: 'nominal', title: 'Gender' },
+                },
+              },
+              layout: { x: 0, y: 6, w: 3, h: 3 },
+            },
+            {
+              displayName: 'Number of employees by department',
+              type: 'BAR',
+              sql: `SELECT d.dept_name, COUNT(DISTINCT e.emp_no) AS employee_count
+FROM employees e
+JOIN dept_emp de ON e.emp_no = de.emp_no
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'
+GROUP BY d.dept_name
+ORDER BY employee_count DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'dept_name', type: 'nominal', title: 'Department', sort: '-y' },
+                  y: { field: 'employee_count', type: 'quantitative', title: 'Employees' },
+                },
+              },
+              layout: { x: 3, y: 6, w: 3, h: 3 },
+            },
+          ],
+        },
+        {
+          name: 'Financial Report (2000/12/30)',
+          items: [
+            {
+              displayName: 'Average Salary',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(s.salary), 2) AS avg_salary
+FROM salaries s
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Total Salary Budget',
+              type: 'NUMBER',
+              sql: `SELECT SUM(s.salary) AS total_salary_budget
+FROM salaries s
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Median Salary',
+              type: 'NUMBER',
+              sql: `SELECT MEDIAN(s.salary) AS median_salary
+FROM salaries s
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Average salary by department',
+              type: 'BAR',
+              sql: `SELECT d.dept_name, ROUND(AVG(s.salary), 2) AS avg_salary
+FROM salaries s
+JOIN dept_emp de ON s.emp_no = de.emp_no
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'
+  AND de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'
+GROUP BY d.dept_name
+ORDER BY avg_salary DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'dept_name', type: 'nominal', title: 'Department', sort: '-y' },
+                  y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary ($)' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 6, h: 4 },
+            },
+            {
+              displayName: 'Salary trend over time',
+              type: 'LINE',
+              sql: `SELECT EXTRACT(YEAR FROM s.from_date) AS year,
+  ROUND(AVG(s.salary), 2) AS avg_salary
+FROM salaries s
+WHERE EXTRACT(YEAR FROM s.from_date) BETWEEN 1985 AND 2000
+GROUP BY EXTRACT(YEAR FROM s.from_date)
+ORDER BY year`,
+              chartSchema: {
+                mark: { type: 'line', tooltip: true, point: true },
+                encoding: {
+                  x: { field: 'year', type: 'ordinal', title: 'Year' },
+                  y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary ($)' },
+                },
+              },
+              layout: { x: 0, y: 6, w: 3, h: 3 },
+            },
+            {
+              displayName: 'Salary distribution by gender',
+              type: 'GROUPED_BAR',
+              sql: `SELECT e.gender,
+  ROUND(AVG(s.salary), 2) AS avg_salary,
+  MEDIAN(s.salary) AS median_salary
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+WHERE s.from_date <= DATE '2000-12-30'
+  AND s.to_date >= DATE '2000-12-30'
+GROUP BY e.gender`,
+              chartSchema: {
+                transform: [
+                  { fold: ['avg_salary', 'median_salary'], as: ['Metric', 'Salary'] },
+                ],
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'gender', type: 'nominal', title: 'Gender' },
+                  y: { field: 'Salary', type: 'quantitative', title: 'Salary ($)' },
+                  xOffset: { field: 'Metric', type: 'nominal' },
+                  color: { field: 'Metric', type: 'nominal', title: 'Metric' },
+                },
+              },
+              layout: { x: 3, y: 6, w: 3, h: 3 },
+            },
+          ],
+        },
       ],
       spreadsheets: [
         {

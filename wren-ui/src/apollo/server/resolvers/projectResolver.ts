@@ -451,13 +451,29 @@ export class ProjectResolver {
       // If folder creation fails, items will have no folder
     }
 
-    // Create sample dashboards
+    // Create sample dashboards with items
     if (content.dashboards) {
       for (const dash of content.dashboards) {
-        await ctx.dashboardService.createDashboard(projectId, {
+        const dashboard = await ctx.dashboardService.createDashboard(projectId, {
           name: dash.name,
           folderId,
         });
+
+        // Create dashboard items with explicit layouts
+        if (dash.items) {
+          for (const item of dash.items) {
+            await ctx.dashboardItemRepository.createOne({
+              dashboardId: dashboard.id,
+              type: item.type as any,
+              displayName: item.displayName,
+              detail: {
+                sql: item.sql,
+                chartSchema: item.chartSchema || undefined,
+              },
+              layout: item.layout,
+            });
+          }
+        }
       }
     }
 
