@@ -313,7 +313,14 @@ export default class ChartSpecHandler {
       }
     }
 
-    this.addHoverHighlight(this.encoding);
+    // Skip hover highlight for point/circle marks - the opacity condition
+    // causes rendering issues with scatter/bubble charts
+    if (
+      this.mark.type !== MarkType.POINT &&
+      this.mark.type !== MarkType.CIRCLE
+    ) {
+      this.addHoverHighlight(this.encoding);
+    }
   }
 
   private addHoverHighlight(encoding: EncodingSpec) {
