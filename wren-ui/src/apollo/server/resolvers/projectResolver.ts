@@ -494,6 +494,17 @@ export class ProjectResolver {
               content: thread.answer || null,
               numRowsUsedInLLM: thread.answer ? 1 : 0,
             },
+            // chartDetail with FINISHED status and Vega-Lite schema renders a
+            // pre-built chart in the Chart tab without triggering the AI service.
+            ...(thread.chartDetail && {
+              chartDetail: {
+                queryId: '',
+                status: 'FINISHED',
+                description: thread.chartDetail.description,
+                chartType: thread.chartDetail.chartType,
+                chartSchema: thread.chartDetail.chartSchema,
+              },
+            }),
           },
           projectId,
           folderId,

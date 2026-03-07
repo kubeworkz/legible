@@ -99,21 +99,6 @@ const StyledTabs = styled(Tabs)`
       [aria-label='pie-chart'] {
         color: var(--gold-6);
       }
-
-      .adm-beta-tag {
-        background-color: var(--geekblue-2);
-        color: var(--geekblue-5);
-      }
-    }
-
-    .adm-beta-tag {
-      padding: 0 4px;
-      line-height: 18px;
-      margin: 0 0 0 6px;
-      border-radius: 2px;
-      background-color: var(--gray-5);
-      color: white;
-      border: none;
     }
   }
 `;
@@ -324,9 +309,7 @@ export default function AnswerResult(props: Props) {
               tab={
                 <div className="select-none">
                   <PieChartFilled className="mr-2" />
-                  <Text>
-                    Chart<Tag className="adm-beta-tag">Beta</Tag>
-                  </Text>
+                  <Text>Chart</Text>
                 </div>
               }
             >

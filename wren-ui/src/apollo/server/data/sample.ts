@@ -37,6 +37,11 @@ export interface SampleContentThread {
   question: string;
   sql: string;
   answer?: string;
+  chartDetail?: {
+    description: string;
+    chartType: string;
+    chartSchema: Record<string, any>;
+  };
 }
 
 export interface SampleContentSpreadsheet {
@@ -476,6 +481,25 @@ FROM (
   GROUP BY emp_no
   HAVING COUNT(DISTINCT dept_no) > 1
 ) sub`,
+          chartDetail: {
+            description: 'Employees who worked in multiple departments',
+            chartType: 'bar',
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: {
+                  field: 'multi_dept_employees',
+                  type: 'quantitative',
+                  title: 'Number of Employees',
+                },
+                y: {
+                  datum: 'Employees',
+                  type: 'nominal',
+                  title: '',
+                },
+              },
+            },
+          },
         },
         {
           question: 'Can you give me the average salary and median salary for men and women?',
@@ -487,6 +511,38 @@ FROM (
 FROM employees e
 JOIN salaries s ON e.emp_no = s.emp_no
 GROUP BY e.gender`,
+          chartDetail: {
+            description: 'Average and median salary comparison by gender',
+            chartType: 'grouped_bar',
+            chartSchema: {
+              transform: [
+                {
+                  fold: ['avg_salary', 'median_salary'],
+                  as: ['Metric', 'Salary'],
+                },
+              ],
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: {
+                  field: 'gender',
+                  type: 'nominal',
+                  title: 'Gender',
+                },
+                y: {
+                  field: 'Salary',
+                  type: 'quantitative',
+                  title: 'Salary ($)',
+                },
+                xOffset: { field: 'Metric', type: 'nominal' },
+                color: {
+                  field: 'Metric',
+                  type: 'nominal',
+                  title: 'Metric',
+                  scale: { range: ['#5B8FF9', '#5AD8A6'] },
+                },
+              },
+            },
+          },
         },
       ],
     },

@@ -19,6 +19,7 @@ import {
   ThreadResponseAdjustmentType,
   ThreadResponseAnswerDetail,
   ThreadResponseBreakdownDetail,
+  ThreadResponseChartDetail,
 } from '../repositories/threadResponseRepository';
 import { getLogger } from '@server/utils';
 import { isEmpty, isNil } from 'lodash';
@@ -73,6 +74,7 @@ export interface AskingDetailTaskInput {
   trackedAskingResult?: TrackedAskingResult;
   breakdownDetail?: ThreadResponseBreakdownDetail;
   answerDetail?: ThreadResponseAnswerDetail;
+  chartDetail?: ThreadResponseChartDetail;
 }
 
 export interface AskingDetailTaskUpdateInput {
@@ -720,12 +722,13 @@ export class AskingService implements IAskingService {
       askingTaskId: input.trackedAskingResult?.taskId,
     });
 
-    // if breakdownDetail or answerDetail are provided (e.g. for seeded sample content),
+    // if breakdownDetail, answerDetail, or chartDetail are provided (e.g. for seeded sample content),
     // update the response using updateOne which properly handles JSON serialization
-    if (input.breakdownDetail || input.answerDetail) {
+    if (input.breakdownDetail || input.answerDetail || input.chartDetail) {
       await this.threadResponseRepository.updateOne(threadResponse.id, {
         ...(input.breakdownDetail && { breakdownDetail: input.breakdownDetail }),
         ...(input.answerDetail && { answerDetail: input.answerDetail }),
+        ...(input.chartDetail && { chartDetail: input.chartDetail }),
       });
     }
 
