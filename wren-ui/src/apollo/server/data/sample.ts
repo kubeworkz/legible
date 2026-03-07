@@ -814,7 +814,7 @@ ORDER BY avg_salary DESC`,
               displayName: 'Average Salary Comparison: Manager vs Non-Manager by Department',
               type: 'GROUPED_BAR',
               sql: `SELECT d.dept_name,
-  CASE WHEN dm.emp_no IS NOT NULL THEN 'Manager' ELSE 'Non-Manager' END AS role,
+  CASE WHEN dm.emp_no IS NOT NULL THEN 'Manager' ELSE 'Non-Manager' END AS employee_role,
   ROUND(AVG(s.salary), 2) AS avg_salary
 FROM employees e
 JOIN salaries s ON e.emp_no = s.emp_no
@@ -827,15 +827,15 @@ WHERE s.from_date <= DATE '2000-12-30'
   AND s.to_date >= DATE '2000-12-30'
   AND de.from_date <= DATE '2000-12-30'
   AND de.to_date >= DATE '2000-12-30'
-GROUP BY d.dept_name, role
-ORDER BY d.dept_name, role`,
+GROUP BY d.dept_name, employee_role
+ORDER BY d.dept_name, employee_role`,
               chartSchema: {
                 mark: { type: 'bar', tooltip: true },
                 encoding: {
                   x: { field: 'dept_name', type: 'nominal', title: 'Department' },
                   y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary' },
-                  xOffset: { field: 'role', type: 'nominal' },
-                  color: { field: 'role', type: 'nominal', title: 'Role' },
+                  xOffset: { field: 'employee_role', type: 'nominal' },
+                  color: { field: 'employee_role', type: 'nominal', title: 'Role' },
                 },
               },
               layout: { x: 0, y: 12, w: 4, h: 5 },
@@ -858,12 +858,12 @@ ORDER BY d.dept_name, role`,
     WHEN avg_salary < 140000 THEN '130-140K'
     ELSE '140K+'
   END AS salary_bucket,
-  role,
+  employee_role,
   COUNT(*) AS frequency
 FROM (
   SELECT e.emp_no,
     ROUND(AVG(s.salary), 0) AS avg_salary,
-    CASE WHEN dm.emp_no IS NOT NULL THEN 'Manager' ELSE 'Non-Manager' END AS role
+    CASE WHEN dm.emp_no IS NOT NULL THEN 'Manager' ELSE 'Non-Manager' END AS employee_role
   FROM employees e
   JOIN salaries s ON e.emp_no = s.emp_no
   LEFT JOIN dept_manager dm ON e.emp_no = dm.emp_no
@@ -871,18 +871,18 @@ FROM (
     AND dm.to_date >= DATE '2000-12-30'
   WHERE s.from_date <= DATE '2000-12-30'
     AND s.to_date >= DATE '2000-12-30'
-  GROUP BY e.emp_no, role
+  GROUP BY e.emp_no, employee_role
 ) sub
-GROUP BY salary_bucket, role
-ORDER BY salary_bucket, role`,
+GROUP BY salary_bucket, employee_role
+ORDER BY salary_bucket, employee_role`,
               chartSchema: {
                 mark: { type: 'bar', tooltip: true },
                 encoding: {
                   x: { field: 'salary_bucket', type: 'ordinal', title: 'Average Salary',
                     sort: ['40-50K', '50-60K', '60-70K', '70-80K', '80-90K', '90-100K', '100-110K', '110-120K', '120-130K', '130-140K', '140K+'] },
                   y: { field: 'frequency', type: 'quantitative', title: 'Frequency' },
-                  xOffset: { field: 'role', type: 'nominal' },
-                  color: { field: 'role', type: 'nominal', title: 'Role' },
+                  xOffset: { field: 'employee_role', type: 'nominal' },
+                  color: { field: 'employee_role', type: 'nominal', title: 'Role' },
                 },
               },
               layout: { x: 4, y: 12, w: 2, h: 5 },
