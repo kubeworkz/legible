@@ -918,7 +918,7 @@ GROUP BY manager_status`,
               sql: `SELECT YEAR(s.from_date) AS yr,
   d.dept_name,
   e.gender,
-  ROUND(AVG(s.salary), 0) AS avg_salary
+  s.salary
 FROM employees e
 JOIN dept_manager dm ON e.emp_no = dm.emp_no
 JOIN salaries s ON e.emp_no = s.emp_no
@@ -929,13 +929,12 @@ WHERE YEAR(s.from_date) BETWEEN 1985 AND 2000
   AND dm.to_date >= s.from_date
   AND de.from_date <= s.to_date
   AND de.to_date >= s.from_date
-GROUP BY YEAR(s.from_date), d.dept_name, e.gender
 ORDER BY yr, d.dept_name`,
               chartSchema: {
                 mark: { type: 'point', tooltip: true, filled: true, size: 80 },
                 encoding: {
                   x: { field: 'yr', type: 'ordinal', title: 'Year' },
-                  y: { field: 'avg_salary', type: 'quantitative', title: 'Salary', scale: { zero: false } },
+                  y: { field: 'salary', type: 'quantitative', title: 'Salary', scale: { zero: false } },
                   color: { field: 'dept_name', type: 'nominal', title: 'Department' },
                   shape: { field: 'gender', type: 'nominal', title: 'Gender' },
                 },
