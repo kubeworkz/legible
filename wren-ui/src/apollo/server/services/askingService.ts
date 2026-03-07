@@ -1109,6 +1109,10 @@ export class AskingService implements IAskingService {
   private async getDeployId(projectId?: number) {
     const { id } = await this.projectService.getCurrentProject(projectId);
     const lastDeploy = await this.deployService.getLastDeployment(id);
+    if (!lastDeploy) {
+      const { manifest } = await this.mdlService.makeCurrentModelMDL(id);
+      return this.deployService.createMDLHash(manifest, id);
+    }
     return lastDeploy.hash;
   }
 

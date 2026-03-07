@@ -106,7 +106,9 @@ export class SpreadsheetResolver {
 
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const deployment = await ctx.deployService.getLastDeployment(project.id);
-    const mdl = deployment.manifest;
+    const mdl = deployment
+      ? deployment.manifest
+      : (await ctx.mdlService.makeCurrentModelMDL(project.id)).manifest;
     const result = (await ctx.queryService.preview(sqlToRun, {
       project,
       manifest: mdl,

@@ -823,7 +823,10 @@ export class ModelResolver {
 
     // create view
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
-    const { manifest } = await ctx.deployService.getLastDeployment(project.id);
+    const deployment = await ctx.deployService.getLastDeployment(project.id);
+    const manifest = deployment
+      ? deployment.manifest
+      : (await ctx.mdlService.makeCurrentModelMDL(project.id)).manifest;
 
     // get sql statement of a response
     const response = await ctx.askingService.getResponse(responseId);
@@ -956,7 +959,10 @@ export class ModelResolver {
     const project = projectId
       ? await ctx.projectService.getProjectById(parseInt(projectId))
       : await ctx.projectService.getCurrentProject(ctx.projectId);
-    const { manifest } = await ctx.deployService.getLastDeployment(project.id);
+    const deployment = await ctx.deployService.getLastDeployment(project.id);
+    const manifest = deployment
+      ? deployment.manifest
+      : (await ctx.mdlService.makeCurrentModelMDL(project.id)).manifest;
     return await ctx.queryService.preview(sql, {
       project,
       limit: limit,

@@ -106,6 +106,10 @@ export class DashboardCacheBackgroundTracker {
         dashboard.projectId,
       );
       const deployment = await this.deployService.getLastDeployment(project.id);
+      if (!deployment) {
+        logger.warn(`No successful deployment found for project ${project.id}, skipping cache refresh`);
+        return;
+      }
       const mdl = deployment.manifest;
       const hash = uuidv4();
 

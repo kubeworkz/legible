@@ -153,7 +153,9 @@ export class DashboardResolver {
     // query with cache enabled
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const deployment = await ctx.deployService.getLastDeployment(project.id);
-    const mdl = deployment.manifest;
+    const mdl = deployment
+      ? deployment.manifest
+      : (await ctx.mdlService.makeCurrentModelMDL(project.id)).manifest;
     await ctx.queryService.preview(response.sql, {
       project,
       manifest: mdl,
@@ -223,7 +225,9 @@ export class DashboardResolver {
       const { cacheEnabled } = dashboard;
       const project = await ctx.projectService.getCurrentProject(ctx.projectId);
       const deployment = await ctx.deployService.getLastDeployment(project.id);
-      const mdl = deployment.manifest;
+      const mdl = deployment
+        ? deployment.manifest
+        : (await ctx.mdlService.makeCurrentModelMDL(project.id)).manifest;
       const data = (await ctx.queryService.preview(item.detail.sql, {
         project,
         manifest: mdl,
