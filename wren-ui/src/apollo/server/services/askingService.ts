@@ -974,7 +974,9 @@ export class AskingService implements IAskingService {
     }
     const project = await this.projectService.getCurrentProject(projectId);
     const deployment = await this.deployService.getLastDeployment(project.id);
-    const mdl = deployment.manifest;
+    const mdl = deployment
+      ? deployment.manifest
+      : (await this.mdlService.makeCurrentModelMDL(project.id)).manifest;
     const eventName = TelemetryEvent.HOME_PREVIEW_ANSWER;
     try {
       const data = (await this.queryService.preview(response.sql, {
@@ -1015,7 +1017,9 @@ export class AskingService implements IAskingService {
     }
     const project = await this.projectService.getCurrentProject(projectId);
     const deployment = await this.deployService.getLastDeployment(project.id);
-    const mdl = deployment.manifest;
+    const mdl = deployment
+      ? deployment.manifest
+      : (await this.mdlService.makeCurrentModelMDL(project.id)).manifest;
     const steps = response?.breakdownDetail?.steps;
     const sql = safeFormatSQL(constructCteSql(steps, stepIndex));
     const eventName = TelemetryEvent.HOME_PREVIEW_ANSWER;
@@ -1043,7 +1047,10 @@ export class AskingService implements IAskingService {
     projectId?: number,
   ): Promise<Task> {
     const project = await this.projectService.getCurrentProject(projectId);
-    const { manifest } = await this.deployService.getLastDeployment(project.id);
+    const deployment = await this.deployService.getLastDeployment(project.id);
+    const manifest = deployment
+      ? deployment.manifest
+      : (await this.mdlService.makeCurrentModelMDL(project.id)).manifest;
 
     const response = await this.wrenAIAdaptor.generateRecommendationQuestions({
       manifest,
