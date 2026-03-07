@@ -16,6 +16,7 @@ export const COMMON_DASHBOARD_ITEM = gql`
       chartSchema
     }
     displayName
+    description
   }
 `;
 

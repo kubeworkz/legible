@@ -394,6 +394,7 @@ export type UpdateDashboardInput = {
 export type DashboardItem = {
   __typename?: 'DashboardItem';
   dashboardId: Scalars['Int'];
+  description?: Maybe<Scalars['String']>;
   detail: DashboardItemDetail;
   displayName?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
@@ -1840,7 +1841,8 @@ export type UpdateCurrentProjectInput = {
 };
 
 export type UpdateDashboardItemInput = {
-  displayName: Scalars['String'];
+  description?: InputMaybe<Scalars['String']>;
+  displayName?: InputMaybe<Scalars['String']>;
 };
 
 export type UpdateDashboardItemLayoutsInput = {

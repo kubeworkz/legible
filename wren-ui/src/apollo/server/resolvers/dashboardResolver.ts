@@ -174,16 +174,22 @@ export class DashboardResolver {
 
   public async updateDashboardItem(
     _root: any,
-    args: { where: { id: number }; data: { displayName: string } },
+    args: {
+      where: { id: number };
+      data: { displayName?: string; description?: string };
+    },
     ctx: IContext,
   ): Promise<DashboardItem> {
     const { id } = args.where;
-    const { displayName } = args.data;
+    const { displayName, description } = args.data;
     const item = await ctx.dashboardService.getDashboardItem(id);
     if (!item) {
       throw new Error(`Dashboard item not found. id: ${id}`);
     }
-    return await ctx.dashboardService.updateDashboardItem(id, { displayName });
+    return await ctx.dashboardService.updateDashboardItem(id, {
+      displayName,
+      description,
+    });
   }
 
   public async deleteDashboardItem(

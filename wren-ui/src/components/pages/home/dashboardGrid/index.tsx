@@ -73,6 +73,34 @@ const StyledDashboardGrid = styled.div`
     flex-grow: 1;
   }
 
+  .adm-pinned-description {
+    padding: 0 16px;
+
+    input {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 12px;
+      color: var(--gray-7);
+      background: transparent;
+      padding: 2px 0;
+      cursor: text;
+
+      &::placeholder {
+        color: var(--gray-5);
+      }
+
+      &:hover {
+        color: var(--gray-8);
+      }
+
+      &:focus {
+        color: var(--gray-9);
+        border-bottom: 1px solid var(--geekblue-6);
+      }
+    }
+  }
+
   .adm-pinned-actions {
     display: flex;
     gap: 4px;
@@ -81,8 +109,8 @@ const StyledDashboardGrid = styled.div`
   }
 
   .adm-pinned-content {
-    height: calc(100% - 40px);
-    padding: 16px 12px 16px;
+    height: calc(100% - 64px);
+    padding: 8px 12px 16px;
 
     &-overflow {
       overflow: auto;
@@ -312,6 +340,47 @@ const PinnedItemTitle = (props: { id: number; title: string }) => {
   );
 };
 
+const PinnedItemDescription = (props: {
+  id: number;
+  description: string | null;
+}) => {
+  const { id, description } = props;
+  const [value, setValue] = useState(description || '');
+
+  const [updateDashboardItem] = useUpdateDashboardItemMutation({
+    onError: (error) => console.error(error),
+  });
+
+  const handleBlur = () => {
+    const trimmed = value.trim();
+    if (trimmed === (description || '')) return;
+    updateDashboardItem({
+      variables: {
+        where: { id },
+        data: { description: trimmed || null },
+      },
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
+  return (
+    <div className="adm-pinned-description" onMouseDown={(e) => e.stopPropagation()}>
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        placeholder="Add description"
+      />
+    </div>
+  );
+};
+
 const PinnedItem = forwardRef(
   (
     props: {
@@ -408,6 +477,7 @@ const PinnedItem = forwardRef(
             </DashboardItemDropdown>
           </div>
         </div>
+        <PinnedItemDescription id={item.id} description={item.description || null} />
         <div className="adm-pinned-content">
           <div className="adm-pinned-content-overflow adm-scrollbar-track">
             <LoadingWrapper loading={loading} tip="Loading...">

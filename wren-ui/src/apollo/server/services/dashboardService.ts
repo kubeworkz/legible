@@ -29,7 +29,8 @@ export interface CreateDashboardItemInput {
 }
 
 export interface UpdateDashboardItemInput {
-  displayName: string;
+  displayName?: string;
+  description?: string;
 }
 
 export type UpdateDashboardItemLayouts = (DashboardItemLayout & {
@@ -277,9 +278,10 @@ export class DashboardService implements IDashboardService {
     dashboardItemId: number,
     input: UpdateDashboardItemInput,
   ): Promise<DashboardItem> {
-    return await this.dashboardItemRepository.updateOne(dashboardItemId, {
-      displayName: input.displayName,
-    });
+    const updateData: Record<string, any> = {};
+    if (input.displayName !== undefined) updateData.displayName = input.displayName;
+    if (input.description !== undefined) updateData.description = input.description;
+    return await this.dashboardItemRepository.updateOne(dashboardItemId, updateData);
   }
 
   public async updateDashboardItemLayouts(

@@ -1317,7 +1317,8 @@ export const typeDefs = gql`
   }
 
   input UpdateDashboardItemInput {
-    displayName: String!
+    displayName: String
+    description: String
   }
 
   input ItemLayoutInput {
@@ -1410,6 +1411,7 @@ export const typeDefs = gql`
     layout: DashboardItemLayout!
     detail: DashboardItemDetail!
     displayName: String
+    description: String
   }
 
   type Dashboard {

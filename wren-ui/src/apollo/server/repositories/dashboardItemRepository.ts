@@ -40,6 +40,7 @@ export interface DashboardItem {
   layout: DashboardItemLayout;
   detail: DashboardItemDetail;
   displayName?: string;
+  description?: string;
 }
 
 export interface IDashboardItemRepository
