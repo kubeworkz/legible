@@ -125,7 +125,7 @@ export default function Chart(props: VegaLiteProps) {
   };
 
   const getChartContent = () => {
-    if (values.length === 0) return <div>No available data</div>;
+    if (!values || values.length === 0) return <div>No available data</div>;
 
     if (parsedError) {
       return (

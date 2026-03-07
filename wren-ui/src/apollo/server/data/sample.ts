@@ -475,18 +475,18 @@ WHERE de.from_date <= DATE '2000-12-30'
               displayName: 'New Hires and Headcount by Dept (Until 2000)',
               type: 'STACKED_BAR',
               sql: `SELECT
-  EXTRACT(YEAR FROM de.from_date) AS year,
+  YEAR(de.from_date) AS hire_year,
   d.dept_name,
   COUNT(*) AS new_hires
 FROM dept_emp de
 JOIN departments d ON de.dept_no = d.dept_no
-WHERE EXTRACT(YEAR FROM de.from_date) BETWEEN 1985 AND 2000
-GROUP BY EXTRACT(YEAR FROM de.from_date), d.dept_name
-ORDER BY year, d.dept_name`,
+WHERE YEAR(de.from_date) BETWEEN 1985 AND 2000
+GROUP BY YEAR(de.from_date), d.dept_name
+ORDER BY hire_year, d.dept_name`,
               chartSchema: {
                 mark: { type: 'bar', tooltip: true },
                 encoding: {
-                  x: { field: 'year', type: 'ordinal', title: 'Year' },
+                  x: { field: 'hire_year', type: 'ordinal', title: 'Year' },
                   y: { field: 'new_hires', type: 'quantitative', title: 'New Hires', stack: true },
                   color: { field: 'dept_name', type: 'nominal', title: 'Department' },
                 },
@@ -588,16 +588,16 @@ ORDER BY avg_salary DESC`,
             {
               displayName: 'Salary trend over time',
               type: 'LINE',
-              sql: `SELECT EXTRACT(YEAR FROM s.from_date) AS year,
+              sql: `SELECT YEAR(s.from_date) AS salary_year,
   ROUND(AVG(s.salary), 2) AS avg_salary
 FROM salaries s
-WHERE EXTRACT(YEAR FROM s.from_date) BETWEEN 1985 AND 2000
-GROUP BY EXTRACT(YEAR FROM s.from_date)
-ORDER BY year`,
+WHERE YEAR(s.from_date) BETWEEN 1985 AND 2000
+GROUP BY YEAR(s.from_date)
+ORDER BY salary_year`,
               chartSchema: {
                 mark: { type: 'line', tooltip: true, point: true },
                 encoding: {
-                  x: { field: 'year', type: 'ordinal', title: 'Year' },
+                  x: { field: 'salary_year', type: 'ordinal', title: 'Year' },
                   y: { field: 'avg_salary', type: 'quantitative', title: 'Average Salary ($)' },
                 },
               },
