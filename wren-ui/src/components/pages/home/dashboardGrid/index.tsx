@@ -85,6 +85,7 @@ const StyledDashboardGrid = styled.div`
 
     &.is-placeholder .editable-cell-value-wrap {
       font-style: italic;
+      color: var(--gray-5);
     }
   }
 
