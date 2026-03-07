@@ -531,6 +531,112 @@ ORDER BY employee_count DESC`,
               },
               layout: { x: 3, y: 6, w: 3, h: 3 },
             },
+            {
+              displayName: 'Average Tenure by Department (Years)',
+              type: 'BAR',
+              sql: `SELECT d.dept_name,
+  ROUND(AVG(DATEDIFF('day', de.from_date,
+    CASE WHEN de.to_date > DATE '2000-12-30' THEN DATE '2000-12-30' ELSE de.to_date END
+  )) / 365.25, 2) AS avg_tenure_years
+FROM dept_emp de
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE de.from_date <= DATE '2000-12-30'
+GROUP BY d.dept_name
+ORDER BY avg_tenure_years DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'dept_name', type: 'nominal', title: 'Department', sort: '-y' },
+                  y: { field: 'avg_tenure_years', type: 'quantitative', title: 'Avg Tenure (Years)' },
+                },
+              },
+              layout: { x: 0, y: 9, w: 3, h: 3 },
+            },
+            {
+              displayName: 'Distribution of Tenure by Tenure Brackets',
+              type: 'BAR',
+              sql: `SELECT
+  CASE
+    WHEN tenure_years < 2 THEN '0-2'
+    WHEN tenure_years < 5 THEN '2-5'
+    WHEN tenure_years < 10 THEN '5-10'
+    WHEN tenure_years < 15 THEN '10-15'
+    ELSE '15+'
+  END AS tenure_bracket,
+  COUNT(*) AS employee_count
+FROM (
+  SELECT DATEDIFF('day', de.from_date,
+    CASE WHEN de.to_date > DATE '2000-12-30' THEN DATE '2000-12-30' ELSE de.to_date END
+  ) / 365.25 AS tenure_years
+  FROM dept_emp de
+  WHERE de.from_date <= DATE '2000-12-30'
+) sub
+GROUP BY tenure_bracket
+ORDER BY tenure_bracket`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'tenure_bracket', type: 'ordinal', title: 'Tenure Bracket (Years)', sort: ['0-2', '2-5', '5-10', '10-15', '15+'] },
+                  y: { field: 'employee_count', type: 'quantitative', title: 'Employees' },
+                },
+              },
+              layout: { x: 3, y: 9, w: 3, h: 3 },
+            },
+            {
+              displayName: 'Average Age of Employees',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(DATEDIFF('day', e.birth_date, DATE '2000-12-30') / 365.25), 1) AS avg_age
+FROM employees e
+JOIN dept_emp de ON e.emp_no = de.emp_no
+WHERE de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'`,
+              layout: { x: 0, y: 12, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Age Distribution by Department',
+              type: 'BAR',
+              sql: `SELECT d.dept_name,
+  ROUND(AVG(DATEDIFF('day', e.birth_date, DATE '2000-12-30') / 365.25), 1) AS avg_age
+FROM employees e
+JOIN dept_emp de ON e.emp_no = de.emp_no
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE de.from_date <= DATE '2000-12-30'
+  AND de.to_date >= DATE '2000-12-30'
+GROUP BY d.dept_name
+ORDER BY avg_age DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'dept_name', type: 'nominal', title: 'Department', sort: '-y' },
+                  y: { field: 'avg_age', type: 'quantitative', title: 'Average Age', scale: { zero: false } },
+                },
+              },
+              layout: { x: 2, y: 12, w: 4, h: 3 },
+            },
+            {
+              displayName: 'Employees Left by Year and Department (Up to 2000)',
+              type: 'STACKED_BAR',
+              sql: `SELECT
+  YEAR(de.to_date) AS departure_year,
+  d.dept_name,
+  COUNT(*) AS departures
+FROM dept_emp de
+JOIN departments d ON de.dept_no = d.dept_no
+WHERE de.to_date <= DATE '2000-12-30'
+  AND de.to_date < DATE '9999-01-01'
+  AND YEAR(de.to_date) BETWEEN 1985 AND 2000
+GROUP BY YEAR(de.to_date), d.dept_name
+ORDER BY departure_year, d.dept_name`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'departure_year', type: 'ordinal', title: 'Year' },
+                  y: { field: 'departures', type: 'quantitative', title: 'Employees Left', stack: true },
+                  color: { field: 'dept_name', type: 'nominal', title: 'Department' },
+                },
+              },
+              layout: { x: 0, y: 15, w: 6, h: 4 },
+            },
           ],
         },
         {

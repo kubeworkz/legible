@@ -19,6 +19,7 @@ import { DashboardItemDropdown } from '@/components/diagram/CustomDropdown';
 import EditableWrapper, { EditableContext } from '@/components/EditableWrapper';
 import {
   DashboardItem,
+  DashboardItemType,
   ItemLayoutInput,
 } from '@/apollo/client/graphql/__types__';
 import {
@@ -99,6 +100,21 @@ const StyledDashboardGrid = styled.div`
 
   .adm-pinned-item-chart {
     height: 100%;
+  }
+
+  .adm-pinned-item-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--gray-9);
+    line-height: 1;
+    padding: 0 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .react-grid-placeholder {
@@ -240,6 +256,27 @@ const DashboardGrid = forwardRef(
 
 export default DashboardGrid;
 
+const formatNumber = (value: number | string): string => {
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return String(value);
+  // Format with commas for thousands
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: Number.isInteger(num) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+const NumberItem = (props: { values?: Record<string, any>[] }) => {
+  const { values } = props;
+  if (!values || values.length === 0) return <div>No available data</div>;
+  // Get the first value from the first row
+  const firstRow = values[0];
+  const keys = Object.keys(firstRow);
+  if (keys.length === 0) return <div>No available data</div>;
+  const rawValue = firstRow[keys[0]];
+  return <div className="adm-pinned-item-number">{formatNumber(rawValue)}</div>;
+};
+
 const PinnedItemTitle = (props: { id: number; title: string }) => {
   const { title } = props;
   const [form] = Form.useForm();
@@ -374,19 +411,23 @@ const PinnedItem = forwardRef(
         <div className="adm-pinned-content">
           <div className="adm-pinned-content-overflow adm-scrollbar-track">
             <LoadingWrapper loading={loading} tip="Loading...">
-              <Chart
-                className="adm-pinned-item-chart"
-                width="100%"
-                height="100%"
-                spec={detail.chartSchema}
-                values={previewItem?.data}
-                forceUpdate={forceUpdate}
-                autoFilter
-                hideActions
-                hideTitle
-                hideLegend={isHideLegend}
-                isPinned
-              />
+              {item.type === DashboardItemType.NUMBER ? (
+                <NumberItem values={previewItem?.data} />
+              ) : (
+                <Chart
+                  className="adm-pinned-item-chart"
+                  width="100%"
+                  height="100%"
+                  spec={detail.chartSchema}
+                  values={previewItem?.data}
+                  forceUpdate={forceUpdate}
+                  autoFilter
+                  hideActions
+                  hideTitle
+                  hideLegend={isHideLegend}
+                  isPinned
+                />
+              )}
             </LoadingWrapper>
           </div>
           {lastRefreshTime && (
