@@ -265,6 +265,15 @@ export default class ChartSpecHandler {
       additionalProps = { point: this.options.point, tooltip: true };
     } else if (mark.type === MarkType.ARC) {
       additionalProps = { innerRadius: this.options.donutInner };
+    } else if (mark.type === MarkType.POINT || mark.type === MarkType.CIRCLE) {
+      // Preserve filled, size, opacity, and tooltip for scatter/bubble charts
+      const { filled, size, opacity, tooltip } = mark as any;
+      additionalProps = {
+        ...(filled !== undefined && { filled }),
+        ...(size !== undefined && { size }),
+        ...(opacity !== undefined && { opacity }),
+        tooltip: tooltip !== undefined ? tooltip : true,
+      };
     }
     this.mark = { type: mark.type, ...additionalProps };
   }
