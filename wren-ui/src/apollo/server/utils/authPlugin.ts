@@ -1,16 +1,24 @@
 import { ApolloServerPlugin } from 'apollo-server-plugin-base';
 import { IContext } from '@server/types';
-import { PUBLIC_OPERATIONS } from './authGuard';
+import { PUBLIC_OPERATIONS, INTERNAL_SERVICE_OPERATIONS } from './authGuard';
+
+const INTERNAL_SERVICE_TOKEN = process.env.INTERNAL_SERVICE_TOKEN || '';
 
 /**
  * Apollo Server plugin that enforces authentication on all operations
  * except those in the PUBLIC_OPERATIONS whitelist.
  *
+ * Internal service operations (e.g. previewSql used by AI service) require
+ * a valid INTERNAL_SERVICE_TOKEN passed via X-Service-Token header.
+ *
  * This provides blanket auth protection without modifying each resolver.
  */
 export function createAuthPlugin(): ApolloServerPlugin<IContext> {
   return {
-    async requestDidStart() {
+    async requestDidStart(requestContext) {
+      // Extract the service token from the request headers
+      const serviceToken =
+        requestContext.request.http?.headers?.get('x-service-token') || '';
       return {
         async didResolveOperation(requestContext) {
           const { context, operation } = requestContext;
@@ -40,6 +48,30 @@ export function createAuthPlugin(): ApolloServerPlugin<IContext> {
           });
 
           if (allPublic) return;
+
+          // Check if ALL top-level fields are internal service operations
+          // and verify the service token
+          const allInternal = selections.every((sel: any) => {
+            if (sel.kind === 'Field') {
+              return INTERNAL_SERVICE_OPERATIONS.has(sel.name.value);
+            }
+            return false;
+          });
+
+          if (allInternal) {
+            if (
+              INTERNAL_SERVICE_TOKEN &&
+              serviceToken === INTERNAL_SERVICE_TOKEN
+            ) {
+              return; // Valid service-to-service call
+            }
+            // If no service token configured, reject — don't fall through to
+            // allow unauthenticated access.
+            // Also reject if the token doesn't match.
+            throw new Error(
+              'Authentication required: internal service token invalid or missing',
+            );
+          }
 
           // Require authentication for non-public operations
           // Allow either session-based auth (currentUser) or API key auth (osk-/psk- key + organizationId)

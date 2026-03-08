@@ -129,7 +129,13 @@ export const PUBLIC_OPERATIONS = new Set([
   'me',
   'acceptInvitation',
   'IntrospectionQuery',
-  // Used by AI service internally without authentication
+]);
+
+/**
+ * Operations that require internal service token authentication
+ * (used by AI service for service-to-service calls).
+ */
+export const INTERNAL_SERVICE_OPERATIONS = new Set([
   'previewSql',
 ]);
 

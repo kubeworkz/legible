@@ -22,6 +22,7 @@ class WrenUI(Engine):
         **_,
     ):
         self._endpoint = endpoint
+        self._service_token = os.getenv("INTERNAL_SERVICE_TOKEN", "")
 
     async def execute_sql(
         self,
@@ -43,6 +44,10 @@ class WrenUI(Engine):
         else:
             data["limit"] = limit
 
+        headers = {}
+        if self._service_token:
+            headers["X-Service-Token"] = self._service_token
+
         try:
             async with session.post(
                 f"{self._endpoint}/api/graphql",
@@ -50,6 +55,7 @@ class WrenUI(Engine):
                     "query": "mutation PreviewSql($data: PreviewSQLDataInput) { previewSql(data: $data) }",
                     "variables": {"data": data},
                 },
+                headers=headers,
                 timeout=aiohttp.ClientTimeout(total=timeout),
             ) as response:
                 res_json = await response.json()

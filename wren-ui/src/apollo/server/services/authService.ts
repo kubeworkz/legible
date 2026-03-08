@@ -23,6 +23,25 @@ const SALT_ROUNDS = 12;
 const SESSION_TOKEN_BYTES = 48;
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+/**
+ * Validates password meets minimum security requirements.
+ * Throws descriptive error if any rule fails.
+ */
+function validatePassword(password: string): void {
+  if (!password || password.length < 8) {
+    throw new Error('Password must be at least 8 characters');
+  }
+  if (!/[A-Z]/.test(password)) {
+    throw new Error('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(password)) {
+    throw new Error('Password must contain at least one lowercase letter');
+  }
+  if (!/\d/.test(password)) {
+    throw new Error('Password must contain at least one digit');
+  }
+}
+
 export interface SignupInput {
   email: string;
   password: string;
@@ -86,6 +105,9 @@ export class AuthService implements IAuthService {
 
   public async signup(input: SignupInput): Promise<AuthPayload> {
     const { email, password, displayName } = input;
+
+    // Validate password strength
+    validatePassword(password);
 
     // Check if user already exists
     const existing = await this.userRepository.findByEmail(email);
@@ -154,7 +176,11 @@ export class AuthService implements IAuthService {
       lastLoginAt: new Date().toISOString(),
     });
 
-    // Create a session
+    // Invalidate all previous sessions on login to prevent
+    // accumulation of unlimited concurrent sessions
+    await this.sessionRepository.deleteAllByUserId(user.id);
+
+    // Create a new session
     const session = await this.createSession(user.id);
 
     return { token: session.token, user };
@@ -221,12 +247,15 @@ export class AuthService implements IAuthService {
     const valid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!valid) throw new Error('Current password is incorrect');
 
-    if (newPassword.length < 8) {
-      throw new Error('New password must be at least 8 characters');
-    }
+    // Validate new password strength
+    validatePassword(newPassword);
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
     await this.userRepository.updateOne(userId, { passwordHash });
+
+    // Invalidate all existing sessions — the user must re-login
+    await this.sessionRepository.deleteAllByUserId(userId);
+
     return true;
   }
 

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
-import { withApiKeyAuth } from '@/apollo/server/utils/apiKeyAuth';
+import { withApiKeyAuth, requireProjectAccess } from '@/apollo/server/utils/apiKeyAuth';
 import { ApiType } from '@server/repositories/apiHistoryRepository';
 import * as Errors from '@/apollo/server/utils/error';
 import { v4 as uuidv4 } from 'uuid';
@@ -38,6 +38,10 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  // Verify project-level access for session-based auth
+  const hasAccess = await requireProjectAccess(req, res);
+  if (!hasAccess) return;
+
   const { question, language, threadId } = req.body as AsyncAskRequest;
   const startTime = Date.now();
   const apiKeyAttribution = extractApiKeyAttribution(req);

@@ -80,6 +80,7 @@ export interface IContext {
   // auth
   currentUser?: User | null;
   authToken?: string;
+  clientIp?: string;
 
   // adaptor
   wrenEngineAdaptor: IWrenEngineAdaptor;

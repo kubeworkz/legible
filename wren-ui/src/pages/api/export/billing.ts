@@ -8,8 +8,9 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
+import { MemberRole } from '@server/repositories/memberRepository';
 
-const { billingService, authService, organizationService } = components;
+const { billingService, authService, organizationService, memberService } = components;
 
 function csvEscape(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -58,6 +59,16 @@ export default async function handler(
       return res.status(403).json({ error: 'No organization' });
     }
     const organizationId = userOrgs[0].id;
+
+    // Require org OWNER or ADMIN role to export billing data
+    try {
+      await memberService.requireRole(organizationId, session.id, [
+        MemberRole.OWNER,
+        MemberRole.ADMIN,
+      ]);
+    } catch {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
 
     // Get billing overview
     const overview = await billingService.getBillingOverview(organizationId);

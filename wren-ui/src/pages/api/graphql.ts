@@ -1,4 +1,3 @@
-import microCors from 'micro-cors';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { ApolloServer } from 'apollo-server-micro';
 import { typeDefs } from '@server';
@@ -15,12 +14,46 @@ import {
 import { createAuthPlugin } from '@/apollo/server/utils/authPlugin';
 import { TelemetryEvent } from '@/apollo/server/telemetry/telemetry';
 import { components } from '@/common';
+import depthLimit from 'graphql-depth-limit';
 
 const serverConfig = getConfig();
 const logger = getLogger('APOLLO');
 logger.level = 'debug';
 
-const cors = microCors();
+// Restrict CORS to configured origins (defaults to same-origin only).
+// Internal services (AI service) communicate server-to-server and are
+// unaffected by CORS restrictions.
+const ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+  : [];
+
+const CORS_HEADERS = [
+  'Content-Type',
+  'Authorization',
+  'X-Project-Id',
+  'X-Organization-Id',
+  'X-Service-Token',
+].join(', ');
+
+function applyCors(req: NextApiRequest, res: NextApiResponse): boolean {
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.length > 0 && ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  // If no allowed origins configured or origin not in list, no ACAO header
+  // is set — browsers will block the cross-origin request (same-origin OK).
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', CORS_HEADERS);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return true; // Preflight handled — stop processing
+  }
+  return false; // Continue to handler
+}
 
 export const config = {
   api: {
@@ -118,6 +151,7 @@ const bootstrapServer = async () => {
     typeDefs,
     resolvers,
     plugins: [createAuthPlugin()],
+    validationRules: [depthLimit(10)],
     formatError: (error: GraphQLError) => {
       // stop print error stacktrace of dry run error
       if (error.extensions?.code === GeneralErrorCodes.DRY_RUN_ERROR) {
@@ -155,6 +189,15 @@ const bootstrapServer = async () => {
     },
     introspection: process.env.NODE_ENV !== 'production',
     context: async ({ req }): Promise<IContext> => {
+      // Extract client IP for rate limiting
+      const xff = req?.headers?.['x-forwarded-for'];
+      const xri = req?.headers?.['x-real-ip'];
+      const clientIp = xff
+        ? (Array.isArray(xff) ? xff[0] : xff).split(',')[0].trim()
+        : xri
+          ? (Array.isArray(xri) ? xri[0] : String(xri))
+          : req?.socket?.remoteAddress || 'unknown';
+
       // Extract projectId from X-Project-Id header if present
       const projectIdHeader = req?.headers?.['x-project-id'];
       const projectId = projectIdHeader
@@ -218,6 +261,7 @@ const bootstrapServer = async () => {
         // auth
         currentUser,
         authToken,
+        clientIp,
         // adaptor
         wrenEngineAdaptor,
         ibisServerAdaptor: ibisAdaptor,
@@ -296,6 +340,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   })(req, res);
 };
 
-export default cors((req: NextApiRequest, res: NextApiResponse) =>
-  req.method === 'OPTIONS' ? res.status(200).end() : handler(req, res),
-);
+export default async function graphqlHandler(req: NextApiRequest, res: NextApiResponse) {
+  // Apply CORS; returns true for preflight OPTIONS to stop processing
+  if (applyCors(req, res)) return;
+  return handler(req, res);
+}

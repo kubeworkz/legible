@@ -2,6 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
 import { ThreadResponseAnswerStatus } from '@/apollo/server/services/askingService';
 import { TelemetryEvent } from '@/apollo/server/telemetry/telemetry';
+import {
+  withApiKeyAuth,
+  requireProjectAccess,
+} from '@/apollo/server/utils/apiKeyAuth';
 
 const { wrenAIAdaptor, askingService, telemetry } = components;
 
@@ -29,7 +33,7 @@ class ContentMap {
 
 const contentMap = new ContentMap();
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -37,6 +41,10 @@ export default async function handler(
     res.status(405).json({ error: 'Method Not Allowed' });
     return;
   }
+
+  // Verify project-level access for session-based auth
+  const hasAccess = await requireProjectAccess(req, res);
+  if (!hasAccess) return;
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
@@ -160,3 +168,5 @@ export default async function handler(
     res.status(500).end();
   }
 }
+
+export default withApiKeyAuth(handler);

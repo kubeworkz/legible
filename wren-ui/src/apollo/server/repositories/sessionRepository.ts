@@ -13,6 +13,7 @@ export interface Session {
 export interface ISessionRepository extends IBasicRepository<Session> {
   findByToken(token: string): Promise<Session | null>;
   deleteExpired(): Promise<number>;
+  deleteAllByUserId(userId: number, exceptSessionId?: number): Promise<number>;
 }
 
 export class SessionRepository
@@ -31,5 +32,20 @@ export class SessionRepository
     return this.knex(this.tableName)
       .where('expires_at', '<', new Date().toISOString())
       .delete();
+  }
+
+  /**
+   * Delete all sessions for a user.
+   * Optionally exclude a specific session (e.g. the current one).
+   */
+  public async deleteAllByUserId(
+    userId: number,
+    exceptSessionId?: number,
+  ): Promise<number> {
+    const query = this.knex(this.tableName).where('user_id', userId);
+    if (exceptSessionId) {
+      query.andWhereNot('id', exceptSessionId);
+    }
+    return query.delete();
   }
 }

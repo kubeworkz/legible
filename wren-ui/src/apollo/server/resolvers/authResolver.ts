@@ -1,6 +1,10 @@
 import { IContext } from '@server/types';
 import { User } from '@server/repositories/userRepository';
 import { requireAuth } from '@server/utils/authGuard';
+import {
+  checkLoginRateLimit,
+  checkSignupRateLimit,
+} from '@server/utils/authRateLimiter';
 
 export class AuthResolver {
   constructor() {
@@ -28,6 +32,13 @@ export class AuthResolver {
     args: { data: { email: string; password: string; displayName?: string } },
     ctx: IContext,
   ) {
+    // Rate limit signup by IP
+    const ip = ctx.clientIp || 'unknown';
+    const rl = checkSignupRateLimit(ip);
+    if (!rl.allowed) {
+      throw new Error(rl.reason || 'Too many signup attempts');
+    }
+
     const result = await ctx.authService.signup(args.data);
     const { passwordHash, ...user } = result.user;
     return { token: result.token, user };
@@ -38,6 +49,13 @@ export class AuthResolver {
     args: { data: { email: string; password: string } },
     ctx: IContext,
   ) {
+    // Rate limit login by IP
+    const ip = ctx.clientIp || 'unknown';
+    const rl = checkLoginRateLimit(ip);
+    if (!rl.allowed) {
+      throw new Error(rl.reason || 'Too many login attempts');
+    }
+
     const result = await ctx.authService.login(args.data);
     const { passwordHash, ...user } = result.user;
     return { token: result.token, user };
