@@ -1,6 +1,10 @@
 import { IContext } from '@server/types';
 import { requireProjectRead, requireProjectAdmin } from '../utils/authGuard';
 import { ViewerAccess } from '../repositories/projectPermissionOverrideRepository';
+import {
+  AuditCategory,
+  AuditAction,
+} from '@server/repositories/auditLogRepository';
 
 export class PermissionOverrideResolver {
   constructor() {
@@ -58,6 +62,20 @@ export class PermissionOverrideResolver {
         viewerModelingAccess: args.data.viewerModelingAccess,
         viewerKnowledgeAccess: args.data.viewerKnowledgeAccess,
       });
+
+    ctx.auditLogService.log({
+      userId: ctx.currentUser?.id,
+      userEmail: ctx.currentUser?.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      projectId,
+      category: AuditCategory.PROJECT_PERMISSION,
+      action: AuditAction.VIEWER_PERMISSION_UPDATED,
+      targetType: 'project',
+      targetId: projectId,
+      detail: args.data,
+    });
+
     return {
       projectId: override.projectId,
       viewerModelingAccess: override.viewerModelingAccess,

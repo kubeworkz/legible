@@ -38,6 +38,10 @@ import DataSourceSchemaDetector, {
 import { encryptConnectionInfo } from '../dataSource';
 import { TelemetryEvent } from '../telemetry/telemetry';
 import { requireAuth, requireOrganization, requireProjectRead, requireProjectWrite, requireProjectAdmin } from '../utils/authGuard';
+import {
+  AuditCategory,
+  AuditAction,
+} from '@server/repositories/auditLogRepository';
 
 const logger = getLogger('DataSourceResolver');
 logger.level = 'debug';
@@ -127,6 +131,19 @@ export class ProjectResolver {
       logger.debug(`Assigned user ${ctx.currentUser.id} as project OWNER`);
     }
 
+    ctx.auditLogService.log({
+      userId: ctx.currentUser?.id,
+      userEmail: ctx.currentUser?.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      projectId: project.id,
+      category: AuditCategory.PROJECT,
+      action: AuditAction.PROJECT_CREATED,
+      targetType: 'project',
+      targetId: project.id,
+      detail: { displayName: displayName.trim() },
+    });
+
     return this.formatProjectInfo(project);
   }
 
@@ -161,6 +178,20 @@ export class ProjectResolver {
     }
     await ctx.projectRepository.updateOne(arg.projectId, updateData);
     const project = await ctx.projectService.getProjectById(arg.projectId);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      projectId: arg.projectId,
+      category: AuditCategory.PROJECT,
+      action: AuditAction.PROJECT_UPDATED,
+      targetType: 'project',
+      targetId: arg.projectId,
+      detail: updateData,
+    });
+
     return this.formatProjectInfo(project);
   }
 
@@ -202,6 +233,20 @@ export class ProjectResolver {
     }
 
     logger.debug(`Project deleted: ${projectId}`);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      projectId,
+      category: AuditCategory.PROJECT,
+      action: AuditAction.PROJECT_DELETED,
+      targetType: 'project',
+      targetId: projectId,
+      detail: { displayName: (project as any).displayName },
+    });
+
     return true;
   }
 

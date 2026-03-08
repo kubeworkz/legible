@@ -1,6 +1,10 @@
 import { IContext } from '@server/types';
 import { MemberRole } from '@server/repositories/memberRepository';
 import { requireAuth, requireOrganization } from '../utils/authGuard';
+import {
+  AuditCategory,
+  AuditAction,
+} from '@server/repositories/auditLogRepository';
 
 export class ProjectApiKeyResolver {
   constructor() {
@@ -86,6 +90,20 @@ export class ProjectApiKeyResolver {
         rateLimitRpm: args.data.rateLimitRpm,
         rateLimitRpd: args.data.rateLimitRpd,
         tokenQuotaMonthly: args.data.tokenQuotaMonthly,
+      }).then((result) => {
+        ctx.auditLogService.log({
+          userId: user.id,
+          userEmail: user.email,
+          clientIp: ctx.clientIp,
+          organizationId,
+          projectId: args.data.projectId,
+          category: AuditCategory.API_KEY,
+          action: AuditAction.PROJECT_KEY_CREATED,
+          targetType: 'project_api_key',
+          targetId: result.key?.id,
+          detail: { name: args.data.name, projectId: args.data.projectId },
+        });
+        return result;
       });
     } catch (error) {
       console.error('[createProjectApiKey] Error:', error);
@@ -116,7 +134,22 @@ export class ProjectApiKeyResolver {
       );
     }
 
-    return ctx.projectApiKeyService.revokeKey(args.keyId, args.projectId);
+    return ctx.projectApiKeyService.revokeKey(args.keyId, args.projectId).then(
+      (result) => {
+        ctx.auditLogService.log({
+          userId: user.id,
+          userEmail: user.email,
+          clientIp: ctx.clientIp,
+          organizationId,
+          projectId: args.projectId,
+          category: AuditCategory.API_KEY,
+          action: AuditAction.PROJECT_KEY_REVOKED,
+          targetType: 'project_api_key',
+          targetId: args.keyId,
+        });
+        return result;
+      },
+    );
   }
 
   public async deleteProjectApiKey(
@@ -142,7 +175,22 @@ export class ProjectApiKeyResolver {
       );
     }
 
-    return ctx.projectApiKeyService.deleteKey(args.keyId, args.projectId);
+    return ctx.projectApiKeyService.deleteKey(args.keyId, args.projectId).then(
+      (result) => {
+        ctx.auditLogService.log({
+          userId: user.id,
+          userEmail: user.email,
+          clientIp: ctx.clientIp,
+          organizationId,
+          projectId: args.projectId,
+          category: AuditCategory.API_KEY,
+          action: AuditAction.PROJECT_KEY_DELETED,
+          targetType: 'project_api_key',
+          targetId: args.keyId,
+        });
+        return result;
+      },
+    );
   }
 
   public async updateProjectApiKeyRateLimits(

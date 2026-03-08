@@ -16,3 +16,4 @@ export * from './projectApiKeyService';
 export * from './folderService';
 export * from './spreadsheetService';
 export * from './projectMemberService';
+export * from './auditLogService';

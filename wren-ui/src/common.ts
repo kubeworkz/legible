@@ -35,10 +35,12 @@ import {
   SpreadsheetHistoryRepository,
   ProjectMemberRepository,
   ProjectPermissionOverrideRepository,
+  AuditLogRepository,
 } from '@server/repositories';
 import { FolderService } from '@server/services/folderService';
 import { SpreadsheetService } from '@server/services/spreadsheetService';
 import { ProjectMemberService } from '@server/services/projectMemberService';
+import { AuditLogService } from '@server/services/auditLogService';
 import {
   WrenEngineAdaptor,
   WrenAIAdaptor,
@@ -124,6 +126,7 @@ export const initComponents = () => {
   const projectMemberRepository = new ProjectMemberRepository(knex);
   const projectPermissionOverrideRepository =
     new ProjectPermissionOverrideRepository(knex);
+  const auditLogRepository = new AuditLogRepository(knex);
   const billingConfigRepository = new BillingConfigRepository(knex);
   const monthlyUsageCacheRepository = new MonthlyUsageCacheRepository(knex);
 
@@ -260,6 +263,9 @@ export const initComponents = () => {
     projectMemberRepository,
     memberRepository,
   });
+  const auditLogService = new AuditLogService({
+    auditLogRepository,
+  });
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =
@@ -321,6 +327,7 @@ export const initComponents = () => {
     spreadsheetRepository,
     projectMemberRepository,
     projectPermissionOverrideRepository,
+    auditLogRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -349,6 +356,7 @@ export const initComponents = () => {
     folderService,
     spreadsheetService,
     projectMemberService,
+    auditLogService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

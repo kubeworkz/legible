@@ -1816,6 +1816,45 @@ export const typeDefs = gql`
     canAccessKnowledge: Boolean!
   }
 
+  # ---- Audit Log ----
+  type AuditLogEntry {
+    id: Int!
+    timestamp: String!
+    userId: Int
+    userEmail: String
+    clientIp: String
+    organizationId: Int
+    projectId: Int
+    category: String!
+    action: String!
+    targetType: String
+    targetId: String
+    result: String!
+    detail: JSON
+    createdAt: String!
+  }
+
+  type AuditLogPaginatedResponse {
+    data: [AuditLogEntry!]!
+    total: Int!
+  }
+
+  input AuditLogFilterInput {
+    category: String
+    action: String
+    userId: Int
+    organizationId: Int
+    projectId: Int
+    result: String
+    startTime: String
+    endTime: String
+  }
+
+  input AuditLogPaginationInput {
+    limit: Int!
+    offset: Int!
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -1923,6 +1962,12 @@ export const typeDefs = gql`
     # Project Members
     projectMembers: [ProjectMemberType!]!
     myProjectRole: MyProjectRoleResult!
+
+    # Audit Logs
+    auditLogs(
+      filter: AuditLogFilterInput
+      pagination: AuditLogPaginationInput!
+    ): AuditLogPaginatedResponse!
   }
 
   type Mutation {

@@ -6,6 +6,10 @@ import {
   requireProjectRead,
   requireProjectAdmin,
 } from '../utils/authGuard';
+import {
+  AuditCategory,
+  AuditAction,
+} from '@server/repositories/auditLogRepository';
 
 export class ProjectMemberResolver {
   constructor() {
@@ -140,6 +144,20 @@ export class ProjectMemberResolver {
     const targetUser = await ctx.userRepository.findOneBy({
       id: pm.userId,
     });
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      projectId,
+      category: AuditCategory.PROJECT_MEMBER,
+      action: AuditAction.PROJECT_MEMBER_ADDED,
+      targetType: 'user',
+      targetId: args.data.userId,
+      detail: { role: args.data.role },
+    });
+
     return {
       ...pm,
       role: pm.role.toUpperCase(),
@@ -180,6 +198,19 @@ export class ProjectMemberResolver {
       role,
     );
 
+    ctx.auditLogService.log({
+      userId: ctx.currentUser?.id,
+      userEmail: ctx.currentUser?.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      projectId,
+      category: AuditCategory.PROJECT_MEMBER,
+      action: AuditAction.PROJECT_MEMBER_ROLE_CHANGED,
+      targetType: 'user',
+      targetId: args.data.userId,
+      detail: { newRole: args.data.role },
+    });
+
     const targetUser = await ctx.userRepository.findOneBy({
       id: pm.userId,
     });
@@ -211,6 +242,19 @@ export class ProjectMemberResolver {
   ) {
     await requireProjectAdmin(ctx);
     const projectId = ctx.projectId!;
+
+    ctx.auditLogService.log({
+      userId: ctx.currentUser?.id,
+      userEmail: ctx.currentUser?.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      projectId,
+      category: AuditCategory.PROJECT_MEMBER,
+      action: AuditAction.PROJECT_MEMBER_REMOVED,
+      targetType: 'user',
+      targetId: args.userId,
+    });
+
     return ctx.projectMemberService.removeMember(projectId, args.userId);
   }
 }

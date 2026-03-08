@@ -1,6 +1,10 @@
 import { IContext } from '@server/types';
 import { MemberRole } from '@server/repositories/memberRepository';
 import { requireAuth, requireOrganization } from '../utils/authGuard';
+import {
+  AuditCategory,
+  AuditAction,
+} from '@server/repositories/auditLogRepository';
 
 export class OrgApiKeyResolver {
   constructor() {
@@ -53,6 +57,19 @@ export class OrgApiKeyResolver {
         rateLimitRpm: args.data.rateLimitRpm,
         rateLimitRpd: args.data.rateLimitRpd,
         tokenQuotaMonthly: args.data.tokenQuotaMonthly,
+      }).then((result) => {
+        ctx.auditLogService.log({
+          userId: user.id,
+          userEmail: user.email,
+          clientIp: ctx.clientIp,
+          organizationId,
+          category: AuditCategory.API_KEY,
+          action: AuditAction.ORG_KEY_CREATED,
+          targetType: 'org_api_key',
+          targetId: result.key?.id,
+          detail: { name: args.data.name },
+        });
+        return result;
       });
     } catch (error) {
       console.error('[createApiKey] Error:', error);
@@ -78,6 +95,18 @@ export class OrgApiKeyResolver {
       MemberRole.OWNER,
       MemberRole.ADMIN,
     ]);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId,
+      category: AuditCategory.API_KEY,
+      action: AuditAction.ORG_KEY_REVOKED,
+      targetType: 'org_api_key',
+      targetId: args.keyId,
+    });
+
     return ctx.orgApiKeyService.revokeKey(args.keyId, organizationId);
   }
 
@@ -92,6 +121,18 @@ export class OrgApiKeyResolver {
       MemberRole.OWNER,
       MemberRole.ADMIN,
     ]);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId,
+      category: AuditCategory.API_KEY,
+      action: AuditAction.ORG_KEY_DELETED,
+      targetType: 'org_api_key',
+      targetId: args.keyId,
+    });
+
     return ctx.orgApiKeyService.deleteKey(args.keyId, organizationId);
   }
 

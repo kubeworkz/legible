@@ -1,6 +1,10 @@
 import { IContext } from '@server/types';
 import { MemberRole } from '@server/repositories/memberRepository';
 import { requireAuth } from '../utils/authGuard';
+import {
+  AuditCategory,
+  AuditAction,
+} from '@server/repositories/auditLogRepository';
 
 export class OrganizationResolver {
   constructor() {
@@ -58,7 +62,21 @@ export class OrganizationResolver {
     ctx: IContext,
   ) {
     const user = requireAuth(ctx);
-    return ctx.organizationService.createOrganization(args.data, user.id);
+    const org = await ctx.organizationService.createOrganization(args.data, user.id);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: org.id,
+      category: AuditCategory.ORG,
+      action: AuditAction.ORG_CREATED,
+      targetType: 'organization',
+      targetId: org.id,
+      detail: { displayName: args.data.displayName },
+    });
+
+    return org;
   }
 
   public async updateOrganization(
@@ -77,7 +95,20 @@ export class OrganizationResolver {
     return ctx.organizationService.updateOrganization(
       args.organizationId,
       args.data,
-    );
+    ).then((org) => {
+      ctx.auditLogService.log({
+        userId: user.id,
+        userEmail: user.email,
+        clientIp: ctx.clientIp,
+        organizationId: args.organizationId,
+        category: AuditCategory.ORG,
+        action: AuditAction.ORG_UPDATED,
+        targetType: 'organization',
+        targetId: args.organizationId,
+        detail: args.data,
+      });
+      return org;
+    });
   }
 
   public async deleteOrganization(
@@ -89,6 +120,18 @@ export class OrganizationResolver {
     await ctx.memberService.requireRole(args.organizationId, user.id, [
       MemberRole.OWNER,
     ]);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: args.organizationId,
+      category: AuditCategory.ORG,
+      action: AuditAction.ORG_DELETED,
+      targetType: 'organization',
+      targetId: args.organizationId,
+    });
+
     return ctx.organizationService.deleteOrganization(args.organizationId);
   }
 
@@ -104,7 +147,21 @@ export class OrganizationResolver {
       MemberRole.OWNER,
       MemberRole.ADMIN,
     ]);
-    return ctx.memberService.inviteMember(args.data, user.id);
+    const invitation = await ctx.memberService.inviteMember(args.data, user.id);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: args.data.organizationId,
+      category: AuditCategory.ORG_MEMBER,
+      action: AuditAction.MEMBER_INVITED,
+      targetType: 'invitation',
+      targetId: invitation.id,
+      detail: { email: args.data.email, role: args.data.role },
+    });
+
+    return invitation;
   }
 
   public async acceptInvitation(
@@ -113,7 +170,20 @@ export class OrganizationResolver {
     ctx: IContext,
   ) {
     const user = requireAuth(ctx);
-    return ctx.memberService.acceptInvitation(args.token, user.id);
+    const member = await ctx.memberService.acceptInvitation(args.token, user.id);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: member.organizationId,
+      category: AuditCategory.ORG_MEMBER,
+      action: AuditAction.INVITATION_ACCEPTED,
+      targetType: 'member',
+      targetId: member.id,
+    });
+
+    return member;
   }
 
   public async updateMemberRole(
@@ -132,10 +202,24 @@ export class OrganizationResolver {
       MemberRole.OWNER,
       MemberRole.ADMIN,
     ]);
-    return ctx.memberService.updateMemberRole(
+    const updated = await ctx.memberService.updateMemberRole(
       args.data.memberId,
       args.data.role,
     );
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: member.organizationId,
+      category: AuditCategory.ORG_MEMBER,
+      action: AuditAction.MEMBER_ROLE_CHANGED,
+      targetType: 'member',
+      targetId: args.data.memberId,
+      detail: { newRole: args.data.role },
+    });
+
+    return updated;
   }
 
   public async removeMember(
@@ -163,6 +247,18 @@ export class OrganizationResolver {
         member.userId,
       );
     }
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: member.organizationId,
+      category: AuditCategory.ORG_MEMBER,
+      action: AuditAction.MEMBER_REMOVED,
+      targetType: 'member',
+      targetId: args.memberId,
+      detail: { removedUserId: member.userId },
+    });
 
     return ctx.memberService.removeMember(args.memberId);
   }

@@ -18,6 +18,7 @@ import { SpreadsheetResolver } from './resolvers/spreadsheetResolver';
 import { BillingResolver } from './resolvers/billingResolver';
 import { PermissionOverrideResolver } from './resolvers/permissionOverrideResolver';
 import { ProjectMemberResolver } from './resolvers/projectMemberResolver';
+import { AuditLogResolver } from './resolvers/auditLogResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -40,6 +41,7 @@ const spreadsheetResolver = new SpreadsheetResolver();
 const billingResolver = new BillingResolver();
 const permissionOverrideResolver = new PermissionOverrideResolver();
 const projectMemberResolver = new ProjectMemberResolver();
+const auditLogResolver = new AuditLogResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -141,6 +143,9 @@ const resolvers = {
     // Project Members
     projectMembers: projectMemberResolver.listProjectMembers,
     myProjectRole: projectMemberResolver.getMyProjectRole,
+
+    // Audit Logs
+    auditLogs: auditLogResolver.getAuditLogs,
 
     // Spreadsheets
     spreadsheets: spreadsheetResolver.getSpreadsheets,

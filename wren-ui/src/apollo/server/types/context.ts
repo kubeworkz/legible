@@ -35,6 +35,7 @@ import { IFolderRepository } from '@server/repositories/folderRepository';
 import { IFolderAccessRepository } from '@server/repositories/folderAccessRepository';
 import { IProjectMemberRepository } from '@server/repositories/projectMemberRepository';
 import { IProjectPermissionOverrideRepository } from '@server/repositories/projectPermissionOverrideRepository';
+import { IAuditLogRepository } from '@server/repositories/auditLogRepository';
 import { ISpreadsheetRepository } from '@server/repositories/spreadsheetRepository';
 import {
   IQueryService,
@@ -56,6 +57,7 @@ import { IRateLimitService } from '../services/rateLimitService';
 import { IBillingService } from '../services/billingService';
 import { IFolderService } from '../services/folderService';
 import { IProjectMemberService } from '../services/projectMemberService';
+import { IAuditLogService } from '../services/auditLogService';
 import { ISpreadsheetService } from '../services/spreadsheetService';
 import { ITelemetry } from '@server/telemetry/telemetry';
 import {
@@ -108,6 +110,7 @@ export interface IContext {
   folderService: IFolderService;
   spreadsheetService: ISpreadsheetService;
   projectMemberService: IProjectMemberService;
+  auditLogService: IAuditLogService;
 
   // repository
   projectRepository: IProjectRepository;
@@ -140,6 +143,7 @@ export interface IContext {
   spreadsheetRepository: ISpreadsheetRepository;
   projectMemberRepository: IProjectMemberRepository;
   projectPermissionOverrideRepository: IProjectPermissionOverrideRepository;
+  auditLogRepository: IAuditLogRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;

@@ -30,6 +30,10 @@ import { CompactTable, PreviewDataResponse } from '@server/services';
 import { TelemetryEvent } from '../telemetry/telemetry';
 import { requireProjectRead, requireProjectWrite, requireModelingRead } from '../utils/authGuard';
 import {
+  AuditCategory,
+  AuditAction,
+} from '@server/repositories/auditLogRepository';
+import {
   ensureModelOwnership,
   ensureViewOwnership,
   ensureRelationOwnership,
@@ -270,6 +274,19 @@ export class ModelResolver {
       project.id,
       args.force,
     );
+
+    ctx.auditLogService.log({
+      userId: ctx.currentUser?.id,
+      userEmail: ctx.currentUser?.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      projectId: project.id,
+      category: AuditCategory.DEPLOY,
+      action: AuditAction.MODEL_DEPLOYED,
+      targetType: 'project',
+      targetId: project.id,
+      detail: { force: !!args.force },
+    });
 
     // only generating for user's data source
     if (project.sampleDataset === null) {

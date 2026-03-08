@@ -35,3 +35,4 @@ export * from './spreadsheetRepository';
 export * from './spreadsheetHistoryRepository';
 export * from './projectMemberRepository';
 export * from './projectPermissionOverrideRepository';
+export * from './auditLogRepository';

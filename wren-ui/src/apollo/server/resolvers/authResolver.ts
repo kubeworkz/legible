@@ -5,6 +5,11 @@ import {
   checkLoginRateLimit,
   checkSignupRateLimit,
 } from '@server/utils/authRateLimiter';
+import {
+  AuditCategory,
+  AuditAction,
+  AuditResult,
+} from '@server/repositories/auditLogRepository';
 
 export class AuthResolver {
   constructor() {
@@ -41,6 +46,18 @@ export class AuthResolver {
 
     const result = await ctx.authService.signup(args.data);
     const { passwordHash, ...user } = result.user;
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      category: AuditCategory.AUTH,
+      action: AuditAction.SIGNUP,
+      targetType: 'user',
+      targetId: user.id,
+      detail: { email: user.email },
+    });
+
     return { token: result.token, user };
   }
 
@@ -56,9 +73,32 @@ export class AuthResolver {
       throw new Error(rl.reason || 'Too many login attempts');
     }
 
-    const result = await ctx.authService.login(args.data);
-    const { passwordHash, ...user } = result.user;
-    return { token: result.token, user };
+    try {
+      const result = await ctx.authService.login(args.data);
+      const { passwordHash, ...user } = result.user;
+
+      ctx.auditLogService.log({
+        userId: user.id,
+        userEmail: user.email,
+        clientIp: ctx.clientIp,
+        category: AuditCategory.AUTH,
+        action: AuditAction.LOGIN,
+        targetType: 'user',
+        targetId: user.id,
+      });
+
+      return { token: result.token, user };
+    } catch (err) {
+      ctx.auditLogService.log({
+        userEmail: args.data.email,
+        clientIp: ctx.clientIp,
+        category: AuditCategory.AUTH,
+        action: AuditAction.LOGIN_FAILED,
+        result: AuditResult.FAILURE,
+        detail: { email: args.data.email },
+      });
+      throw err;
+    }
   }
 
   public async logout(
@@ -67,6 +107,16 @@ export class AuthResolver {
     ctx: IContext,
   ): Promise<boolean> {
     if (!ctx.authToken) return true;
+
+    ctx.auditLogService.log({
+      userId: ctx.currentUser?.id,
+      userEmail: ctx.currentUser?.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      category: AuditCategory.AUTH,
+      action: AuditAction.LOGOUT,
+    });
+
     return ctx.authService.logout(ctx.authToken);
   }
 
@@ -78,6 +128,19 @@ export class AuthResolver {
     const user = requireAuth(ctx);
     const updated = await ctx.authService.updateProfile(user.id, args.data);
     const { passwordHash, ...rest } = updated;
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      category: AuditCategory.PROFILE,
+      action: AuditAction.PROFILE_UPDATED,
+      targetType: 'user',
+      targetId: user.id,
+      detail: args.data,
+    });
+
     return rest;
   }
 
@@ -87,11 +150,24 @@ export class AuthResolver {
     ctx: IContext,
   ): Promise<boolean> {
     const user = requireAuth(ctx);
-    return ctx.authService.changePassword(
+    const result = await ctx.authService.changePassword(
       user.id,
       args.data.currentPassword,
       args.data.newPassword,
     );
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      category: AuditCategory.AUTH,
+      action: AuditAction.PASSWORD_CHANGED,
+      targetType: 'user',
+      targetId: user.id,
+    });
+
+    return result;
   }
 
   public async deleteAccount(
@@ -101,6 +177,18 @@ export class AuthResolver {
   ): Promise<boolean> {
     const user = requireAuth(ctx);
     if (!ctx.authToken) throw new Error('Authentication required');
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId: ctx.organizationId,
+      category: AuditCategory.AUTH,
+      action: AuditAction.ACCOUNT_DELETED,
+      targetType: 'user',
+      targetId: user.id,
+    });
+
     return ctx.authService.deleteAccount(user.id, ctx.authToken);
   }
 }
