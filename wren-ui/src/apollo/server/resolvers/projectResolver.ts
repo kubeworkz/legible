@@ -37,7 +37,7 @@ import DataSourceSchemaDetector, {
 } from '@server/managers/dataSourceSchemaDetector';
 import { encryptConnectionInfo } from '../dataSource';
 import { TelemetryEvent } from '../telemetry/telemetry';
-import { requireAuth, requireOrganization } from '../utils/authGuard';
+import { requireAuth, requireOrganization, requireProjectRead, requireProjectWrite, requireProjectAdmin } from '../utils/authGuard';
 
 const logger = getLogger('DataSourceResolver');
 logger.level = 'debug';
@@ -75,6 +75,7 @@ export class ProjectResolver {
   }
 
   public async listProjects(_root: any, _arg: any, ctx: IContext) {
+    requireAuth(ctx);
     const projects = await ctx.projectService.listProjects(ctx.organizationId);
     return projects.map((p) => this.formatProjectInfo(p));
   }
@@ -84,6 +85,7 @@ export class ProjectResolver {
     arg: { projectId: number },
     ctx: IContext,
   ) {
+    requireAuth(ctx);
     const project = await ctx.projectService.getProjectById(arg.projectId);
     return this.formatProjectInfo(project);
   }
@@ -93,6 +95,8 @@ export class ProjectResolver {
     arg: { data: { displayName: string; language?: string; timezone?: string } },
     ctx: IContext,
   ) {
+    requireAuth(ctx);
+    requireOrganization(ctx);
     const { displayName, language, timezone } = arg.data;
     if (!displayName || displayName.trim().length === 0) {
       throw new Error('Project display name is required');
@@ -134,6 +138,10 @@ export class ProjectResolver {
     },
     ctx: IContext,
   ) {
+    const user = requireAuth(ctx);
+    await ctx.projectMemberService.requireProjectRole(
+      arg.projectId, user.id, [ProjectRole.OWNER], ctx.organizationId,
+    );
     const { displayName, language, timezone } = arg.data;
     const updateData: Record<string, any> = {};
     if (displayName !== undefined && displayName !== null) {
@@ -161,6 +169,10 @@ export class ProjectResolver {
     arg: { projectId: number },
     ctx: IContext,
   ) {
+    const user = requireAuth(ctx);
+    await ctx.projectMemberService.requireProjectRole(
+      arg.projectId, user.id, [ProjectRole.OWNER], ctx.organizationId,
+    );
     const { projectId } = arg;
 
     const allProjects = await ctx.projectService.listProjects(ctx.organizationId);
@@ -211,6 +223,7 @@ export class ProjectResolver {
   }
 
   public async getSettings(_root: any, _arg: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const generalConnectionInfo =
       ctx.projectService.getGeneralConnectionInfo(project);
@@ -235,6 +248,7 @@ export class ProjectResolver {
     _arg: any,
     ctx: IContext,
   ) {
+    await requireProjectRead(ctx);
     return ctx.projectService.getProjectRecommendationQuestions(ctx.projectId);
   }
 
@@ -243,6 +257,7 @@ export class ProjectResolver {
     arg: { data: { language: string } },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { language } = arg.data;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     await ctx.projectRepository.updateOne(project.id, {
@@ -259,6 +274,7 @@ export class ProjectResolver {
   }
 
   public async resetCurrentProject(_root: any, _arg: any, ctx: IContext) {
+    await requireProjectAdmin(ctx);
     let project;
     try {
       project = await ctx.projectService.getCurrentProject(ctx.projectId);
@@ -300,6 +316,7 @@ export class ProjectResolver {
     _arg: { data: SampleDatasetData },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { name } = _arg.data;
     const dataset = sampleDatasets[snakeCase(name)];
     if (!dataset) {
@@ -557,6 +574,7 @@ export class ProjectResolver {
   }
 
   public async getOnboardingStatus(_root: any, _arg: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     let project: Project | null;
     try {
       project = await ctx.projectRepository.getCurrentProject(ctx.projectId);
@@ -596,6 +614,7 @@ export class ProjectResolver {
     },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { type, properties } = args.data;
 
     const { displayName, ...connectionInfo } = properties;
@@ -720,6 +739,7 @@ export class ProjectResolver {
     args: { data: DataSource },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { properties } = args.data;
     const { displayName, ...connectionInfo } = properties;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
@@ -767,6 +787,7 @@ export class ProjectResolver {
   }
 
   public async listDataSourceTables(_root: any, _arg, ctx: IContext) {
+    await requireProjectRead(ctx);
     return await ctx.projectService.getProjectDataSourceTables(
       undefined,
       ctx.projectId,
@@ -780,6 +801,7 @@ export class ProjectResolver {
     },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const eventName = TelemetryEvent.CONNECTION_SAVE_TABLES;
 
     // get current project
@@ -813,6 +835,7 @@ export class ProjectResolver {
   }
 
   public async autoGenerateRelation(_root: any, _arg: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
 
     // get models and columns
@@ -891,6 +914,7 @@ export class ProjectResolver {
     arg: { data: { relations: RelationData[] } },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const eventName = TelemetryEvent.CONNECTION_SAVE_RELATION;
     try {
       const savedRelations = await ctx.modelService.saveRelations(
@@ -915,6 +939,7 @@ export class ProjectResolver {
   }
 
   public async getSchemaChange(_root: any, _arg: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const lastSchemaChange =
       await ctx.schemaChangeRepository.findLastSchemaChange(project.id);
@@ -973,6 +998,7 @@ export class ProjectResolver {
     _arg: any,
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const schemaDetector = new DataSourceSchemaDetector({
       ctx,
@@ -999,6 +1025,7 @@ export class ProjectResolver {
     arg: { where: { type: SchemaChangeType } },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { type } = arg.where;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const schemaDetector = new DataSourceSchemaDetector({

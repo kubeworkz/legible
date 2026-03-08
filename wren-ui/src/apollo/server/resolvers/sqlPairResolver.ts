@@ -4,6 +4,7 @@ import * as Errors from '@server/utils/error';
 import { TelemetryEvent, TrackTelemetry } from '@server/telemetry/telemetry';
 import { DialectSQL, WrenSQL } from '@server/models/adaptor';
 import { safeFormatSQL } from '@server/utils/sqlFormat';
+import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
 
 export class SqlPairResolver {
   constructor() {
@@ -20,6 +21,7 @@ export class SqlPairResolver {
     _arg: any,
     ctx: IContext,
   ): Promise<SqlPair[]> {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.sqlPairService.getProjectSqlPairs(project.id);
   }
@@ -35,6 +37,7 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ): Promise<SqlPair> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     await this.validateSql(arg.data.sql, ctx);
     return await ctx.sqlPairService.createSqlPair(project.id, arg.data);
@@ -54,6 +57,7 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ): Promise<SqlPair> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     await this.validateSql(arg.data.sql, ctx);
     return ctx.sqlPairService.editSqlPair(project.id, arg.where.id, arg.data);
@@ -69,6 +73,7 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.sqlPairService.deleteSqlPair(project.id, arg.where.id);
   }
@@ -82,6 +87,7 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const questions = await ctx.sqlPairService.generateQuestions(project, [
       arg.data.sql,
@@ -98,6 +104,7 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ): Promise<WrenSQL> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const lastDeployment = await ctx.deployService.getLastDeployment(
       project.id,

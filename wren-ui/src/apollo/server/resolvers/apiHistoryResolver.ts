@@ -1,5 +1,6 @@
 import { ApiType, ApiHistory, UsageFilter } from '@server/repositories/apiHistoryRepository';
 import { IContext } from '@server/types';
+import { requireProjectRead } from '../utils/authGuard';
 
 export interface ApiHistoryFilter {
   apiType?: ApiType;
@@ -77,6 +78,7 @@ export class ApiHistoryResolver {
     },
     ctx: IContext,
   ) {
+    await requireProjectRead(ctx);
     const { filter, pagination } = args;
     const { offset, limit } = pagination;
 
@@ -158,6 +160,7 @@ export class ApiHistoryResolver {
     args: { filter?: ApiUsageFilterInput },
     ctx: IContext,
   ) {
+    await requireProjectRead(ctx);
     const { filter } = args;
 
     // Build usage filter

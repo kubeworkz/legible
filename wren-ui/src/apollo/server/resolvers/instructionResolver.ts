@@ -3,6 +3,7 @@ import { UpdateInstructionInput } from '@server/models';
 import { Instruction } from '@server/repositories/instructionRepository';
 import { getLogger } from '@server/utils';
 import { TelemetryEvent, TrackTelemetry } from '@server/telemetry/telemetry';
+import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
 
 const logger = getLogger('InstructionResolver');
 logger.level = 'debug';
@@ -20,6 +21,7 @@ export class InstructionResolver {
     _args: any,
     ctx: IContext,
   ): Promise<Instruction[]> {
+    await requireProjectRead(ctx);
     try {
       const project = await ctx.projectService.getCurrentProject(ctx.projectId);
       return await ctx.instructionService.getInstructions(project.id);
@@ -41,6 +43,7 @@ export class InstructionResolver {
     },
     ctx: IContext,
   ): Promise<Instruction> {
+    await requireProjectWrite(ctx);
     const { instruction, questions, isDefault } = args.data;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return await ctx.instructionService.createInstruction({
@@ -63,6 +66,7 @@ export class InstructionResolver {
     },
     ctx: IContext,
   ): Promise<Instruction> {
+    await requireProjectWrite(ctx);
     const { id } = args.where;
     const { instruction, questions, isDefault } = args.data;
     if (!id) {
@@ -84,6 +88,7 @@ export class InstructionResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const { id } = args.where;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     await ctx.instructionService.deleteInstruction(id, project.id);

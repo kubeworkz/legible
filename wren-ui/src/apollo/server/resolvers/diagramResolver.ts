@@ -19,6 +19,7 @@ import {
 import { ColumnMDL, Manifest } from '@server/mdl/type';
 import { getLogger } from '@server/utils';
 import { MDLBuilder } from '../mdl/mdlBuilder';
+import { requireProjectRead } from '../utils/authGuard';
 
 const logger = getLogger('DiagramResolver');
 logger.level = 'debug';
@@ -33,6 +34,7 @@ export class DiagramResolver {
     _args: any,
     ctx: IContext,
   ): Promise<Diagram> {
+    await requireProjectRead(ctx);
     const project = await ctx.projectRepository.getCurrentProject(
       ctx.projectId,
     );

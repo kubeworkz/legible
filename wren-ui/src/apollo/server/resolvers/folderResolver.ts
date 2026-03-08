@@ -2,6 +2,7 @@ import { IContext } from '@server/types';
 import { Folder } from '@server/repositories/folderRepository';
 import { FolderAccess } from '@server/repositories/folderAccessRepository';
 import { getLogger } from '@server/utils';
+import { requireProjectRead, requireProjectWrite, requireProjectAdmin } from '../utils/authGuard';
 
 const logger = getLogger('FolderResolver');
 logger.level = 'debug';
@@ -27,6 +28,7 @@ export class FolderResolver {
     _args: any,
     ctx: IContext,
   ): Promise<Folder[]> {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const userId = ctx.currentUser?.id;
     if (!userId) {
@@ -44,6 +46,7 @@ export class FolderResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ): Promise<Folder> {
+    await requireProjectRead(ctx);
     return ctx.folderService.getFolder(args.where.id);
   }
 
@@ -58,6 +61,7 @@ export class FolderResolver {
     },
     ctx: IContext,
   ): Promise<Folder> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const userId = ctx.currentUser?.id;
     if (!userId) {
@@ -78,6 +82,7 @@ export class FolderResolver {
     },
     ctx: IContext,
   ): Promise<Folder> {
+    await requireProjectWrite(ctx);
     return ctx.folderService.updateFolder(args.where.id, {
       name: args.data.name,
       visibility: args.data.visibility as any,
@@ -90,6 +95,7 @@ export class FolderResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     return ctx.folderService.deleteFolder(args.where.id);
   }
 
@@ -98,6 +104,7 @@ export class FolderResolver {
     _args: any,
     ctx: IContext,
   ): Promise<{ personal: Folder; public: Folder }> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const userId = ctx.currentUser?.id;
     if (!userId) {
@@ -111,6 +118,7 @@ export class FolderResolver {
     args: { where: { folderId: number } },
     ctx: IContext,
   ): Promise<FolderAccess[]> {
+    await requireProjectRead(ctx);
     return ctx.folderService.getFolderAccess(args.where.folderId);
   }
 
@@ -122,6 +130,7 @@ export class FolderResolver {
     },
     ctx: IContext,
   ): Promise<FolderAccess[]> {
+    await requireProjectAdmin(ctx);
     return ctx.folderService.setFolderAccess(
       args.where.folderId,
       args.data.entries.map((e) => ({
@@ -136,6 +145,7 @@ export class FolderResolver {
     args: { data: { dashboardId: number; folderId: number | null } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     return ctx.folderService.moveDashboardToFolder(
       args.data.dashboardId,
       args.data.folderId,
@@ -147,6 +157,7 @@ export class FolderResolver {
     args: { data: { threadId: number; folderId: number | null } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     return ctx.folderService.moveThreadToFolder(
       args.data.threadId,
       args.data.folderId,
@@ -158,6 +169,7 @@ export class FolderResolver {
     args: { data: { spreadsheetId: number; folderId: number | null } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     return ctx.folderService.moveSpreadsheetToFolder(
       args.data.spreadsheetId,
       args.data.folderId,
@@ -171,6 +183,7 @@ export class FolderResolver {
     },
     ctx: IContext,
   ): Promise<Folder[]> {
+    await requireProjectWrite(ctx);
     return ctx.folderService.reorderFolders(args.data.orders);
   }
 

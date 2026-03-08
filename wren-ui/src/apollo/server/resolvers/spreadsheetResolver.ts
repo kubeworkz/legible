@@ -3,6 +3,7 @@ import { Spreadsheet } from '@server/repositories/spreadsheetRepository';
 import { SpreadsheetHistory } from '@server/repositories/spreadsheetHistoryRepository';
 import { getLogger } from '@server/utils';
 import { DEFAULT_PREVIEW_LIMIT, PreviewDataResponse } from '@server/services';
+import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
 
 const logger = getLogger('SpreadsheetResolver');
 logger.level = 'debug';
@@ -26,6 +27,7 @@ export class SpreadsheetResolver {
     args: { folderId?: number },
     ctx: IContext,
   ): Promise<Spreadsheet[]> {
+    await requireProjectRead(ctx);
     const all = await ctx.spreadsheetService.listSpreadsheets(ctx.projectId);
     if (args.folderId !== undefined && args.folderId !== null) {
       return all.filter((s) => s.folderId === args.folderId);
@@ -38,6 +40,7 @@ export class SpreadsheetResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ): Promise<Spreadsheet> {
+    await requireProjectRead(ctx);
     return await ctx.spreadsheetService.getSpreadsheet(args.where.id);
   }
 
@@ -48,6 +51,7 @@ export class SpreadsheetResolver {
     },
     ctx: IContext,
   ): Promise<Spreadsheet> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     // Auto-set creator name from the logged-in user if not explicitly provided
     const creatorName =
@@ -77,6 +81,7 @@ export class SpreadsheetResolver {
     },
     ctx: IContext,
   ): Promise<Spreadsheet> {
+    await requireProjectWrite(ctx);
     return await ctx.spreadsheetService.updateSpreadsheet(
       args.where.id,
       args.data,
@@ -88,6 +93,7 @@ export class SpreadsheetResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     return await ctx.spreadsheetService.deleteSpreadsheet(args.where.id);
   }
 
@@ -96,6 +102,7 @@ export class SpreadsheetResolver {
     args: { data: { spreadsheetId: number; sql?: string; limit?: number } },
     ctx: IContext,
   ): Promise<any> {
+    await requireProjectRead(ctx);
     const { spreadsheetId, sql: overrideSql, limit } = args.data;
     const spreadsheet =
       await ctx.spreadsheetService.getSpreadsheet(spreadsheetId);
@@ -132,6 +139,7 @@ export class SpreadsheetResolver {
     args: { where: { spreadsheetId: number } },
     ctx: IContext,
   ): Promise<SpreadsheetHistory[]> {
+    await requireProjectRead(ctx);
     return await ctx.spreadsheetService.listHistory(args.where.spreadsheetId);
   }
 
@@ -147,6 +155,7 @@ export class SpreadsheetResolver {
     },
     ctx: IContext,
   ): Promise<Spreadsheet> {
+    await requireProjectWrite(ctx);
     const { spreadsheetId, changeSummary, ...updateData } = args.data;
     return await ctx.spreadsheetService.saveWithHistory(
       spreadsheetId,
@@ -160,6 +169,7 @@ export class SpreadsheetResolver {
     args: { data: { spreadsheetId: number; historyId: number } },
     ctx: IContext,
   ): Promise<Spreadsheet> {
+    await requireProjectWrite(ctx);
     return await ctx.spreadsheetService.restoreVersion(
       args.data.spreadsheetId,
       args.data.historyId,
@@ -171,6 +181,7 @@ export class SpreadsheetResolver {
     args: { data: { spreadsheetId: number; name?: string } },
     ctx: IContext,
   ): Promise<Spreadsheet> {
+    await requireProjectWrite(ctx);
     return await ctx.spreadsheetService.duplicateSpreadsheet(
       args.data.spreadsheetId,
       args.data.name,

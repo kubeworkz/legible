@@ -1,5 +1,6 @@
 import { IContext } from '@server/types';
 import { User } from '@server/repositories/userRepository';
+import { ProjectRole } from '@server/repositories/projectMemberRepository';
 
 /**
  * Shared authentication guard. Throws if ctx.currentUser is not authenticated.
@@ -60,6 +61,66 @@ export async function requireProjectAccess(ctx: IContext): Promise<number> {
   return ctx.projectId;
 }
 
+/** Role sets for convenience */
+const READ_ROLES = [ProjectRole.OWNER, ProjectRole.CONTRIBUTOR, ProjectRole.VIEWER];
+const WRITE_ROLES = [ProjectRole.OWNER, ProjectRole.CONTRIBUTOR];
+const ADMIN_ROLES = [ProjectRole.OWNER];
+
+/**
+ * Ensures the user has at least VIEWER access to the current project.
+ * Org OWNER/ADMIN get implicit OWNER access (handled by ProjectMemberService).
+ * Returns the verified projectId.
+ */
+export async function requireProjectRead(ctx: IContext): Promise<number> {
+  const user = requireAuth(ctx);
+  if (!ctx.projectId) {
+    throw new Error('Project context required');
+  }
+  await ctx.projectMemberService.requireProjectRole(
+    ctx.projectId,
+    user.id,
+    READ_ROLES,
+    ctx.organizationId,
+  );
+  return ctx.projectId;
+}
+
+/**
+ * Ensures the user has at least CONTRIBUTOR access to the current project.
+ * Returns the verified projectId.
+ */
+export async function requireProjectWrite(ctx: IContext): Promise<number> {
+  const user = requireAuth(ctx);
+  if (!ctx.projectId) {
+    throw new Error('Project context required');
+  }
+  await ctx.projectMemberService.requireProjectRole(
+    ctx.projectId,
+    user.id,
+    WRITE_ROLES,
+    ctx.organizationId,
+  );
+  return ctx.projectId;
+}
+
+/**
+ * Ensures the user has OWNER access to the current project.
+ * Returns the verified projectId.
+ */
+export async function requireProjectAdmin(ctx: IContext): Promise<number> {
+  const user = requireAuth(ctx);
+  if (!ctx.projectId) {
+    throw new Error('Project context required');
+  }
+  await ctx.projectMemberService.requireProjectRole(
+    ctx.projectId,
+    user.id,
+    ADMIN_ROLES,
+    ctx.organizationId,
+  );
+  return ctx.projectId;
+}
+
 /** Operations that don't require authentication */
 export const PUBLIC_OPERATIONS = new Set([
   'signup',
@@ -67,4 +128,6 @@ export const PUBLIC_OPERATIONS = new Set([
   'me',
   'acceptInvitation',
   'IntrospectionQuery',
+  // Used by AI service internally without authentication
+  'previewSql',
 ]);

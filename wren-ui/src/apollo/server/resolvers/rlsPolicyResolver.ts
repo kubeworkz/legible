@@ -9,6 +9,7 @@ import {
   UpdateRlsPolicyInput,
   AssignSessionPropertyValueInput,
 } from '@server/services/rlsPolicyService';
+import { requireProjectRead, requireProjectAdmin } from '../utils/authGuard';
 
 export class RlsPolicyResolver {
   constructor() {
@@ -39,6 +40,7 @@ export class RlsPolicyResolver {
     _arg: any,
     ctx: IContext,
   ): Promise<SessionProperty[]> {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.listSessionProperties(project.id);
   }
@@ -48,6 +50,7 @@ export class RlsPolicyResolver {
     arg: { data: CreateSessionPropertyInput },
     ctx: IContext,
   ): Promise<SessionProperty> {
+    await requireProjectAdmin(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.createSessionProperty(project.id, arg.data);
   }
@@ -57,6 +60,7 @@ export class RlsPolicyResolver {
     arg: { where: { id: number }; data: UpdateSessionPropertyInput },
     ctx: IContext,
   ): Promise<SessionProperty> {
+    await requireProjectAdmin(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.updateSessionProperty(
       project.id,
@@ -70,6 +74,7 @@ export class RlsPolicyResolver {
     arg: { where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectAdmin(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.deleteSessionProperty(
       project.id,
@@ -84,6 +89,7 @@ export class RlsPolicyResolver {
     _arg: any,
     ctx: IContext,
   ): Promise<RlsPolicyDetail[]> {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.listRlsPolicies(project.id);
   }
@@ -93,6 +99,7 @@ export class RlsPolicyResolver {
     arg: { where: { id: number } },
     ctx: IContext,
   ): Promise<RlsPolicyDetail> {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.getRlsPolicy(project.id, arg.where.id);
   }
@@ -102,6 +109,7 @@ export class RlsPolicyResolver {
     arg: { data: CreateRlsPolicyInput },
     ctx: IContext,
   ): Promise<RlsPolicyDetail> {
+    await requireProjectAdmin(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.createRlsPolicy(project.id, arg.data);
   }
@@ -111,6 +119,7 @@ export class RlsPolicyResolver {
     arg: { where: { id: number }; data: UpdateRlsPolicyInput },
     ctx: IContext,
   ): Promise<RlsPolicyDetail> {
+    await requireProjectAdmin(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.updateRlsPolicy(
       project.id,
@@ -124,6 +133,7 @@ export class RlsPolicyResolver {
     arg: { where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectAdmin(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.rlsPolicyService.deleteRlsPolicy(project.id, arg.where.id);
   }
@@ -135,6 +145,7 @@ export class RlsPolicyResolver {
     arg: { userId: number },
     ctx: IContext,
   ): Promise<UserSessionPropertyValue[]> {
+    await requireProjectRead(ctx);
     return ctx.rlsPolicyService.listUserSessionPropertyValues(arg.userId);
   }
 
@@ -143,6 +154,7 @@ export class RlsPolicyResolver {
     arg: { data: AssignSessionPropertyValueInput[] },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectAdmin(ctx);
     return ctx.rlsPolicyService.assignSessionPropertyValues(arg.data);
   }
 

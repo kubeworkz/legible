@@ -28,6 +28,7 @@ import {
 } from '../data';
 import { TelemetryEvent, WrenService } from '../telemetry/telemetry';
 import { TrackedAskingResult } from '../services';
+import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
 
 const logger = getLogger('AskingResolver');
 logger.level = 'debug';
@@ -132,6 +133,7 @@ export class AskingResolver {
     _args: any,
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     await ctx.projectService.generateProjectRecommendationQuestions(
       ctx.projectId,
     );
@@ -143,6 +145,7 @@ export class AskingResolver {
     args: { threadId: number },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const { threadId } = args;
     const askingService = ctx.askingService;
     await askingService.generateThreadRecommendationQuestions(
@@ -157,6 +160,7 @@ export class AskingResolver {
     args: { threadId: number },
     ctx: IContext,
   ): Promise<ThreadRecommendQuestionResult> {
+    await requireProjectRead(ctx);
     const { threadId } = args;
     const askingService = ctx.askingService;
     return askingService.getThreadRecommendationQuestions(threadId);
@@ -167,6 +171,7 @@ export class AskingResolver {
     _args: any,
     ctx: IContext,
   ): Promise<SuggestedQuestionResponse> {
+    await requireProjectRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { sampleDataset } = project;
     if (!sampleDataset) {
@@ -181,6 +186,7 @@ export class AskingResolver {
     args: { data: { question: string; threadId?: number } },
     ctx: IContext,
   ): Promise<Task> {
+    await requireProjectWrite(ctx);
     const { question, threadId } = args.data;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
 
@@ -203,6 +209,7 @@ export class AskingResolver {
     args: { taskId: string },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const { taskId } = args;
     const askingService = ctx.askingService;
     await askingService.cancelAskingTask(taskId);
@@ -214,6 +221,7 @@ export class AskingResolver {
     args: { taskId: string },
     ctx: IContext,
   ): Promise<AskingTask> {
+    await requireProjectRead(ctx);
     const { taskId } = args;
     const askingService = ctx.askingService;
     const askResult = await askingService.getAskingTask(taskId);
@@ -260,6 +268,7 @@ export class AskingResolver {
     },
     ctx: IContext,
   ): Promise<Thread> {
+    await requireProjectWrite(ctx);
     const { data } = args;
 
     const askingService = ctx.askingService;
@@ -323,6 +332,7 @@ export class AskingResolver {
     args: { threadId: number },
     ctx: IContext,
   ): Promise<DetailedThread> {
+    await requireProjectRead(ctx);
     const { threadId } = args;
 
     const askingService = ctx.askingService;
@@ -363,6 +373,7 @@ export class AskingResolver {
     args: { where: { id: number }; data: { summary: string } },
     ctx: IContext,
   ): Promise<Thread> {
+    await requireProjectWrite(ctx);
     const { where, data } = args;
 
     const askingService = ctx.askingService;
@@ -393,6 +404,7 @@ export class AskingResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const { where } = args;
 
     const askingService = ctx.askingService;
@@ -405,6 +417,7 @@ export class AskingResolver {
     args: { folderId?: number },
     ctx: IContext,
   ): Promise<Thread[]> {
+    await requireProjectRead(ctx);
     const threads = await ctx.askingService.listThreads(ctx.projectId);
     return threads;
   }
@@ -422,6 +435,7 @@ export class AskingResolver {
     },
     ctx: IContext,
   ): Promise<ThreadResponse> {
+    await requireProjectWrite(ctx);
     const { threadId, data } = args;
 
     const askingService = ctx.askingService;
@@ -468,6 +482,7 @@ export class AskingResolver {
     args: { where: { id: number }; data: { sql: string } },
     ctx: IContext,
   ): Promise<ThreadResponse> {
+    await requireProjectWrite(ctx);
     const { where, data } = args;
     const askingService = ctx.askingService;
     const response = await askingService.updateThreadResponse(where.id, data);
@@ -479,6 +494,7 @@ export class AskingResolver {
     args: { responseId: number },
     ctx: IContext,
   ): Promise<Task> {
+    await requireProjectWrite(ctx);
     const { responseId } = args;
     const askingService = ctx.askingService;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
@@ -505,6 +521,7 @@ export class AskingResolver {
     },
     ctx: IContext,
   ): Promise<ThreadResponse> {
+    await requireProjectWrite(ctx);
     const { responseId, data } = args;
     const askingService = ctx.askingService;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
@@ -544,6 +561,7 @@ export class AskingResolver {
     args: { taskId: string },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const { taskId } = args;
     const askingService = ctx.askingService;
     await askingService.cancelAdjustThreadResponseAnswer(taskId);
@@ -555,6 +573,7 @@ export class AskingResolver {
     args: { responseId: number },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const { responseId } = args;
     const askingService = ctx.askingService;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
@@ -573,6 +592,7 @@ export class AskingResolver {
     args: { taskId: string },
     ctx: IContext,
   ): Promise<AdjustmentTask> {
+    await requireProjectRead(ctx);
     const { taskId } = args;
     const askingService = ctx.askingService;
     const adjustmentTask = await askingService.getAdjustmentTask(taskId);
@@ -593,6 +613,7 @@ export class AskingResolver {
     args: { responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { responseId } = args;
     const askingService = ctx.askingService;
@@ -608,6 +629,7 @@ export class AskingResolver {
     args: { responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { responseId } = args;
     const askingService = ctx.askingService;
@@ -621,6 +643,7 @@ export class AskingResolver {
     args: { responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { responseId } = args;
     const askingService = ctx.askingService;
@@ -634,6 +657,7 @@ export class AskingResolver {
     args: { responseId: number; data: ChartAdjustmentOption },
     ctx: IContext,
   ): Promise<ThreadResponse> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { responseId, data } = args;
     const askingService = ctx.askingService;
@@ -647,6 +671,7 @@ export class AskingResolver {
     args: { responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
+    await requireProjectRead(ctx);
     const { responseId } = args;
     const askingService = ctx.askingService;
     const response = await askingService.getResponse(responseId);
@@ -659,6 +684,7 @@ export class AskingResolver {
     args: { where: { responseId: number; stepIndex?: number; limit?: number } },
     ctx: IContext,
   ): Promise<any> {
+    await requireProjectRead(ctx);
     const { responseId, limit } = args.where;
     const askingService = ctx.askingService;
     const data = await askingService.previewData(
@@ -674,6 +700,7 @@ export class AskingResolver {
     args: { where: { responseId: number; stepIndex?: number; limit?: number } },
     ctx: IContext,
   ): Promise<any> {
+    await requireProjectRead(ctx);
     const { responseId, stepIndex, limit } = args.where;
     const askingService = ctx.askingService;
     const data = await askingService.previewBreakdownData(
@@ -690,6 +717,7 @@ export class AskingResolver {
     args: { data: { previousQuestions?: string[] } },
     ctx: IContext,
   ): Promise<Task> {
+    await requireProjectWrite(ctx);
     const { data } = args;
     const askingService = ctx.askingService;
     return askingService.createInstantRecommendedQuestions(data, ctx.projectId);
@@ -700,6 +728,7 @@ export class AskingResolver {
     args: { taskId: string },
     ctx: IContext,
   ): Promise<RecommendedQuestionsTask> {
+    await requireProjectRead(ctx);
     const { taskId } = args;
     const askingService = ctx.askingService;
     const result = await askingService.getInstantRecommendedQuestions(taskId);

@@ -16,6 +16,7 @@ import {
   DashboardSchedule,
   PreviewItemResponse,
 } from '@server/models/dashboard';
+import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
 
 const logger = getLogger('DashboardResolver');
 logger.level = 'debug';
@@ -42,6 +43,7 @@ export class DashboardResolver {
     _args: any,
     ctx: IContext,
   ): Promise<Dashboard[]> {
+    await requireProjectRead(ctx);
     return await ctx.dashboardService.listDashboards(ctx.projectId);
   }
 
@@ -56,6 +58,7 @@ export class DashboardResolver {
       nextScheduledAt: string | null;
     }
   > {
+    await requireProjectRead(ctx);
     // If a specific dashboard ID is provided, use it; otherwise fall back to first dashboard
     const dashboard = args.where?.id
       ? await ctx.dashboardService.getDashboard(args.where.id)
@@ -80,6 +83,7 @@ export class DashboardResolver {
     args: { data: { name: string; folderId?: number } },
     ctx: IContext,
   ): Promise<Dashboard> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return await ctx.dashboardService.createDashboard(project.id, {
       name: args.data.name,
@@ -95,6 +99,7 @@ export class DashboardResolver {
     },
     ctx: IContext,
   ): Promise<Dashboard> {
+    await requireProjectWrite(ctx);
     return await ctx.dashboardService.updateDashboard(args.where.id, args.data);
   }
 
@@ -103,6 +108,7 @@ export class DashboardResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     return await ctx.dashboardService.deleteDashboard(args.where.id);
   }
 
@@ -111,6 +117,7 @@ export class DashboardResolver {
     _args: any,
     ctx: IContext,
   ): Promise<DashboardItem[]> {
+    await requireProjectRead(ctx);
     const dashboard = await ctx.dashboardService.getCurrentDashboard(
       ctx.projectId,
     );
@@ -131,6 +138,7 @@ export class DashboardResolver {
     },
     ctx: IContext,
   ): Promise<DashboardItem> {
+    await requireProjectWrite(ctx);
     const { responseId, itemType, dashboardId } = args.data;
     // Use explicit dashboardId if provided, otherwise fall back to first dashboard
     const dashboard = dashboardId
@@ -180,6 +188,7 @@ export class DashboardResolver {
     },
     ctx: IContext,
   ): Promise<DashboardItem> {
+    await requireProjectWrite(ctx);
     const { id } = args.where;
     const { displayName, description } = args.data;
     const item = await ctx.dashboardService.getDashboardItem(id);
@@ -197,6 +206,7 @@ export class DashboardResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const { id } = args.where;
     const item = await ctx.dashboardService.getDashboardItem(id);
     if (!item) {
@@ -210,6 +220,7 @@ export class DashboardResolver {
     args: { data: { layouts: UpdateDashboardItemLayouts } },
     ctx: IContext,
   ): Promise<DashboardItem[]> {
+    await requireProjectWrite(ctx);
     const { layouts } = args.data;
     if (layouts.length === 0) {
       throw new Error('Layouts are required.');
@@ -222,6 +233,7 @@ export class DashboardResolver {
     args: { data: { itemId: number; limit?: number; refresh?: boolean } },
     ctx: IContext,
   ): Promise<PreviewItemResponse> {
+    await requireProjectRead(ctx);
     const { itemId, limit, refresh } = args.data;
     try {
       const item = await ctx.dashboardService.getDashboardItem(itemId);
@@ -267,6 +279,7 @@ export class DashboardResolver {
     args: { data: SetDashboardCacheData & { dashboardId?: number } },
     ctx: IContext,
   ): Promise<Dashboard> {
+    await requireProjectWrite(ctx);
     try {
       const { dashboardId, ...cacheData } = args.data;
       const dashboard = dashboardId

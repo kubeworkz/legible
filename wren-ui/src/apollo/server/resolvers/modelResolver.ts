@@ -28,6 +28,7 @@ import {
 } from '../utils/model';
 import { CompactTable, PreviewDataResponse } from '@server/services';
 import { TelemetryEvent } from '../telemetry/telemetry';
+import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
 
 const logger = getLogger('ModelResolver');
 logger.level = 'debug';
@@ -82,6 +83,7 @@ export class ModelResolver {
     args: { data: RelationData },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { data } = args;
 
     const eventName = TelemetryEvent.MODELING_CREATE_RELATION;
@@ -108,6 +110,7 @@ export class ModelResolver {
     args: { data: UpdateRelationData; where: { id: number } },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { data, where } = args;
     const eventName = TelemetryEvent.MODELING_UPDATE_RELATION;
     try {
@@ -130,6 +133,7 @@ export class ModelResolver {
     args: { where: { id: number } },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const relationId = args.where.id;
     await ctx.modelService.deleteRelation(relationId);
     return true;
@@ -140,6 +144,7 @@ export class ModelResolver {
     _args: { data: CreateCalculatedFieldData },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const eventName = TelemetryEvent.MODELING_CREATE_CF;
     try {
       const column = await ctx.modelService.createCalculatedField(_args.data);
@@ -157,6 +162,7 @@ export class ModelResolver {
   }
 
   public async validateCalculatedField(_root: any, args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const { name, modelId, columnId } = args.data;
     return await ctx.modelService.validateCalculatedFieldNaming(
       name,
@@ -170,6 +176,7 @@ export class ModelResolver {
     _args: { data: UpdateCalculatedFieldData; where: { id: number } },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { data, where } = _args;
 
     const eventName = TelemetryEvent.MODELING_UPDATE_CF;
@@ -192,6 +199,7 @@ export class ModelResolver {
   }
 
   public async deleteCalculatedField(_root: any, args: any, ctx: IContext) {
+    await requireProjectWrite(ctx);
     const columnId = args.where.id;
     // check column exist and is calculated field
     const column = await ctx.modelColumnRepository.findOneBy({ id: columnId });
@@ -203,6 +211,7 @@ export class ModelResolver {
   }
 
   public async checkModelSync(_root: any, _args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const { id } = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { manifest } = await ctx.mdlService.makeCurrentModelMDL(
       ctx.projectId,
@@ -225,6 +234,7 @@ export class ModelResolver {
     args: { force: boolean },
     ctx: IContext,
   ): Promise<DeployResponse> {
+    await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     if (!project.version && project.type !== DataSourceName.DUCKDB) {
       const version =
@@ -252,6 +262,7 @@ export class ModelResolver {
   }
 
   public async getMDL(_root: any, args: { hash: string }, ctx: IContext) {
+    await requireProjectRead(ctx);
     const mdl = await ctx.deployService.getMDLByHash(args.hash);
     return {
       hash: args.hash,
@@ -260,6 +271,7 @@ export class ModelResolver {
   }
 
   public async listModels(_root: any, _args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const { id: projectId } = await ctx.projectService.getCurrentProject(
       ctx.projectId,
     );
@@ -297,6 +309,7 @@ export class ModelResolver {
   }
 
   public async getModel(_root: any, args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const modelId = args.where.id;
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
     if (!model) {
@@ -343,6 +356,7 @@ export class ModelResolver {
     args: { data: CreateModelData },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { sourceTableName, fields, primaryKey } = args.data;
     try {
       const model = await this.handleCreateModel(
@@ -442,6 +456,7 @@ export class ModelResolver {
     args: { data: UpdateModelData; where: { id: number } },
     ctx: IContext,
   ) {
+    await requireProjectWrite(ctx);
     const { fields, primaryKey } = args.data;
     try {
       const model = await this.handleUpdateModel(ctx, args, fields, primaryKey);
@@ -561,6 +576,7 @@ export class ModelResolver {
 
   // delete model
   public async deleteModel(_root: any, args: any, ctx: IContext) {
+    await requireProjectWrite(ctx);
     const modelId = args.where.id;
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
     if (!model) {
@@ -578,6 +594,7 @@ export class ModelResolver {
     args: { where: { id: number }; data: UpdateModelMetadataInput },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const modelId = args.where.id;
     const data = args.data;
 
@@ -783,6 +800,7 @@ export class ModelResolver {
 
   // list views
   public async listViews(_root: any, _args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const { id } = await ctx.projectService.getCurrentProject(ctx.projectId);
     const views = await ctx.viewRepository.findAllBy({ projectId: id });
     return views.map((view) => ({
@@ -794,6 +812,7 @@ export class ModelResolver {
   }
 
   public async getView(_root: any, args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const viewId = args.where.id;
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
@@ -807,12 +826,14 @@ export class ModelResolver {
 
   // validate a view name
   public async validateView(_root: any, args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const { name } = args.data;
     return this.validateViewName(name, ctx);
   }
 
   // create view from sql of a response
   public async createView(_root: any, args: any, ctx: IContext) {
+    await requireProjectWrite(ctx);
     const { name: displayName, responseId, rephrasedQuestion } = args.data;
 
     // validate view name
@@ -895,6 +916,7 @@ export class ModelResolver {
 
   // delete view
   public async deleteView(_root: any, args: any, ctx: IContext) {
+    await requireProjectWrite(ctx);
     const viewId = args.where.id;
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
@@ -905,6 +927,7 @@ export class ModelResolver {
   }
 
   public async previewModelData(_root: any, args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const modelId = args.where.id;
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
     if (!model) {
@@ -929,6 +952,7 @@ export class ModelResolver {
   }
 
   public async previewViewData(_root: any, args: any, ctx: IContext) {
+    await requireProjectRead(ctx);
     const { id: viewId, limit } = args.where;
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
@@ -978,6 +1002,7 @@ export class ModelResolver {
     args: { responseId: number },
     ctx: IContext,
   ): Promise<string> {
+    await requireProjectRead(ctx);
     const { responseId } = args;
 
     // If using a sample dataset, native SQL is not supported
@@ -1020,6 +1045,7 @@ export class ModelResolver {
     args: { where: { id: number }; data: UpdateViewMetadataInput },
     ctx: IContext,
   ): Promise<boolean> {
+    await requireProjectWrite(ctx);
     const viewId = args.where.id;
     const data = args.data;
 
