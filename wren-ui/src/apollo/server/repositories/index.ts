@@ -33,3 +33,4 @@ export * from './folderRepository';
 export * from './folderAccessRepository';
 export * from './spreadsheetRepository';
 export * from './spreadsheetHistoryRepository';
+export * from './projectMemberRepository';

@@ -33,9 +33,11 @@ import {
   FolderAccessRepository,
   SpreadsheetRepository,
   SpreadsheetHistoryRepository,
+  ProjectMemberRepository,
 } from '@server/repositories';
 import { FolderService } from '@server/services/folderService';
 import { SpreadsheetService } from '@server/services/spreadsheetService';
+import { ProjectMemberService } from '@server/services/projectMemberService';
 import {
   WrenEngineAdaptor,
   WrenAIAdaptor,
@@ -118,6 +120,7 @@ export const initComponents = () => {
   const folderAccessRepository = new FolderAccessRepository(knex);
   const spreadsheetRepository = new SpreadsheetRepository(knex);
   const spreadsheetHistoryRepository = new SpreadsheetHistoryRepository(knex);
+  const projectMemberRepository = new ProjectMemberRepository(knex);
   const billingConfigRepository = new BillingConfigRepository(knex);
   const monthlyUsageCacheRepository = new MonthlyUsageCacheRepository(knex);
 
@@ -250,6 +253,10 @@ export const initComponents = () => {
     spreadsheetRepository,
     spreadsheetHistoryRepository,
   });
+  const projectMemberService = new ProjectMemberService({
+    projectMemberRepository,
+    memberRepository,
+  });
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =
@@ -309,6 +316,7 @@ export const initComponents = () => {
     folderRepository,
     folderAccessRepository,
     spreadsheetRepository,
+    projectMemberRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -336,6 +344,7 @@ export const initComponents = () => {
     rlsPolicyService,
     folderService,
     spreadsheetService,
+    projectMemberService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

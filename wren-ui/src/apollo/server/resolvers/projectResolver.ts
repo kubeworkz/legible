@@ -30,6 +30,7 @@ import {
 } from '@server/data';
 import { snakeCase } from 'lodash';
 import { CompactTable, ProjectData } from '../services';
+import { ProjectRole } from '../repositories/projectMemberRepository';
 import { DuckDBPrepareOptions } from '@server/adaptors/wrenEngineAdaptor';
 import DataSourceSchemaDetector, {
   SchemaChangeType,
@@ -111,6 +112,17 @@ export class ProjectResolver {
     }
     const project = await ctx.projectRepository.createOne(projectValue);
     logger.debug(`Project created: ${project.id}`);
+
+    // Auto-assign the creator as project OWNER
+    if (ctx.currentUser?.id) {
+      await ctx.projectMemberService.addMember(
+        project.id,
+        ctx.currentUser.id,
+        ProjectRole.OWNER,
+      );
+      logger.debug(`Assigned user ${ctx.currentUser.id} as project OWNER`);
+    }
+
     return this.formatProjectInfo(project);
   }
 
@@ -374,6 +386,21 @@ export class ProjectResolver {
       // Update ctx.projectId so subsequent calls use the correct project
       ctx.projectId = projectId;
 
+      // Ensure the current user is a project OWNER (reuse path may skip saveDataSource)
+      if (ctx.currentUser?.id) {
+        const existing = await ctx.projectMemberRepository.findByProjectAndUser(
+          projectId,
+          ctx.currentUser.id,
+        );
+        if (!existing) {
+          await ctx.projectMemberService.addMember(
+            projectId,
+            ctx.currentUser.id,
+            ProjectRole.OWNER,
+          );
+        }
+      }
+
       // list all the tables in the data source
       const tables = await this.listDataSourceTables(_root, _arg, ctx);
       const tableNames = tables.map((table) => table.name);
@@ -611,6 +638,22 @@ export class ProjectResolver {
     logger.debug('Dashboard init...');
     await ctx.dashboardService.initDashboard(project.id);
     logger.debug('Dashboard created.');
+
+    // Auto-assign the creator as project OWNER (if not already assigned)
+    if (ctx.currentUser?.id) {
+      const existing = await ctx.projectMemberRepository.findByProjectAndUser(
+        project.id,
+        ctx.currentUser.id,
+      );
+      if (!existing) {
+        await ctx.projectMemberService.addMember(
+          project.id,
+          ctx.currentUser.id,
+          ProjectRole.OWNER,
+        );
+        logger.debug(`Assigned user ${ctx.currentUser.id} as project OWNER`);
+      }
+    }
 
     const eventName = TelemetryEvent.CONNECTION_SAVE_DATA_SOURCE;
     const eventProperties = {

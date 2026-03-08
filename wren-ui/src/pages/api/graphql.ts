@@ -60,6 +60,7 @@ const bootstrapServer = async () => {
     folderRepository,
     folderAccessRepository,
     spreadsheetRepository,
+    projectMemberRepository,
     // adaptors
     wrenEngineAdaptor,
     ibisAdaptor,
@@ -84,6 +85,7 @@ const bootstrapServer = async () => {
     rlsPolicyService,
     folderService,
     spreadsheetService,
+    projectMemberService,
     rateLimitService,
     billingService,
     // background trackers
@@ -236,6 +238,7 @@ const bootstrapServer = async () => {
         rlsPolicyService,
         folderService,
         spreadsheetService,
+        projectMemberService,
         // repository
         projectRepository,
         modelRepository,
@@ -264,6 +267,7 @@ const bootstrapServer = async () => {
         folderRepository,
         folderAccessRepository,
         spreadsheetRepository,
+        projectMemberRepository,
         // rate limiting
         rateLimitService,
         // billing

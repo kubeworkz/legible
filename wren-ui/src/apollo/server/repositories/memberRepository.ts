@@ -5,6 +5,7 @@ export enum MemberRole {
   OWNER = 'owner',
   ADMIN = 'admin',
   MEMBER = 'member',
+  VIEWER = 'viewer',
 }
 
 export interface Member {
