@@ -3,6 +3,12 @@ import { Folder } from '@server/repositories/folderRepository';
 import { FolderAccess } from '@server/repositories/folderAccessRepository';
 import { getLogger } from '@server/utils';
 import { requireProjectRead, requireProjectWrite, requireProjectAdmin } from '../utils/authGuard';
+import {
+  ensureFolderOwnership,
+  ensureDashboardOwnership,
+  ensureThreadOwnership,
+  ensureSpreadsheetOwnership,
+} from '../utils/resourceOwnership';
 
 const logger = getLogger('FolderResolver');
 logger.level = 'debug';
@@ -47,6 +53,7 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<Folder> {
     await requireProjectRead(ctx);
+    await ensureFolderOwnership(ctx, args.where.id);
     return ctx.folderService.getFolder(args.where.id);
   }
 
@@ -83,6 +90,7 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<Folder> {
     await requireProjectWrite(ctx);
+    await ensureFolderOwnership(ctx, args.where.id);
     return ctx.folderService.updateFolder(args.where.id, {
       name: args.data.name,
       visibility: args.data.visibility as any,
@@ -96,6 +104,7 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
+    await ensureFolderOwnership(ctx, args.where.id);
     return ctx.folderService.deleteFolder(args.where.id);
   }
 
@@ -119,6 +128,7 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<FolderAccess[]> {
     await requireProjectRead(ctx);
+    await ensureFolderOwnership(ctx, args.where.folderId);
     return ctx.folderService.getFolderAccess(args.where.folderId);
   }
 
@@ -131,6 +141,7 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<FolderAccess[]> {
     await requireProjectAdmin(ctx);
+    await ensureFolderOwnership(ctx, args.where.folderId);
     return ctx.folderService.setFolderAccess(
       args.where.folderId,
       args.data.entries.map((e) => ({
@@ -146,6 +157,10 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
+    await ensureDashboardOwnership(ctx, args.data.dashboardId);
+    if (args.data.folderId !== null) {
+      await ensureFolderOwnership(ctx, args.data.folderId);
+    }
     return ctx.folderService.moveDashboardToFolder(
       args.data.dashboardId,
       args.data.folderId,
@@ -158,6 +173,10 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
+    await ensureThreadOwnership(ctx, args.data.threadId);
+    if (args.data.folderId !== null) {
+      await ensureFolderOwnership(ctx, args.data.folderId);
+    }
     return ctx.folderService.moveThreadToFolder(
       args.data.threadId,
       args.data.folderId,
@@ -170,6 +189,10 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
+    await ensureSpreadsheetOwnership(ctx, args.data.spreadsheetId);
+    if (args.data.folderId !== null) {
+      await ensureFolderOwnership(ctx, args.data.folderId);
+    }
     return ctx.folderService.moveSpreadsheetToFolder(
       args.data.spreadsheetId,
       args.data.folderId,
@@ -184,6 +207,10 @@ export class FolderResolver {
     ctx: IContext,
   ): Promise<Folder[]> {
     await requireProjectWrite(ctx);
+    // Verify all folder IDs belong to this project
+    for (const order of args.data.orders) {
+      await ensureFolderOwnership(ctx, order.id);
+    }
     return ctx.folderService.reorderFolders(args.data.orders);
   }
 

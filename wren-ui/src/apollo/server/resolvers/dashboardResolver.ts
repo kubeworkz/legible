@@ -17,6 +17,12 @@ import {
   PreviewItemResponse,
 } from '@server/models/dashboard';
 import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
+import {
+  ensureDashboardOwnership,
+  ensureDashboardItemOwnership,
+  ensureFolderOwnership,
+  ensureThreadResponseOwnership,
+} from '../utils/resourceOwnership';
 
 const logger = getLogger('DashboardResolver');
 logger.level = 'debug';
@@ -59,9 +65,10 @@ export class DashboardResolver {
     }
   > {
     await requireProjectRead(ctx);
-    // If a specific dashboard ID is provided, use it; otherwise fall back to first dashboard
+    // If a specific dashboard ID is provided, verify ownership; otherwise fall back to first dashboard
     const dashboard = args.where?.id
-      ? await ctx.dashboardService.getDashboard(args.where.id)
+      ? await ensureDashboardOwnership(ctx, args.where.id)
+        .then(() => ctx.dashboardService.getDashboard(args.where.id))
       : await ctx.dashboardService.getCurrentDashboard(ctx.projectId);
     if (!dashboard) {
       throw new Error('Dashboard not found.');
@@ -84,6 +91,10 @@ export class DashboardResolver {
     ctx: IContext,
   ): Promise<Dashboard> {
     await requireProjectWrite(ctx);
+    // Verify folder belongs to this project if specified
+    if (args.data.folderId) {
+      await ensureFolderOwnership(ctx, args.data.folderId);
+    }
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return await ctx.dashboardService.createDashboard(project.id, {
       name: args.data.name,
@@ -100,6 +111,7 @@ export class DashboardResolver {
     ctx: IContext,
   ): Promise<Dashboard> {
     await requireProjectWrite(ctx);
+    await ensureDashboardOwnership(ctx, args.where.id);
     return await ctx.dashboardService.updateDashboard(args.where.id, args.data);
   }
 
@@ -109,6 +121,7 @@ export class DashboardResolver {
     ctx: IContext,
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
+    await ensureDashboardOwnership(ctx, args.where.id);
     return await ctx.dashboardService.deleteDashboard(args.where.id);
   }
 
@@ -140,6 +153,11 @@ export class DashboardResolver {
   ): Promise<DashboardItem> {
     await requireProjectWrite(ctx);
     const { responseId, itemType, dashboardId } = args.data;
+    // Verify ownership of referenced resources
+    if (dashboardId) {
+      await ensureDashboardOwnership(ctx, dashboardId);
+    }
+    await ensureThreadResponseOwnership(ctx, responseId);
     // Use explicit dashboardId if provided, otherwise fall back to first dashboard
     const dashboard = dashboardId
       ? await ctx.dashboardService.getDashboard(dashboardId)
@@ -191,6 +209,7 @@ export class DashboardResolver {
     await requireProjectWrite(ctx);
     const { id } = args.where;
     const { displayName, description } = args.data;
+    await ensureDashboardItemOwnership(ctx, id);
     const item = await ctx.dashboardService.getDashboardItem(id);
     if (!item) {
       throw new Error(`Dashboard item not found. id: ${id}`);
@@ -208,6 +227,7 @@ export class DashboardResolver {
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
     const { id } = args.where;
+    await ensureDashboardItemOwnership(ctx, id);
     const item = await ctx.dashboardService.getDashboardItem(id);
     if (!item) {
       throw new Error(`Dashboard item not found. id: ${id}`);
@@ -236,6 +256,7 @@ export class DashboardResolver {
     await requireProjectRead(ctx);
     const { itemId, limit, refresh } = args.data;
     try {
+      await ensureDashboardItemOwnership(ctx, itemId);
       const item = await ctx.dashboardService.getDashboardItem(itemId);
       const dashboard = await ctx.dashboardService.getDashboard(
         item.dashboardId,
@@ -282,6 +303,9 @@ export class DashboardResolver {
     await requireProjectWrite(ctx);
     try {
       const { dashboardId, ...cacheData } = args.data;
+      if (dashboardId) {
+        await ensureDashboardOwnership(ctx, dashboardId);
+      }
       const dashboard = dashboardId
         ? await ctx.dashboardService.getDashboard(dashboardId)
         : await ctx.dashboardService.getCurrentDashboard(ctx.projectId);

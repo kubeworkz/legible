@@ -29,6 +29,13 @@ import {
 import { CompactTable, PreviewDataResponse } from '@server/services';
 import { TelemetryEvent } from '../telemetry/telemetry';
 import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
+import {
+  ensureModelOwnership,
+  ensureViewOwnership,
+  ensureRelationOwnership,
+  ensureModelColumnOwnership,
+  ensureThreadResponseOwnership,
+} from '../utils/resourceOwnership';
 
 const logger = getLogger('ModelResolver');
 logger.level = 'debug';
@@ -112,6 +119,8 @@ export class ModelResolver {
   ) {
     await requireProjectWrite(ctx);
     const { data, where } = args;
+    // Verify relation belongs to this project
+    await ensureRelationOwnership(ctx, where.id);
     const eventName = TelemetryEvent.MODELING_UPDATE_RELATION;
     try {
       const relation = await ctx.modelService.updateRelation(data, where.id);
@@ -135,6 +144,8 @@ export class ModelResolver {
   ) {
     await requireProjectWrite(ctx);
     const relationId = args.where.id;
+    // Verify relation belongs to this project
+    await ensureRelationOwnership(ctx, relationId);
     await ctx.modelService.deleteRelation(relationId);
     return true;
   }
@@ -145,6 +156,8 @@ export class ModelResolver {
     ctx: IContext,
   ) {
     await requireProjectWrite(ctx);
+    // Verify model belongs to this project
+    await ensureModelOwnership(ctx, _args.data.modelId);
     const eventName = TelemetryEvent.MODELING_CREATE_CF;
     try {
       const column = await ctx.modelService.createCalculatedField(_args.data);
@@ -164,6 +177,8 @@ export class ModelResolver {
   public async validateCalculatedField(_root: any, args: any, ctx: IContext) {
     await requireProjectRead(ctx);
     const { name, modelId, columnId } = args.data;
+    // Verify model belongs to this project
+    await ensureModelOwnership(ctx, modelId);
     return await ctx.modelService.validateCalculatedFieldNaming(
       name,
       modelId,
@@ -178,6 +193,8 @@ export class ModelResolver {
   ) {
     await requireProjectWrite(ctx);
     const { data, where } = _args;
+    // Verify calculated field belongs to this project
+    await ensureModelColumnOwnership(ctx, where.id);
 
     const eventName = TelemetryEvent.MODELING_UPDATE_CF;
     try {
@@ -201,6 +218,8 @@ export class ModelResolver {
   public async deleteCalculatedField(_root: any, args: any, ctx: IContext) {
     await requireProjectWrite(ctx);
     const columnId = args.where.id;
+    // Verify calculated field belongs to this project
+    await ensureModelColumnOwnership(ctx, columnId);
     // check column exist and is calculated field
     const column = await ctx.modelColumnRepository.findOneBy({ id: columnId });
     if (!column || !column.isCalculated) {
@@ -311,6 +330,8 @@ export class ModelResolver {
   public async getModel(_root: any, args: any, ctx: IContext) {
     await requireProjectRead(ctx);
     const modelId = args.where.id;
+    // Verify model belongs to this project
+    await ensureModelOwnership(ctx, modelId);
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
     if (!model) {
       throw new Error('Model not found');
@@ -458,6 +479,8 @@ export class ModelResolver {
   ) {
     await requireProjectWrite(ctx);
     const { fields, primaryKey } = args.data;
+    // Verify model belongs to this project
+    await ensureModelOwnership(ctx, args.where.id);
     try {
       const model = await this.handleUpdateModel(ctx, args, fields, primaryKey);
       ctx.telemetry.sendEvent(TelemetryEvent.MODELING_UPDATE_MODEL, {
@@ -578,6 +601,8 @@ export class ModelResolver {
   public async deleteModel(_root: any, args: any, ctx: IContext) {
     await requireProjectWrite(ctx);
     const modelId = args.where.id;
+    // Verify model belongs to this project
+    await ensureModelOwnership(ctx, modelId);
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
     if (!model) {
       throw new Error('Model not found');
@@ -597,6 +622,8 @@ export class ModelResolver {
     await requireProjectWrite(ctx);
     const modelId = args.where.id;
     const data = args.data;
+    // Verify model belongs to this project
+    await ensureModelOwnership(ctx, modelId);
 
     // check if model exists
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
@@ -814,6 +841,8 @@ export class ModelResolver {
   public async getView(_root: any, args: any, ctx: IContext) {
     await requireProjectRead(ctx);
     const viewId = args.where.id;
+    // Verify view belongs to this project
+    await ensureViewOwnership(ctx, viewId);
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
       throw new Error('View not found');
@@ -835,6 +864,8 @@ export class ModelResolver {
   public async createView(_root: any, args: any, ctx: IContext) {
     await requireProjectWrite(ctx);
     const { name: displayName, responseId, rephrasedQuestion } = args.data;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
 
     // validate view name
     const validateResult = await this.validateViewName(displayName, ctx);
@@ -918,6 +949,8 @@ export class ModelResolver {
   public async deleteView(_root: any, args: any, ctx: IContext) {
     await requireProjectWrite(ctx);
     const viewId = args.where.id;
+    // Verify view belongs to this project
+    await ensureViewOwnership(ctx, viewId);
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
       throw new Error('View not found');
@@ -929,6 +962,8 @@ export class ModelResolver {
   public async previewModelData(_root: any, args: any, ctx: IContext) {
     await requireProjectRead(ctx);
     const modelId = args.where.id;
+    // Verify model belongs to this project
+    await ensureModelOwnership(ctx, modelId);
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
     if (!model) {
       throw new Error('Model not found');
@@ -954,6 +989,8 @@ export class ModelResolver {
   public async previewViewData(_root: any, args: any, ctx: IContext) {
     await requireProjectRead(ctx);
     const { id: viewId, limit } = args.where;
+    // Verify view belongs to this project
+    await ensureViewOwnership(ctx, viewId);
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
       throw new Error('View not found');
@@ -972,17 +1009,29 @@ export class ModelResolver {
     return data;
   }
 
-  // Notice: this is used by AI service.
-  // any change to this resolver should be synced with AI service.
+  // Notice: this is used by AI service (via PUBLIC_OPERATIONS bypass).
+  // When called by AI service (no auth), projectId from args is trusted.
+  // When called by authenticated user, we use ctx.projectId to prevent
+  // cross-project access via arbitrary projectId in args.
   public async previewSql(
     _root: any,
     args: { data: PreviewSQLData },
     ctx: IContext,
   ) {
     const { sql, projectId, limit, dryRun, sessionProperties } = args.data;
-    const project = projectId
-      ? await ctx.projectService.getProjectById(parseInt(projectId))
-      : await ctx.projectService.getCurrentProject(ctx.projectId);
+
+    // If user is authenticated, always use ctx.projectId (ignoring args.projectId)
+    // to prevent cross-project data access. Only unauthenticated callers
+    // (AI service via PUBLIC_OPERATIONS) may specify an explicit projectId.
+    let project;
+    if (ctx.currentUser) {
+      project = await ctx.projectService.getCurrentProject(ctx.projectId);
+    } else {
+      project = projectId
+        ? await ctx.projectService.getProjectById(parseInt(projectId))
+        : await ctx.projectService.getCurrentProject(ctx.projectId);
+    }
+
     const deployment = await ctx.deployService.getLastDeployment(project.id);
     const manifest = deployment
       ? deployment.manifest
@@ -1004,6 +1053,8 @@ export class ModelResolver {
   ): Promise<string> {
     await requireProjectRead(ctx);
     const { responseId } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
 
     // If using a sample dataset, native SQL is not supported
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
@@ -1048,6 +1099,8 @@ export class ModelResolver {
     await requireProjectWrite(ctx);
     const viewId = args.where.id;
     const data = args.data;
+    // Verify view belongs to this project
+    await ensureViewOwnership(ctx, viewId);
 
     // check if view exists
     const view = await ctx.viewRepository.findOneBy({ id: viewId });

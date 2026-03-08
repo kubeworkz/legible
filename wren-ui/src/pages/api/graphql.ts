@@ -34,6 +34,7 @@ const bootstrapServer = async () => {
 
     // repositories
     projectRepository,
+    threadRepository,
     modelRepository,
     modelColumnRepository,
     relationRepository,
@@ -241,6 +242,7 @@ const bootstrapServer = async () => {
         projectMemberService,
         // repository
         projectRepository,
+        threadRepository,
         modelRepository,
         modelColumnRepository,
         modelNestedColumnRepository,

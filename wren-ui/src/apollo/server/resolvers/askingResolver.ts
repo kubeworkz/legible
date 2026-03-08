@@ -29,6 +29,11 @@ import {
 import { TelemetryEvent, WrenService } from '../telemetry/telemetry';
 import { TrackedAskingResult } from '../services';
 import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
+import {
+  ensureThreadOwnership,
+  ensureThreadResponseOwnership,
+  ensureFolderOwnership,
+} from '../utils/resourceOwnership';
 
 const logger = getLogger('AskingResolver');
 logger.level = 'debug';
@@ -147,6 +152,10 @@ export class AskingResolver {
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
     const { threadId } = args;
+    // Verify thread belongs to this project
+    if (threadId) {
+      await ensureThreadOwnership(ctx, threadId);
+    }
     const askingService = ctx.askingService;
     await askingService.generateThreadRecommendationQuestions(
       threadId,
@@ -162,6 +171,8 @@ export class AskingResolver {
   ): Promise<ThreadRecommendQuestionResult> {
     await requireProjectRead(ctx);
     const { threadId } = args;
+    // Verify thread belongs to this project
+    await ensureThreadOwnership(ctx, threadId);
     const askingService = ctx.askingService;
     return askingService.getThreadRecommendationQuestions(threadId);
   }
@@ -188,6 +199,10 @@ export class AskingResolver {
   ): Promise<Task> {
     await requireProjectWrite(ctx);
     const { question, threadId } = args.data;
+    // Verify thread belongs to this project if specified
+    if (threadId) {
+      await ensureThreadOwnership(ctx, threadId);
+    }
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
 
     const askingService = ctx.askingService;
@@ -271,6 +286,11 @@ export class AskingResolver {
     await requireProjectWrite(ctx);
     const { data } = args;
 
+    // Verify folder belongs to this project if specified
+    if (data.folderId) {
+      await ensureFolderOwnership(ctx, data.folderId);
+    }
+
     const askingService = ctx.askingService;
 
     // if taskId is provided, use the result from the asking task
@@ -334,6 +354,8 @@ export class AskingResolver {
   ): Promise<DetailedThread> {
     await requireProjectRead(ctx);
     const { threadId } = args;
+    // Verify thread belongs to this project
+    await ensureThreadOwnership(ctx, threadId);
 
     const askingService = ctx.askingService;
     const responses = await askingService.getResponsesWithThread(threadId);
@@ -375,6 +397,8 @@ export class AskingResolver {
   ): Promise<Thread> {
     await requireProjectWrite(ctx);
     const { where, data } = args;
+    // Verify thread belongs to this project
+    await ensureThreadOwnership(ctx, where.id);
 
     const askingService = ctx.askingService;
     const eventName = TelemetryEvent.HOME_UPDATE_THREAD_SUMMARY;
@@ -406,6 +430,8 @@ export class AskingResolver {
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
     const { where } = args;
+    // Verify thread belongs to this project
+    await ensureThreadOwnership(ctx, where.id);
 
     const askingService = ctx.askingService;
     await askingService.deleteThread(where.id);
@@ -437,6 +463,8 @@ export class AskingResolver {
   ): Promise<ThreadResponse> {
     await requireProjectWrite(ctx);
     const { threadId, data } = args;
+    // Verify thread belongs to this project
+    await ensureThreadOwnership(ctx, threadId);
 
     const askingService = ctx.askingService;
     const eventName = TelemetryEvent.HOME_ASK_FOLLOWUP_QUESTION;
@@ -484,6 +512,8 @@ export class AskingResolver {
   ): Promise<ThreadResponse> {
     await requireProjectWrite(ctx);
     const { where, data } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, where.id);
     const askingService = ctx.askingService;
     const response = await askingService.updateThreadResponse(where.id, data);
     return response;
@@ -496,6 +526,8 @@ export class AskingResolver {
   ): Promise<Task> {
     await requireProjectWrite(ctx);
     const { responseId } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
 
@@ -523,6 +555,8 @@ export class AskingResolver {
   ): Promise<ThreadResponse> {
     await requireProjectWrite(ctx);
     const { responseId, data } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
 
@@ -575,6 +609,8 @@ export class AskingResolver {
   ): Promise<boolean> {
     await requireProjectWrite(ctx);
     const { responseId } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     await askingService.rerunAdjustThreadResponseAnswer(
@@ -616,6 +652,8 @@ export class AskingResolver {
     await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { responseId } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     const breakdownDetail = await askingService.generateThreadResponseBreakdown(
       responseId,
@@ -632,6 +670,8 @@ export class AskingResolver {
     await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { responseId } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     return askingService.generateThreadResponseAnswer(responseId, {
       language: WrenAILanguage[project.language] || WrenAILanguage.EN,
@@ -646,6 +686,8 @@ export class AskingResolver {
     await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { responseId } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     return askingService.generateThreadResponseChart(responseId, {
       language: WrenAILanguage[project.language] || WrenAILanguage.EN,
@@ -660,6 +702,8 @@ export class AskingResolver {
     await requireProjectWrite(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { responseId, data } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     return askingService.adjustThreadResponseChart(responseId, data, {
       language: WrenAILanguage[project.language] || WrenAILanguage.EN,
@@ -673,6 +717,8 @@ export class AskingResolver {
   ): Promise<ThreadResponse> {
     await requireProjectRead(ctx);
     const { responseId } = args;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     const response = await askingService.getResponse(responseId);
 
@@ -686,6 +732,8 @@ export class AskingResolver {
   ): Promise<any> {
     await requireProjectRead(ctx);
     const { responseId, limit } = args.where;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     const data = await askingService.previewData(
       responseId,
@@ -702,6 +750,8 @@ export class AskingResolver {
   ): Promise<any> {
     await requireProjectRead(ctx);
     const { responseId, stepIndex, limit } = args.where;
+    // Verify response belongs to this project
+    await ensureThreadResponseOwnership(ctx, responseId);
     const askingService = ctx.askingService;
     const data = await askingService.previewBreakdownData(
       responseId,

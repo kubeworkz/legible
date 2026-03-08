@@ -25,6 +25,7 @@ import {
   IMemberRepository,
   ISessionRepository,
   IInvitationRepository,
+  IThreadRepository,
 } from '@server/repositories';
 import { IProjectApiKeyRepository } from '@server/repositories/projectApiKeyRepository';
 import { ISessionPropertyRepository } from '@server/repositories/sessionPropertyRepository';
@@ -108,6 +109,7 @@ export interface IContext {
 
   // repository
   projectRepository: IProjectRepository;
+  threadRepository: IThreadRepository;
   modelRepository: IModelRepository;
   modelColumnRepository: IModelColumnRepository;
   modelNestedColumnRepository: IModelNestedColumnRepository;
