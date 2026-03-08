@@ -26,6 +26,7 @@ import Deploy from '@/components/deploy/Deploy';
 import useProject from '@/hooks/useProject';
 import useAuth from '@/hooks/useAuth';
 import useOrganization from '@/hooks/useOrganization';
+import useProjectRole from '@/hooks/useProjectRole';
 import { useApolloClient } from '@apollo/client';
 import { ProjectLanguage } from '@/apollo/client/graphql/__types__';
 import { getLanguageText } from '@/utils/language';
@@ -172,6 +173,8 @@ export default function HeaderBar() {
     setCurrentOrgId,
     createOrganization,
   } = useOrganization();
+  const { canWrite, canAdmin, canAccessModeling, canAccessKnowledge } =
+    useProjectRole();
   const { pathname } = router;
   const showNav = !pathname.startsWith(Path.Onboarding);
   const isModeling = pathname.startsWith(Path.Modeling);
@@ -383,22 +386,26 @@ export default function HeaderBar() {
                 >
                   Home
                 </StyledButton>
-                <StyledButton
-                  shape="round"
-                  size="small"
-                  $isHighlight={pathname.startsWith(Path.Modeling)}
-                  onClick={() => router.push(bp(Path.Modeling))}
-                >
-                  Modeling
-                </StyledButton>
-                <StyledButton
-                  shape="round"
-                  size="small"
-                  $isHighlight={pathname.startsWith(Path.Knowledge)}
-                  onClick={() => router.push(bp(Path.KnowledgeQuestionSQLPairs))}
-                >
-                  Knowledge
-                </StyledButton>
+                {canAccessModeling && (
+                  <StyledButton
+                    shape="round"
+                    size="small"
+                    $isHighlight={pathname.startsWith(Path.Modeling)}
+                    onClick={() => router.push(bp(Path.Modeling))}
+                  >
+                    Modeling
+                  </StyledButton>
+                )}
+                {canAccessKnowledge && (
+                  <StyledButton
+                    shape="round"
+                    size="small"
+                    $isHighlight={pathname.startsWith(Path.Knowledge)}
+                    onClick={() => router.push(bp(Path.KnowledgeQuestionSQLPairs))}
+                  >
+                    Knowledge
+                  </StyledButton>
+                )}
                 <StyledButton
                   shape="round"
                   size="small"
@@ -407,14 +414,16 @@ export default function HeaderBar() {
                 >
                   API
                 </StyledButton>
-                <StyledButton
-                  shape="round"
-                  size="small"
-                  $isHighlight={pathname.startsWith(Path.DataSecurity)}
-                  onClick={() => router.push(bp(Path.DataSecurityRowLevel))}
-                >
-                  Data Security
-                </StyledButton>
+                {canAdmin && (
+                  <StyledButton
+                    shape="round"
+                    size="small"
+                    $isHighlight={pathname.startsWith(Path.DataSecurity)}
+                    onClick={() => router.push(bp(Path.DataSecurityRowLevel))}
+                  >
+                    Data Security
+                  </StyledButton>
+                )}
               </Space>
             )}
           </Space>

@@ -140,6 +140,7 @@ const resolvers = {
 
     // Project Members
     projectMembers: projectMemberResolver.listProjectMembers,
+    myProjectRole: projectMemberResolver.getMyProjectRole,
 
     // Spreadsheets
     spreadsheets: spreadsheetResolver.getSpreadsheets,

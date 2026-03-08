@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
-import { withApiKeyAuth } from '@/apollo/server/utils/apiKeyAuth';
+import { withApiKeyAuth, requireProjectAccess } from '@/apollo/server/utils/apiKeyAuth';
 import { ApiType } from '@server/repositories/apiHistoryRepository';
 import {
   ApiError,
@@ -175,6 +175,8 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  if (!(await requireProjectAccess(req, res))) return;
+
   const startTime = Date.now();
   const apiKeyAttribution = extractApiKeyAttribution(req);
   let project;

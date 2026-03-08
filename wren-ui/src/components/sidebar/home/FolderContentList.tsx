@@ -8,6 +8,7 @@ import FolderOutlined from '@ant-design/icons/FolderOutlined';
 import DashboardOutlined from '@ant-design/icons/DashboardOutlined';
 import MessageOutlined from '@ant-design/icons/MessageOutlined';
 import TableOutlined from '@ant-design/icons/TableOutlined';
+import useProjectRole from '@/hooks/useProjectRole';
 import TreeTitleInput from '@/components/sidebar/home/TreeTitleInput';
 import { DeleteThreadModal, DeleteDashboardModal, DeleteSpreadsheetModal } from '@/components/modals/DeleteModal';
 import type { FolderGroup, SidebarItem } from '@/hooks/useHomeSidebar';
@@ -283,6 +284,8 @@ function ContentItem(props: {
     },
   ];
 
+  const hasWriteActions = onRename || onDelete;
+
   return (
     <ItemRow
       $selected={selected}
@@ -294,19 +297,21 @@ function ContentItem(props: {
       <span className="item-name" title={title}>
         {title}
       </span>
-      <span className="item-actions">
-        <Dropdown
-          trigger={['click']}
-          dropdownRender={() => <StyledMenu items={menuItems} />}
-          overlayStyle={{ minWidth: 150 }}
-        >
-          <KebabIcon
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          />
-        </Dropdown>
-      </span>
+      {hasWriteActions && (
+        <span className="item-actions">
+          <Dropdown
+            trigger={['click']}
+            dropdownRender={() => <StyledMenu items={menuItems} />}
+            overlayStyle={{ minWidth: 150 }}
+          >
+            <KebabIcon
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            />
+          </Dropdown>
+        </span>
+      )}
     </ItemRow>
   );
 }
@@ -403,6 +408,8 @@ export default function FolderContentList(props: Props) {
     onMoveToFolder,
   } = props;
 
+  const { canWrite } = useProjectRole();
+
   const handleNewDashboard = useCallback(() => {
     if (folderGroup) {
       onDashboardCreate(folderGroup.folder.id);
@@ -439,11 +446,11 @@ export default function FolderContentList(props: Props) {
         deleteModal="dashboard"
         selectedKey={selectedKey}
         moveToFolderOptions={moveOptions}
-        onNew={handleNewDashboard}
+        onNew={canWrite ? handleNewDashboard : undefined}
         onSelect={onSelect}
-        onRename={onRename}
-        onDelete={onDelete}
-        onMoveToFolder={onMoveToFolder}
+        onRename={canWrite ? onRename : undefined}
+        onDelete={canWrite ? onDelete : undefined}
+        onMoveToFolder={canWrite ? onMoveToFolder : undefined}
       />
 
       <ContentSection
@@ -455,11 +462,11 @@ export default function FolderContentList(props: Props) {
         deleteModal="spreadsheet"
         selectedKey={selectedKey}
         moveToFolderOptions={moveOptions}
-        onNew={handleNewSpreadsheet}
+        onNew={canWrite ? handleNewSpreadsheet : undefined}
         onSelect={onSelect}
-        onRename={onRename}
-        onDelete={onDelete}
-        onMoveToFolder={onMoveToFolder}
+        onRename={canWrite ? onRename : undefined}
+        onDelete={canWrite ? onDelete : undefined}
+        onMoveToFolder={canWrite ? onMoveToFolder : undefined}
       />
 
       <ContentSection
@@ -471,11 +478,11 @@ export default function FolderContentList(props: Props) {
         deleteModal="thread"
         selectedKey={selectedKey}
         moveToFolderOptions={moveOptions}
-        onNew={onThreadCreate}
+        onNew={canWrite ? onThreadCreate : undefined}
         onSelect={onSelect}
-        onRename={onRename}
-        onDelete={onDelete}
-        onMoveToFolder={onMoveToFolder}
+        onRename={canWrite ? onRename : undefined}
+        onDelete={canWrite ? onDelete : undefined}
+        onMoveToFolder={canWrite ? onMoveToFolder : undefined}
       />
     </Container>
   );

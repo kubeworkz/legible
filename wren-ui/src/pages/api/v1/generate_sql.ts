@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
-import { withApiKeyAuth } from '@/apollo/server/utils/apiKeyAuth';
+import { withApiKeyAuth, requireProjectAccess } from '@/apollo/server/utils/apiKeyAuth';
 import { ApiType } from '@server/repositories/apiHistoryRepository';
 import { AskResult, WrenAILanguage } from '@/apollo/server/models/adaptor';
 import * as Errors from '@/apollo/server/utils/error';
@@ -41,6 +41,8 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  if (!(await requireProjectAccess(req, res))) return;
+
   const {
     question,
     threadId,

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
-import { withApiKeyAuth } from '@/apollo/server/utils/apiKeyAuth';
+import { withApiKeyAuth, requireProjectAccess } from '@/apollo/server/utils/apiKeyAuth';
 import { ApiType } from '@server/repositories/apiHistoryRepository';
 import * as Errors from '@/apollo/server/utils/error';
 import { v4 as uuidv4 } from 'uuid';
@@ -56,6 +56,8 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  if (!(await requireProjectAccess(req, res))) return;
+
   const {
     question,
     sql,

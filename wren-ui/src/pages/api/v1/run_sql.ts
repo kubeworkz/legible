@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { components } from '@/common';
-import { withApiKeyAuth } from '@/apollo/server/utils/apiKeyAuth';
+import { withApiKeyAuth, requireProjectAccess } from '@/apollo/server/utils/apiKeyAuth';
 import { ApiType } from '@server/repositories/apiHistoryRepository';
 import * as Errors from '@/apollo/server/utils/error';
 import { getLogger } from '@server/utils';
@@ -44,6 +44,8 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  if (!(await requireProjectAccess(req, res))) return;
+
   const { sql, threadId, limit = 1000 } = req.body as RunSqlRequest;
   const startTime = Date.now();
   const apiKeyAttribution = extractApiKeyAttribution(req);

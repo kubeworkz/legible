@@ -50,3 +50,15 @@ export const REMOVE_PROJECT_MEMBER = gql`
     removeProjectMember(userId: $userId)
   }
 `;
+
+export const MY_PROJECT_ROLE = gql`
+  query MyProjectRole {
+    myProjectRole {
+      role
+      canWrite
+      canAdmin
+      canAccessModeling
+      canAccessKnowledge
+    }
+  }
+`;

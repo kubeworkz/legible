@@ -11,6 +11,7 @@ import ShareAltOutlined from '@ant-design/icons/ShareAltOutlined';
 import { RobotSVG } from '@/utils/svgs';
 import { ANSWER_TAB_KEYS } from '@/utils/enum';
 import { canGenerateAnswer } from '@/hooks/useAskPrompt';
+import useProjectRole from '@/hooks/useProjectRole';
 import usePromptThreadStore from './store';
 import { RecommendedQuestionsProps } from '@/components/pages/home/promptThread';
 import RecommendedQuestions, {
@@ -173,6 +174,7 @@ const isNeedGenerateAnswer = (answerDetail: ThreadResponseAnswerDetail) => {
 
 export default function AnswerResult(props: Props) {
   const { threadResponse, isLastThreadResponse, isOpeningQuestion } = props;
+  const { canWrite } = useProjectRole();
 
   const {
     onOpenSaveAsViewModal,
@@ -317,43 +319,47 @@ export default function AnswerResult(props: Props) {
             </Tabs.TabPane>
           </StyledTabs>
           <div className="mt-2 d-flex align-center">
-            <Tooltip
-              overlayInnerStyle={{ width: 'max-content' }}
-              placement="topLeft"
-              title={knowledgeTooltip}
-            >
-              <Button
-                type="link"
-                size="small"
-                className="mr-2"
+            {canWrite && (
+              <Tooltip
+                overlayInnerStyle={{ width: 'max-content' }}
+                placement="topLeft"
+                title={knowledgeTooltip}
+              >
+                <Button
+                  type="link"
+                  size="small"
+                  className="mr-2"
+                  onClick={() =>
+                    onOpenSaveToKnowledgeModal(
+                      {
+                        question: rephrasedQuestion,
+                        sql,
+                      },
+                      { isCreateMode: true },
+                    )
+                  }
+                  data-guideid="save-to-knowledge"
+                >
+                  <div className="d-flex align-center">
+                    <RobotSVG className="mr-2" />
+                    Save to knowledge
+                  </div>
+                </Button>
+              </Tooltip>
+            )}
+            {canWrite && (
+              <ViewBlock
+                view={view}
                 onClick={() =>
-                  onOpenSaveToKnowledgeModal(
+                  onOpenSaveAsViewModal(
+                    { sql, responseId: id },
                     {
-                      question: rephrasedQuestion,
-                      sql,
+                      rephrasedQuestion: questionForSaveAsView,
                     },
-                    { isCreateMode: true },
                   )
                 }
-                data-guideid="save-to-knowledge"
-              >
-                <div className="d-flex align-center">
-                  <RobotSVG className="mr-2" />
-                  Save to knowledge
-                </div>
-              </Button>
-            </Tooltip>
-            <ViewBlock
-              view={view}
-              onClick={() =>
-                onOpenSaveAsViewModal(
-                  { sql, responseId: id },
-                  {
-                    rephrasedQuestion: questionForSaveAsView,
-                  },
-                )
-              }
-            />
+              />
+            )}
           </div>
           {renderRecommendedQuestions(
             isLastThreadResponse,

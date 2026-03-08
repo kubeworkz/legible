@@ -13,6 +13,7 @@ import DataSecurity from './DataSecurity';
 import LearningSection from '@/components/learning';
 import ProjectSwitcher from './ProjectSwitcher';
 import useProject from '@/hooks/useProject';
+import useProjectRole from '@/hooks/useProjectRole';
 
 const Layout = styled.div`
   position: relative;
@@ -54,9 +55,12 @@ type Props = (ModelingSidebarProps | HomeSidebarProps) & {
 const DynamicSidebar = (
   props: Props & {
     pathname: string;
+    canAccessModeling: boolean;
+    canAccessKnowledge: boolean;
+    canAdmin: boolean;
   },
 ) => {
-  const { pathname, ...restProps } = props;
+  const { pathname, canAccessModeling, canAccessKnowledge, canAdmin, ...restProps } = props;
 
   const getContent = () => {
     if (pathname.startsWith(Path.Home)) {
@@ -64,11 +68,13 @@ const DynamicSidebar = (
     }
 
     if (pathname.startsWith(Path.Modeling)) {
-      return <Modeling {...(restProps as ModelingSidebarProps)} />;
+      return canAccessModeling ? (
+        <Modeling {...(restProps as ModelingSidebarProps)} />
+      ) : null;
     }
 
     if (pathname.startsWith(Path.Knowledge)) {
-      return <Knowledge />;
+      return canAccessKnowledge ? <Knowledge /> : null;
     }
 
     if (pathname.startsWith(Path.APIManagement)) {
@@ -76,7 +82,7 @@ const DynamicSidebar = (
     }
 
     if (pathname.startsWith(Path.DataSecurity)) {
-      return <DataSecurity />;
+      return canAdmin ? <DataSecurity /> : null;
     }
 
     return null;
@@ -88,6 +94,7 @@ const DynamicSidebar = (
 export default function Sidebar(props: Props) {
   const router = useRouter();
   const { currentProjectId } = useProject();
+  const { canAccessModeling, canAccessKnowledge, canAdmin } = useProjectRole();
   const { onCollapse, ...sidebarProps } = props;
 
   const onSettingsClick = () => {
@@ -97,7 +104,13 @@ export default function Sidebar(props: Props) {
   return (
     <Layout className="d-flex flex-column">
       <ProjectSwitcher onCollapse={onCollapse} />
-      <DynamicSidebar {...sidebarProps} pathname={router.pathname} />
+      <DynamicSidebar
+        {...sidebarProps}
+        pathname={router.pathname}
+        canAccessModeling={canAccessModeling}
+        canAccessKnowledge={canAccessKnowledge}
+        canAdmin={canAdmin}
+      />
       <LearningSection />
       <div className="border-t border-gray-4 pt-2">
         <StyledButton type="text" block onClick={onSettingsClick}>

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { getConfig } from '@server/config';
 import { components } from '@/common';
 import { getLogger } from '@server/utils';
+import { withApiKeyAuth, requireProjectAccess } from '@/apollo/server/utils/apiKeyAuth';
 
 const logger = getLogger('API_RELATIONSHIP_RECOMMENDATIONS');
 logger.level = 'debug';
@@ -18,10 +19,14 @@ const { projectService, deployService } = components;
  * GET /api/v1/relationship-recommendations?id=<uuid>
  *   Returns: { id, status, response, error }
  */
-export default async function handler(
+export default withApiKeyAuth(handler);
+
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  if (!(await requireProjectAccess(req, res))) return;
+
   const aiEndpoint = serverConfig.wrenAIEndpoint;
 
   if (req.method === 'POST') {

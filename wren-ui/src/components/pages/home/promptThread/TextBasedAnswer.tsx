@@ -10,6 +10,7 @@ import { nextTick } from '@/utils/time';
 import { MORE_ACTION } from '@/utils/enum';
 import usePromptThreadStore from './store';
 import useDropdown from '@/hooks/useDropdown';
+import useProjectRole from '@/hooks/useProjectRole';
 import useTextBasedAnswerStreamTask from '@/hooks/useTextBasedAnswerStreamTask';
 import { Props as AnswerResultProps } from '@/components/pages/home/promptThread/AnswerResult';
 import MarkdownBlock from '@/components/editor/MarkdownBlock';
@@ -44,6 +45,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
     onOpenAdjustReasoningStepsModal,
     onOpenAdjustSQLModal,
   } = usePromptThreadStore();
+  const { canWrite } = useProjectRole();
   const { isLastThreadResponse, onInitPreviewDone, threadResponse } = props;
   const { id } = threadResponse;
   const { content, error, numRowsUsedInLLM, status } =
@@ -160,7 +162,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
     }
   };
 
-  const adjustAnswerDropdown = (
+  const adjustAnswerDropdown = canWrite ? (
     <AdjustAnswerDropdown
       onMoreClick={onMoreClick}
       data={adjustAnswerDropdownData}
@@ -180,7 +182,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
         />
       </Button>
     </AdjustAnswerDropdown>
-  );
+  ) : null;
 
   if (error) {
     return (

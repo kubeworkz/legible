@@ -1808,6 +1808,14 @@ export const typeDefs = gql`
     role: ProjectRole!
   }
 
+  type MyProjectRoleResult {
+    role: ProjectRole!
+    canWrite: Boolean!
+    canAdmin: Boolean!
+    canAccessModeling: Boolean!
+    canAccessKnowledge: Boolean!
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -1914,6 +1922,7 @@ export const typeDefs = gql`
 
     # Project Members
     projectMembers: [ProjectMemberType!]!
+    myProjectRole: MyProjectRoleResult!
   }
 
   type Mutation {

@@ -248,3 +248,63 @@ export function requirePermission(
   }
   return true;
 }
+
+/**
+ * Validate that a session-based user has at least READ access to the
+ * project specified by the X-Project-Id header.
+ *
+ * For API key auth this is a no-op (project keys already scoped, org keys
+ * have global access).
+ *
+ * Returns `true` if access is granted, `false` if a 403 was sent.
+ */
+export async function requireProjectAccess(
+  req: NextApiRequest,
+  res: NextApiResponse,
+): Promise<boolean> {
+  const apiKeyAuth = (req as AuthenticatedApiRequest).apiKeyAuth;
+  // API key auth — skip (already validated by key type / permissions)
+  if (apiKeyAuth) return true;
+
+  // Session auth — validate project membership
+  const projectIdHeader = req.headers['x-project-id'];
+  const projectId = projectIdHeader ? Number(projectIdHeader) : null;
+  if (!projectId) {
+    // No project context — let the handler decide
+    return true;
+  }
+
+  const token = extractBearerToken(req);
+  if (!token) return true; // Should not happen after withApiKeyAuth
+
+  try {
+    const { authService, projectMemberService } = components;
+    const user = await authService.validateSession(token);
+    if (!user) {
+      res.status(401).json({ error: 'Invalid session' });
+      return false;
+    }
+
+    // Read organizationId from header (set by withApiKeyAuth or client)
+    const orgIdHeader = req.headers['x-organization-id'];
+    const organizationId = orgIdHeader ? Number(orgIdHeader) : undefined;
+
+    const role = await projectMemberService.getEffectiveRole(
+      projectId,
+      user.id,
+      organizationId,
+    );
+    if (!role) {
+      res.status(403).json({
+        error: 'Forbidden',
+        message: 'You do not have access to this project',
+      });
+      return false;
+    }
+    return true;
+  } catch (err) {
+    logger.error(`Project access check failed: ${(err as Error).message}`);
+    res.status(500).json({ error: 'Internal server error' });
+    return false;
+  }
+}

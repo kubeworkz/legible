@@ -18,6 +18,7 @@ import CodeFilled from '@ant-design/icons/CodeFilled';
 import { BinocularsIcon } from '@/utils/icons';
 import { nextTick } from '@/utils/time';
 import useNativeSQL from '@/hooks/useNativeSQL';
+import useProjectRole from '@/hooks/useProjectRole';
 import { DATA_SOURCE_OPTIONS } from '@/components/pages/setup/utils';
 import { Logo } from '@/components/Logo';
 import { Props as AnswerResultProps } from '@/components/pages/home/promptThread/AnswerResult';
@@ -50,6 +51,7 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
   const { isLastThreadResponse, onInitPreviewDone, threadResponse } = props;
 
   const { onOpenAdjustSQLModal } = usePromptThreadStore();
+  const { canWrite } = useProjectRole();
   const { fetchNativeSQL, nativeSQLResult } = useNativeSQL();
   const [previewData, previewDataResult] = usePreviewDataMutation({
     onError: (error) => console.error(error),
@@ -171,16 +173,18 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
                 </Text>
               </div>
             )}
-            <Button
-              type="link"
-              data-ph-capture="true"
-              data-ph-capture-attribute-name="view_sql_copy_sql"
-              icon={<CodeFilled />}
-              size="small"
-              onClick={() => onOpenAdjustSQLModal({ sql, responseId: id })}
-            >
-              Adjust SQL
-            </Button>
+            {canWrite && (
+              <Button
+                type="link"
+                data-ph-capture="true"
+                data-ph-capture-attribute-name="view_sql_copy_sql"
+                icon={<CodeFilled />}
+                size="small"
+                onClick={() => onOpenAdjustSQLModal({ sql, responseId: id })}
+              >
+                Adjust SQL
+              </Button>
+            )}
           </Space>
         </StyledToolBar>
         <SQLCodeBlock

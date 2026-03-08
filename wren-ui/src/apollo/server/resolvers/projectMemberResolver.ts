@@ -1,5 +1,6 @@
 import { IContext } from '@server/types';
 import { ProjectRole } from '@server/repositories/projectMemberRepository';
+import { ViewerAccess } from '@server/repositories/projectPermissionOverrideRepository';
 import {
   requireAuth,
   requireProjectRead,
@@ -12,6 +13,60 @@ export class ProjectMemberResolver {
     this.addProjectMember = this.addProjectMember.bind(this);
     this.updateProjectMemberRole = this.updateProjectMemberRole.bind(this);
     this.removeProjectMember = this.removeProjectMember.bind(this);
+    this.getMyProjectRole = this.getMyProjectRole.bind(this);
+  }
+
+  /**
+   * Query: myProjectRole
+   * Returns the current user's effective role and computed permission flags.
+   */
+  public async getMyProjectRole(
+    _root: any,
+    _args: any,
+    ctx: IContext,
+  ) {
+    const user = requireAuth(ctx);
+    const projectId = ctx.projectId!;
+    const organizationId = ctx.organizationId;
+
+    const role = await ctx.projectMemberService.getEffectiveRole(
+      projectId,
+      user.id,
+      organizationId,
+    );
+
+    if (!role) {
+      throw new Error('You do not have access to this project');
+    }
+
+    // OWNER and CONTRIBUTOR always have full access
+    const isOwner = role === ProjectRole.OWNER;
+    const isContributor = role === ProjectRole.CONTRIBUTOR;
+    const canWrite = isOwner || isContributor;
+    const canAdmin = isOwner;
+
+    // For viewers, check permission overrides
+    let canAccessModeling = true;
+    let canAccessKnowledge = true;
+
+    if (role === ProjectRole.VIEWER) {
+      const overrides =
+        await ctx.projectPermissionOverrideRepository.findByProject(projectId);
+      if (overrides) {
+        canAccessModeling =
+          overrides.viewerModelingAccess !== ViewerAccess.NO_PERMISSION;
+        canAccessKnowledge =
+          overrides.viewerKnowledgeAccess !== ViewerAccess.NO_PERMISSION;
+      }
+    }
+
+    return {
+      role: role.toUpperCase(),
+      canWrite,
+      canAdmin,
+      canAccessModeling,
+      canAccessKnowledge,
+    };
   }
 
   /**

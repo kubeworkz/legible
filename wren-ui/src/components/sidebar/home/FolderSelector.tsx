@@ -11,6 +11,7 @@ import UsergroupAddOutlined from '@ant-design/icons/UsergroupAddOutlined';
 import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import { DeleteFolderModal } from '@/components/modals/DeleteModal';
+import useProjectRole from '@/hooks/useProjectRole';
 import type { FolderItem } from '@/hooks/useHomeSidebar';
 
 const SelectorBar = styled.div`
@@ -180,6 +181,8 @@ export default function FolderSelector(props: Props) {
     onManageAccess,
   } = props;
 
+  const { canWrite } = useProjectRole();
+
   const selectedFolder = useMemo(
     () => folders.find((f) => f.id === selectedFolderId) || folders[0],
     [folders, selectedFolderId],
@@ -197,7 +200,7 @@ export default function FolderSelector(props: Props) {
       onClick: () => onSelectFolder(folder.id),
     }));
 
-    if (onCreateFolder) {
+    if (canWrite && onCreateFolder) {
       items.push({
         key: 'new-folder',
         className: 'new-folder-item',
@@ -212,10 +215,10 @@ export default function FolderSelector(props: Props) {
     }
 
     return items;
-  }, [folders, onCreateFolder, onSelectFolder]);
+  }, [folders, canWrite, onCreateFolder, onSelectFolder]);
 
   const folderActionMenu = useMemo(() => {
-    if (!selectedFolder) return null;
+    if (!selectedFolder || !canWrite) return null;
 
     const items: any[] = [
       {
@@ -254,7 +257,7 @@ export default function FolderSelector(props: Props) {
     ];
 
     return <FolderActionMenu items={items} />;
-  }, [selectedFolder, onRenameFolder, onDeleteFolder, onManageAccess]);
+  }, [selectedFolder, canWrite, onRenameFolder, onDeleteFolder, onManageAccess]);
 
   if (!selectedFolder) return null;
 
