@@ -144,7 +144,11 @@ export class OrgApiKeyResolver {
     ctx: IContext,
   ) {
     const user = requireAuth(ctx);
-    requireOrganization(ctx);
+    const organizationId = requireOrganization(ctx);
+    await ctx.memberService.requireRole(organizationId, user.id, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
     const { rateLimitService } = await import('@/common').then(
       (m) => m.components,
     );

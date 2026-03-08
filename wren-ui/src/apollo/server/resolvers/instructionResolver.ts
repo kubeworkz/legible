@@ -3,7 +3,7 @@ import { UpdateInstructionInput } from '@server/models';
 import { Instruction } from '@server/repositories/instructionRepository';
 import { getLogger } from '@server/utils';
 import { TelemetryEvent, TrackTelemetry } from '@server/telemetry/telemetry';
-import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
+import { requireKnowledgeRead, requireProjectWrite } from '../utils/authGuard';
 
 const logger = getLogger('InstructionResolver');
 logger.level = 'debug';
@@ -21,7 +21,7 @@ export class InstructionResolver {
     _args: any,
     ctx: IContext,
   ): Promise<Instruction[]> {
-    await requireProjectRead(ctx);
+    await requireKnowledgeRead(ctx);
     try {
       const project = await ctx.projectService.getCurrentProject(ctx.projectId);
       return await ctx.instructionService.getInstructions(project.id);

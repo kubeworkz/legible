@@ -23,6 +23,11 @@ import EditOutlined from '@ant-design/icons/EditOutlined';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
 import useOrganization, { MemberInfo, MemberRole } from '@/hooks/useOrganization';
 import useAuth from '@/hooks/useAuth';
+import { useQuery, useMutation } from '@apollo/client';
+import {
+  GET_PROJECT_PERMISSION_OVERRIDES,
+  UPDATE_PROJECT_PERMISSION_OVERRIDES,
+} from '@/apollo/client/graphql/permissionOverrides';
 
 const { Title, Text } = Typography;
 
@@ -586,14 +591,26 @@ const PermissionSection = styled.div`
 function RolePermissionsTab({ isAdmin }: { isAdmin: boolean }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingRole, setEditingRole] = useState<string | null>(null);
-  const [viewerPerms, setViewerPerms] = useState<ViewerPermissions>({
-    modeling: 'read_only',
-    knowledge: 'read_only',
-  });
   const [tempPerms, setTempPerms] = useState<ViewerPermissions>({
     modeling: 'read_only',
     knowledge: 'read_only',
   });
+
+  const { data, loading: queryLoading } = useQuery(GET_PROJECT_PERMISSION_OVERRIDES, {
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const [updateOverrides, { loading: mutationLoading }] = useMutation(
+    UPDATE_PROJECT_PERMISSION_OVERRIDES,
+    {
+      refetchQueries: [{ query: GET_PROJECT_PERMISSION_OVERRIDES }],
+    },
+  );
+
+  const viewerPerms: ViewerPermissions = {
+    modeling: (data?.projectPermissionOverrides?.viewerModelingAccess as PermissionLevel) || 'read_only',
+    knowledge: (data?.projectPermissionOverrides?.viewerKnowledgeAccess as PermissionLevel) || 'read_only',
+  };
 
   const openPermissionModal = (role: string) => {
     setEditingRole(role);
@@ -601,10 +618,22 @@ function RolePermissionsTab({ isAdmin }: { isAdmin: boolean }) {
     setModalVisible(true);
   };
 
-  const handleSubmit = () => {
-    setViewerPerms({ ...tempPerms });
-    setModalVisible(false);
-    message.success('Permissions updated.');
+  const handleSubmit = async () => {
+    try {
+      await updateOverrides({
+        variables: {
+          data: {
+            viewerModelingAccess: tempPerms.modeling,
+            viewerKnowledgeAccess: tempPerms.knowledge,
+          },
+        },
+      });
+      setModalVisible(false);
+      message.success('Permissions updated.');
+    } catch (error) {
+      console.error('Failed to update permissions:', error);
+      message.error('Failed to update permissions.');
+    }
   };
 
   const getViewerDescription = () => {
@@ -723,6 +752,7 @@ function RolePermissionsTab({ isAdmin }: { isAdmin: boolean }) {
         rowKey="role"
         pagination={false}
         size="middle"
+        loading={queryLoading}
       />
 
       <Title level={5} className="gray-9 mt-6 mb-3">
@@ -749,7 +779,7 @@ function RolePermissionsTab({ isAdmin }: { isAdmin: boolean }) {
         footer={
           <div className="d-flex justify-content-end" style={{ gap: 8 }}>
             <Button onClick={() => setModalVisible(false)}>Cancel</Button>
-            <Button type="primary" onClick={handleSubmit}>
+            <Button type="primary" onClick={handleSubmit} loading={mutationLoading}>
               Submit
             </Button>
           </div>

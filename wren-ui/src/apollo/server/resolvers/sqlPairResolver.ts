@@ -4,7 +4,7 @@ import * as Errors from '@server/utils/error';
 import { TelemetryEvent, TrackTelemetry } from '@server/telemetry/telemetry';
 import { DialectSQL, WrenSQL } from '@server/models/adaptor';
 import { safeFormatSQL } from '@server/utils/sqlFormat';
-import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
+import { requireKnowledgeRead, requireProjectWrite } from '../utils/authGuard';
 
 export class SqlPairResolver {
   constructor() {
@@ -21,7 +21,7 @@ export class SqlPairResolver {
     _arg: any,
     ctx: IContext,
   ): Promise<SqlPair[]> {
-    await requireProjectRead(ctx);
+    await requireKnowledgeRead(ctx);
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     return ctx.sqlPairService.getProjectSqlPairs(project.id);
   }

@@ -16,6 +16,7 @@ import { RlsPolicyResolver } from './resolvers/rlsPolicyResolver';
 import { FolderResolver } from './resolvers/folderResolver';
 import { SpreadsheetResolver } from './resolvers/spreadsheetResolver';
 import { BillingResolver } from './resolvers/billingResolver';
+import { PermissionOverrideResolver } from './resolvers/permissionOverrideResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -36,6 +37,7 @@ const rlsPolicyResolver = new RlsPolicyResolver();
 const folderResolver = new FolderResolver();
 const spreadsheetResolver = new SpreadsheetResolver();
 const billingResolver = new BillingResolver();
+const permissionOverrideResolver = new PermissionOverrideResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -129,6 +131,10 @@ const resolvers = {
     folders: folderResolver.listFolders,
     folder: folderResolver.getFolder,
     folderAccess: folderResolver.getFolderAccess,
+
+    // Permission Overrides
+    projectPermissionOverrides:
+      permissionOverrideResolver.getProjectPermissionOverrides,
 
     // Spreadsheets
     spreadsheets: spreadsheetResolver.getSpreadsheets,
@@ -309,6 +315,10 @@ const resolvers = {
     moveThreadToFolder: folderResolver.moveThreadToFolder,
     moveSpreadsheetToFolder: folderResolver.moveSpreadsheetToFolder,
     reorderFolders: folderResolver.reorderFolders,
+
+    // Permission Overrides
+    updateProjectPermissionOverrides:
+      permissionOverrideResolver.updateProjectPermissionOverrides,
 
     // Spreadsheets
     createSpreadsheet: spreadsheetResolver.createSpreadsheet,

@@ -1,0 +1,67 @@
+import { IContext } from '@server/types';
+import { requireProjectRead, requireProjectAdmin } from '../utils/authGuard';
+import { ViewerAccess } from '../repositories/projectPermissionOverrideRepository';
+
+export class PermissionOverrideResolver {
+  constructor() {
+    this.getProjectPermissionOverrides =
+      this.getProjectPermissionOverrides.bind(this);
+    this.updateProjectPermissionOverrides =
+      this.updateProjectPermissionOverrides.bind(this);
+  }
+
+  /**
+   * Query: projectPermissionOverrides
+   * Returns the current viewer permission overrides for the active project.
+   * Any project member can read these (needed by UI to gate visibility).
+   */
+  public async getProjectPermissionOverrides(
+    _root: any,
+    _args: any,
+    ctx: IContext,
+  ) {
+    const projectId = await requireProjectRead(ctx);
+    const override =
+      await ctx.projectPermissionOverrideRepository.findByProject(projectId);
+    if (override) {
+      return {
+        projectId: override.projectId,
+        viewerModelingAccess: override.viewerModelingAccess,
+        viewerKnowledgeAccess: override.viewerKnowledgeAccess,
+      };
+    }
+    // Return defaults if no override row exists
+    return {
+      projectId,
+      viewerModelingAccess: ViewerAccess.READ_ONLY,
+      viewerKnowledgeAccess: ViewerAccess.READ_ONLY,
+    };
+  }
+
+  /**
+   * Mutation: updateProjectPermissionOverrides
+   * Only project owners can change viewer permission settings.
+   */
+  public async updateProjectPermissionOverrides(
+    _root: any,
+    args: {
+      data: {
+        viewerModelingAccess?: ViewerAccess;
+        viewerKnowledgeAccess?: ViewerAccess;
+      };
+    },
+    ctx: IContext,
+  ) {
+    const projectId = await requireProjectAdmin(ctx);
+    const override =
+      await ctx.projectPermissionOverrideRepository.upsert(projectId, {
+        viewerModelingAccess: args.data.viewerModelingAccess,
+        viewerKnowledgeAccess: args.data.viewerKnowledgeAccess,
+      });
+    return {
+      projectId: override.projectId,
+      viewerModelingAccess: override.viewerModelingAccess,
+      viewerKnowledgeAccess: override.viewerKnowledgeAccess,
+    };
+  }
+}

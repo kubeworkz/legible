@@ -1761,6 +1761,24 @@ export const typeDefs = gql`
     orders: [FolderOrderInput!]!
   }
 
+  # ── Permission Overrides ──────────────────────────────────
+
+  enum ViewerAccessLevel {
+    read_only
+    no_permission
+  }
+
+  type ProjectPermissionOverrides {
+    projectId: Int!
+    viewerModelingAccess: ViewerAccessLevel!
+    viewerKnowledgeAccess: ViewerAccessLevel!
+  }
+
+  input UpdateProjectPermissionOverridesInput {
+    viewerModelingAccess: ViewerAccessLevel
+    viewerKnowledgeAccess: ViewerAccessLevel
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -1861,6 +1879,9 @@ export const typeDefs = gql`
     folders: [Folder!]!
     folder(where: FolderWhereInput!): Folder!
     folderAccess(where: FolderAccessWhereInput!): [FolderAccess!]!
+
+    # Permission Overrides
+    projectPermissionOverrides: ProjectPermissionOverrides!
   }
 
   type Mutation {
@@ -2103,5 +2124,10 @@ export const typeDefs = gql`
     moveThreadToFolder(data: MoveThreadToFolderInput!): Boolean!
     moveSpreadsheetToFolder(data: MoveSpreadsheetToFolderInput!): Boolean!
     reorderFolders(data: ReorderFoldersInput!): [Folder!]!
+
+    # Permission Overrides
+    updateProjectPermissionOverrides(
+      data: UpdateProjectPermissionOverridesInput!
+    ): ProjectPermissionOverrides!
   }
 `;

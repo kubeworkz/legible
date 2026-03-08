@@ -1,5 +1,6 @@
 import { IContext } from '@server/types';
 import { getConfig } from '@server/config';
+import { requireAuth } from '../utils/authGuard';
 
 import { getLogger } from '@server/utils';
 import { uniq } from 'lodash';
@@ -20,6 +21,7 @@ export class LearningResolver {
     _args: any,
     ctx: IContext,
   ): Promise<any> {
+    requireAuth(ctx);
     const result = await ctx.learningRepository.findAll();
     return { paths: result[0]?.paths || [] };
   }
@@ -29,6 +31,7 @@ export class LearningResolver {
     args: any,
     ctx: IContext,
   ): Promise<any> {
+    requireAuth(ctx);
     const { path } = args.data;
     const result = await ctx.learningRepository.findAll();
 

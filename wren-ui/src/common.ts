@@ -34,6 +34,7 @@ import {
   SpreadsheetRepository,
   SpreadsheetHistoryRepository,
   ProjectMemberRepository,
+  ProjectPermissionOverrideRepository,
 } from '@server/repositories';
 import { FolderService } from '@server/services/folderService';
 import { SpreadsheetService } from '@server/services/spreadsheetService';
@@ -121,6 +122,8 @@ export const initComponents = () => {
   const spreadsheetRepository = new SpreadsheetRepository(knex);
   const spreadsheetHistoryRepository = new SpreadsheetHistoryRepository(knex);
   const projectMemberRepository = new ProjectMemberRepository(knex);
+  const projectPermissionOverrideRepository =
+    new ProjectPermissionOverrideRepository(knex);
   const billingConfigRepository = new BillingConfigRepository(knex);
   const monthlyUsageCacheRepository = new MonthlyUsageCacheRepository(knex);
 
@@ -317,6 +320,7 @@ export const initComponents = () => {
     folderAccessRepository,
     spreadsheetRepository,
     projectMemberRepository,
+    projectPermissionOverrideRepository,
 
     // adaptors
     wrenEngineAdaptor,

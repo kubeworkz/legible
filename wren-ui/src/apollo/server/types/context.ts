@@ -34,6 +34,7 @@ import { IUserSessionPropertyValueRepository } from '@server/repositories/userSe
 import { IFolderRepository } from '@server/repositories/folderRepository';
 import { IFolderAccessRepository } from '@server/repositories/folderAccessRepository';
 import { IProjectMemberRepository } from '@server/repositories/projectMemberRepository';
+import { IProjectPermissionOverrideRepository } from '@server/repositories/projectPermissionOverrideRepository';
 import { ISpreadsheetRepository } from '@server/repositories/spreadsheetRepository';
 import {
   IQueryService,
@@ -137,6 +138,7 @@ export interface IContext {
   folderAccessRepository: IFolderAccessRepository;
   spreadsheetRepository: ISpreadsheetRepository;
   projectMemberRepository: IProjectMemberRepository;
+  projectPermissionOverrideRepository: IProjectPermissionOverrideRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;

@@ -62,6 +62,7 @@ const bootstrapServer = async () => {
     folderAccessRepository,
     spreadsheetRepository,
     projectMemberRepository,
+    projectPermissionOverrideRepository,
     // adaptors
     wrenEngineAdaptor,
     ibisAdaptor,
@@ -270,6 +271,7 @@ const bootstrapServer = async () => {
         folderAccessRepository,
         spreadsheetRepository,
         projectMemberRepository,
+        projectPermissionOverrideRepository,
         // rate limiting
         rateLimitService,
         // billing

@@ -62,8 +62,12 @@ export class BillingResolver {
     args: { filter?: any },
     ctx: IContext,
   ) {
-    requireAuth(ctx);
+    const user = requireAuth(ctx);
     const organizationId = requireOrganization(ctx);
+    await ctx.memberService.requireRole(organizationId, user.id, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
     const filter = {
       organizationId,
       ...(args.filter?.startDate && {

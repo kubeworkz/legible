@@ -1,6 +1,7 @@
 import { IContext } from '@server/types';
 import { User } from '@server/repositories/userRepository';
 import { ProjectRole } from '@server/repositories/projectMemberRepository';
+import { ViewerAccess } from '@server/repositories/projectPermissionOverrideRepository';
 
 /**
  * Shared authentication guard. Throws if ctx.currentUser is not authenticated.
@@ -131,3 +132,62 @@ export const PUBLIC_OPERATIONS = new Set([
   // Used by AI service internally without authentication
   'previewSql',
 ]);
+
+// ── Section-aware guards ─────────────────────────────────
+// These extend the role-based guards to also check per-project
+// viewer permission overrides (stored in project_permission_override).
+
+/**
+ * Resolve the effective role of the current user on the project.
+ * Returns null if the user has no access.
+ */
+async function getEffectiveRole(ctx: IContext): Promise<ProjectRole | null> {
+  if (!ctx.currentUser || !ctx.projectId) return null;
+  return ctx.projectMemberService.getEffectiveRole(
+    ctx.projectId,
+    ctx.currentUser.id,
+    ctx.organizationId,
+  );
+}
+
+/**
+ * Ensures the user can access the Modeling section.
+ *  - OWNER / CONTRIBUTOR: always allowed
+ *  - VIEWER: allowed only if viewerModelingAccess !== 'no_permission'
+ *  - No role: denied
+ */
+export async function requireModelingRead(ctx: IContext): Promise<number> {
+  const projectId = await requireProjectRead(ctx);
+  const role = await getEffectiveRole(ctx);
+  if (role === ProjectRole.VIEWER) {
+    const override =
+      await ctx.projectPermissionOverrideRepository.findByProject(projectId);
+    if (override?.viewerModelingAccess === ViewerAccess.NO_PERMISSION) {
+      throw new Error(
+        'Access denied: Viewer access to Modeling is disabled for this project',
+      );
+    }
+  }
+  return projectId;
+}
+
+/**
+ * Ensures the user can access the Knowledge section.
+ *  - OWNER / CONTRIBUTOR: always allowed
+ *  - VIEWER: allowed only if viewerKnowledgeAccess !== 'no_permission'
+ *  - No role: denied
+ */
+export async function requireKnowledgeRead(ctx: IContext): Promise<number> {
+  const projectId = await requireProjectRead(ctx);
+  const role = await getEffectiveRole(ctx);
+  if (role === ProjectRole.VIEWER) {
+    const override =
+      await ctx.projectPermissionOverrideRepository.findByProject(projectId);
+    if (override?.viewerKnowledgeAccess === ViewerAccess.NO_PERMISSION) {
+      throw new Error(
+        'Access denied: Viewer access to Knowledge is disabled for this project',
+      );
+    }
+  }
+  return projectId;
+}

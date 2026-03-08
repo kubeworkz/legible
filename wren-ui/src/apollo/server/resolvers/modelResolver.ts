@@ -28,7 +28,7 @@ import {
 } from '../utils/model';
 import { CompactTable, PreviewDataResponse } from '@server/services';
 import { TelemetryEvent } from '../telemetry/telemetry';
-import { requireProjectRead, requireProjectWrite } from '../utils/authGuard';
+import { requireProjectRead, requireProjectWrite, requireModelingRead } from '../utils/authGuard';
 import {
   ensureModelOwnership,
   ensureViewOwnership,
@@ -175,7 +175,7 @@ export class ModelResolver {
   }
 
   public async validateCalculatedField(_root: any, args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const { name, modelId, columnId } = args.data;
     // Verify model belongs to this project
     await ensureModelOwnership(ctx, modelId);
@@ -230,7 +230,7 @@ export class ModelResolver {
   }
 
   public async checkModelSync(_root: any, _args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const { id } = await ctx.projectService.getCurrentProject(ctx.projectId);
     const { manifest } = await ctx.mdlService.makeCurrentModelMDL(
       ctx.projectId,
@@ -290,7 +290,7 @@ export class ModelResolver {
   }
 
   public async listModels(_root: any, _args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const { id: projectId } = await ctx.projectService.getCurrentProject(
       ctx.projectId,
     );
@@ -328,7 +328,7 @@ export class ModelResolver {
   }
 
   public async getModel(_root: any, args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const modelId = args.where.id;
     // Verify model belongs to this project
     await ensureModelOwnership(ctx, modelId);
@@ -827,7 +827,7 @@ export class ModelResolver {
 
   // list views
   public async listViews(_root: any, _args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const { id } = await ctx.projectService.getCurrentProject(ctx.projectId);
     const views = await ctx.viewRepository.findAllBy({ projectId: id });
     return views.map((view) => ({
@@ -839,7 +839,7 @@ export class ModelResolver {
   }
 
   public async getView(_root: any, args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const viewId = args.where.id;
     // Verify view belongs to this project
     await ensureViewOwnership(ctx, viewId);
@@ -855,7 +855,7 @@ export class ModelResolver {
 
   // validate a view name
   public async validateView(_root: any, args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const { name } = args.data;
     return this.validateViewName(name, ctx);
   }
@@ -960,7 +960,7 @@ export class ModelResolver {
   }
 
   public async previewModelData(_root: any, args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const modelId = args.where.id;
     // Verify model belongs to this project
     await ensureModelOwnership(ctx, modelId);
@@ -987,7 +987,7 @@ export class ModelResolver {
   }
 
   public async previewViewData(_root: any, args: any, ctx: IContext) {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const { id: viewId, limit } = args.where;
     // Verify view belongs to this project
     await ensureViewOwnership(ctx, viewId);
@@ -1051,7 +1051,7 @@ export class ModelResolver {
     args: { responseId: number },
     ctx: IContext,
   ): Promise<string> {
-    await requireProjectRead(ctx);
+    await requireModelingRead(ctx);
     const { responseId } = args;
     // Verify response belongs to this project
     await ensureThreadResponseOwnership(ctx, responseId);
