@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Button,
   Table,
@@ -21,8 +21,9 @@ import UserAddOutlined from '@ant-design/icons/UserAddOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
-import useOrganization, { MemberInfo, MemberRole } from '@/hooks/useOrganization';
+import useOrganization, { MemberInfo } from '@/hooks/useOrganization';
 import useAuth from '@/hooks/useAuth';
+import useProjectMembers, { ProjectMemberInfo, ProjectRole } from '@/hooks/useProjectMembers';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   GET_PROJECT_PERMISSION_OVERRIDES,
@@ -49,12 +50,6 @@ const PERMISSION_COLORS: Record<ProjectPermission, string> = {
   OWNER: 'gold',
   CONTRIBUTOR: 'blue',
   VIEWER: 'default',
-};
-
-const ROLE_COLORS: Record<MemberRole, string> = {
-  OWNER: 'gold',
-  ADMIN: 'blue',
-  MEMBER: 'default',
 };
 
 const PERMISSION_OPTIONS: { label: string; value: ProjectPermission }[] = [
@@ -99,20 +94,21 @@ const MemberAvatar = styled.span<{ $color: string }>`
   flex-shrink: 0;
 `;
 
-// ── Add Member Modal ──────────────────────────────────────
+// ── Add Project Member Modal ──────────────────────────────────
 
 interface AddMemberModalProps {
   visible: boolean;
-  members: MemberInfo[];
+  /** Org members not yet in the project */
+  candidates: MemberInfo[];
   onClose: () => void;
-  onAdd: (email: string, role: MemberRole) => Promise<void>;
+  onAdd: (userId: number, role: ProjectRole) => Promise<void>;
 }
 
-function AddMemberModal({ visible, members, onClose, onAdd }: AddMemberModalProps) {
+function AddMemberModal({ visible, candidates, onClose, onAdd }: AddMemberModalProps) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
-  const memberOptions = members.map((m) => {
+  const memberOptions = candidates.map((m) => {
     const name = m.user.displayName || m.user.email;
     const initials = getInitials(name);
     const color = getAvatarColor(name);
@@ -120,10 +116,10 @@ function AddMemberModal({ visible, members, onClose, onAdd }: AddMemberModalProp
       label: (
         <span className="d-flex align-center">
           <MemberAvatar $color={color}>{initials}</MemberAvatar>
-          {name}
+          {name} ({m.user.email})
         </span>
       ),
-      value: m.user.email,
+      value: m.userId,
       searchText: `${name} ${m.user.email}`,
     };
   });
@@ -135,7 +131,7 @@ function AddMemberModal({ visible, members, onClose, onAdd }: AddMemberModalProp
       await onAdd(values.member, values.permission);
       form.resetFields();
       onClose();
-      message.success(`Member added successfully.`);
+      message.success('Member added to project.');
     } catch (error) {
       if ((error as any)?.errorFields) return;
       console.error('Failed to add member:', error);
@@ -196,52 +192,57 @@ function AddMemberModal({ visible, members, onClose, onAdd }: AddMemberModalProp
 export default function SettingsAccessControl() {
   const {
     currentOrganization,
-    members,
-    membersLoading,
-    loading,
+    members: orgMembers,
+    loading: orgLoading,
     isAdmin,
-    updateMemberRole,
-    removeMember,
-    inviteMember,
-    refetchMembers,
   } = useOrganization();
   const { user } = useAuth();
+  const {
+    members: projectMembers,
+    loading: projectMembersLoading,
+    addMember,
+    updateMemberRole,
+    removeMember,
+  } = useProjectMembers();
   const [addVisible, setAddVisible] = useState(false);
 
+  // Org members not yet added to this project — candidates for the "Add member" modal
+  const addCandidates = useMemo(() => {
+    const projectUserIds = new Set(projectMembers.map((pm) => pm.userId));
+    return orgMembers.filter((m) => !projectUserIds.has(m.userId));
+  }, [orgMembers, projectMembers]);
+
   const handleRoleChange = useCallback(
-    async (memberId: number, role: MemberRole) => {
+    async (userId: number, role: ProjectRole) => {
       try {
-        await updateMemberRole(memberId, role);
-        await refetchMembers();
-        message.success('Member role updated.');
+        await updateMemberRole(userId, role);
+        message.success('Project role updated.');
       } catch (error) {
         console.error('Failed to update role:', error);
-        message.error('Failed to update member role.');
+        message.error('Failed to update project role.');
       }
     },
-    [updateMemberRole, refetchMembers],
+    [updateMemberRole],
   );
 
   const handleRemove = useCallback(
-    async (memberId: number) => {
+    async (userId: number) => {
       try {
-        await removeMember(memberId);
-        await refetchMembers();
-        message.success('Member removed.');
+        await removeMember(userId);
+        message.success('Member removed from project.');
       } catch (error) {
         console.error('Failed to remove member:', error);
         message.error('Failed to remove member.');
       }
     },
-    [removeMember, refetchMembers],
+    [removeMember],
   );
 
   const handleAdd = useCallback(
-    async (email: string, role: MemberRole) => {
-      await inviteMember(email, role);
-      await refetchMembers();
+    async (userId: number, role: ProjectRole) => {
+      await addMember(userId, role);
     },
-    [inviteMember, refetchMembers],
+    [addMember],
   );
 
   const columns = [
@@ -249,9 +250,9 @@ export default function SettingsAccessControl() {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      render: (_: any, record: MemberInfo) => {
+      render: (_: any, record: ProjectMemberInfo) => {
         const isMe = record.userId === user?.id;
-        const name = record.user.displayName || record.user.email;
+        const name = record.user?.displayName || record.user?.email || 'Unknown';
         const initials = getInitials(name);
         const color = getAvatarColor(name);
         return (
@@ -269,25 +270,16 @@ export default function SettingsAccessControl() {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      render: (_: any, record: MemberInfo) => (
-        <Text className="gray-7">{record.user.email}</Text>
+      render: (_: any, record: ProjectMemberInfo) => (
+        <Text className="gray-7">{record.user?.email || '—'}</Text>
       ),
     },
     {
-      title: 'Organization role',
-      dataIndex: 'orgRole',
-      key: 'orgRole',
-      width: 170,
-      render: (_: any, record: MemberInfo) => {
-        return <Tag color={ROLE_COLORS[record.role]}>{record.role}</Tag>;
-      },
-    },
-    {
-      title: 'Permission',
-      dataIndex: 'permission',
-      key: 'permission',
+      title: 'Project role',
+      dataIndex: 'role',
+      key: 'role',
       width: 160,
-      render: (_: any, record: MemberInfo) => {
+      render: (_: any, record: ProjectMemberInfo) => {
         if (record.role === 'OWNER') {
           return (
             <Select
@@ -302,17 +294,19 @@ export default function SettingsAccessControl() {
         if (isAdmin && record.userId !== user?.id) {
           return (
             <Select
-              defaultValue="VIEWER"
+              value={record.role}
               size="small"
               style={{ width: 130 }}
               options={PERMISSION_OPTIONS}
               onChange={(value) =>
-                handleRoleChange(record.id, value as MemberRole)
+                handleRoleChange(record.userId, value as ProjectRole)
               }
             />
           );
         }
-        return <Tag color="default">Viewer</Tag>;
+        return (
+          <Tag color={PERMISSION_COLORS[record.role]}>{record.role}</Tag>
+        );
       },
     },
     ...(isAdmin
@@ -321,13 +315,13 @@ export default function SettingsAccessControl() {
             title: '',
             key: 'actions',
             width: 60,
-            render: (_: any, record: MemberInfo) => {
+            render: (_: any, record: ProjectMemberInfo) => {
               if (record.role === 'OWNER') return null;
               if (record.userId === user?.id) return null;
               return (
                 <Popconfirm
-                  title="Remove this member? They will lose access."
-                  onConfirm={() => handleRemove(record.id)}
+                  title="Remove this member from the project?"
+                  onConfirm={() => handleRemove(record.userId)}
                   okText="Remove"
                   okButtonProps={{ danger: true }}
                 >
@@ -345,9 +339,9 @@ export default function SettingsAccessControl() {
       : []),
   ];
 
-  if (loading || !currentOrganization) {
+  if (orgLoading || !currentOrganization) {
     return (
-      <SettingsLayout loading={loading}>
+      <SettingsLayout loading={orgLoading}>
         <div />
       </SettingsLayout>
     );
@@ -376,10 +370,10 @@ export default function SettingsAccessControl() {
             </HeaderRow>
 
             <Table
-              dataSource={members}
+              dataSource={projectMembers}
               columns={columns}
               rowKey="id"
-              loading={membersLoading}
+              loading={projectMembersLoading}
               pagination={false}
               size="middle"
             />
@@ -396,7 +390,7 @@ export default function SettingsAccessControl() {
 
         <AddMemberModal
           visible={addVisible}
-          members={members}
+          candidates={addCandidates}
           onClose={() => setAddVisible(false)}
           onAdd={handleAdd}
         />

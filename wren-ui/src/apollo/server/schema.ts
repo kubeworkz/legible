@@ -1779,6 +1779,35 @@ export const typeDefs = gql`
     viewerKnowledgeAccess: ViewerAccessLevel
   }
 
+  # ── Project Members ──────────────────────────────────────
+
+  enum ProjectRole {
+    OWNER
+    CONTRIBUTOR
+    VIEWER
+  }
+
+  type ProjectMemberType {
+    id: Int!
+    projectId: Int!
+    userId: Int!
+    role: ProjectRole!
+    user: AuthUser
+    grantedBy: Int
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input AddProjectMemberInput {
+    userId: Int!
+    role: ProjectRole!
+  }
+
+  input UpdateProjectMemberRoleInput {
+    userId: Int!
+    role: ProjectRole!
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -1882,6 +1911,9 @@ export const typeDefs = gql`
 
     # Permission Overrides
     projectPermissionOverrides: ProjectPermissionOverrides!
+
+    # Project Members
+    projectMembers: [ProjectMemberType!]!
   }
 
   type Mutation {
@@ -1908,6 +1940,11 @@ export const typeDefs = gql`
     acceptInvitation(token: String!): MemberType!
     updateMemberRole(data: UpdateMemberRoleInput!): MemberType!
     removeMember(memberId: Int!): Boolean!
+
+    # Project Members
+    addProjectMember(data: AddProjectMemberInput!): ProjectMemberType!
+    updateProjectMemberRole(data: UpdateProjectMemberRoleInput!): ProjectMemberType!
+    removeProjectMember(userId: Int!): Boolean!
 
     # API Keys
     createApiKey(data: CreateApiKeyInput!): CreateApiKeyResult!

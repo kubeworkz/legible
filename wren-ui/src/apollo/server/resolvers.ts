@@ -17,6 +17,7 @@ import { FolderResolver } from './resolvers/folderResolver';
 import { SpreadsheetResolver } from './resolvers/spreadsheetResolver';
 import { BillingResolver } from './resolvers/billingResolver';
 import { PermissionOverrideResolver } from './resolvers/permissionOverrideResolver';
+import { ProjectMemberResolver } from './resolvers/projectMemberResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -38,6 +39,7 @@ const folderResolver = new FolderResolver();
 const spreadsheetResolver = new SpreadsheetResolver();
 const billingResolver = new BillingResolver();
 const permissionOverrideResolver = new PermissionOverrideResolver();
+const projectMemberResolver = new ProjectMemberResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -135,6 +137,9 @@ const resolvers = {
     // Permission Overrides
     projectPermissionOverrides:
       permissionOverrideResolver.getProjectPermissionOverrides,
+
+    // Project Members
+    projectMembers: projectMemberResolver.listProjectMembers,
 
     // Spreadsheets
     spreadsheets: spreadsheetResolver.getSpreadsheets,
@@ -319,6 +324,11 @@ const resolvers = {
     // Permission Overrides
     updateProjectPermissionOverrides:
       permissionOverrideResolver.updateProjectPermissionOverrides,
+
+    // Project Members
+    addProjectMember: projectMemberResolver.addProjectMember,
+    updateProjectMemberRole: projectMemberResolver.updateProjectMemberRole,
+    removeProjectMember: projectMemberResolver.removeProjectMember,
 
     // Spreadsheets
     createSpreadsheet: spreadsheetResolver.createSpreadsheet,

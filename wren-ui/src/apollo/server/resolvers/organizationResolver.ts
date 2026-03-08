@@ -153,6 +153,17 @@ export class OrganizationResolver {
       MemberRole.OWNER,
       MemberRole.ADMIN,
     ]);
+
+    // Cascade: remove the user's project_member rows for all projects
+    const projectMemberships =
+      await ctx.projectMemberRepository.findAllByUser(member.userId);
+    for (const pm of projectMemberships) {
+      await ctx.projectMemberRepository.removeByProjectAndUser(
+        pm.projectId,
+        member.userId,
+      );
+    }
+
     return ctx.memberService.removeMember(args.memberId);
   }
 }
