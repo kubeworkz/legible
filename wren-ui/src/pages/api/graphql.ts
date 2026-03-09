@@ -14,6 +14,8 @@ import {
 import { createAuthPlugin } from '@/apollo/server/utils/authPlugin';
 import { TelemetryEvent } from '@/apollo/server/telemetry/telemetry';
 import { components } from '@/common';
+import { byokStore } from '@server/utils/byokContext';
+import { getDecryptedByokKey } from '@server/resolvers/byokResolver';
 import depthLimit from 'graphql-depth-limit';
 
 const serverConfig = getConfig();
@@ -332,16 +334,31 @@ const bootstrapServer = async () => {
     },
   });
   await apolloServer.start();
-  return apolloServer;
+  return { apolloServer, projectRepository };
 };
 
 const startServer = bootstrapServer();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const apolloServer = await startServer;
-  await apolloServer.createHandler({
-    path: '/api/graphql',
-  })(req, res);
+  const { apolloServer, projectRepository } = await startServer;
+
+  // Read project ID from request header to look up BYOK config
+  const projectIdHeader = req?.headers?.['x-project-id'];
+  const projectId = projectIdHeader
+    ? parseInt(String(projectIdHeader), 10)
+    : undefined;
+
+  // Resolve the BYOK config for this project (if any)
+  const byokConfig =
+    projectId && !isNaN(projectId)
+      ? await getDecryptedByokKey(projectRepository, projectId)
+      : null;
+
+  // Run the Apollo handler within the BYOK context so that the adaptor's
+  // axios interceptor can pick up the API key from AsyncLocalStorage.
+  return byokStore.run(byokConfig, () =>
+    apolloServer.createHandler({ path: '/api/graphql' })(req, res),
+  );
 };
 
 export default async function graphqlHandler(req: NextApiRequest, res: NextApiResponse) {

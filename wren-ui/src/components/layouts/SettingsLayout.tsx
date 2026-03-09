@@ -18,6 +18,7 @@ import UsergroupAddOutlined from '@ant-design/icons/UsergroupAddOutlined';
 import KeyOutlined from '@ant-design/icons/KeyOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
 import FileSearchOutlined from '@ant-design/icons/FileSearchOutlined';
+import ApiOutlined from '@ant-design/icons/ApiOutlined';
 
 const { Sider, Content } = Layout;
 
@@ -103,6 +104,13 @@ const projectMenuItems: MenuItem[] = [
     label: 'Data connection',
     icon: <DatabaseOutlined />,
     path: Path.SettingsDataConnection,
+  },
+  {
+    key: 'byok',
+    label: 'BYOK',
+    icon: <ApiOutlined />,
+    path: Path.SettingsByok,
+    visible: ({ canAdmin }) => canAdmin,
   },
   {
     key: 'project-api-keys',

@@ -33,6 +33,7 @@ export enum Path {
   SettingsApiKeys = '/projects/[projectId]/settings/api-keys',
   SettingsAuditLog = '/projects/[projectId]/settings/audit-log',
   SettingsProjectApiKeys = '/projects/[projectId]/settings/project-api-keys',
+  SettingsByok = '/projects/[projectId]/settings/byok',
   SettingsUserProfile = '/projects/[projectId]/settings/user/profile',
   SettingsUserDangerZone = '/projects/[projectId]/settings/user/danger-zone',
 }

@@ -1219,6 +1219,19 @@ export const typeDefs = gql`
     timezone: String
   }
 
+  # ─── BYOK (Bring Your Own Key) ─────────────────────────────
+
+  type ProjectLlmConfig {
+    hasApiKey: Boolean!
+    provider: String
+    maskedApiKey: String
+  }
+
+  input SetProjectLlmKeyInput {
+    apiKey: String!
+    provider: String
+  }
+
   # Settings
   input UpdateDataSourceInput {
     properties: JSON!
@@ -1963,6 +1976,9 @@ export const typeDefs = gql`
     projectMembers: [ProjectMemberType!]!
     myProjectRole: MyProjectRoleResult!
 
+    # BYOK
+    projectLlmConfig: ProjectLlmConfig!
+
     # Audit Logs
     auditLogs(
       filter: AuditLogFilterInput
@@ -2220,5 +2236,9 @@ export const typeDefs = gql`
     updateProjectPermissionOverrides(
       data: UpdateProjectPermissionOverridesInput!
     ): ProjectPermissionOverrides!
+
+    # BYOK
+    setProjectLlmKey(data: SetProjectLlmKeyInput!): ProjectLlmConfig!
+    clearProjectLlmKey: ProjectLlmConfig!
   }
 `;

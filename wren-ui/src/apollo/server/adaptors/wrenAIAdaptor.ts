@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { Readable } from 'stream';
 import {
   AskCandidateType,
@@ -35,6 +35,7 @@ import {
   AskFeedbackStatus,
 } from '@server/models/adaptor';
 import { getLogger } from '@server/utils';
+import { getCurrentByokConfig } from '@server/utils/byokContext';
 import * as Errors from '@server/utils/error';
 import { SqlPair } from '../repositories';
 import { ThreadResponse } from '@server/repositories';
@@ -133,9 +134,22 @@ export interface IWrenAIAdaptor {
 
 export class WrenAIAdaptor implements IWrenAIAdaptor {
   private readonly wrenAIBaseEndpoint: string;
+  private readonly http: AxiosInstance;
 
   constructor({ wrenAIBaseEndpoint }: { wrenAIBaseEndpoint: string }) {
     this.wrenAIBaseEndpoint = wrenAIBaseEndpoint;
+
+    // Create an axios instance with a BYOK interceptor that automatically
+    // adds LLM API key headers when a project has a BYOK key configured.
+    this.http = axios.create();
+    this.http.interceptors.request.use((config) => {
+      const byok = getCurrentByokConfig();
+      if (byok) {
+        config.headers.set('X-LLM-Api-Key', byok.apiKey);
+        config.headers.set('X-LLM-Provider', byok.provider);
+      }
+      return config;
+    });
   }
 
   public async delete(projectId: number): Promise<void> {
@@ -144,7 +158,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
         throw new Error('Project ID is required');
       }
       const url = `${this.wrenAIBaseEndpoint}/v1/semantics`;
-      const response = await axios.delete(url, {
+      const response = await this.http.delete(url, {
         params: {
           project_id: projectId.toString(),
         },
@@ -192,7 +206,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   }
   public async getSqlPairResult(queryId: string): Promise<SqlPairResult> {
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/sql-pairs/${queryId}`,
       );
       const { status, error } = this.transformStatusAndError(res.data);
@@ -212,7 +226,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     sqlPairIds: number[],
   ): Promise<void> {
     try {
-      await axios.delete(`${this.wrenAIBaseEndpoint}/v1/sql-pairs`, {
+      await this.http.delete(`${this.wrenAIBaseEndpoint}/v1/sql-pairs`, {
         data: {
           sql_pair_ids: sqlPairIds.map((id) => id.toString()),
           project_id: projectId.toString(),
@@ -234,7 +248,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async ask(input: AskInput): Promise<AsyncQueryResponse> {
     try {
-      const res = await axios.post(`${this.wrenAIBaseEndpoint}/v1/asks`, {
+      const res = await this.http.post(`${this.wrenAIBaseEndpoint}/v1/asks`, {
         query: input.query,
         id: input.deployId,
         histories: this.transformHistoryInput(input.histories),
@@ -250,7 +264,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   public async cancelAsk(queryId: string): Promise<void> {
     // make PATCH request /v1/asks/:query_id to cancel the query
     try {
-      await axios.patch(`${this.wrenAIBaseEndpoint}/v1/asks/${queryId}`, {
+      await this.http.patch(`${this.wrenAIBaseEndpoint}/v1/asks/${queryId}`, {
         status: 'stopped',
       });
     } catch (err: any) {
@@ -262,7 +276,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   public async getAskResult(queryId: string): Promise<AskResult> {
     // make GET request /v1/asks/:query_id/result to get the result
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/asks/${queryId}/result`,
       );
       return this.transformAskResult(res.data);
@@ -280,7 +294,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   public async getAskStreamingResult(queryId: string): Promise<Readable> {
     // make GET request /v1/asks/:query_id/streaming-result to get the streaming result
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/asks/${queryId}/streaming-result`,
         { responseType: 'stream' },
       );
@@ -304,7 +318,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     input: AskDetailInput,
   ): Promise<AsyncQueryResponse> {
     try {
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/ask-details`,
         input,
       );
@@ -320,7 +334,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   public async getAskDetailResult(queryId: string): Promise<AskDetailResult> {
     // make GET request /v1/ask-details/:query_id/result to get the result
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/ask-details/${queryId}/result`,
       );
       return this.transformAskDetailResult(res.data);
@@ -335,7 +349,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   public async deploy(deployData: DeployData): Promise<WrenAIDeployResponse> {
     const { manifest, hash } = deployData;
     try {
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/semantics-preparations`,
         {
           mdl: JSON.stringify(manifest),
@@ -379,7 +393,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     };
     logger.info(`Wren AI: Generating recommendation questions`);
     try {
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/question-recommendations`,
         body,
       );
@@ -399,7 +413,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     queryId: string,
   ): Promise<RecommendationQuestionsResult> {
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/question-recommendations/${queryId}`,
       );
       return this.transformRecommendationQuestionsResult(res.data);
@@ -424,7 +438,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     };
     // make POST request /v1/sql-answers to create text-based answer
     try {
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/sql-answers`,
         body,
       );
@@ -442,7 +456,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   ): Promise<TextBasedAnswerResult> {
     // make GET request /v1/sql-answers/:query_id to get the result
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/sql-answers/${queryId}`,
       );
       return this.transformTextBasedAnswerResult(res.data);
@@ -457,7 +471,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   public async streamTextBasedAnswer(queryId: string): Promise<Readable> {
     // make GET request /v1/sql-answers/:query_id/streaming to get the streaming result
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/sql-answers/${queryId}/streaming`,
         { responseType: 'stream' },
       );
@@ -472,7 +486,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async generateChart(input: ChartInput): Promise<AsyncQueryResponse> {
     try {
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/charts`,
         input,
       );
@@ -485,7 +499,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async getChartResult(queryId: string): Promise<ChartResult> {
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/charts/${queryId}`,
       );
       return this.transformChartResult(res.data);
@@ -499,7 +513,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async cancelChart(queryId: string): Promise<void> {
     try {
-      await axios.patch(`${this.wrenAIBaseEndpoint}/v1/charts/${queryId}`, {
+      await this.http.patch(`${this.wrenAIBaseEndpoint}/v1/charts/${queryId}`, {
         status: 'stopped',
       });
     } catch (err: any) {
@@ -512,7 +526,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     input: ChartAdjustmentInput,
   ): Promise<AsyncQueryResponse> {
     try {
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/chart-adjustments`,
         this.transformChartAdjustmentInput(input),
       );
@@ -525,7 +539,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async getChartAdjustmentResult(queryId: string): Promise<ChartResult> {
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/chart-adjustments/${queryId}`,
       );
       return this.transformChartResult(res.data);
@@ -539,7 +553,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async cancelChartAdjustment(queryId: string): Promise<void> {
     try {
-      await axios.patch(
+      await this.http.patch(
         `${this.wrenAIBaseEndpoint}/v1/chart-adjustments/${queryId}`,
         {
           status: 'stopped',
@@ -562,7 +576,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
         configurations: input.configurations,
       };
 
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/sql-questions`,
         body,
       );
@@ -588,7 +602,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       project_id: input[0]?.projectId.toString(),
     };
     try {
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/instructions`,
         body,
       );
@@ -605,7 +619,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     queryId: string,
   ): Promise<Partial<QuestionsResult>> {
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/sql-questions/${queryId}`,
       );
       const { status, error } = this.transformStatusAndError(res.data);
@@ -626,7 +640,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     queryId: string,
   ): Promise<InstructionResult> {
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/instructions/${queryId}`,
       );
       return this.transformStatusAndError(res.data) as InstructionResult;
@@ -643,7 +657,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     projectId: number,
   ): Promise<void> {
     try {
-      await axios.delete(`${this.wrenAIBaseEndpoint}/v1/instructions`, {
+      await this.http.delete(`${this.wrenAIBaseEndpoint}/v1/instructions`, {
         data: {
           instruction_ids: ids.map((id) => id.toString()),
           project_id: projectId.toString(),
@@ -669,7 +683,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
         project_id: input.projectId.toString(),
         configurations: input.configurations,
       };
-      const res = await axios.post(
+      const res = await this.http.post(
         `${this.wrenAIBaseEndpoint}/v1/ask-feedbacks`,
         body,
       );
@@ -686,7 +700,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
     queryId: string,
   ): Promise<AskFeedbackResult> {
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/ask-feedbacks/${queryId}`,
       );
       return this.transformAskFeedbackResult(res.data);
@@ -700,7 +714,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async cancelAskFeedback(queryId: string): Promise<void> {
     try {
-      await axios.patch(
+      await this.http.patch(
         `${this.wrenAIBaseEndpoint}/v1/ask-feedbacks/${queryId}`,
         {
           status: 'stopped',
@@ -797,7 +811,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   private async getDeployStatus(deployId: string): Promise<WrenAISystemStatus> {
     try {
-      const res = await axios.get(
+      const res = await this.http.get(
         `${this.wrenAIBaseEndpoint}/v1/semantics-preparations/${deployId}/status`,
       );
       if (res.data.error) {

@@ -17,6 +17,7 @@ from src.providers.llm import (
 )
 from src.providers.loader import provider
 from src.utils import extract_braces_content, remove_trailing_slash
+from src.web.v1.middleware import get_byok_api_key
 
 
 @provider("litellm_llm")
@@ -118,9 +119,12 @@ class LitellmLLMProvider(LLMProvider):
                     **generation_kwargs,
                 )
             else:
+                # Use BYOK (Bring Your Own Key) if provided in request context,
+                # otherwise fall back to the configured system API key.
+                effective_api_key = get_byok_api_key() or self._api_key
                 completion = await acompletion(
                     model=self._model,
-                    api_key=self._api_key,
+                    api_key=effective_api_key,
                     api_base=self._api_base,
                     api_version=self._api_version,
                     timeout=self._timeout,

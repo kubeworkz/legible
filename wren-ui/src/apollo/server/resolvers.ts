@@ -19,6 +19,7 @@ import { BillingResolver } from './resolvers/billingResolver';
 import { PermissionOverrideResolver } from './resolvers/permissionOverrideResolver';
 import { ProjectMemberResolver } from './resolvers/projectMemberResolver';
 import { AuditLogResolver } from './resolvers/auditLogResolver';
+import { ByokResolver } from './resolvers/byokResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -42,6 +43,7 @@ const billingResolver = new BillingResolver();
 const permissionOverrideResolver = new PermissionOverrideResolver();
 const projectMemberResolver = new ProjectMemberResolver();
 const auditLogResolver = new AuditLogResolver();
+const byokResolver = new ByokResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -146,6 +148,9 @@ const resolvers = {
 
     // Audit Logs
     auditLogs: auditLogResolver.getAuditLogs,
+
+    // BYOK
+    projectLlmConfig: byokResolver.getProjectLlmConfig,
 
     // Spreadsheets
     spreadsheets: spreadsheetResolver.getSpreadsheets,
@@ -330,6 +335,10 @@ const resolvers = {
     // Permission Overrides
     updateProjectPermissionOverrides:
       permissionOverrideResolver.updateProjectPermissionOverrides,
+
+    // BYOK
+    setProjectLlmKey: byokResolver.setProjectLlmKey,
+    clearProjectLlmKey: byokResolver.clearProjectLlmKey,
 
     // Project Members
     addProjectMember: projectMemberResolver.addProjectMember,

@@ -32,7 +32,8 @@ export default function useRouteGuard() {
       // Project-admin-only settings pages
       (!canAdmin && pathname.startsWith(Path.SettingsAccessControl)) ||
       (!canAdmin && pathname.startsWith(Path.SettingsDangerZone)) ||
-      (!canAdmin && pathname.startsWith(Path.SettingsProjectApiKeys));
+      (!canAdmin && pathname.startsWith(Path.SettingsProjectApiKeys)) ||
+      (!canAdmin && pathname.startsWith(Path.SettingsByok));
 
     if (shouldRedirect) {
       router.replace(buildPath(Path.Home, currentProjectId));

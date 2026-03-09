@@ -53,6 +53,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# BYOK middleware — reads X-LLM-Api-Key header and stores in contextvars
+# Must be added after CORS middleware (Starlette processes middleware in reverse add order)
+from src.web.v1.middleware import ByokMiddleware
+
+app.add_middleware(ByokMiddleware)
+
 app.include_router(routers.router, prefix="/v1", tags=["v1"])
 if settings.development:
     from src.web import development
