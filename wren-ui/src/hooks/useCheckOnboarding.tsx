@@ -61,9 +61,14 @@ export const useWithOnboarding = () => {
           }
           return;
         }
-        // User is on a regular app page but onboarding is incomplete —
-        // redirect them to the appropriate setup step.
-        router.push(buildPath(newPath, projectId));
+        // Pages that require data models — redirect to setup when incomplete.
+        const requiresOnboarding =
+          pathname.startsWith(Path.Modeling) ||
+          pathname.startsWith(Path.Knowledge) ||
+          pathname.startsWith(Path.DataSecurity);
+        if (requiresOnboarding) {
+          router.push(buildPath(newPath, projectId));
+        }
         return;
       }
 
