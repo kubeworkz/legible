@@ -5,6 +5,8 @@ import styled, { css } from 'styled-components';
 import SimpleLayout from '@/components/layouts/SimpleLayout';
 import { Path, buildPath } from '@/utils/enum';
 import useProject from '@/hooks/useProject';
+import useProjectRole from '@/hooks/useProjectRole';
+import useOrganization from '@/hooks/useOrganization';
 import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import ArrowLeftOutlined from '@ant-design/icons/ArrowLeftOutlined';
 import InfoCircleOutlined from '@ant-design/icons/InfoCircleOutlined';
@@ -15,6 +17,7 @@ import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import UsergroupAddOutlined from '@ant-design/icons/UsergroupAddOutlined';
 import KeyOutlined from '@ant-design/icons/KeyOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
+import FileSearchOutlined from '@ant-design/icons/FileSearchOutlined';
 
 const { Sider, Content } = Layout;
 
@@ -77,6 +80,8 @@ interface MenuItem {
   label: string;
   icon: React.ReactNode;
   path: Path;
+  /** When set, item is only shown if the predicate returns true */
+  visible?: (ctx: { canAdmin: boolean; isOrgAdmin: boolean }) => boolean;
 }
 
 const projectMenuItems: MenuItem[] = [
@@ -91,6 +96,7 @@ const projectMenuItems: MenuItem[] = [
     label: 'Access control',
     icon: <SafetyOutlined />,
     path: Path.SettingsAccessControl,
+    visible: ({ canAdmin }) => canAdmin,
   },
   {
     key: 'data-connection',
@@ -103,12 +109,14 @@ const projectMenuItems: MenuItem[] = [
     label: 'API Keys',
     icon: <KeyOutlined />,
     path: Path.SettingsProjectApiKeys,
+    visible: ({ canAdmin }) => canAdmin,
   },
   {
     key: 'danger-zone',
     label: 'Danger zone',
     icon: <ExclamationCircleOutlined />,
     path: Path.SettingsDangerZone,
+    visible: ({ canAdmin }) => canAdmin,
   },
 ];
 
@@ -124,18 +132,28 @@ const orgMenuItems: MenuItem[] = [
     label: 'Members',
     icon: <UsergroupAddOutlined />,
     path: Path.SettingsMembers,
+    visible: ({ isOrgAdmin }) => isOrgAdmin,
   },
   {
     key: 'api-keys',
     label: 'API Keys',
     icon: <KeyOutlined />,
     path: Path.SettingsApiKeys,
+    visible: ({ isOrgAdmin }) => isOrgAdmin,
+  },
+  {
+    key: 'audit-log',
+    label: 'Audit activity',
+    icon: <FileSearchOutlined />,
+    path: Path.SettingsAuditLog,
+    visible: ({ isOrgAdmin }) => isOrgAdmin,
   },
   {
     key: 'org-danger-zone',
     label: 'Danger zone',
     icon: <ExclamationCircleOutlined />,
     path: Path.SettingsOrgDangerZone,
+    visible: ({ isOrgAdmin }) => isOrgAdmin,
   },
 ];
 
@@ -163,7 +181,13 @@ export default function SettingsLayout(props: Props) {
   const { children, loading } = props;
   const router = useRouter();
   const { currentProjectId } = useProject();
+  const { canAdmin } = useProjectRole();
+  const { isAdmin: isOrgAdmin } = useOrganization();
   const bp = (path: Path) => buildPath(path, currentProjectId);
+
+  const visCtx = { canAdmin, isOrgAdmin };
+  const filterVisible = (items: MenuItem[]) =>
+    items.filter((item) => !item.visible || item.visible(visCtx));
 
   const activeKey = useMemo(() => {
     const allItems = [...projectMenuItems, ...orgMenuItems, ...userMenuItems];
@@ -205,7 +229,7 @@ export default function SettingsLayout(props: Props) {
             >
               Project
             </Typography.Text>
-            {projectMenuItems.map((item) => (
+            {filterVisible(projectMenuItems).map((item) => (
               <StyledMenuButton
                 key={item.key}
                 type="text"
@@ -224,7 +248,7 @@ export default function SettingsLayout(props: Props) {
             >
               Organization
             </Typography.Text>
-            {orgMenuItems.map((item) => (
+            {filterVisible(orgMenuItems).map((item) => (
               <StyledMenuButton
                 key={item.key}
                 type="text"
@@ -243,7 +267,7 @@ export default function SettingsLayout(props: Props) {
             >
               User
             </Typography.Text>
-            {userMenuItems.map((item) => (
+            {filterVisible(userMenuItems).map((item) => (
               <StyledMenuButton
                 key={item.key}
                 type="text"

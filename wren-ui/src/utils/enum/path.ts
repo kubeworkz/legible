@@ -31,6 +31,7 @@ export enum Path {
   SettingsMembers = '/projects/[projectId]/settings/members',
   SettingsOrgDangerZone = '/projects/[projectId]/settings/org-danger-zone',
   SettingsApiKeys = '/projects/[projectId]/settings/api-keys',
+  SettingsAuditLog = '/projects/[projectId]/settings/audit-log',
   SettingsProjectApiKeys = '/projects/[projectId]/settings/project-api-keys',
   SettingsUserProfile = '/projects/[projectId]/settings/user/profile',
   SettingsUserDangerZone = '/projects/[projectId]/settings/user/danger-zone',
