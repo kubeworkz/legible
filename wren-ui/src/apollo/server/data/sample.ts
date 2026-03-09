@@ -3436,6 +3436,376 @@ ORDER BY price_range`,
         type: RelationType.ONE_TO_ONE,
       },
     ],
+    sampleContent: {
+      dashboards: [
+        {
+          name: 'Fraud Risk',
+          items: [
+            // Row 0 — KPI Numbers
+            {
+              displayName: 'Total Fraud Transactions',
+              type: 'NUMBER',
+              sql: `SELECT COUNT(*) AS total_fraud FROM transactions WHERE is_fraud = 'Yes'`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Fraud Rate (%)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(100.0 * SUM(CASE WHEN is_fraud = 'Yes' THEN 1 ELSE 0 END) / COUNT(*), 2) AS fraud_rate FROM transactions`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Total Fraud Amount ($)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(SUM(amount), 2) AS total_fraud_amount FROM transactions WHERE is_fraud = 'Yes'`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            // Row 2 — Fraud by transaction method (PIE)
+            {
+              displayName: 'Fraud by Transaction Method',
+              type: 'PIE',
+              sql: `SELECT use_chip, COUNT(*) AS fraud_count
+FROM transactions
+WHERE is_fraud = 'Yes'
+GROUP BY use_chip`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'fraud_count', type: 'quantitative' },
+                  color: { field: 'use_chip', type: 'nominal', title: 'Method' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 3, h: 3 },
+            },
+            // Row 2 — Top 10 merchant categories by fraud count (BAR)
+            {
+              displayName: 'Top 10 Merchant Categories by Fraud',
+              type: 'BAR',
+              sql: `SELECT mc.description AS category, COUNT(*) AS fraud_count
+FROM transactions t
+JOIN mcc_codes mc ON t.mcc = mc.mcc_code
+WHERE t.is_fraud = 'Yes'
+GROUP BY mc.description
+ORDER BY fraud_count DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'category', type: 'nominal', title: 'Merchant Category', sort: '-y' },
+                  y: { field: 'fraud_count', type: 'quantitative', title: 'Fraud Count' },
+                },
+              },
+              layout: { x: 3, y: 2, w: 3, h: 3 },
+            },
+            // Row 5 — Monthly fraud trend (LINE)
+            {
+              displayName: 'Monthly Fraud Transaction Trend',
+              type: 'BAR',
+              sql: `SELECT
+  STRFTIME(date, '%Y-%m') AS txn_month,
+  COUNT(*) AS fraud_count
+FROM transactions
+WHERE is_fraud = 'Yes'
+GROUP BY STRFTIME(date, '%Y-%m')
+ORDER BY txn_month`,
+              chartSchema: {
+                mark: { type: 'line', tooltip: true, point: true },
+                encoding: {
+                  x: { field: 'txn_month', type: 'ordinal', title: 'Month' },
+                  y: { field: 'fraud_count', type: 'quantitative', title: 'Fraud Transactions' },
+                },
+              },
+              layout: { x: 0, y: 5, w: 6, h: 4 },
+            },
+            // Row 9 — Fraud by card brand (BAR)
+            {
+              displayName: 'Fraud by Card Brand',
+              type: 'BAR',
+              sql: `SELECT c.card_brand, COUNT(*) AS fraud_count
+FROM transactions t
+JOIN cards c ON t.card_id = c.id
+WHERE t.is_fraud = 'Yes'
+GROUP BY c.card_brand
+ORDER BY fraud_count DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'card_brand', type: 'nominal', title: 'Card Brand', sort: '-y' },
+                  y: { field: 'fraud_count', type: 'quantitative', title: 'Fraud Count' },
+                },
+              },
+              layout: { x: 0, y: 9, w: 3, h: 3 },
+            },
+            // Row 9 — Fraud amount distribution by card type (BAR)
+            {
+              displayName: 'Fraud Amount by Card Type',
+              type: 'BAR',
+              sql: `SELECT c.card_type, ROUND(SUM(t.amount), 2) AS fraud_amount
+FROM transactions t
+JOIN cards c ON t.card_id = c.id
+WHERE t.is_fraud = 'Yes'
+GROUP BY c.card_type
+ORDER BY fraud_amount DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'card_type', type: 'nominal', title: 'Card Type', sort: '-y' },
+                  y: { field: 'fraud_amount', type: 'quantitative', title: 'Fraud Amount ($)' },
+                },
+              },
+              layout: { x: 3, y: 9, w: 3, h: 3 },
+            },
+          ],
+        },
+        {
+          name: 'Financial Planning & Market Analysis',
+          items: [
+            // Row 0 — KPI Numbers
+            {
+              displayName: 'Total Transaction Volume',
+              type: 'NUMBER',
+              sql: `SELECT COUNT(*) AS total_transactions FROM transactions`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Total Transaction Amount ($)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(SUM(amount), 2) AS total_amount FROM transactions WHERE amount > 0`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Transaction Amount ($)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(amount), 2) AS avg_amount FROM transactions WHERE amount > 0`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            // Row 2 — Spending by card brand (PIE)
+            {
+              displayName: 'Spending by Card Brand',
+              type: 'PIE',
+              sql: `SELECT c.card_brand, ROUND(SUM(t.amount), 2) AS total_spent
+FROM transactions t
+JOIN cards c ON t.card_id = c.id
+WHERE t.amount > 0
+GROUP BY c.card_brand`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'total_spent', type: 'quantitative' },
+                  color: { field: 'card_brand', type: 'nominal', title: 'Card Brand' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 3, h: 3 },
+            },
+            // Row 2 — Top 10 merchant categories by spend (BAR)
+            {
+              displayName: 'Top 10 Merchant Categories by Spend',
+              type: 'BAR',
+              sql: `SELECT mc.description AS category, ROUND(SUM(t.amount), 2) AS total_spent
+FROM transactions t
+JOIN mcc_codes mc ON t.mcc = mc.mcc_code
+WHERE t.amount > 0
+GROUP BY mc.description
+ORDER BY total_spent DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'category', type: 'nominal', title: 'Merchant Category', sort: '-y' },
+                  y: { field: 'total_spent', type: 'quantitative', title: 'Total Spent ($)' },
+                },
+              },
+              layout: { x: 3, y: 2, w: 3, h: 3 },
+            },
+            // Row 5 — Monthly transaction volume trend (LINE)
+            {
+              displayName: 'Monthly Transaction Volume Trend',
+              type: 'BAR',
+              sql: `SELECT
+  STRFTIME(date, '%Y-%m') AS txn_month,
+  COUNT(*) AS txn_count,
+  ROUND(SUM(amount), 2) AS total_amount
+FROM transactions
+WHERE amount > 0
+GROUP BY STRFTIME(date, '%Y-%m')
+ORDER BY txn_month`,
+              chartSchema: {
+                mark: { type: 'line', tooltip: true, point: true },
+                encoding: {
+                  x: { field: 'txn_month', type: 'ordinal', title: 'Month' },
+                  y: { field: 'txn_count', type: 'quantitative', title: 'Transactions' },
+                },
+              },
+              layout: { x: 0, y: 5, w: 6, h: 4 },
+            },
+            // Row 9 — Income distribution of customers (BAR)
+            {
+              displayName: 'Customer Income Distribution',
+              type: 'BAR',
+              sql: `SELECT
+  CASE
+    WHEN yearly_income < 20000 THEN 'Under $20k'
+    WHEN yearly_income < 40000 THEN '$20k-40k'
+    WHEN yearly_income < 60000 THEN '$40k-60k'
+    WHEN yearly_income < 80000 THEN '$60k-80k'
+    WHEN yearly_income < 100000 THEN '$80k-100k'
+    ELSE '$100k+'
+  END AS income_bracket,
+  COUNT(*) AS customer_count
+FROM users
+GROUP BY income_bracket
+ORDER BY income_bracket`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'income_bracket', type: 'ordinal', title: 'Income Bracket',
+                    sort: ['Under $20k', '$20k-40k', '$40k-60k', '$60k-80k', '$80k-100k', '$100k+'] },
+                  y: { field: 'customer_count', type: 'quantitative', title: 'Customers' },
+                },
+              },
+              layout: { x: 0, y: 9, w: 3, h: 3 },
+            },
+            // Row 9 — Avg credit score by gender (BAR)
+            {
+              displayName: 'Avg Credit Score by Gender',
+              type: 'BAR',
+              sql: `SELECT gender, ROUND(AVG(credit_score), 0) AS avg_credit_score
+FROM users
+GROUP BY gender
+ORDER BY avg_credit_score DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'gender', type: 'nominal', title: 'Gender' },
+                  y: { field: 'avg_credit_score', type: 'quantitative', title: 'Avg Credit Score' },
+                },
+              },
+              layout: { x: 3, y: 9, w: 3, h: 3 },
+            },
+            // Row 12 — Spending by transaction method stacked by card brand
+            {
+              displayName: 'Spending by Method & Card Brand',
+              type: 'STACKED_BAR',
+              sql: `SELECT t.use_chip, c.card_brand, ROUND(SUM(t.amount), 2) AS total_spent
+FROM transactions t
+JOIN cards c ON t.card_id = c.id
+WHERE t.amount > 0
+GROUP BY t.use_chip, c.card_brand
+ORDER BY t.use_chip, c.card_brand`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'use_chip', type: 'nominal', title: 'Transaction Method' },
+                  y: { field: 'total_spent', type: 'quantitative', title: 'Total Spent ($)', stack: true },
+                  color: { field: 'card_brand', type: 'nominal', title: 'Card Brand' },
+                },
+              },
+              layout: { x: 0, y: 12, w: 6, h: 4 },
+            },
+          ],
+        },
+      ],
+      spreadsheets: [
+        {
+          name: 'Which online transactions with amounts greater than 113.83 were identified as fraudulent, including details about the transaction, merchant category, and card type?',
+          sql: `SELECT
+  t.id AS transaction_id,
+  t.date,
+  t.amount,
+  t.use_chip AS transaction_method,
+  t.merchant_city,
+  t.merchant_state,
+  mc.description AS merchant_category,
+  c.card_brand,
+  c.card_type,
+  u.current_age,
+  u.gender
+FROM transactions t
+JOIN mcc_codes mc ON t.mcc = mc.mcc_code
+JOIN cards c ON t.card_id = c.id
+JOIN users u ON t.client_id = u.id
+WHERE t.is_fraud = 'Yes'
+  AND t.use_chip = 'Online Transaction'
+  AND t.amount > 113.83
+ORDER BY t.amount DESC`,
+        },
+        {
+          name: 'Which are the top 10 users with the highest total transaction values, along with their age, yearly income, credit score, and rank?',
+          sql: `SELECT
+  u.id AS user_id,
+  u.current_age,
+  u.gender,
+  u.yearly_income,
+  u.credit_score,
+  ROUND(SUM(t.amount), 2) AS total_transaction_value,
+  ROW_NUMBER() OVER (ORDER BY SUM(t.amount) DESC) AS rank
+FROM users u
+JOIN transactions t ON u.id = t.client_id
+WHERE t.amount > 0
+GROUP BY u.id, u.current_age, u.gender, u.yearly_income, u.credit_score
+ORDER BY total_transaction_value DESC
+LIMIT 10`,
+        },
+      ],
+      threads: [
+        {
+          question: 'Give me all the records of fraud transactions',
+          answer: 'Here are the fraud transaction records from the dataset. Each row includes the transaction ID, date, amount, merchant details, and the card/user information associated with the fraudulent activity.',
+          sql: `SELECT
+  t.id AS transaction_id,
+  t.date,
+  t.amount,
+  t.use_chip AS transaction_method,
+  t.merchant_city,
+  t.merchant_state,
+  mc.description AS merchant_category,
+  c.card_brand,
+  c.card_type,
+  u.current_age,
+  u.gender,
+  u.yearly_income
+FROM transactions t
+JOIN mcc_codes mc ON t.mcc = mc.mcc_code
+JOIN cards c ON t.card_id = c.id
+JOIN users u ON t.client_id = u.id
+WHERE t.is_fraud = 'Yes'
+ORDER BY t.date DESC`,
+        },
+        {
+          question: "What's the pattern of these fraud transactions",
+          answer: 'Fraud transactions show several notable patterns: (1) Online transactions have the highest fraud rate compared to chip or swipe methods, (2) Certain merchant categories like grocery stores and gas stations see disproportionately more fraud, (3) Fraud amounts tend to cluster in specific ranges — many are small transactions under $50 but there are also spikes in the $100-200 range, (4) Fraud is fairly evenly distributed across card brands but credit cards are targeted more than debit cards.',
+          sql: `SELECT
+  t.use_chip AS transaction_method,
+  c.card_type,
+  CASE
+    WHEN t.amount < 25 THEN 'Under $25'
+    WHEN t.amount < 50 THEN '$25-50'
+    WHEN t.amount < 100 THEN '$50-100'
+    WHEN t.amount < 200 THEN '$100-200'
+    ELSE '$200+'
+  END AS amount_range,
+  COUNT(*) AS fraud_count,
+  ROUND(AVG(t.amount), 2) AS avg_fraud_amount
+FROM transactions t
+JOIN cards c ON t.card_id = c.id
+WHERE t.is_fraud = 'Yes'
+GROUP BY t.use_chip, c.card_type, amount_range
+ORDER BY fraud_count DESC`,
+          chartDetail: {
+            description: 'Fraud transaction count by transaction method and amount range',
+            chartType: 'STACKED_BAR',
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'transaction_method', type: 'nominal', title: 'Transaction Method' },
+                y: { field: 'fraud_count', type: 'quantitative', title: 'Fraud Count', stack: true },
+                color: { field: 'amount_range', type: 'nominal', title: 'Amount Range' },
+              },
+            },
+          },
+        },
+      ],
+    },
   },
   hotel_rating: {
     name: SampleDatasetName.HOTEL_RATING,
