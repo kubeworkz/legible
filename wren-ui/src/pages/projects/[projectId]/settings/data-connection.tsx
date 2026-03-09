@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -240,9 +241,24 @@ export default function SettingsDataConnection() {
         <Title level={4} className="gray-9 mb-1">
           Data connection
         </Title>
-        <Text className="gray-6 d-block mb-5">
+        <Text className="gray-6 d-block mb-3">
           Manage the data source connection for this project.
         </Text>
+
+        <Alert
+          type="info"
+          showIcon
+          className="mb-5"
+          message={
+            <span>
+              To change your data connection, go to{' '}
+              <Link href={buildPath(Path.SettingsDangerZone, currentProjectId)}>
+                Settings &gt; Project &gt; Danger Zone
+              </Link>{' '}
+              to reset the current connection and set up a new one.
+            </span>
+          }
+        />
 
         {dataSource?.sampleDataset ? (
           <SampleDatasetPanel sampleDataset={dataSource.sampleDataset} />
