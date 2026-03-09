@@ -3940,11 +3940,27 @@ ORDER BY fraud_count DESC`,
               displayName: 'age',
             },
           },
+          {
+            name: 'traveller_type',
+            properties: {
+              description: 'Type of traveller (Family, Solo, Couple, or Group).',
+              displayName: 'traveller_type',
+            },
+          },
+          {
+            name: 'join_year',
+            properties: {
+              description: 'Year the user joined the platform.',
+              displayName: 'join_year',
+            },
+          },
         ],
         schema: [
           { columnName: 'user_id', dataType: 'INTEGER' },
           { columnName: 'country', dataType: 'VARCHAR' },
           { columnName: 'age', dataType: 'INTEGER' },
+          { columnName: 'traveller_type', dataType: 'VARCHAR' },
+          { columnName: 'join_year', dataType: 'INTEGER' },
         ],
       },
       {
@@ -4016,6 +4032,366 @@ ORDER BY fraud_count DESC`,
         type: RelationType.ONE_TO_MANY,
       },
     ],
+    sampleContent: {
+      dashboards: [
+        {
+          name: 'User Behavior',
+          items: [
+            // Row 0 — KPI Numbers
+            {
+              displayName: 'Total Reviewers',
+              type: 'NUMBER',
+              sql: `SELECT COUNT(DISTINCT user_id) AS total_reviewers FROM reviews`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Review Score',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(review_score), 2) AS avg_score FROM reviews`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Total Reviews',
+              type: 'NUMBER',
+              sql: `SELECT COUNT(*) AS total_reviews FROM reviews`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            // Row 2 — Reviews by traveller type (PIE)
+            {
+              displayName: 'Reviews by Traveller Type',
+              type: 'PIE',
+              sql: `SELECT u.traveller_type, COUNT(*) AS review_count
+FROM reviews r
+JOIN users u ON r.user_id = u.user_id
+GROUP BY u.traveller_type`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'review_count', type: 'quantitative' },
+                  color: { field: 'traveller_type', type: 'nominal', title: 'Traveller Type' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 3, h: 3 },
+            },
+            // Row 2 — Avg score by traveller type (BAR)
+            {
+              displayName: 'Avg Score by Traveller Type',
+              type: 'BAR',
+              sql: `SELECT u.traveller_type, ROUND(AVG(r.review_score), 2) AS avg_score
+FROM reviews r
+JOIN users u ON r.user_id = u.user_id
+GROUP BY u.traveller_type
+ORDER BY avg_score DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'traveller_type', type: 'nominal', title: 'Traveller Type', sort: '-y' },
+                  y: { field: 'avg_score', type: 'quantitative', title: 'Avg Score' },
+                },
+              },
+              layout: { x: 3, y: 2, w: 3, h: 3 },
+            },
+            // Row 5 — Avg score by user age bracket (BAR)
+            {
+              displayName: 'Avg Review Score by Age Group',
+              type: 'BAR',
+              sql: `SELECT
+  CASE
+    WHEN u.age < 25 THEN 'Under 25'
+    WHEN u.age < 35 THEN '25-34'
+    WHEN u.age < 45 THEN '35-44'
+    WHEN u.age < 55 THEN '45-54'
+    WHEN u.age < 65 THEN '55-64'
+    ELSE '65+'
+  END AS age_group,
+  ROUND(AVG(r.review_score), 2) AS avg_score,
+  COUNT(*) AS review_count
+FROM reviews r
+JOIN users u ON r.user_id = u.user_id
+GROUP BY age_group
+ORDER BY age_group`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'age_group', type: 'ordinal', title: 'Age Group',
+                    sort: ['Under 25', '25-34', '35-44', '45-54', '55-64', '65+'] },
+                  y: { field: 'avg_score', type: 'quantitative', title: 'Avg Score' },
+                },
+              },
+              layout: { x: 0, y: 5, w: 6, h: 4 },
+            },
+            // Row 9 — Top 10 reviewer countries (BAR)
+            {
+              displayName: 'Top 10 Reviewer Countries',
+              type: 'BAR',
+              sql: `SELECT u.country, COUNT(*) AS review_count
+FROM reviews r
+JOIN users u ON r.user_id = u.user_id
+GROUP BY u.country
+ORDER BY review_count DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'country', type: 'nominal', title: 'Country', sort: '-y' },
+                  y: { field: 'review_count', type: 'quantitative', title: 'Reviews' },
+                },
+              },
+              layout: { x: 0, y: 9, w: 3, h: 3 },
+            },
+            // Row 9 — Avg score by join year (BAR)
+            {
+              displayName: 'Avg Score by Join Year',
+              type: 'BAR',
+              sql: `SELECT u.join_year, ROUND(AVG(r.review_score), 2) AS avg_score
+FROM reviews r
+JOIN users u ON r.user_id = u.user_id
+GROUP BY u.join_year
+ORDER BY u.join_year`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'join_year', type: 'ordinal', title: 'Join Year' },
+                  y: { field: 'avg_score', type: 'quantitative', title: 'Avg Score' },
+                },
+              },
+              layout: { x: 3, y: 9, w: 3, h: 3 },
+            },
+          ],
+        },
+        {
+          name: 'Hotel Performance',
+          items: [
+            // Row 0 — KPI Numbers
+            {
+              displayName: 'Total Hotels',
+              type: 'NUMBER',
+              sql: `SELECT COUNT(*) AS total_hotels FROM hotels`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Hotel Star Rating',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(star_rating), 1) AS avg_stars FROM hotels`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Cleanliness Score',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(cleanliness_base), 2) AS avg_cleanliness FROM hotels`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            // Row 2 — Hotels by star rating (PIE)
+            {
+              displayName: 'Hotels by Star Rating',
+              type: 'PIE',
+              sql: `SELECT star_rating || ' Stars' AS star_category, COUNT(*) AS hotel_count
+FROM hotels
+GROUP BY star_rating`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'hotel_count', type: 'quantitative' },
+                  color: { field: 'star_category', type: 'nominal', title: 'Star Rating' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 3, h: 3 },
+            },
+            // Row 2 — Top 10 hotels by avg review score (BAR)
+            {
+              displayName: 'Top 10 Hotels by Avg Review Score',
+              type: 'BAR',
+              sql: `SELECT h.hotel_name, ROUND(AVG(r.review_score), 2) AS avg_score
+FROM reviews r
+JOIN hotels h ON r.hotel_id = h.hotel_id
+GROUP BY h.hotel_name
+ORDER BY avg_score DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'hotel_name', type: 'nominal', title: 'Hotel', sort: '-y' },
+                  y: { field: 'avg_score', type: 'quantitative', title: 'Avg Score' },
+                },
+              },
+              layout: { x: 3, y: 2, w: 3, h: 3 },
+            },
+            // Row 5 — Avg review score by country (BAR)
+            {
+              displayName: 'Avg Review Score by Hotel Country',
+              type: 'BAR',
+              sql: `SELECT h.country, ROUND(AVG(r.review_score), 2) AS avg_score, COUNT(*) AS review_count
+FROM reviews r
+JOIN hotels h ON r.hotel_id = h.hotel_id
+GROUP BY h.country
+ORDER BY avg_score DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'country', type: 'nominal', title: 'Country', sort: '-y' },
+                  y: { field: 'avg_score', type: 'quantitative', title: 'Avg Score' },
+                },
+              },
+              layout: { x: 0, y: 5, w: 6, h: 4 },
+            },
+            // Row 9 — Cleanliness vs Comfort vs Facilities by star rating
+            {
+              displayName: 'Quality Scores by Star Rating',
+              type: 'BAR',
+              sql: `SELECT star_rating || ' Stars' AS star_category,
+  ROUND(AVG(cleanliness_base), 2) AS avg_cleanliness,
+  ROUND(AVG(comfort_base), 2) AS avg_comfort,
+  ROUND(AVG(facilities_base), 2) AS avg_facilities
+FROM hotels
+GROUP BY star_rating
+ORDER BY star_rating`,
+              chartSchema: {
+                transform: [
+                  { fold: ['avg_cleanliness', 'avg_comfort', 'avg_facilities'], as: ['Quality Metric', 'Score'] },
+                ],
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'star_category', type: 'nominal', title: 'Star Rating' },
+                  y: { field: 'Score', type: 'quantitative', title: 'Score' },
+                  xOffset: { field: 'Quality Metric', type: 'nominal' },
+                  color: { field: 'Quality Metric', type: 'nominal', title: 'Metric', scale: { range: ['#5B8FF9', '#5AD8A6', '#F6BD16'] } },
+                },
+              },
+              layout: { x: 0, y: 9, w: 3, h: 3 },
+            },
+            // Row 9 — Review score distribution (BAR)
+            {
+              displayName: 'Review Score Distribution',
+              type: 'BAR',
+              sql: `SELECT
+  CASE
+    WHEN review_score < 3 THEN '1-2'
+    WHEN review_score < 5 THEN '3-4'
+    WHEN review_score < 7 THEN '5-6'
+    WHEN review_score < 9 THEN '7-8'
+    ELSE '9-10'
+  END AS score_range,
+  COUNT(*) AS review_count
+FROM reviews
+GROUP BY score_range
+ORDER BY score_range`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'score_range', type: 'ordinal', title: 'Score Range',
+                    sort: ['1-2', '3-4', '5-6', '7-8', '9-10'] },
+                  y: { field: 'review_count', type: 'quantitative', title: 'Reviews' },
+                },
+              },
+              layout: { x: 3, y: 9, w: 3, h: 3 },
+            },
+          ],
+        },
+      ],
+      spreadsheets: [
+        {
+          name: 'Information of users aged 35-44 who are either Family or Solo travellers?',
+          sql: `SELECT
+  u.user_id,
+  u.country,
+  u.age,
+  u.traveller_type,
+  u.join_year,
+  COUNT(r.review_id) AS total_reviews,
+  ROUND(AVG(r.review_score), 2) AS avg_review_score,
+  ROUND(MIN(r.review_score), 2) AS min_score,
+  ROUND(MAX(r.review_score), 2) AS max_score
+FROM users u
+LEFT JOIN reviews r ON u.user_id = r.user_id
+WHERE u.age BETWEEN 35 AND 44
+  AND u.traveller_type IN ('Family', 'Solo')
+GROUP BY u.user_id, u.country, u.age, u.traveller_type, u.join_year
+ORDER BY total_reviews DESC`,
+        },
+        {
+          name: 'Performance of Hotels in Different Regions',
+          sql: `SELECT
+  h.country AS region,
+  h.city,
+  COUNT(DISTINCT h.hotel_id) AS hotel_count,
+  COUNT(r.review_id) AS total_reviews,
+  ROUND(AVG(r.review_score), 2) AS avg_review_score,
+  ROUND(AVG(h.star_rating), 1) AS avg_star_rating,
+  ROUND(AVG(h.cleanliness_base), 2) AS avg_cleanliness,
+  ROUND(AVG(h.comfort_base), 2) AS avg_comfort,
+  ROUND(AVG(h.facilities_base), 2) AS avg_facilities
+FROM hotels h
+LEFT JOIN reviews r ON h.hotel_id = r.hotel_id
+GROUP BY h.country, h.city
+ORDER BY avg_review_score DESC`,
+        },
+      ],
+      threads: [
+        {
+          question: 'Do users from specific countries consistently rate hotels in other regions lower than the global average?',
+          answer: 'Yes, there are notable patterns. Users from certain countries tend to rate hotels in foreign regions differently. For example, some European users tend to rate hotels in Asia slightly below the global average, while users from Asian countries often give higher scores to European hotels. The global average review score serves as the baseline, and deviations of 0.5+ points suggest a consistent bias from particular origin countries.',
+          sql: `SELECT
+  u.country AS user_country,
+  h.country AS hotel_country,
+  COUNT(*) AS review_count,
+  ROUND(AVG(r.review_score), 2) AS avg_score,
+  ROUND((SELECT AVG(review_score) FROM reviews), 2) AS global_avg,
+  ROUND(AVG(r.review_score) - (SELECT AVG(review_score) FROM reviews), 2) AS diff_from_global
+FROM reviews r
+JOIN users u ON r.user_id = u.user_id
+JOIN hotels h ON r.hotel_id = h.hotel_id
+WHERE u.country != h.country
+GROUP BY u.country, h.country
+HAVING COUNT(*) >= 3
+ORDER BY diff_from_global ASC`,
+          chartDetail: {
+            description: 'Average review score by user country for foreign hotels vs global average',
+            chartType: 'BAR',
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'user_country', type: 'nominal', title: 'User Country' },
+                y: { field: 'diff_from_global', type: 'quantitative', title: 'Diff from Global Avg' },
+                color: {
+                  field: 'diff_from_global', type: 'quantitative',
+                  scale: { scheme: 'redblue', domainMid: 0 },
+                  title: 'Deviation',
+                },
+              },
+            },
+          },
+        },
+        {
+          question: 'Do users who joined in 2025 give significantly higher average scores than users who joined in 2020?',
+          answer: 'Comparing the two cohorts reveals a measurable difference. Users who joined in 2025 tend to give modestly different average scores compared to the 2020 cohort. The breakdown by traveller type and hotel star rating shows that the gap is more pronounced for certain segments — for instance, newer solo travellers tend to rate 5-star hotels more generously than their 2020 counterparts.',
+          sql: `SELECT
+  u.join_year,
+  u.traveller_type,
+  h.star_rating,
+  COUNT(*) AS review_count,
+  ROUND(AVG(r.review_score), 2) AS avg_score
+FROM reviews r
+JOIN users u ON r.user_id = u.user_id
+JOIN hotels h ON r.hotel_id = h.hotel_id
+WHERE u.join_year IN (2020, 2025)
+GROUP BY u.join_year, u.traveller_type, h.star_rating
+ORDER BY u.join_year, u.traveller_type, h.star_rating`,
+          chartDetail: {
+            description: 'Average review score comparison: 2020 vs 2025 joiners by traveller type',
+            chartType: 'BAR',
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'traveller_type', type: 'nominal', title: 'Traveller Type' },
+                y: { field: 'avg_score', type: 'quantitative', title: 'Avg Score' },
+                xOffset: { field: 'join_year', type: 'nominal' },
+                color: { field: 'join_year', type: 'nominal', title: 'Join Year', scale: { range: ['#5B8FF9', '#F6BD16'] } },
+              },
+            },
+          },
+        },
+      ],
+    },
   },
   supply_chain: {
     name: SampleDatasetName.SUPPLY_CHAIN,
