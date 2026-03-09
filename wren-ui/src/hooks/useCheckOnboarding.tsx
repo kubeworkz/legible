@@ -61,6 +61,9 @@ export const useWithOnboarding = () => {
           }
           return;
         }
+        // User is on a regular app page but onboarding is incomplete —
+        // redirect them to the appropriate setup step.
+        router.push(buildPath(newPath, projectId));
         return;
       }
 
