@@ -51,7 +51,7 @@ export default function SettingsDangerZone() {
       onOk: async () => {
         await resetCurrentProject();
         client.clearStore();
-        router.push(buildPath(Path.SettingsDataConnection, currentProjectId));
+        router.push(buildPath(Path.OnboardingConnection, currentProjectId));
       },
     });
   };
