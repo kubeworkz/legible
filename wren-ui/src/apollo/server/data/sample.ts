@@ -1893,6 +1893,395 @@ GROUP BY e.gender`,
         type: RelationType.ONE_TO_MANY,
       },
     ],
+    sampleContent: {
+      dashboards: [
+        {
+          name: 'Operational Logistics',
+          items: [
+            // Row 0 — KPI Numbers
+            {
+              displayName: 'Total Orders',
+              type: 'NUMBER',
+              sql: `SELECT COUNT(DISTINCT order_id) AS total_orders FROM olist_orders_dataset`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Total Freight Cost (R$)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(SUM(freight_value), 2) AS total_freight FROM olist_order_items_dataset`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Delivery Days',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(DATEDIFF('day', order_purchase_timestamp, order_delivered_customer_date)), 1) AS avg_delivery_days
+FROM olist_orders_dataset
+WHERE order_delivered_customer_date IS NOT NULL`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            // Row 2 — Orders by status (PIE)
+            {
+              displayName: 'Orders by Status',
+              type: 'PIE',
+              sql: `SELECT order_status, COUNT(*) AS order_count
+FROM olist_orders_dataset
+GROUP BY order_status`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'order_count', type: 'quantitative' },
+                  color: { field: 'order_status', type: 'nominal', title: 'Status' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 3, h: 3 },
+            },
+            // Row 2 — Avg freight by customer state (BAR)
+            {
+              displayName: 'Avg Freight Cost by Customer State (Top 10)',
+              type: 'BAR',
+              sql: `SELECT c.customer_state, ROUND(AVG(oi.freight_value), 2) AS avg_freight
+FROM olist_order_items_dataset oi
+JOIN olist_orders_dataset o ON oi.order_id = o.order_id
+JOIN olist_customers_dataset c ON o.customer_id = c.customer_id
+GROUP BY c.customer_state
+ORDER BY avg_freight DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'customer_state', type: 'nominal', title: 'State', sort: '-y' },
+                  y: { field: 'avg_freight', type: 'quantitative', title: 'Avg Freight (R$)' },
+                },
+              },
+              layout: { x: 3, y: 2, w: 3, h: 3 },
+            },
+            // Row 5 — Monthly order volume trend (LINE)
+            {
+              displayName: 'Monthly Order Volume Trend',
+              type: 'BAR',
+              sql: `SELECT
+  STRFTIME(order_purchase_timestamp, '%Y-%m') AS order_month,
+  COUNT(DISTINCT order_id) AS order_count
+FROM olist_orders_dataset
+WHERE order_purchase_timestamp >= DATE '2017-01-01'
+  AND order_purchase_timestamp < DATE '2019-01-01'
+GROUP BY STRFTIME(order_purchase_timestamp, '%Y-%m')
+ORDER BY order_month`,
+              chartSchema: {
+                mark: { type: 'line', tooltip: true, point: true },
+                encoding: {
+                  x: { field: 'order_month', type: 'ordinal', title: 'Month' },
+                  y: { field: 'order_count', type: 'quantitative', title: 'Orders' },
+                },
+              },
+              layout: { x: 0, y: 5, w: 6, h: 4 },
+            },
+            // Row 9 — Late delivery rate by state (BAR)
+            {
+              displayName: 'Late Delivery Rate by State (Top 10)',
+              type: 'BAR',
+              sql: `SELECT c.customer_state,
+  ROUND(100.0 * SUM(CASE WHEN o.order_delivered_customer_date > o.order_estimated_delivery_date THEN 1 ELSE 0 END) / COUNT(*), 1) AS late_pct
+FROM olist_orders_dataset o
+JOIN olist_customers_dataset c ON o.customer_id = c.customer_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY late_pct DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'customer_state', type: 'nominal', title: 'State', sort: '-y' },
+                  y: { field: 'late_pct', type: 'quantitative', title: 'Late Delivery %' },
+                },
+              },
+              layout: { x: 0, y: 9, w: 3, h: 3 },
+            },
+            // Row 9 — Avg delivery time vs estimate by state
+            {
+              displayName: 'Delivery Time vs Estimated (Top 10 States)',
+              type: 'BAR',
+              sql: `SELECT c.customer_state,
+  ROUND(AVG(DATEDIFF('day', o.order_purchase_timestamp, o.order_delivered_customer_date)), 1) AS avg_actual_days,
+  ROUND(AVG(DATEDIFF('day', o.order_purchase_timestamp, o.order_estimated_delivery_date)), 1) AS avg_estimated_days
+FROM olist_orders_dataset o
+JOIN olist_customers_dataset c ON o.customer_id = c.customer_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY COUNT(*) DESC
+LIMIT 10`,
+              chartSchema: {
+                transform: [
+                  { fold: ['avg_actual_days', 'avg_estimated_days'], as: ['Metric', 'Days'] },
+                ],
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'customer_state', type: 'nominal', title: 'State' },
+                  y: { field: 'Days', type: 'quantitative', title: 'Days' },
+                  xOffset: { field: 'Metric', type: 'nominal' },
+                  color: { field: 'Metric', type: 'nominal', title: 'Metric', scale: { range: ['#5B8FF9', '#5AD8A6'] } },
+                },
+              },
+              layout: { x: 3, y: 9, w: 3, h: 3 },
+            },
+          ],
+        },
+        {
+          name: 'Sales Report',
+          items: [
+            // Row 0 — KPI Numbers
+            {
+              displayName: 'Total Revenue (R$)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(SUM(payment_value), 2) AS total_revenue FROM olist_order_payments_dataset`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Order Value (R$)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(order_total), 2) AS avg_order_value
+FROM (
+  SELECT order_id, SUM(payment_value) AS order_total
+  FROM olist_order_payments_dataset
+  GROUP BY order_id
+) sub`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Total Unique Customers',
+              type: 'NUMBER',
+              sql: `SELECT COUNT(DISTINCT customer_unique_id) AS unique_customers FROM olist_customers_dataset`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            // Row 2 — Revenue by payment type (PIE)
+            {
+              displayName: 'Revenue by Payment Type',
+              type: 'PIE',
+              sql: `SELECT payment_type, ROUND(SUM(payment_value), 2) AS total_value
+FROM olist_order_payments_dataset
+GROUP BY payment_type`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'total_value', type: 'quantitative' },
+                  color: { field: 'payment_type', type: 'nominal', title: 'Payment Type' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 3, h: 3 },
+            },
+            // Row 2 — Top 10 product categories by revenue (BAR)
+            {
+              displayName: 'Top 10 Product Categories by Revenue',
+              type: 'BAR',
+              sql: `SELECT t.product_category_name_english AS category, ROUND(SUM(oi.price), 2) AS revenue
+FROM olist_order_items_dataset oi
+JOIN olist_products_dataset p ON oi.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english
+ORDER BY revenue DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'category', type: 'nominal', title: 'Category', sort: '-y' },
+                  y: { field: 'revenue', type: 'quantitative', title: 'Revenue (R$)' },
+                },
+              },
+              layout: { x: 3, y: 2, w: 3, h: 3 },
+            },
+            // Row 5 — Monthly revenue trend (LINE)
+            {
+              displayName: 'Monthly Revenue Trend',
+              type: 'BAR',
+              sql: `SELECT
+  STRFTIME(o.order_purchase_timestamp, '%Y-%m') AS order_month,
+  ROUND(SUM(p.payment_value), 2) AS monthly_revenue
+FROM olist_orders_dataset o
+JOIN olist_order_payments_dataset p ON o.order_id = p.order_id
+WHERE o.order_purchase_timestamp >= DATE '2017-01-01'
+  AND o.order_purchase_timestamp < DATE '2019-01-01'
+GROUP BY STRFTIME(o.order_purchase_timestamp, '%Y-%m')
+ORDER BY order_month`,
+              chartSchema: {
+                mark: { type: 'line', tooltip: true, point: true },
+                encoding: {
+                  x: { field: 'order_month', type: 'ordinal', title: 'Month' },
+                  y: { field: 'monthly_revenue', type: 'quantitative', title: 'Revenue (R$)' },
+                },
+              },
+              layout: { x: 0, y: 5, w: 6, h: 4 },
+            },
+            // Row 9 — Revenue by customer state (BAR)
+            {
+              displayName: 'Revenue by Customer State (Top 10)',
+              type: 'BAR',
+              sql: `SELECT c.customer_state, ROUND(SUM(p.payment_value), 2) AS revenue
+FROM olist_orders_dataset o
+JOIN olist_customers_dataset c ON o.customer_id = c.customer_id
+JOIN olist_order_payments_dataset p ON o.order_id = p.order_id
+GROUP BY c.customer_state
+ORDER BY revenue DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'customer_state', type: 'nominal', title: 'State', sort: '-y' },
+                  y: { field: 'revenue', type: 'quantitative', title: 'Revenue (R$)' },
+                },
+              },
+              layout: { x: 0, y: 9, w: 3, h: 3 },
+            },
+            // Row 9 — Avg review score by category (BAR)
+            {
+              displayName: 'Avg Review Score by Top 10 Categories',
+              type: 'BAR',
+              sql: `SELECT t.product_category_name_english AS category,
+  ROUND(AVG(r.review_score), 2) AS avg_score
+FROM olist_order_items_dataset oi
+JOIN olist_products_dataset p ON oi.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+JOIN olist_order_reviews_dataset r ON oi.order_id = r.order_id
+GROUP BY t.product_category_name_english
+ORDER BY COUNT(*) DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'category', type: 'nominal', title: 'Category' },
+                  y: { field: 'avg_score', type: 'quantitative', title: 'Avg Score', scale: { domain: [0, 5] } },
+                },
+              },
+              layout: { x: 3, y: 9, w: 3, h: 3 },
+            },
+            // Row 12 — Stacked: Revenue by state + payment type
+            {
+              displayName: 'Revenue by State & Payment Type (Top 5 States)',
+              type: 'STACKED_BAR',
+              sql: `SELECT c.customer_state, p.payment_type, ROUND(SUM(p.payment_value), 2) AS revenue
+FROM olist_orders_dataset o
+JOIN olist_customers_dataset c ON o.customer_id = c.customer_id
+JOIN olist_order_payments_dataset p ON o.order_id = p.order_id
+WHERE c.customer_state IN (
+  SELECT customer_state FROM (
+    SELECT c2.customer_state, SUM(p2.payment_value) AS s
+    FROM olist_orders_dataset o2
+    JOIN olist_customers_dataset c2 ON o2.customer_id = c2.customer_id
+    JOIN olist_order_payments_dataset p2 ON o2.order_id = p2.order_id
+    GROUP BY c2.customer_state
+    ORDER BY s DESC
+    LIMIT 5
+  )
+)
+GROUP BY c.customer_state, p.payment_type
+ORDER BY c.customer_state, p.payment_type`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'customer_state', type: 'nominal', title: 'State' },
+                  y: { field: 'revenue', type: 'quantitative', title: 'Revenue (R$)', stack: true },
+                  color: { field: 'payment_type', type: 'nominal', title: 'Payment Type' },
+                },
+              },
+              layout: { x: 0, y: 12, w: 6, h: 4 },
+            },
+          ],
+        },
+      ],
+      spreadsheets: [
+        {
+          name: 'Which customers made purchases in 2017 but not in 2018?',
+          sql: `SELECT
+  c.customer_unique_id,
+  c.customer_city,
+  c.customer_state,
+  COUNT(DISTINCT o.order_id) AS orders_in_2017
+FROM olist_customers_dataset c
+JOIN olist_orders_dataset o ON c.customer_id = o.customer_id
+WHERE YEAR(o.order_purchase_timestamp) = 2017
+  AND c.customer_unique_id NOT IN (
+    SELECT c2.customer_unique_id
+    FROM olist_customers_dataset c2
+    JOIN olist_orders_dataset o2 ON c2.customer_id = o2.customer_id
+    WHERE YEAR(o2.order_purchase_timestamp) = 2018
+  )
+GROUP BY c.customer_unique_id, c.customer_city, c.customer_state
+ORDER BY orders_in_2017 DESC`,
+        },
+        {
+          name: 'Which are the top 5 sellers with the lowest average review scores? (show me 10 records)',
+          sql: `SELECT
+  s.seller_id,
+  s.seller_city,
+  s.seller_state,
+  ROUND(AVG(r.review_score), 2) AS avg_review_score,
+  COUNT(DISTINCT r.review_id) AS review_count
+FROM olist_sellers_dataset s
+JOIN olist_order_items_dataset oi ON s.seller_id = oi.seller_id
+JOIN olist_order_reviews_dataset r ON oi.order_id = r.order_id
+GROUP BY s.seller_id, s.seller_city, s.seller_state
+HAVING COUNT(DISTINCT r.review_id) >= 10
+ORDER BY avg_review_score ASC
+LIMIT 10`,
+        },
+      ],
+      threads: [
+        {
+          question: 'Does the number of pictures affect the selling amount of that product?',
+          answer: 'Yes, there is a positive correlation. Products with more photos tend to have higher total sales revenue. Products with 1 photo average about R$137 per sale, while products with 10+ photos average significantly more. However, the relationship plateaus around 6-7 photos.',
+          sql: `SELECT
+  p.product_photos_qty,
+  COUNT(DISTINCT oi.order_id) AS total_orders,
+  ROUND(SUM(oi.price), 2) AS total_revenue,
+  ROUND(AVG(oi.price), 2) AS avg_price
+FROM olist_products_dataset p
+JOIN olist_order_items_dataset oi ON p.product_id = oi.product_id
+WHERE p.product_photos_qty IS NOT NULL
+GROUP BY p.product_photos_qty
+ORDER BY p.product_photos_qty`,
+          chartDetail: {
+            description: 'Total revenue by number of product photos',
+            chartType: 'BAR',
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'product_photos_qty', type: 'ordinal', title: 'Number of Photos' },
+                y: { field: 'total_revenue', type: 'quantitative', title: 'Total Revenue (R$)' },
+              },
+            },
+          },
+        },
+        {
+          question: 'Can you show me the relationship between review and product value?',
+          answer: 'There is a moderate inverse relationship between product price and review scores. Lower-priced items (under R$100) tend to receive slightly higher average review scores (~4.1), while higher-priced items ($500+) receive lower scores (~3.7). This suggests that customers purchasing expensive items may have higher expectations.',
+          sql: `SELECT
+  CASE
+    WHEN oi.price < 50 THEN 'Under R$50'
+    WHEN oi.price < 100 THEN 'R$50-100'
+    WHEN oi.price < 200 THEN 'R$100-200'
+    WHEN oi.price < 500 THEN 'R$200-500'
+    ELSE 'R$500+'
+  END AS price_range,
+  ROUND(AVG(r.review_score), 2) AS avg_review_score,
+  COUNT(DISTINCT r.review_id) AS review_count
+FROM olist_order_items_dataset oi
+JOIN olist_order_reviews_dataset r ON oi.order_id = r.order_id
+GROUP BY price_range
+ORDER BY price_range`,
+          chartDetail: {
+            description: 'Average review score by product price range',
+            chartType: 'BAR',
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'price_range', type: 'ordinal', title: 'Price Range',
+                  sort: ['Under R$50', 'R$50-100', 'R$100-200', 'R$200-500', 'R$500+'] },
+                y: { field: 'avg_review_score', type: 'quantitative', title: 'Avg Review Score', scale: { domain: [0, 5] } },
+              },
+            },
+          },
+        },
+      ],
+    },
   },
   nba: {
     name: SampleDatasetName.NBA,
