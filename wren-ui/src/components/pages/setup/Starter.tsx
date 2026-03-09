@@ -39,7 +39,16 @@ export default function Starter(props) {
 
   return (
     <>
-      <Typography.Title level={1} className="mb-3">
+      <Typography.Title level={1} className="mb-2">
+        Let&apos;s get you started
+      </Typography.Title>
+      <Typography.Text type="secondary" style={{ fontSize: 16 }}>
+        Connect your own data source or explore with a sample dataset.
+      </Typography.Text>
+
+      <div className="py-6" />
+
+      <Typography.Title level={3} className="mb-3">
         Connect a data source
       </Typography.Title>
       <Typography.Text>
@@ -63,7 +72,7 @@ export default function Starter(props) {
 
       <div className="py-8" />
 
-      <Typography.Title level={1} className="mb-3">
+      <Typography.Title level={3} className="mb-3">
         Play around with sample data
       </Typography.Title>
       <Row className="mt-6" gutter={[16, 16]}>
