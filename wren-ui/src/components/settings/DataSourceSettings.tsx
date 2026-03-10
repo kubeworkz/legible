@@ -41,11 +41,8 @@ const SampleDatasetPanel = (props: Props) => {
           data={templates.map((t) => ({ ...t, disabled: t.value !== sampleDataset }))}
           selectedTemplate={sampleDataset}
           onSelect={() => {}}
+          showComingSoon={false}
         />
-      </div>
-      <div className="gray-6 mt-1">
-        To change your sample dataset, go to Settings &gt; Project &gt; Danger
-        Zone to reset the current connection and set up a new one.
       </div>
     </>
   );

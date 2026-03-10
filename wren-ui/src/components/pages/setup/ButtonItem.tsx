@@ -68,6 +68,7 @@ const ComingSoon = styled.div`
 type Props = ButtonOption & {
   selectedTemplate: SampleDatasetName;
   onSelect: (value: string) => void;
+  showComingSoon?: boolean;
 };
 
 export default function ButtonItem(props: IterableComponent<Props>) {
@@ -80,6 +81,7 @@ export default function ButtonItem(props: IterableComponent<Props>) {
     label,
     onSelect,
     selectedTemplate,
+    showComingSoon = true,
   } = props;
 
   const isSelected = selectedTemplate === value;
@@ -112,7 +114,7 @@ export default function ButtonItem(props: IterableComponent<Props>) {
         )}
         {label}
       </div>
-      {disabled && <ComingSoon />}
+      {disabled && showComingSoon && <ComingSoon />}
     </StyledButton>
   );
 }
