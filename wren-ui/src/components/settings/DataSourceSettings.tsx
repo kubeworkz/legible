@@ -1,9 +1,8 @@
-import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useEffect, useMemo } from 'react';
-import { Button, Form, Modal, message, Alert } from 'antd';
+import { Button, Form, message, Alert } from 'antd';
 import { makeIterable } from '@/utils/iteration';
-import { DATA_SOURCES, FORM_MODE, Path } from '@/utils/enum';
+import { DATA_SOURCES, FORM_MODE } from '@/utils/enum';
 import { getDataSource, getTemplates } from '@/components/pages/setup/utils';
 import { FlexLoading } from '@/components/PageLoading';
 import ButtonItem from '@/components/pages/setup/ButtonItem';
@@ -13,7 +12,6 @@ import {
 } from '@/hooks/useSetupConnectionDataSource';
 import { parseGraphQLError } from '@/utils/errorHandler';
 import {
-  useStartSampleDatasetMutation,
   useUpdateDataSourceMutation,
 } from '@/apollo/client/graphql/dataSource.generated';
 import {
@@ -32,51 +30,22 @@ interface Props {
 const SampleDatasetIterator = makeIterable(ButtonItem);
 
 const SampleDatasetPanel = (props: Props) => {
-  const router = useRouter();
-  const { sampleDataset, closeModal } = props;
+  const { sampleDataset } = props;
   const templates = getTemplates();
-  const [startSampleDataset] = useStartSampleDatasetMutation({
-    onError: (error) => console.error(error),
-    onCompleted: (data) => {
-      // Switch to the newly created project
-      const projectId = data?.startSampleDataset?.projectId;
-      if (projectId && typeof window !== 'undefined') {
-        localStorage.setItem('wren-current-project-id', String(projectId));
-      }
-      router.push(Path.Home);
-      closeModal();
-    },
-    refetchQueries: 'active',
-  });
-
-  const onSelect = (name: SampleDatasetName) => {
-    const isCurrentTemplate = sampleDataset === name;
-    if (!isCurrentTemplate) {
-      const template = templates.find((item) => item.value === name);
-      Modal.confirm({
-        title: `Are you sure you want to change to "${template.label}" dataset?`,
-        okButtonProps: { danger: true },
-        okText: 'Change',
-        onOk: async () => {
-          await startSampleDataset({ variables: { data: { name } } });
-        },
-      });
-    }
-  };
 
   return (
     <>
-      <div className="mb-2">Change sample dataset</div>
+      <div className="mb-2">Current sample dataset</div>
       <div className="d-grid grid-columns-3 g-4">
         <SampleDatasetIterator
-          data={templates}
+          data={templates.map((t) => ({ ...t, disabled: t.value !== sampleDataset }))}
           selectedTemplate={sampleDataset}
-          onSelect={onSelect}
+          onSelect={() => {}}
         />
       </div>
       <div className="gray-6 mt-1">
-        Please be aware that choosing another sample dataset will delete all
-        thread records in the Home page.
+        To change your sample dataset, go to Settings &gt; Project &gt; Danger
+        Zone to reset the current connection and set up a new one.
       </div>
     </>
   );
