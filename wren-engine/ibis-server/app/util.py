@@ -1,7 +1,6 @@
 import asyncio
 import base64
 import json
-import pathlib
 import time
 
 try:
@@ -13,6 +12,8 @@ except ImportError:  # pragma: no cover
     class ClickHouseDbError(Exception):
         pass
 
+
+import os
 
 import datafusion
 import orjson
@@ -55,6 +56,12 @@ MIGRATION_MESSAGE = "Wren engine is migrating to Rust version now. \
     Wren AI team are appreciate if you can provide the error messages and related logs for us."
 
 
+def _normalize_port(info: dict | None) -> dict | None:
+    if isinstance(info, dict) and type(info.get("port")) is int:
+        return {**info, "port": str(info["port"])}
+    return info
+
+
 def resolve_connection_info(dto) -> dict:
     """Return connection info dict from either a file path or the inline DTO field.
 
@@ -62,7 +69,6 @@ def resolve_connection_info(dto) -> dict:
     directory that is allowed to be read. Requests are rejected if the env var
     is absent or the resolved path escapes that directory.
     """
-    import os
 
     if getattr(dto, "connection_file_path", None):
         allowed_root = os.environ.get("CONNECTION_FILE_ROOT")
@@ -71,15 +77,29 @@ def resolve_connection_info(dto) -> dict:
                 ErrorCode.INVALID_CONNECTION_INFO,
                 "connectionFilePath requires the CONNECTION_FILE_ROOT environment variable to be set",
             )
-        path = pathlib.Path(dto.connection_file_path).resolve()
-        if not path.is_relative_to(pathlib.Path(allowed_root).resolve()):
+        # Resolve the trusted root (no user input involved)
+        allowed_root_str = os.path.realpath(allowed_root)
+        # Build the candidate path by joining the trusted root with the user
+        # value, then normalise. Using os.path.normpath(os.path.join(base, user))
+        # is the pattern recognised by CodeQL as safe for path-injection checks.
+        # realpath additionally resolves symlinks so a symlink inside the allowed
+        # root cannot escape to a file outside it.
+        fullpath = os.path.realpath(
+            os.path.normpath(os.path.join(allowed_root_str, dto.connection_file_path))
+        )
+        root_prefix = (
+            allowed_root_str
+            if allowed_root_str.endswith(os.sep)
+            else allowed_root_str + os.sep
+        )
+        if not fullpath.startswith(root_prefix):
             raise WrenError(
                 ErrorCode.INVALID_CONNECTION_INFO,
                 f"Connection file path is outside the allowed directory: {dto.connection_file_path}",
             )
         try:
-            with open(path) as f:
-                return json.load(f)
+            with open(fullpath) as f:
+                return _normalize_port(json.load(f))
         except FileNotFoundError:
             raise WrenError(
                 ErrorCode.INVALID_CONNECTION_INFO,
@@ -90,7 +110,7 @@ def resolve_connection_info(dto) -> dict:
                 ErrorCode.INVALID_CONNECTION_INFO,
                 f"Invalid JSON in connection file: {e}",
             )
-    return dto.connection_info
+    return _normalize_port(dto.connection_info)
 
 
 @tracer.start_as_current_span("base64_to_dict", kind=trace.SpanKind.INTERNAL)
@@ -143,10 +163,10 @@ def _with_session_timezone(
                     )
                 )
                 continue
-            if data_source == DataSource.mysql:
+            if data_source in {DataSource.mysql, DataSource.doris}:
                 timezone = headers.get(X_WREN_TIMEZONE, "UTC")
                 # TODO: ibis mysql loss the timezone information
-                # we cast timestamp to timestamp with session timezone for mysql
+                # we cast timestamp to timestamp with session timezone for mysql/doris
                 fields.append(
                     pa.field(
                         field.name,
