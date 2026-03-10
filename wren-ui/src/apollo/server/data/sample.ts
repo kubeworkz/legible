@@ -4723,6 +4723,330 @@ ORDER BY u.join_year, u.traveller_type, h.star_rating`,
         type: RelationType.ONE_TO_MANY,
       },
     ],
+    sampleContent: {
+      dashboards: [
+        {
+          name: 'Supply Chain & Operation',
+          items: [
+            // Row 0 — KPI Numbers
+            {
+              displayName: 'Avg Lead Time (days)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(lead_time_days), 1) AS avg_lead_time FROM suppliers`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Shipping Time (days)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(shipping_time_days), 1) AS avg_shipping_time FROM shipments`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Defect Rate (%)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(defect_rate), 2) AS avg_defect_rate FROM orders`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            // Row 2 — Inspection results (PIE)
+            {
+              displayName: 'Order Inspection Results',
+              type: 'PIE',
+              sql: `SELECT inspection_result, COUNT(*) AS order_count
+FROM orders
+GROUP BY inspection_result`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'order_count', type: 'quantitative' },
+                  color: { field: 'inspection_result', type: 'nominal', title: 'Result' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 3, h: 3 },
+            },
+            // Row 2 — Shipping cost by transportation mode (BAR)
+            {
+              displayName: 'Avg Shipping Cost by Transportation Mode',
+              type: 'BAR',
+              sql: `SELECT transportation_mode, ROUND(AVG(shipping_cost), 2) AS avg_shipping_cost
+FROM shipments
+GROUP BY transportation_mode
+ORDER BY avg_shipping_cost DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'transportation_mode', type: 'nominal', title: 'Mode', sort: '-y' },
+                  y: { field: 'avg_shipping_cost', type: 'quantitative', title: 'Avg Shipping Cost ($)' },
+                },
+              },
+              layout: { x: 3, y: 2, w: 3, h: 3 },
+            },
+            // Row 5 — Avg defect rate by product type (BAR)
+            {
+              displayName: 'Avg Defect Rate by Product Type',
+              type: 'BAR',
+              sql: `SELECT p.product_type, ROUND(AVG(o.defect_rate), 2) AS avg_defect_rate
+FROM orders o
+JOIN products p ON o.product_id = p.product_id
+GROUP BY p.product_type
+ORDER BY avg_defect_rate DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'product_type', type: 'nominal', title: 'Product Type', sort: '-y' },
+                  y: { field: 'avg_defect_rate', type: 'quantitative', title: 'Avg Defect Rate (%)' },
+                },
+              },
+              layout: { x: 0, y: 5, w: 3, h: 3 },
+            },
+            // Row 5 — Avg manufacturing cost by supplier location (BAR top 10)
+            {
+              displayName: 'Top 10 Supplier Locations by Avg Mfg Cost',
+              type: 'BAR',
+              sql: `SELECT location, ROUND(AVG(manufacturing_cost), 2) AS avg_mfg_cost
+FROM suppliers
+GROUP BY location
+ORDER BY avg_mfg_cost DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'location', type: 'nominal', title: 'Location', sort: '-y' },
+                  y: { field: 'avg_mfg_cost', type: 'quantitative', title: 'Avg Mfg Cost ($)' },
+                },
+              },
+              layout: { x: 3, y: 5, w: 3, h: 3 },
+            },
+            // Row 8 — Shipping carrier performance stacked by mode
+            {
+              displayName: 'Shipping Volume by Carrier & Mode',
+              type: 'STACKED_BAR',
+              sql: `SELECT shipping_carrier, transportation_mode, COUNT(*) AS shipment_count
+FROM shipments
+GROUP BY shipping_carrier, transportation_mode
+ORDER BY shipping_carrier, transportation_mode`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'shipping_carrier', type: 'nominal', title: 'Carrier' },
+                  y: { field: 'shipment_count', type: 'quantitative', title: 'Shipments', stack: true },
+                  color: { field: 'transportation_mode', type: 'nominal', title: 'Mode' },
+                },
+              },
+              layout: { x: 0, y: 8, w: 6, h: 4 },
+            },
+          ],
+        },
+        {
+          name: 'Sales & Commercial',
+          items: [
+            // Row 0 — KPI Numbers
+            {
+              displayName: 'Total Revenue ($)',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(SUM(revenue_generated), 2) AS total_revenue FROM orders`,
+              layout: { x: 0, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Total Units Sold',
+              type: 'NUMBER',
+              sql: `SELECT SUM(number_sold) AS total_units_sold FROM orders`,
+              layout: { x: 2, y: 0, w: 2, h: 2 },
+            },
+            {
+              displayName: 'Avg Order Quantity',
+              type: 'NUMBER',
+              sql: `SELECT ROUND(AVG(order_quantity), 0) AS avg_order_qty FROM orders`,
+              layout: { x: 4, y: 0, w: 2, h: 2 },
+            },
+            // Row 2 — Revenue by customer demographics (PIE)
+            {
+              displayName: 'Revenue by Customer Demographics',
+              type: 'PIE',
+              sql: `SELECT customer_demographics, ROUND(SUM(revenue_generated), 2) AS revenue
+FROM orders
+GROUP BY customer_demographics`,
+              chartSchema: {
+                mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+                encoding: {
+                  theta: { field: 'revenue', type: 'quantitative' },
+                  color: { field: 'customer_demographics', type: 'nominal', title: 'Demographics' },
+                },
+              },
+              layout: { x: 0, y: 2, w: 3, h: 3 },
+            },
+            // Row 2 — Revenue by product type (BAR)
+            {
+              displayName: 'Revenue by Product Type',
+              type: 'BAR',
+              sql: `SELECT p.product_type, ROUND(SUM(o.revenue_generated), 2) AS revenue
+FROM orders o
+JOIN products p ON o.product_id = p.product_id
+GROUP BY p.product_type
+ORDER BY revenue DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'product_type', type: 'nominal', title: 'Product Type', sort: '-y' },
+                  y: { field: 'revenue', type: 'quantitative', title: 'Revenue ($)' },
+                },
+              },
+              layout: { x: 3, y: 2, w: 3, h: 3 },
+            },
+            // Row 5 — Top 10 products by revenue (BAR)
+            {
+              displayName: 'Top 10 Products by Revenue',
+              type: 'BAR',
+              sql: `SELECT p.sku, ROUND(SUM(o.revenue_generated), 2) AS revenue
+FROM orders o
+JOIN products p ON o.product_id = p.product_id
+GROUP BY p.sku
+ORDER BY revenue DESC
+LIMIT 10`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'sku', type: 'nominal', title: 'Product SKU', sort: '-y' },
+                  y: { field: 'revenue', type: 'quantitative', title: 'Revenue ($)' },
+                },
+              },
+              layout: { x: 0, y: 5, w: 3, h: 3 },
+            },
+            // Row 5 — Avg price by product type (BAR)
+            {
+              displayName: 'Avg Product Price by Type',
+              type: 'BAR',
+              sql: `SELECT product_type, ROUND(AVG(price), 2) AS avg_price
+FROM products
+GROUP BY product_type
+ORDER BY avg_price DESC`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'product_type', type: 'nominal', title: 'Product Type', sort: '-y' },
+                  y: { field: 'avg_price', type: 'quantitative', title: 'Avg Price ($)' },
+                },
+              },
+              layout: { x: 3, y: 5, w: 3, h: 3 },
+            },
+            // Row 8 — Revenue by demographics & product type stacked
+            {
+              displayName: 'Revenue by Demographics & Product Type',
+              type: 'STACKED_BAR',
+              sql: `SELECT o.customer_demographics, p.product_type, ROUND(SUM(o.revenue_generated), 2) AS revenue
+FROM orders o
+JOIN products p ON o.product_id = p.product_id
+GROUP BY o.customer_demographics, p.product_type
+ORDER BY o.customer_demographics, p.product_type`,
+              chartSchema: {
+                mark: { type: 'bar', tooltip: true },
+                encoding: {
+                  x: { field: 'customer_demographics', type: 'nominal', title: 'Demographics' },
+                  y: { field: 'revenue', type: 'quantitative', title: 'Revenue ($)', stack: true },
+                  color: { field: 'product_type', type: 'nominal', title: 'Product Type' },
+                },
+              },
+              layout: { x: 0, y: 8, w: 6, h: 4 },
+            },
+          ],
+        },
+      ],
+      spreadsheets: [
+        {
+          name: 'What are the average lead time, average shipping time, average manufacturing lead time, average order quantity, average availability, and counts of distinct shipping carriers, transportation modes, routes, and supplier locations for each product type?',
+          sql: `SELECT
+  p.product_type,
+  ROUND(AVG(s.lead_time_days), 1) AS avg_lead_time,
+  ROUND(AVG(sh.shipping_time_days), 1) AS avg_shipping_time,
+  ROUND(AVG(s.manufacturing_lead_time_days), 1) AS avg_mfg_lead_time,
+  ROUND(AVG(o.order_quantity), 1) AS avg_order_quantity,
+  ROUND(AVG(p.availability), 1) AS avg_availability,
+  COUNT(DISTINCT sh.shipping_carrier) AS distinct_carriers,
+  COUNT(DISTINCT sh.transportation_mode) AS distinct_modes,
+  COUNT(DISTINCT sh.route) AS distinct_routes,
+  COUNT(DISTINCT s.location) AS distinct_supplier_locations
+FROM products p
+JOIN suppliers s ON p.supplier_id = s.supplier_id
+JOIN orders o ON p.product_id = o.product_id
+JOIN shipments sh ON o.order_id = sh.order_id
+GROUP BY p.product_type
+ORDER BY p.product_type`,
+        },
+        {
+          name: 'Which are the top 10 products with the lowest average stock levels and availability, ranked by their risk of stock shortage?',
+          sql: `SELECT
+  p.product_id,
+  p.sku,
+  p.product_type,
+  p.stock_level,
+  p.availability,
+  ROUND(AVG(o.order_quantity), 1) AS avg_order_qty,
+  ROUND(p.stock_level * 1.0 / NULLIF(AVG(o.order_quantity), 0), 2) AS stock_to_demand_ratio,
+  ROW_NUMBER() OVER (ORDER BY p.stock_level + p.availability ASC) AS shortage_risk_rank
+FROM products p
+JOIN orders o ON p.product_id = o.product_id
+GROUP BY p.product_id, p.sku, p.product_type, p.stock_level, p.availability
+ORDER BY shortage_risk_rank
+LIMIT 10`,
+        },
+      ],
+      threads: [
+        {
+          question: 'For the same transportation mode, which shipping carrier has the best balance of shipping costs and shipping times?',
+          answer: 'Looking at each transportation mode, the carriers with the best cost-to-time efficiency are identified by their cost-per-day metric (shipping cost divided by shipping time). Lower values indicate a carrier delivers more value per dollar spent. Across modes like Road, Rail, Air, and Sea, certain carriers consistently offer better cost-time balance — for example, carriers with shorter shipping times at moderate costs outperform those with lower costs but significantly longer delivery windows.',
+          sql: `SELECT
+  sh.transportation_mode,
+  sh.shipping_carrier,
+  COUNT(*) AS shipment_count,
+  ROUND(AVG(sh.shipping_cost), 2) AS avg_shipping_cost,
+  ROUND(AVG(sh.shipping_time_days), 1) AS avg_shipping_days,
+  ROUND(AVG(sh.shipping_cost) / NULLIF(AVG(sh.shipping_time_days), 0), 2) AS cost_per_day
+FROM shipments sh
+GROUP BY sh.transportation_mode, sh.shipping_carrier
+ORDER BY sh.transportation_mode, cost_per_day ASC`,
+          chartDetail: {
+            description: 'Average shipping cost vs average shipping time by carrier, grouped by transportation mode',
+            chartType: 'BAR',
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'shipping_carrier', type: 'nominal', title: 'Carrier' },
+                y: { field: 'cost_per_day', type: 'quantitative', title: 'Cost per Day ($)' },
+                color: { field: 'transportation_mode', type: 'nominal', title: 'Mode' },
+                xOffset: { field: 'transportation_mode', type: 'nominal' },
+              },
+            },
+          },
+        },
+        {
+          question: 'Rank the prices of the product SKUs that men buy',
+          answer: 'Here are the product SKUs purchased by male customers, ranked by their unit price from highest to lowest. This shows which premium products are most popular among male buyers and helps identify pricing patterns in that demographic segment.',
+          sql: `SELECT
+  p.sku,
+  p.product_type,
+  p.price,
+  SUM(o.number_sold) AS total_units_sold,
+  ROUND(SUM(o.revenue_generated), 2) AS total_revenue,
+  RANK() OVER (ORDER BY p.price DESC) AS price_rank
+FROM orders o
+JOIN products p ON o.product_id = p.product_id
+WHERE o.customer_demographics = 'Male'
+GROUP BY p.sku, p.product_type, p.price
+ORDER BY price_rank`,
+          chartDetail: {
+            description: 'Product prices ranked for male customer purchases',
+            chartType: 'BAR',
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'sku', type: 'nominal', title: 'Product SKU', sort: '-y' },
+                y: { field: 'price', type: 'quantitative', title: 'Price ($)' },
+                color: { field: 'product_type', type: 'nominal', title: 'Product Type' },
+              },
+            },
+          },
+        },
+      ],
+    },
   },
 };
 
