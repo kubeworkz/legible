@@ -423,12 +423,19 @@ export class ProjectResolver {
 
       // If we didn't reuse an existing project, create via saveDataSource
       if (!existingProject || !existingProject.type) {
+        // Include displayName so the project gets a proper name instead of null.
+        // Preserve the existing project's name if available, otherwise default.
+        const dsDisplayName =
+          existingProject?.displayName || 'Default Project';
         const dsResult = await this.saveDataSource(
           _root,
           {
             data: {
               type: DataSourceName.DUCKDB,
-              properties: duckdbDatasourceProperties,
+              properties: {
+                ...duckdbDatasourceProperties,
+                displayName: dsDisplayName,
+              },
             } as DataSource,
           },
           ctx,
@@ -683,7 +690,7 @@ export class ProjectResolver {
         logger.debug(`Default project ${unconfigured.id} activated with data source.`);
       } else {
         project = await ctx.projectService.createProject({
-          displayName,
+          displayName: displayName || 'Default Project',
           type,
           connectionInfo,
         } as ProjectData, ctx.organizationId);
@@ -691,7 +698,7 @@ export class ProjectResolver {
       }
     } else {
       project = await ctx.projectService.createProject({
-        displayName,
+        displayName: displayName || 'Default Project',
         type,
         connectionInfo,
       } as ProjectData, ctx.organizationId);
