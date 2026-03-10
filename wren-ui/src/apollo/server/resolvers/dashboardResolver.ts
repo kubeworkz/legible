@@ -188,6 +188,7 @@ export class DashboardResolver {
       limit: DEFAULT_PREVIEW_LIMIT,
       cacheEnabled: true,
       refresh: true,
+      metering: { userId: ctx.currentUser?.id, source: 'dashboard_add_item' },
     });
 
     return await ctx.dashboardService.createDashboardItem({
@@ -273,6 +274,7 @@ export class DashboardResolver {
         limit: limit || DEFAULT_PREVIEW_LIMIT,
         cacheEnabled,
         refresh: refresh || false,
+        metering: { userId: ctx.currentUser?.id, source: 'dashboard_preview' },
       })) as PreviewDataResponse;
 
       // handle data to [{ column1: value1, column2: value2, ... }]

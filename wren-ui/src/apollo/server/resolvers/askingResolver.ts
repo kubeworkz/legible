@@ -739,6 +739,7 @@ export class AskingResolver {
       responseId,
       limit,
       ctx.projectId,
+      { userId: ctx.currentUser?.id, source: 'thread_preview' },
     );
     return data;
   }
@@ -758,6 +759,7 @@ export class AskingResolver {
       stepIndex,
       limit,
       ctx.projectId,
+      { userId: ctx.currentUser?.id, source: 'thread_breakdown_preview' },
     );
     return data;
   }

@@ -11,6 +11,11 @@ import {
 import { getLogger } from '@server/utils';
 import { Project } from '../repositories';
 import { PostHogTelemetry, TelemetryEvent } from '../telemetry/telemetry';
+import {
+  IQueryMeteringService,
+  MeteringContext,
+} from './queryMeteringService';
+import { createHash } from 'crypto';
 
 const logger = getLogger('QueryService');
 logger.level = 'debug';
@@ -46,6 +51,9 @@ export interface PreviewOptions {
   cacheEnabled?: boolean;
   // RLS session property values: { propertyName: value }
   sessionProperties?: Record<string, string>;
+  // Optional metering context — when provided, a successful non-dryRun
+  // execution on a non-sample project will be recorded for billing.
+  metering?: MeteringContext;
 }
 
 export interface SqlValidateOptions {
@@ -82,19 +90,23 @@ export class QueryService implements IQueryService {
   private readonly ibisAdaptor: IIbisAdaptor;
   private readonly wrenEngineAdaptor: IWrenEngineAdaptor;
   private readonly telemetry: PostHogTelemetry;
+  private readonly queryMeteringService?: IQueryMeteringService;
 
   constructor({
     ibisAdaptor,
     wrenEngineAdaptor,
     telemetry,
+    queryMeteringService,
   }: {
     ibisAdaptor: IIbisAdaptor;
     wrenEngineAdaptor: IWrenEngineAdaptor;
     telemetry: PostHogTelemetry;
+    queryMeteringService?: IQueryMeteringService;
   }) {
     this.ibisAdaptor = ibisAdaptor;
     this.wrenEngineAdaptor = wrenEngineAdaptor;
     this.telemetry = telemetry;
+    this.queryMeteringService = queryMeteringService;
   }
 
   public async preview(
@@ -109,8 +121,13 @@ export class QueryService implements IQueryService {
       refresh,
       cacheEnabled,
       sessionProperties,
+      metering,
     } = options;
     const { type: dataSource, connectionInfo } = project;
+
+    const startTime = Date.now();
+    let result: IbisResponse | PreviewDataResponse | boolean;
+
     if (this.useEngine(dataSource)) {
       if (dryRun) {
         logger.debug('Using wren engine to dry run');
@@ -128,7 +145,7 @@ export class QueryService implements IQueryService {
           limit,
           sessionProperties,
         );
-        return data as PreviewDataResponse;
+        result = data as PreviewDataResponse;
       }
     } else {
       this.checkDataSourceIsSupported(dataSource);
@@ -142,7 +159,7 @@ export class QueryService implements IQueryService {
           sessionProperties,
         );
       } else {
-        return await this.ibisQuery(
+        result = await this.ibisQuery(
           sql,
           dataSource,
           connectionInfo,
@@ -154,6 +171,11 @@ export class QueryService implements IQueryService {
         );
       }
     }
+
+    // ── Metering: record successful non-dryRun execution ──
+    await this.recordMeteringIfNeeded(sql, project, metering, startTime);
+
+    return result;
   }
 
   public async describeStatement(
@@ -186,6 +208,43 @@ export class QueryService implements IQueryService {
       parameters,
     );
     return res;
+  }
+
+  // ── Metering helpers ──────────────────────────────────
+
+  /**
+   * Fire-and-forget metering record after a successful non-dryRun preview.
+   * Skipped when:
+   *   - no metering context provided
+   *   - no metering service wired
+   *   - project uses a sample dataset (playground data)
+   */
+  private async recordMeteringIfNeeded(
+    sql: string,
+    project: Project,
+    metering: MeteringContext | undefined,
+    startTime: number,
+  ): Promise<void> {
+    if (!metering || !this.queryMeteringService) return;
+    if (project.sampleDataset) return; // sample datasets are free
+    if (!project.organizationId) return; // safety guard
+
+    const durationMs = Date.now() - startTime;
+    const sqlHash = createHash('sha256').update(sql).digest('hex').slice(0, 16);
+
+    try {
+      await this.queryMeteringService.recordQuery({
+        organizationId: project.organizationId,
+        projectId: project.id,
+        userId: metering.userId,
+        source: metering.source,
+        durationMs,
+        sqlHash,
+      });
+    } catch (err: any) {
+      // Never let metering failures break query execution
+      logger.error(`Failed to record query metering: ${err.message}`);
+    }
   }
 
   private useEngine(dataSource: DataSourceName): boolean {

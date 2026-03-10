@@ -85,6 +85,9 @@ async function handler(
         limit,
         manifest,
         modelingOnly: false,
+        metering: apiKeyAttribution?.organizationId
+          ? { source: 'api_run_sql' }
+          : undefined,
       });
 
       // Validate the SQL result

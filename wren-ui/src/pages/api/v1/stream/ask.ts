@@ -321,6 +321,9 @@ async function handler(
         limit: sampleSize || 500,
         manifest: lastDeploy.manifest,
         modelingOnly: false,
+        metering: apiKeyAttribution?.organizationId
+          ? { source: 'api_stream_ask' }
+          : undefined,
       });
       sqlData = queryResult;
       sendStateUpdate(res, StateType.SQL_EXECUTION_END);

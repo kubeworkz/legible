@@ -37,6 +37,7 @@ import { IProjectMemberRepository } from '@server/repositories/projectMemberRepo
 import { IProjectPermissionOverrideRepository } from '@server/repositories/projectPermissionOverrideRepository';
 import { IAuditLogRepository } from '@server/repositories/auditLogRepository';
 import { ISpreadsheetRepository } from '@server/repositories/spreadsheetRepository';
+import { IQueryUsageRepository } from '@server/repositories/queryUsageRepository';
 import {
   IQueryService,
   IAskingService,
@@ -55,6 +56,7 @@ import { IProjectApiKeyService } from '../services/projectApiKeyService';
 import { IRlsPolicyService } from '../services/rlsPolicyService';
 import { IRateLimitService } from '../services/rateLimitService';
 import { IBillingService } from '../services/billingService';
+import { IQueryMeteringService } from '../services/queryMeteringService';
 import { IFolderService } from '../services/folderService';
 import { IProjectMemberService } from '../services/projectMemberService';
 import { IAuditLogService } from '../services/auditLogService';
@@ -111,6 +113,7 @@ export interface IContext {
   spreadsheetService: ISpreadsheetService;
   projectMemberService: IProjectMemberService;
   auditLogService: IAuditLogService;
+  queryMeteringService: IQueryMeteringService;
 
   // repository
   projectRepository: IProjectRepository;
@@ -144,6 +147,7 @@ export interface IContext {
   projectMemberRepository: IProjectMemberRepository;
   projectPermissionOverrideRepository: IProjectPermissionOverrideRepository;
   auditLogRepository: IAuditLogRepository;
+  queryUsageRepository: IQueryUsageRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;

@@ -16,6 +16,7 @@ import { RlsPolicyResolver } from './resolvers/rlsPolicyResolver';
 import { FolderResolver } from './resolvers/folderResolver';
 import { SpreadsheetResolver } from './resolvers/spreadsheetResolver';
 import { BillingResolver } from './resolvers/billingResolver';
+import { QueryUsageResolver } from './resolvers/queryUsageResolver';
 import { PermissionOverrideResolver } from './resolvers/permissionOverrideResolver';
 import { ProjectMemberResolver } from './resolvers/projectMemberResolver';
 import { AuditLogResolver } from './resolvers/auditLogResolver';
@@ -40,6 +41,7 @@ const rlsPolicyResolver = new RlsPolicyResolver();
 const folderResolver = new FolderResolver();
 const spreadsheetResolver = new SpreadsheetResolver();
 const billingResolver = new BillingResolver();
+const queryUsageResolver = new QueryUsageResolver();
 const permissionOverrideResolver = new PermissionOverrideResolver();
 const projectMemberResolver = new ProjectMemberResolver();
 const auditLogResolver = new AuditLogResolver();
@@ -126,6 +128,10 @@ const resolvers = {
     billingConfig: billingResolver.billingConfig,
     billingOverview: billingResolver.billingOverview,
     monthlyBilling: billingResolver.monthlyBilling,
+
+    // Query Usage / Metering
+    queryUsageOverview: queryUsageResolver.queryUsageOverview,
+    queryUsageStats: queryUsageResolver.queryUsageStats,
 
     // Data Security
     sessionProperties: rlsPolicyResolver.listSessionProperties,

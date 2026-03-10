@@ -113,6 +113,9 @@ async function handler(
         limit: sampleSize,
         manifest: lastDeploy.manifest,
         modelingOnly: false,
+        metering: apiKeyAttribution?.organizationId
+          ? { source: 'api_vega_chart' }
+          : undefined,
       })) as PreviewDataResponse;
     } catch (queryError) {
       throw new ApiError(

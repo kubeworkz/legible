@@ -69,6 +69,8 @@ import {
   BillingConfigRepository,
   MonthlyUsageCacheRepository,
 } from './apollo/server/repositories/billingRepository';
+import { QueryUsageRepository } from './apollo/server/repositories/queryUsageRepository';
+import { QueryMeteringService } from './apollo/server/services/queryMeteringService';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -129,6 +131,7 @@ export const initComponents = () => {
   const auditLogRepository = new AuditLogRepository(knex);
   const billingConfigRepository = new BillingConfigRepository(knex);
   const monthlyUsageCacheRepository = new MonthlyUsageCacheRepository(knex);
+  const queryUsageRepository = new QueryUsageRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -146,10 +149,14 @@ export const initComponents = () => {
     ibisAdaptor,
     wrenEngineAdaptor,
   });
+  const queryMeteringService = new QueryMeteringService({
+    queryUsageRepository,
+  });
   const queryService = new QueryService({
     ibisAdaptor,
     wrenEngineAdaptor,
     telemetry,
+    queryMeteringService,
   });
   const deployService = new DeployService({
     wrenAIAdaptor,
@@ -328,6 +335,7 @@ export const initComponents = () => {
     projectMemberRepository,
     projectPermissionOverrideRepository,
     auditLogRepository,
+    queryUsageRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -357,6 +365,7 @@ export const initComponents = () => {
     spreadsheetService,
     projectMemberService,
     auditLogService,
+    queryMeteringService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

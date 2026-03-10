@@ -99,6 +99,7 @@ const bootstrapServer = async () => {
     projectMemberRepository,
     projectPermissionOverrideRepository,
     auditLogRepository,
+    queryUsageRepository,
     // adaptors
     wrenEngineAdaptor,
     ibisAdaptor,
@@ -125,6 +126,7 @@ const bootstrapServer = async () => {
     spreadsheetService,
     projectMemberService,
     auditLogService,
+    queryMeteringService,
     rateLimitService,
     billingService,
     // background trackers
@@ -290,6 +292,7 @@ const bootstrapServer = async () => {
         spreadsheetService,
         projectMemberService,
         auditLogService,
+        queryMeteringService,
         // repository
         projectRepository,
         threadRepository,
@@ -322,6 +325,7 @@ const bootstrapServer = async () => {
         projectMemberRepository,
         projectPermissionOverrideRepository,
         auditLogRepository,
+        queryUsageRepository,
         // rate limiting
         rateLimitService,
         // billing

@@ -35,6 +35,7 @@ import {
   Project,
 } from '../repositories';
 import { IQueryService, PreviewDataResponse } from './queryService';
+import { MeteringContext } from './queryMeteringService';
 import { IMDLService } from './mdlService';
 import {
   ThreadRecommendQuestionBackgroundTracker,
@@ -210,12 +211,14 @@ export interface IAskingService {
     responseId: number,
     limit?: number,
     projectId?: number,
+    metering?: MeteringContext,
   ): Promise<PreviewDataResponse>;
   previewBreakdownData(
     responseId: number,
     stepIndex?: number,
     limit?: number,
     projectId?: number,
+    metering?: MeteringContext,
   ): Promise<PreviewDataResponse>;
 
   /**
@@ -970,6 +973,7 @@ export class AskingService implements IAskingService {
     responseId: number,
     limit?: number,
     projectId?: number,
+    metering?: MeteringContext,
   ) {
     const response = await this.getResponse(responseId);
     if (!response) {
@@ -986,6 +990,7 @@ export class AskingService implements IAskingService {
         project,
         manifest: mdl,
         limit,
+        metering,
       })) as PreviewDataResponse;
       this.telemetry.sendEvent(eventName, { sql: response.sql });
       return data;
@@ -1013,6 +1018,7 @@ export class AskingService implements IAskingService {
     stepIndex?: number,
     limit?: number,
     projectId?: number,
+    metering?: MeteringContext,
   ): Promise<PreviewDataResponse> {
     const response = await this.getResponse(responseId);
     if (!response) {
@@ -1031,6 +1037,7 @@ export class AskingService implements IAskingService {
         project,
         manifest: mdl,
         limit,
+        metering,
       })) as PreviewDataResponse;
       this.telemetry.sendEvent(eventName, { sql });
       return data;

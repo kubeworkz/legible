@@ -226,6 +226,54 @@ export const typeDefs = gql`
 
   # ─── End Billing Types ────────────────────────────────────
 
+  # ─── Query Usage / Metering Types ──────────────────────────
+
+  type QueryUsageSummary {
+    totalQueries: Int!
+    freeTierQueries: Int!
+    paidQueries: Int!
+    totalCost: Float!
+  }
+
+  type QueryUsageOverview {
+    summary: QueryUsageSummary!
+    freeTierRemaining: Int!
+    isFreeTier: Boolean!
+  }
+
+  type QueryUsageBySource {
+    source: String!
+    totalQueries: Int!
+    totalCost: Float!
+  }
+
+  type QueryUsageByProject {
+    projectId: Int!
+    totalQueries: Int!
+    totalCost: Float!
+  }
+
+  type QueryDailyUsage {
+    date: String!
+    totalQueries: Int!
+    totalCost: Float!
+  }
+
+  type QueryUsageStats {
+    summary: QueryUsageSummary!
+    bySource: [QueryUsageBySource!]!
+    byProject: [QueryUsageByProject!]!
+    dailyUsage: [QueryDailyUsage!]!
+  }
+
+  input QueryUsageFilterInput {
+    projectId: Int
+    startDate: String
+    endDate: String
+  }
+
+  # ─── End Query Usage Types ────────────────────────────────
+
   # ─── Project API Key Types ─────────────────────────────────
 
   type ProjectApiKey {
@@ -1957,6 +2005,10 @@ export const typeDefs = gql`
     billingConfig: BillingConfig!
     billingOverview: BillingOverview!
     monthlyBilling(year: Int!, month: Int!): MonthlyBillingSummary!
+
+    # Query Usage / Metering
+    queryUsageOverview: QueryUsageOverview!
+    queryUsageStats(filter: QueryUsageFilterInput): QueryUsageStats!
 
     # Data Security
     sessionProperties: [SessionProperty!]!

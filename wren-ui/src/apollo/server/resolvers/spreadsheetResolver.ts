@@ -129,6 +129,7 @@ export class SpreadsheetResolver {
       project,
       manifest: mdl,
       limit: limit ?? DEFAULT_PREVIEW_LIMIT,
+      metering: { userId: ctx.currentUser?.id, source: 'spreadsheet' },
     })) as PreviewDataResponse;
 
     // Update the stored SQL if we used an override

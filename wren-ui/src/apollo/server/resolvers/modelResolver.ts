@@ -998,6 +998,7 @@ export class ModelResolver {
       project,
       modelingOnly: false,
       manifest,
+      metering: { userId: ctx.currentUser?.id, source: 'model_preview' },
     })) as PreviewDataResponse;
 
     return data;
@@ -1022,6 +1023,7 @@ export class ModelResolver {
       limit,
       manifest,
       modelingOnly: false,
+      metering: { userId: ctx.currentUser?.id, source: 'view_preview' },
     })) as PreviewDataResponse;
     return data;
   }
@@ -1060,6 +1062,9 @@ export class ModelResolver {
       manifest,
       dryRun,
       sessionProperties,
+      metering: ctx.currentUser
+        ? { userId: ctx.currentUser.id, source: 'preview_sql' }
+        : undefined,
     });
   }
 

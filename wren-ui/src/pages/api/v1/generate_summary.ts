@@ -86,6 +86,9 @@ async function handler(
         limit: sampleSize || 500,
         manifest: lastDeploy.manifest,
         modelingOnly: false,
+        metering: apiKeyAttribution?.organizationId
+          ? { source: 'api_generate_summary' }
+          : undefined,
       });
       sqlData = queryResult;
     } catch (queryError) {
