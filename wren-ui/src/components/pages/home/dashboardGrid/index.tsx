@@ -378,7 +378,7 @@ const PinnedItem = forwardRef(
   ) => {
     const { item, isSupportCached, onDelete } = props;
     const { detail } = item;
-    const [isHideLegend, setIsHideLegend] = useState(true);
+    const [isHideLegend, setIsHideLegend] = useState(false);
     const [forceLoading, setForceLoading] = useState(false);
     const [forceUpdate, setForceUpdate] = useState(0);
 
@@ -481,7 +481,6 @@ const PinnedItem = forwardRef(
                   forceUpdate={forceUpdate}
                   autoFilter
                   hideActions
-                  hideTitle
                   hideLegend={isHideLegend}
                   isPinned
                 />
