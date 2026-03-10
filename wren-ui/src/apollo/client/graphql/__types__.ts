@@ -1331,6 +1331,8 @@ export type Query = {
   billingConfig: BillingConfig;
   billingOverview: BillingOverview;
   monthlyBilling: MonthlyBillingSummary;
+  queryUsageOverview: QueryUsageOverview;
+  queryUsageStats: QueryUsageStats;
   askingTask?: Maybe<AskingTask>;
   autoGenerateRelation: Array<RecommendRelations>;
   dashboard: DetailedDashboard;
@@ -1481,6 +1483,66 @@ export type MutationRecomputeMonthlyBillingArgs = {
   year: Scalars['Int'];
   month: Scalars['Int'];
 };
+
+// ─── Query Usage / Metering Types ──────────────────────────
+
+export type QueryUsageSummary = {
+  __typename?: 'QueryUsageSummary';
+  totalQueries: Scalars['Int'];
+  freeTierQueries: Scalars['Int'];
+  paidQueries: Scalars['Int'];
+  totalCost: Scalars['Float'];
+};
+
+export type QueryUsageOverview = {
+  __typename?: 'QueryUsageOverview';
+  summary: QueryUsageSummary;
+  freeTierRemaining: Scalars['Int'];
+  isFreeTier: Scalars['Boolean'];
+};
+
+export type QueryUsageBySource = {
+  __typename?: 'QueryUsageBySource';
+  source: Scalars['String'];
+  totalQueries: Scalars['Int'];
+  totalCost: Scalars['Float'];
+};
+
+export type QueryUsageByProject = {
+  __typename?: 'QueryUsageByProject';
+  projectId: Scalars['Int'];
+  totalQueries: Scalars['Int'];
+  totalCost: Scalars['Float'];
+};
+
+export type QueryDailyUsage = {
+  __typename?: 'QueryDailyUsage';
+  date: Scalars['String'];
+  totalQueries: Scalars['Int'];
+  totalCost: Scalars['Float'];
+};
+
+export type QueryUsageStats = {
+  __typename?: 'QueryUsageStats';
+  summary: QueryUsageSummary;
+  bySource: Array<QueryUsageBySource>;
+  byProject: Array<QueryUsageByProject>;
+  dailyUsage: Array<QueryDailyUsage>;
+};
+
+export type QueryUsageFilterInput = {
+  projectId?: Maybe<Scalars['Int']>;
+  startDate?: Maybe<Scalars['String']>;
+  endDate?: Maybe<Scalars['String']>;
+};
+
+export type QueryQueryUsageOverviewArgs = {};
+
+export type QueryQueryUsageStatsArgs = {
+  filter?: InputMaybe<QueryUsageFilterInput>;
+};
+
+// ─── End Query Usage Types ────────────────────────────────
 
 
 export type QueryApiUsageDashboardArgs = {

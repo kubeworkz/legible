@@ -7,6 +7,7 @@ import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import ReadOutlined from '@ant-design/icons/ReadOutlined';
 import BarChartOutlined from '@ant-design/icons/BarChartOutlined';
 import DollarOutlined from '@ant-design/icons/DollarOutlined';
+import DatabaseOutlined from '@ant-design/icons/DatabaseOutlined';
 import SidebarMenu from '@/components/sidebar/SidebarMenu';
 import useProject from '@/hooks/useProject';
 
@@ -25,6 +26,7 @@ const MENU_KEY_MAP = {
   [Path.APIManagementHistory]: MENU_KEY.API_HISTORY,
   [Path.APIManagementUsage]: MENU_KEY.API_USAGE,
   [Path.APIManagementBilling]: MENU_KEY.API_BILLING,
+  [Path.APIManagementQueryUsage]: MENU_KEY.QUERY_USAGE,
 };
 
 const linkStyle = { color: 'inherit', transition: 'none' };
@@ -74,6 +76,20 @@ export default function APIManagement() {
       ),
       icon: <DollarOutlined />,
       key: MENU_KEY.API_BILLING,
+      className: 'pl-4',
+    },
+    {
+      'data-guideid': 'query-usage',
+      label: (
+        <Link
+          style={linkStyle}
+          href={buildPath(Path.APIManagementQueryUsage, currentProjectId)}
+        >
+          Query Usage
+        </Link>
+      ),
+      icon: <DatabaseOutlined />,
+      key: MENU_KEY.QUERY_USAGE,
       className: 'pl-4',
     },
     {
