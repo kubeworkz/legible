@@ -61,3 +61,37 @@ export const RESUME_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const ADMIN_SUBSCRIPTIONS = gql`
+  query AdminSubscriptions {
+    adminSubscriptions {
+      id
+      organizationId
+      organizationName
+      plan
+      status
+      stripeCustomerId
+      stripeSubscriptionId
+      currentPeriodStart
+      currentPeriodEnd
+      canceledAt
+      trialStart
+      trialEnd
+      paymentMethodBrand
+      paymentMethodLast4
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const ADMIN_UPDATE_SUBSCRIPTION = gql`
+  mutation AdminUpdateSubscription($id: Int!, $data: AdminUpdateSubscriptionInput!) {
+    adminUpdateSubscription(id: $id, data: $data) {
+      id
+      plan
+      status
+      updatedAt
+    }
+  }
+`;

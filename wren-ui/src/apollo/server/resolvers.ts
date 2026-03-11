@@ -139,6 +139,7 @@ const resolvers = {
     // Stripe / Subscription
     subscription: stripeResolver.subscription,
     stripeEnabled: stripeResolver.stripeEnabled,
+    adminSubscriptions: stripeResolver.adminSubscriptions,
 
     // Data Security
     sessionProperties: rlsPolicyResolver.listSessionProperties,
@@ -217,6 +218,7 @@ const resolvers = {
     createPortalSession: stripeResolver.createPortalSession,
     cancelSubscription: stripeResolver.cancelSubscription,
     resumeSubscription: stripeResolver.resumeSubscription,
+    adminUpdateSubscription: stripeResolver.adminUpdateSubscription,
 
     deploy: modelResolver.deploy,
     saveDataSource: projectResolver.saveDataSource,

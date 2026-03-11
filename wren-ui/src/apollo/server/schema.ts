@@ -273,6 +273,30 @@ export const typeDefs = gql`
     cancelUrl: String!
   }
 
+  type AdminSubscription {
+    id: Int!
+    organizationId: Int!
+    organizationName: String
+    plan: SubscriptionPlan!
+    status: SubscriptionStatus!
+    stripeCustomerId: String
+    stripeSubscriptionId: String
+    currentPeriodStart: String
+    currentPeriodEnd: String
+    canceledAt: String
+    trialStart: String
+    trialEnd: String
+    paymentMethodBrand: String
+    paymentMethodLast4: String
+    createdAt: String
+    updatedAt: String
+  }
+
+  input AdminUpdateSubscriptionInput {
+    plan: SubscriptionPlan!
+    status: SubscriptionStatus!
+  }
+
   # ─── End Stripe Types ─────────────────────────────────────
 
   # ─── Query Usage / Metering Types ──────────────────────────
@@ -2071,6 +2095,7 @@ export const typeDefs = gql`
     # Stripe / Subscription
     subscription: SubscriptionInfo!
     stripeEnabled: Boolean!
+    adminSubscriptions: [AdminSubscription!]!
 
     # Data Security
     sessionProperties: [SessionProperty!]!
@@ -2153,6 +2178,7 @@ export const typeDefs = gql`
     createPortalSession: PortalSessionResult!
     cancelSubscription: SubscriptionInfo!
     resumeSubscription: SubscriptionInfo!
+    adminUpdateSubscription(id: Int!, data: AdminUpdateSubscriptionInput!): AdminSubscription!
 
     # On Boarding Steps
     saveDataSource(data: DataSourceInput!): DataSource!

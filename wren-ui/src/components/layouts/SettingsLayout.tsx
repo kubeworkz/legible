@@ -19,6 +19,7 @@ import KeyOutlined from '@ant-design/icons/KeyOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
 import FileSearchOutlined from '@ant-design/icons/FileSearchOutlined';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
+import DollarOutlined from '@ant-design/icons/DollarOutlined';
 
 const { Sider, Content } = Layout;
 
@@ -154,6 +155,13 @@ const orgMenuItems: MenuItem[] = [
     label: 'Audit activity',
     icon: <FileSearchOutlined />,
     path: Path.SettingsAuditLog,
+    visible: ({ isOrgAdmin }) => isOrgAdmin,
+  },
+  {
+    key: 'subscriptions',
+    label: 'Subscriptions',
+    icon: <DollarOutlined />,
+    path: Path.SettingsSubscriptions,
     visible: ({ isOrgAdmin }) => isOrgAdmin,
   },
   {

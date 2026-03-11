@@ -45,6 +45,7 @@ export interface ISubscriptionRepository {
   findByStripeSubscriptionId(
     subscriptionId: string,
   ): Promise<Subscription | null>;
+  findAll(): Promise<Subscription[]>;
   createOne(data: Partial<Subscription>): Promise<Subscription>;
   updateByOrganizationId(
     organizationId: number,
@@ -52,6 +53,10 @@ export interface ISubscriptionRepository {
   ): Promise<Subscription | null>;
   updateByStripeSubscriptionId(
     subscriptionId: string,
+    data: Partial<Subscription>,
+  ): Promise<Subscription | null>;
+  updateById(
+    id: number,
     data: Partial<Subscription>,
   ): Promise<Subscription | null>;
 }
@@ -97,6 +102,11 @@ export class SubscriptionRepository implements ISubscriptionRepository {
 
   constructor(knex: Knex) {
     this.knex = knex;
+  }
+
+  public async findAll(): Promise<Subscription[]> {
+    const rows = await this.knex(TABLE).orderBy('id', 'asc');
+    return rows.map(toCamel);
   }
 
   public async findByOrganizationId(
@@ -167,5 +177,20 @@ export class SubscriptionRepository implements ISubscriptionRepository {
       .where({ stripe_subscription_id: subscriptionId })
       .update(updateData);
     return this.findByStripeSubscriptionId(subscriptionId);
+  }
+
+  public async updateById(
+    id: number,
+    data: Partial<Subscription>,
+  ): Promise<Subscription | null> {
+    const updateData = toSnake({
+      ...data,
+      updatedAt: new Date().toISOString(),
+    });
+    delete updateData.id;
+
+    await this.knex(TABLE).where({ id }).update(updateData);
+    const row = await this.knex(TABLE).where({ id }).first();
+    return row ? toCamel(row) : null;
   }
 }

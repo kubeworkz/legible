@@ -881,6 +881,7 @@ export type Mutation = {
   validateView: ViewValidationResponse;
   updateBillingConfig: BillingConfig;
   recomputeMonthlyBilling: MonthlyBillingSummary;
+  adminUpdateSubscription: AdminSubscription;
 };
 
 
@@ -1335,6 +1336,7 @@ export type Query = {
   queryUsageStats: QueryUsageStats;
   queryAllowance: QueryAllowance;
   subscription: SubscriptionInfo;
+  adminSubscriptions: Array<AdminSubscription>;
   stripeEnabled: Scalars['Boolean'];
   askingTask?: Maybe<AskingTask>;
   autoGenerateRelation: Array<RecommendRelations>;
@@ -1603,6 +1605,31 @@ export type PortalSessionResult = {
 export type CreateCheckoutSessionInput = {
   successUrl: Scalars['String'];
   cancelUrl: Scalars['String'];
+};
+
+export type AdminSubscription = {
+  __typename?: 'AdminSubscription';
+  id: Scalars['Int'];
+  organizationId: Scalars['Int'];
+  organizationName?: Maybe<Scalars['String']>;
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
+  stripeCustomerId?: Maybe<Scalars['String']>;
+  stripeSubscriptionId?: Maybe<Scalars['String']>;
+  currentPeriodStart?: Maybe<Scalars['String']>;
+  currentPeriodEnd?: Maybe<Scalars['String']>;
+  canceledAt?: Maybe<Scalars['String']>;
+  trialStart?: Maybe<Scalars['String']>;
+  trialEnd?: Maybe<Scalars['String']>;
+  paymentMethodBrand?: Maybe<Scalars['String']>;
+  paymentMethodLast4?: Maybe<Scalars['String']>;
+  createdAt?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['String']>;
+};
+
+export type AdminUpdateSubscriptionInput = {
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
 };
 
 // ─── End Stripe Types ─────────────────────────────────────
