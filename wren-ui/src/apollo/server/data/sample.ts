@@ -3381,18 +3381,18 @@ ORDER BY price_range`,
     questions: [
       {
         question:
-          'What is the total transaction amount by card brand?',
-        label: 'Spending Analysis',
+          'How does the Average Transaction Frequency and Credit Limit Utilization Rate differ between customers with Excellent (750+) and Poor (580-) credit scores?',
+        label: 'Segmentation',
       },
       {
         question:
-          'Which merchant categories have the highest number of fraudulent transactions?',
-        label: 'Fraud Detection',
+          'How does the Average Transaction Value ($) and Fraud Rate (%) differ between different card type usage across high-volume categories like Grocery Stores and Department Stores?',
+        label: 'Segmentation',
       },
       {
         question:
-          'What is the average credit score of customers grouped by gender?',
-        label: 'Customer Analytics',
+          'What is the ratio of fraudulent to legitimate transactions for users with varying credit scores?',
+        label: 'Comparative',
       },
     ],
     relations: [
