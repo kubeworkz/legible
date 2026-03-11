@@ -4741,6 +4741,23 @@ ORDER BY u.join_year, u.traveller_type, h.star_rating`,
         type: RelationType.ONE_TO_MANY,
       },
     ],
+    questions: [
+      {
+        question:
+          'What is the cost per unit of production volumes for each supplier?',
+        label: 'Descriptive',
+      },
+      {
+        question:
+          'How does the average Defect rates of products that passed their Inspection results compare to the average Defect rates of products that were marked \'Pending\' or \'Fail\'?',
+        label: 'Data Quality',
+      },
+      {
+        question:
+          'Which Transportation modes have a lower average Shipping costs on Route A compared to Route B?',
+        label: 'Comparative',
+      },
+    ],
     sampleContent: {
       dashboards: [
         {
