@@ -137,7 +137,9 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       setCurrentProjectIdState(firstId);
       setStoredProjectId(firstId);
 
-      // If the URL has a wrong project ID, redirect to the correct one
+      // If the URL has a wrong project ID, redirect to the correct one.
+      // When there's no project in the URL (e.g. at root /), just set state
+      // and let the page's own routing logic (useWithOnboarding) handle navigation.
       const urlProjectId = router.query.projectId;
       if (urlProjectId) {
         const currentPath = router.asPath;
@@ -146,10 +148,6 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
           `/projects/${firstId}`,
         );
         router.replace(correctedPath);
-      } else {
-        // No project in URL (e.g. at root /) — redirect to the first project
-        // so onboarding can kick in.
-        router.replace(`/projects/${firstId}`);
       }
     }
   }, [projects, loading, currentProjectId]);
