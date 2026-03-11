@@ -10,7 +10,7 @@ const redirectRoute = {
   [OnboardingStatus.DATASOURCE_SAVED]: Path.OnboardingModels,
   [OnboardingStatus.NOT_STARTED]: Path.OnboardingConnection,
   [OnboardingStatus.ONBOARDING_FINISHED]: Path.Home,
-  [OnboardingStatus.WITH_SAMPLE_DATASET]: Path.Modeling,
+  [OnboardingStatus.WITH_SAMPLE_DATASET]: Path.Home,
 };
 
 export const useWithOnboarding = () => {
