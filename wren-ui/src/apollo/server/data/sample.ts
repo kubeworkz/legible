@@ -4033,6 +4033,23 @@ ORDER BY fraud_count DESC`,
         type: RelationType.ONE_TO_MANY,
       },
     ],
+    questions: [
+      {
+        question:
+          'For the top 3 countries by review volume, what is the standard deviation of the \'score_overall\' for \'Solo\' travelers versus \'Family\' travelers in 2024?',
+        label: 'Descriptive',
+      },
+      {
+        question:
+          'How do average comfort scores differ among hotels based in different cities?',
+        label: 'Descriptive',
+      },
+      {
+        question:
+          'Which hotel has the largest difference between the average score given by \'Female\' travelers and the average score given by \'Male\' travelers?',
+        label: 'Comparative',
+      },
+    ],
     sampleContent: {
       dashboards: [
         {
