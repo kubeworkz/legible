@@ -59,7 +59,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await login(values.email, values.password);
-      router.push('/projects/1/home');
+      router.push('/');
     } catch (err: any) {
       const msg =
         err?.graphQLErrors?.[0]?.message ||

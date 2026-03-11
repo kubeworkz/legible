@@ -97,6 +97,7 @@ export default function Home() {
 
   const { data: suggestedQuestionsData } = useSuggestedQuestionsQuery({
     fetchPolicy: 'cache-and-network',
+    skip: !currentProjectId,
   });
   const [createThread, { loading: threadCreating }] = useCreateThreadMutation({
     onError: (error) => console.error(error),
@@ -106,7 +107,9 @@ export default function Home() {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: settingsResult } = useGetSettingsQuery();
+  const { data: settingsResult } = useGetSettingsQuery({
+    skip: !currentProjectId,
+  });
   const settings = settingsResult?.settings;
   const isSampleDataset = useMemo(
     () => Boolean(settings?.dataSource?.sampleDataset),
