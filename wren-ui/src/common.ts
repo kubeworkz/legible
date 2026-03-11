@@ -154,6 +154,7 @@ export const initComponents = () => {
   });
   const queryMeteringService = new QueryMeteringService({
     queryUsageRepository,
+    subscriptionRepository,
   });
   const queryService = new QueryService({
     ibisAdaptor,
@@ -282,6 +283,9 @@ export const initComponents = () => {
     stripePortalReturnUrl: serverConfig.stripePortalReturnUrl,
     subscriptionRepository,
   });
+
+  // Wire stripeService into metering (created earlier, avoids circular init)
+  queryMeteringService.setStripeService(stripeService);
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =

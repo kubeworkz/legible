@@ -22,6 +22,18 @@ logger.level = 'debug';
 
 export const DEFAULT_PREVIEW_LIMIT = 500;
 
+/** Thrown when a free-tier org has exceeded their monthly query limit */
+export class QueryLimitExceededError extends Error {
+  public readonly monthlyUsed: number;
+  public readonly monthlyLimit: number;
+  constructor(message: string, monthlyUsed: number, monthlyLimit: number) {
+    super(message);
+    this.name = 'QueryLimitExceededError';
+    this.monthlyUsed = monthlyUsed;
+    this.monthlyLimit = monthlyLimit;
+  }
+}
+
 export interface ColumnMetadata {
   name: string;
   type: string;
@@ -124,6 +136,26 @@ export class QueryService implements IQueryService {
       metering,
     } = options;
     const { type: dataSource, connectionInfo } = project;
+
+    // ── Plan enforcement: check allowance before executing ──
+    if (
+      metering &&
+      !dryRun &&
+      !project.sampleDataset &&
+      project.organizationId &&
+      this.queryMeteringService
+    ) {
+      const allowance = await this.queryMeteringService.checkQueryAllowance(
+        project.organizationId,
+      );
+      if (!allowance.allowed) {
+        throw new QueryLimitExceededError(
+          allowance.reason || 'Query limit exceeded',
+          allowance.monthlyUsed,
+          allowance.monthlyLimit || 0,
+        );
+      }
+    }
 
     const startTime = Date.now();
     let result: IbisResponse | PreviewDataResponse | boolean;

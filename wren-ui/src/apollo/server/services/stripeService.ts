@@ -71,6 +71,12 @@ export interface IStripeService {
 
   /** Handle a Stripe webhook event — called from the webhook route */
   handleWebhookEvent(event: any): Promise<void>;
+
+  /** Report overage query usage to Stripe for metered billing */
+  reportOverageUsage(
+    organizationId: number,
+    queryCount: number,
+  ): Promise<void>;
 }
 
 // ── Implementation ──────────────────────────────────────
@@ -468,5 +474,44 @@ export class StripeService implements IStripeService {
       paymentMethodBrand: sub.paymentMethodBrand,
       paymentMethodLast4: sub.paymentMethodLast4,
     };
+  }
+
+  public async reportOverageUsage(
+    organizationId: number,
+    queryCount: number,
+  ): Promise<void> {
+    if (!this.stripe) return;
+
+    const sub =
+      await this.subscriptionRepository.findByOrganizationId(organizationId);
+    if (!sub?.stripeCustomerId) {
+      logger.debug(
+        `Cannot report overage for org=${organizationId}: no Stripe customer`,
+      );
+      return;
+    }
+
+    try {
+      // Create a usage record via Stripe Billing Meter Events
+      // This requires a meter to be set up in the Stripe dashboard
+      // with event_name = 'query_overage'
+      await this.stripe.billing.meterEvents.create({
+        eventName: 'query_overage',
+        payload: {
+          value: String(queryCount),
+          stripe_customer_id: sub.stripeCustomerId,
+        },
+        timestamp: Math.floor(Date.now() / 1000),
+      });
+
+      logger.debug(
+        `Reported ${queryCount} overage query(s) to Stripe for org=${organizationId}`,
+      );
+    } catch (err: any) {
+      // Stripe meter may not be configured yet — log but don’t throw
+      logger.warn(
+        `Stripe meter event failed for org=${organizationId}: ${err.message}`,
+      );
+    }
   }
 }

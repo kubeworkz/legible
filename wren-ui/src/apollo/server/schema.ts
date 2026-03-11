@@ -320,6 +320,14 @@ export const typeDefs = gql`
 
   # ─── End Query Usage Types ────────────────────────────────
 
+  type QueryAllowance {
+    allowed: Boolean!
+    reason: String
+    plan: String!
+    monthlyUsed: Int!
+    monthlyLimit: Int
+  }
+
   # ─── Project API Key Types ─────────────────────────────────
 
   type ProjectApiKey {
@@ -2055,6 +2063,7 @@ export const typeDefs = gql`
     # Query Usage / Metering
     queryUsageOverview: QueryUsageOverview!
     queryUsageStats(filter: QueryUsageFilterInput): QueryUsageStats!
+    queryAllowance: QueryAllowance!
 
     # Stripe / Subscription
     subscription: SubscriptionInfo!

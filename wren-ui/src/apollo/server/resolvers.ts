@@ -134,6 +134,7 @@ const resolvers = {
     // Query Usage / Metering
     queryUsageOverview: queryUsageResolver.queryUsageOverview,
     queryUsageStats: queryUsageResolver.queryUsageStats,
+    queryAllowance: queryUsageResolver.queryAllowance,
 
     // Stripe / Subscription
     subscription: stripeResolver.subscription,

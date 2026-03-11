@@ -1333,6 +1333,7 @@ export type Query = {
   monthlyBilling: MonthlyBillingSummary;
   queryUsageOverview: QueryUsageOverview;
   queryUsageStats: QueryUsageStats;
+  queryAllowance: QueryAllowance;
   subscription: SubscriptionInfo;
   stripeEnabled: Scalars['Boolean'];
   askingTask?: Maybe<AskingTask>;
@@ -1545,6 +1546,14 @@ export type QueryQueryUsageStatsArgs = {
 };
 
 // ─── End Query Usage Types ────────────────────────────────
+
+export interface QueryAllowance {
+  allowed: boolean;
+  reason?: string | null;
+  plan: string;
+  monthlyUsed: number;
+  monthlyLimit: number | null;
+}
 
 // ─── Stripe / Subscription Types ──────────────────────────
 

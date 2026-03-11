@@ -9,6 +9,7 @@ export class QueryUsageResolver {
   constructor() {
     this.queryUsageOverview = this.queryUsageOverview.bind(this);
     this.queryUsageStats = this.queryUsageStats.bind(this);
+    this.queryAllowance = this.queryAllowance.bind(this);
   }
 
   public async queryUsageOverview(_root: any, _args: any, ctx: IContext) {
@@ -41,5 +42,14 @@ export class QueryUsageResolver {
         : undefined,
     };
     return ctx.queryMeteringService.getUsageStats(filter);
+  }
+
+  public async queryAllowance(_root: any, _args: any, ctx: IContext) {
+    await requireAuth(ctx);
+    const organizationId = ctx.organizationId;
+    if (!organizationId) {
+      throw new Error('Organization context required');
+    }
+    return ctx.queryMeteringService.checkQueryAllowance(organizationId);
   }
 }

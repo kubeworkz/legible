@@ -42,3 +42,15 @@ export const QUERY_USAGE_STATS = gql`
     }
   }
 `;
+
+export const QUERY_ALLOWANCE = gql`
+  query QueryAllowance {
+    queryAllowance {
+      allowed
+      reason
+      plan
+      monthlyUsed
+      monthlyLimit
+    }
+  }
+`;
