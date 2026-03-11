@@ -46,6 +46,7 @@ export interface IConfig {
   stripeWebhookSecret?: string;
   stripeProPriceId?: string;
   stripePortalReturnUrl?: string;
+  stripeTrialDays?: number;
 
   // generate recommendation questions max categories
   projectRecommendationQuestionMaxCategories?: number;
@@ -142,6 +143,7 @@ const config = {
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   stripeProPriceId: process.env.STRIPE_PRO_PRICE_ID,
   stripePortalReturnUrl: process.env.STRIPE_PORTAL_RETURN_URL,
+  stripeTrialDays: parseInt(process.env.STRIPE_TRIAL_DAYS || '0', 10),
 
   // generate recommendation questions max questions
   projectRecommendationQuestionMaxCategories: process.env

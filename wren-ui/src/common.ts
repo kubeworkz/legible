@@ -281,6 +281,7 @@ export const initComponents = () => {
     stripeSecretKey: serverConfig.stripeSecretKey,
     stripeProPriceId: serverConfig.stripeProPriceId,
     stripePortalReturnUrl: serverConfig.stripePortalReturnUrl,
+    stripeTrialDays: serverConfig.stripeTrialDays,
     subscriptionRepository,
   });
 

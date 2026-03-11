@@ -254,6 +254,9 @@ export const typeDefs = gql`
     canceledAt: String
     paymentMethodBrand: String
     paymentMethodLast4: String
+    trialStart: String
+    trialEnd: String
+    trialDaysRemaining: Int
   }
 
   type CheckoutSessionResult {

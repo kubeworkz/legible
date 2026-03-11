@@ -31,6 +31,8 @@ export interface Subscription {
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
   canceledAt: string | null;
+  trialStart: string | null;
+  trialEnd: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -79,6 +81,8 @@ function toCamel(row: Record<string, any>): Subscription {
     currentPeriodStart: row.current_period_start,
     currentPeriodEnd: row.current_period_end,
     canceledAt: row.canceled_at,
+    trialStart: row.trial_start,
+    trialEnd: row.trial_end,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

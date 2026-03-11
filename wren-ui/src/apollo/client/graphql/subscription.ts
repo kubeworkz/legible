@@ -12,6 +12,9 @@ export const SUBSCRIPTION = gql`
       canceledAt
       paymentMethodBrand
       paymentMethodLast4
+      trialStart
+      trialEnd
+      trialDaysRemaining
     }
   }
 `;

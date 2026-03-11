@@ -1584,6 +1584,9 @@ export type SubscriptionInfo = {
   canceledAt?: Maybe<Scalars['String']>;
   paymentMethodBrand?: Maybe<Scalars['String']>;
   paymentMethodLast4?: Maybe<Scalars['String']>;
+  trialStart?: Maybe<Scalars['String']>;
+  trialEnd?: Maybe<Scalars['String']>;
+  trialDaysRemaining?: Maybe<Scalars['Int']>;
 };
 
 export type CheckoutSessionResult = {

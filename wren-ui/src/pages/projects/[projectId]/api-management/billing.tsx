@@ -596,16 +596,20 @@ export default function BillingPage() {
                           color={
                             subscription.status === SubscriptionStatus.ACTIVE
                               ? 'green'
-                              : subscription.status === SubscriptionStatus.PAST_DUE
-                                ? 'red'
-                                : subscription.status === SubscriptionStatus.CANCELED
-                                  ? 'default'
-                                  : 'orange'
+                              : subscription.status === SubscriptionStatus.TRIALING
+                                ? 'blue'
+                                : subscription.status === SubscriptionStatus.PAST_DUE
+                                  ? 'red'
+                                  : subscription.status === SubscriptionStatus.CANCELED
+                                    ? 'default'
+                                    : 'orange'
                           }
                         >
-                          {subscription.status
-                            .toLowerCase()
-                            .replace(/_/g, ' ')}
+                          {subscription.status === SubscriptionStatus.TRIALING
+                            ? `Trial · ${subscription.trialDaysRemaining ?? 0} days left`
+                            : subscription.status
+                                .toLowerCase()
+                                .replace(/_/g, ' ')}
                         </Tag>
                         {subscription.plan !== SubscriptionPlan.FREE &&
                           subscription.paymentMethodLast4 && (
@@ -668,6 +672,18 @@ export default function BillingPage() {
                   message={`Your subscription will be canceled on ${new Date(
                     subscription.currentPeriodEnd!,
                   ).toLocaleDateString()}. You can resume anytime before then.`}
+                />
+              )}
+              {subscription.status === SubscriptionStatus.TRIALING && (
+                <Alert
+                  type="info"
+                  showIcon
+                  className="mt-3"
+                  message={`Your Pro trial ends on ${
+                    subscription.trialEnd
+                      ? new Date(subscription.trialEnd).toLocaleDateString()
+                      : 'soon'
+                  }. After the trial, your subscription will convert to a paid plan automatically.`}
                 />
               )}
               {subscription.status === SubscriptionStatus.PAST_DUE && (

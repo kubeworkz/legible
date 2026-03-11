@@ -31,6 +31,9 @@ export interface SubscriptionInfo {
   canceledAt: string | null;
   paymentMethodBrand: string | null;
   paymentMethodLast4: string | null;
+  trialStart: string | null;
+  trialEnd: string | null;
+  trialDaysRemaining: number | null;
 }
 
 export interface CreateCheckoutResult {
@@ -88,17 +91,20 @@ export class StripeService implements IStripeService {
   private readonly proPriceId: string;
   private readonly portalReturnUrl: string;
   private readonly enabled: boolean;
+  private readonly trialDays: number;
 
   constructor(opts: {
     stripeSecretKey?: string;
     stripeProPriceId?: string;
     stripePortalReturnUrl?: string;
+    stripeTrialDays?: number;
     subscriptionRepository: ISubscriptionRepository;
   }) {
     this.subscriptionRepository = opts.subscriptionRepository;
     this.proPriceId = opts.stripeProPriceId || '';
     this.portalReturnUrl =
       opts.stripePortalReturnUrl || 'http://localhost:3000';
+    this.trialDays = opts.stripeTrialDays ?? 0;
 
     if (opts.stripeSecretKey) {
       this.stripe = new Stripe(opts.stripeSecretKey);
@@ -187,14 +193,23 @@ export class StripeService implements IStripeService {
       }
     }
 
-    const session = await this.stripe!.checkout.sessions.create({
+    const sessionParams: any = {
       customer: customerId,
       mode: 'subscription',
       lineItems: [{ price: this.proPriceId, quantity: 1 }],
       successUrl: successUrl,
       cancelUrl: cancelUrl,
       metadata: { organizationId: String(organizationId) },
-    });
+    };
+
+    // Apply trial period if configured
+    if (this.trialDays > 0) {
+      sessionParams.subscriptionData = {
+        trialPeriodDays: this.trialDays,
+      };
+    }
+
+    const session = await this.stripe!.checkout.sessions.create(sessionParams);
 
     return { sessionId: session.id, url: session.url! };
   }
@@ -325,7 +340,7 @@ export class StripeService implements IStripeService {
       pmLast4 = pm.card?.last4 || null;
     }
 
-    await this.subscriptionRepository.updateByOrganizationId(organizationId, {
+    const updateData: any = {
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: subscriptionId,
       stripePriceId: stripeSub.items.data[0]?.price?.id || null,
@@ -340,10 +355,29 @@ export class StripeService implements IStripeService {
         stripeSub.currentPeriodEnd * 1000,
       ).toISOString(),
       canceledAt: null,
-    });
+    };
+
+    // Store trial dates when subscription starts in trialing
+    if (stripeSub.status === 'trialing') {
+      if (stripeSub.trialStart) {
+        updateData.trialStart = new Date(
+          stripeSub.trialStart * 1000,
+        ).toISOString();
+      }
+      if (stripeSub.trialEnd) {
+        updateData.trialEnd = new Date(
+          stripeSub.trialEnd * 1000,
+        ).toISOString();
+      }
+    }
+
+    await this.subscriptionRepository.updateByOrganizationId(
+      organizationId,
+      updateData,
+    );
 
     logger.info(
-      `Organization ${organizationId} upgraded to Pro (sub=${subscriptionId})`,
+      `Organization ${organizationId} upgraded to Pro (sub=${subscriptionId}, status=${stripeSub.status})`,
     );
   }
 
@@ -372,6 +406,23 @@ export class StripeService implements IStripeService {
         ? new Date().toISOString()
         : null,
     };
+
+    // Sync trial dates
+    if (stripeSub.trialStart) {
+      updateData.trialStart = new Date(
+        stripeSub.trialStart * 1000,
+      ).toISOString();
+    }
+    if (stripeSub.trialEnd) {
+      updateData.trialEnd = new Date(
+        stripeSub.trialEnd * 1000,
+      ).toISOString();
+    }
+    // Clear trial fields when no longer trialing
+    if (stripeSub.status !== 'trialing') {
+      updateData.trialStart = null;
+      updateData.trialEnd = null;
+    }
 
     // Update payment method if changed
     if (stripeSub.defaultPaymentMethod) {
@@ -463,6 +514,16 @@ export class StripeService implements IStripeService {
   }
 
   private toInfo(sub: Subscription): SubscriptionInfo {
+    let trialDaysRemaining: number | null = null;
+    if (sub.status === 'trialing' && sub.trialEnd) {
+      const endMs = new Date(sub.trialEnd).getTime();
+      const nowMs = Date.now();
+      trialDaysRemaining = Math.max(
+        0,
+        Math.ceil((endMs - nowMs) / (1000 * 60 * 60 * 24)),
+      );
+    }
+
     return {
       plan: sub.plan,
       status: sub.status,
@@ -473,6 +534,9 @@ export class StripeService implements IStripeService {
       canceledAt: sub.canceledAt,
       paymentMethodBrand: sub.paymentMethodBrand,
       paymentMethodLast4: sub.paymentMethodLast4,
+      trialStart: sub.trialStart,
+      trialEnd: sub.trialEnd,
+      trialDaysRemaining,
     };
   }
 
