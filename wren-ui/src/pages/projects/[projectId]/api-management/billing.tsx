@@ -17,6 +17,9 @@ import {
   message,
   Tooltip,
   Space,
+  Divider,
+  Badge,
+  Alert,
 } from 'antd';
 import styled from 'styled-components';
 import SiderLayout from '@/components/layouts/SiderLayout';
@@ -26,18 +29,33 @@ import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import DownloadOutlined from '@ant-design/icons/DownloadOutlined';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import ThunderboltOutlined from '@ant-design/icons/ThunderboltOutlined';
+import CrownOutlined from '@ant-design/icons/CrownOutlined';
+import CreditCardOutlined from '@ant-design/icons/CreditCardOutlined';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   BILLING_OVERVIEW,
   UPDATE_BILLING_CONFIG,
   RECOMPUTE_MONTHLY_BILLING,
 } from '@/apollo/client/graphql/billing';
+import {
+  SUBSCRIPTION,
+  STRIPE_ENABLED,
+  CREATE_CHECKOUT_SESSION,
+  CREATE_PORTAL_SESSION,
+  CANCEL_SUBSCRIPTION,
+  RESUME_SUBSCRIPTION,
+} from '@/apollo/client/graphql/subscription';
+import {
+  SubscriptionPlan,
+  SubscriptionStatus,
+} from '@/apollo/client/graphql/__types__';
 import type {
   BillingOverview,
   MonthlyBillingSummary,
   KeyCostBreakdown,
   ApiTypeCostBreakdown,
   BillingConfig,
+  SubscriptionInfo,
 } from '@/apollo/client/graphql/__types__';
 
 const { Text } = Typography;
@@ -222,13 +240,28 @@ export default function BillingPage() {
     },
   );
 
+  const { data: subData, loading: subLoading, refetch: refetchSub } = useQuery<{
+    subscription: SubscriptionInfo;
+  }>(SUBSCRIPTION, { fetchPolicy: 'cache-and-network' });
+
+  const { data: stripeData } = useQuery<{ stripeEnabled: boolean }>(
+    STRIPE_ENABLED,
+    { fetchPolicy: 'cache-first' },
+  );
+
   const [updateConfig] = useMutation(UPDATE_BILLING_CONFIG);
   const [recomputeBilling] = useMutation(RECOMPUTE_MONTHLY_BILLING);
+  const [checkoutMutation] = useMutation(CREATE_CHECKOUT_SESSION);
+  const [portalMutation] = useMutation(CREATE_PORTAL_SESSION);
+  const [cancelMutation] = useMutation(CANCEL_SUBSCRIPTION);
+  const [resumeMutation] = useMutation(RESUME_SUBSCRIPTION);
 
   const overview = data?.billingOverview;
   const config = overview?.config;
   const currentMonth = overview?.currentMonth;
   const history = overview?.history || [];
+  const subscription = subData?.subscription;
+  const stripeEnabled = stripeData?.stripeEnabled ?? false;
 
   const currency = config?.currency || 'USD';
 
@@ -256,6 +289,65 @@ export default function BillingPage() {
   const handleExport = useCallback(() => {
     window.open('/api/export/billing', '_blank');
   }, []);
+
+  const handleUpgrade = useCallback(async () => {
+    try {
+      const currentUrl = window.location.href;
+      const { data: result } = await checkoutMutation({
+        variables: {
+          data: {
+            successUrl: `${currentUrl}?upgraded=1`,
+            cancelUrl: currentUrl,
+          },
+        },
+      });
+      if (result?.createCheckoutSession?.url) {
+        window.location.href = result.createCheckoutSession.url;
+      }
+    } catch {
+      message.error('Failed to create checkout session');
+    }
+  }, [checkoutMutation]);
+
+  const handleManagePayment = useCallback(async () => {
+    try {
+      const { data: result } = await portalMutation();
+      if (result?.createPortalSession?.url) {
+        window.open(result.createPortalSession.url, '_blank');
+      }
+    } catch {
+      message.error('Failed to open billing portal');
+    }
+  }, [portalMutation]);
+
+  const handleCancelSubscription = useCallback(async () => {
+    Modal.confirm({
+      title: 'Cancel Subscription',
+      content:
+        'Your Pro plan will remain active until the end of the current billing period. After that, you will be downgraded to the Free plan.',
+      okText: 'Cancel Subscription',
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await cancelMutation();
+          await refetchSub();
+          message.success('Subscription will be canceled at period end');
+        } catch {
+          message.error('Failed to cancel subscription');
+        }
+      },
+    });
+  }, [cancelMutation, refetchSub]);
+
+  const handleResumeSubscription = useCallback(async () => {
+    try {
+      await resumeMutation();
+      await refetchSub();
+      message.success('Subscription resumed');
+    } catch {
+      message.error('Failed to resume subscription');
+    }
+  }, [resumeMutation, refetchSub]);
 
   // ── Monthly history columns ─────────────────────────
 
@@ -446,6 +538,160 @@ export default function BillingPage() {
           </Space>
         }
       >
+        {/* Subscription plan card */}
+        {stripeEnabled && subscription && (
+          <>
+            <Card className="mb-4">
+              <Row align="middle" justify="space-between">
+                <Col>
+                  <Space size="middle" align="center">
+                    {subscription.plan === SubscriptionPlan.PRO ? (
+                      <Badge
+                        count={<CrownOutlined style={{ color: '#faad14' }} />}
+                      >
+                        <div
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 8,
+                            background: '#f6ffed',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <CreditCardOutlined
+                            style={{ fontSize: 20, color: '#52c41a' }}
+                          />
+                        </div>
+                      </Badge>
+                    ) : (
+                      <div
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 8,
+                          background: '#f0f0f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <CreditCardOutlined
+                          style={{ fontSize: 20, color: '#8c8c8c' }}
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <Text strong style={{ fontSize: 16 }}>
+                        {subscription.plan === SubscriptionPlan.FREE
+                          ? 'Free Plan'
+                          : subscription.plan === SubscriptionPlan.PRO
+                            ? 'Pro Plan'
+                            : 'Enterprise Plan'}
+                      </Text>
+                      <br />
+                      <Space size={4}>
+                        <Tag
+                          color={
+                            subscription.status === SubscriptionStatus.ACTIVE
+                              ? 'green'
+                              : subscription.status === SubscriptionStatus.PAST_DUE
+                                ? 'red'
+                                : subscription.status === SubscriptionStatus.CANCELED
+                                  ? 'default'
+                                  : 'orange'
+                          }
+                        >
+                          {subscription.status
+                            .toLowerCase()
+                            .replace(/_/g, ' ')}
+                        </Tag>
+                        {subscription.plan !== SubscriptionPlan.FREE &&
+                          subscription.paymentMethodLast4 && (
+                            <Text className="gray-6" style={{ fontSize: 12 }}>
+                              {subscription.paymentMethodBrand || 'Card'} ····
+                              {subscription.paymentMethodLast4}
+                            </Text>
+                          )}
+                        {subscription.plan !== SubscriptionPlan.FREE &&
+                          subscription.currentPeriodEnd && (
+                            <Text className="gray-6" style={{ fontSize: 12 }}>
+                              · Renews{' '}
+                              {new Date(
+                                subscription.currentPeriodEnd,
+                              ).toLocaleDateString()}
+                            </Text>
+                          )}
+                      </Space>
+                    </div>
+                  </Space>
+                </Col>
+                <Col>
+                  <Space>
+                    {subscription.plan === SubscriptionPlan.FREE && (
+                      <Button
+                        type="primary"
+                        icon={<CrownOutlined />}
+                        onClick={handleUpgrade}
+                      >
+                        Upgrade to Pro
+                      </Button>
+                    )}
+                    {subscription.plan !== SubscriptionPlan.FREE && (
+                      <Button onClick={handleManagePayment}>
+                        Manage Payment
+                      </Button>
+                    )}
+                    {subscription.plan !== SubscriptionPlan.FREE &&
+                      !subscription.canceledAt && (
+                        <Button danger onClick={handleCancelSubscription}>
+                          Cancel
+                        </Button>
+                      )}
+                    {subscription.canceledAt && (
+                      <Button
+                        type="primary"
+                        onClick={handleResumeSubscription}
+                      >
+                        Resume Subscription
+                      </Button>
+                    )}
+                  </Space>
+                </Col>
+              </Row>
+              {subscription.canceledAt && (
+                <Alert
+                  type="warning"
+                  showIcon
+                  className="mt-3"
+                  message={`Your subscription will be canceled on ${new Date(
+                    subscription.currentPeriodEnd!,
+                  ).toLocaleDateString()}. You can resume anytime before then.`}
+                />
+              )}
+              {subscription.status === SubscriptionStatus.PAST_DUE && (
+                <Alert
+                  type="error"
+                  showIcon
+                  className="mt-3"
+                  message="Your last payment failed. Please update your payment method to avoid service interruption."
+                  action={
+                    <Button
+                      size="small"
+                      danger
+                      onClick={handleManagePayment}
+                    >
+                      Update Payment
+                    </Button>
+                  }
+                />
+              )}
+            </Card>
+            <Divider />
+          </>
+        )}
+
         {/* Summary cards */}
         {currentMonth && (
           <>

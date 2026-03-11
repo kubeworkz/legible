@@ -226,6 +226,52 @@ export const typeDefs = gql`
 
   # ─── End Billing Types ────────────────────────────────────
 
+  # ─── Stripe / Subscription Types ───────────────────────────
+
+  enum SubscriptionPlan {
+    free
+    pro
+    enterprise
+  }
+
+  enum SubscriptionStatus {
+    active
+    trialing
+    past_due
+    canceled
+    unpaid
+    incomplete
+    incomplete_expired
+  }
+
+  type SubscriptionInfo {
+    plan: SubscriptionPlan!
+    status: SubscriptionStatus!
+    stripeCustomerId: String
+    stripeSubscriptionId: String
+    currentPeriodStart: String
+    currentPeriodEnd: String
+    canceledAt: String
+    paymentMethodBrand: String
+    paymentMethodLast4: String
+  }
+
+  type CheckoutSessionResult {
+    sessionId: String!
+    url: String!
+  }
+
+  type PortalSessionResult {
+    url: String!
+  }
+
+  input CreateCheckoutSessionInput {
+    successUrl: String!
+    cancelUrl: String!
+  }
+
+  # ─── End Stripe Types ─────────────────────────────────────
+
   # ─── Query Usage / Metering Types ──────────────────────────
 
   type QueryUsageSummary {
@@ -2010,6 +2056,10 @@ export const typeDefs = gql`
     queryUsageOverview: QueryUsageOverview!
     queryUsageStats(filter: QueryUsageFilterInput): QueryUsageStats!
 
+    # Stripe / Subscription
+    subscription: SubscriptionInfo!
+    stripeEnabled: Boolean!
+
     # Data Security
     sessionProperties: [SessionProperty!]!
     rlsPolicies: [RlsPolicy!]!
@@ -2085,6 +2135,12 @@ export const typeDefs = gql`
     # Billing
     updateBillingConfig(data: UpdateBillingConfigInput!): BillingConfig!
     recomputeMonthlyBilling(year: Int!, month: Int!): MonthlyBillingSummary!
+
+    # Stripe / Subscription
+    createCheckoutSession(data: CreateCheckoutSessionInput!): CheckoutSessionResult!
+    createPortalSession: PortalSessionResult!
+    cancelSubscription: SubscriptionInfo!
+    resumeSubscription: SubscriptionInfo!
 
     # On Boarding Steps
     saveDataSource(data: DataSourceInput!): DataSource!

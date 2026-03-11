@@ -18309,6 +18309,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stripe@npm:^20.4.1":
+  version: 20.4.1
+  resolution: "stripe@npm:20.4.1"
+  peerDependencies:
+    "@types/node": ">=16"
+  peerDependenciesMeta:
+    "@types/node":
+      optional: true
+  checksum: 10c0/c4ca1099d70afd175b27ec1fc83f72230c46a95868b85d615a141a806e63dd6d1896fa239f593aca7ad110bb8a14a5fb136b8091453c1c5db663b07529e0f94b
+  languageName: node
+  linkType: hard
+
 "strnum@npm:^1.0.5":
   version: 1.0.5
   resolution: "strnum@npm:1.0.5"
@@ -20262,6 +20274,7 @@ __metadata:
     remark-gfm: "npm:^4.0.0"
     rxjs: "npm:^7.8.2"
     sql-formatter: "npm:^15.3.0"
+    stripe: "npm:^20.4.1"
     styled-components: "npm:5.3.6"
     styled-icons: "npm:^10.47.0"
     ts-essentials: "npm:^9.1.2"

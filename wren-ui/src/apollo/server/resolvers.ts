@@ -21,6 +21,7 @@ import { PermissionOverrideResolver } from './resolvers/permissionOverrideResolv
 import { ProjectMemberResolver } from './resolvers/projectMemberResolver';
 import { AuditLogResolver } from './resolvers/auditLogResolver';
 import { ByokResolver } from './resolvers/byokResolver';
+import { StripeResolver } from './resolvers/stripeResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -46,6 +47,7 @@ const permissionOverrideResolver = new PermissionOverrideResolver();
 const projectMemberResolver = new ProjectMemberResolver();
 const auditLogResolver = new AuditLogResolver();
 const byokResolver = new ByokResolver();
+const stripeResolver = new StripeResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -133,6 +135,10 @@ const resolvers = {
     queryUsageOverview: queryUsageResolver.queryUsageOverview,
     queryUsageStats: queryUsageResolver.queryUsageStats,
 
+    // Stripe / Subscription
+    subscription: stripeResolver.subscription,
+    stripeEnabled: stripeResolver.stripeEnabled,
+
     // Data Security
     sessionProperties: rlsPolicyResolver.listSessionProperties,
     rlsPolicies: rlsPolicyResolver.listRlsPolicies,
@@ -204,6 +210,12 @@ const resolvers = {
     // Billing
     updateBillingConfig: billingResolver.updateBillingConfig,
     recomputeMonthlyBilling: billingResolver.recomputeMonthlyBilling,
+
+    // Stripe / Subscription
+    createCheckoutSession: stripeResolver.createCheckoutSession,
+    createPortalSession: stripeResolver.createPortalSession,
+    cancelSubscription: stripeResolver.cancelSubscription,
+    resumeSubscription: stripeResolver.resumeSubscription,
 
     deploy: modelResolver.deploy,
     saveDataSource: projectResolver.saveDataSource,

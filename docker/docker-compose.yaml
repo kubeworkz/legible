@@ -122,6 +122,11 @@ services:
       INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
       # configs
       WREN_PRODUCT_VERSION: ${WREN_PRODUCT_VERSION}
+      # stripe billing
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRO_PRICE_ID: ${STRIPE_PRO_PRICE_ID:-}
+      STRIPE_PORTAL_RETURN_URL: ${STRIPE_PORTAL_RETURN_URL:-}
     ports:
       # HOST_PORT is the port you want to expose to the host machine
       - ${HOST_PORT}:3000

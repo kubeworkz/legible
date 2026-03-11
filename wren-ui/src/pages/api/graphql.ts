@@ -129,6 +129,8 @@ const bootstrapServer = async () => {
     queryMeteringService,
     rateLimitService,
     billingService,
+    stripeService,
+    subscriptionRepository,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
     threadRecommendQuestionBackgroundTracker,
@@ -326,10 +328,12 @@ const bootstrapServer = async () => {
         projectPermissionOverrideRepository,
         auditLogRepository,
         queryUsageRepository,
+        subscriptionRepository,
         // rate limiting
         rateLimitService,
         // billing
         billingService,
+        stripeService,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

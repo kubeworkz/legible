@@ -41,6 +41,12 @@ export interface IConfig {
   wrenAIVersion?: string;
   wrenProductVersion?: string;
 
+  // stripe
+  stripeSecretKey?: string;
+  stripeWebhookSecret?: string;
+  stripeProPriceId?: string;
+  stripePortalReturnUrl?: string;
+
   // generate recommendation questions max categories
   projectRecommendationQuestionMaxCategories?: number;
   projectRecommendationQuestionsMaxQuestions?: number;
@@ -130,6 +136,12 @@ const config = {
   wrenEngineVersion: process.env.WREN_ENGINE_VERSION,
   wrenAIVersion: process.env.WREN_AI_SERVICE_VERSION,
   wrenProductVersion: process.env.WREN_PRODUCT_VERSION,
+
+  // stripe
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+  stripeProPriceId: process.env.STRIPE_PRO_PRICE_ID,
+  stripePortalReturnUrl: process.env.STRIPE_PORTAL_RETURN_URL,
 
   // generate recommendation questions max questions
   projectRecommendationQuestionMaxCategories: process.env

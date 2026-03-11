@@ -71,6 +71,8 @@ import {
 } from './apollo/server/repositories/billingRepository';
 import { QueryUsageRepository } from './apollo/server/repositories/queryUsageRepository';
 import { QueryMeteringService } from './apollo/server/services/queryMeteringService';
+import { StripeService } from './apollo/server/services/stripeService';
+import { SubscriptionRepository } from './apollo/server/repositories/subscriptionRepository';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
@@ -132,6 +134,7 @@ export const initComponents = () => {
   const billingConfigRepository = new BillingConfigRepository(knex);
   const monthlyUsageCacheRepository = new MonthlyUsageCacheRepository(knex);
   const queryUsageRepository = new QueryUsageRepository(knex);
+  const subscriptionRepository = new SubscriptionRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -273,6 +276,12 @@ export const initComponents = () => {
   const auditLogService = new AuditLogService({
     auditLogRepository,
   });
+  const stripeService = new StripeService({
+    stripeSecretKey: serverConfig.stripeSecretKey,
+    stripeProPriceId: serverConfig.stripeProPriceId,
+    stripePortalReturnUrl: serverConfig.stripePortalReturnUrl,
+    subscriptionRepository,
+  });
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =
@@ -336,6 +345,7 @@ export const initComponents = () => {
     projectPermissionOverrideRepository,
     auditLogRepository,
     queryUsageRepository,
+    subscriptionRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -366,6 +376,7 @@ export const initComponents = () => {
     projectMemberService,
     auditLogService,
     queryMeteringService,
+    stripeService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

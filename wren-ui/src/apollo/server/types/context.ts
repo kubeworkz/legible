@@ -57,6 +57,8 @@ import { IRlsPolicyService } from '../services/rlsPolicyService';
 import { IRateLimitService } from '../services/rateLimitService';
 import { IBillingService } from '../services/billingService';
 import { IQueryMeteringService } from '../services/queryMeteringService';
+import { IStripeService } from '../services/stripeService';
+import { ISubscriptionRepository } from '../repositories/subscriptionRepository';
 import { IFolderService } from '../services/folderService';
 import { IProjectMemberService } from '../services/projectMemberService';
 import { IAuditLogService } from '../services/auditLogService';
@@ -114,6 +116,7 @@ export interface IContext {
   projectMemberService: IProjectMemberService;
   auditLogService: IAuditLogService;
   queryMeteringService: IQueryMeteringService;
+  stripeService: IStripeService;
 
   // repository
   projectRepository: IProjectRepository;
@@ -148,6 +151,7 @@ export interface IContext {
   projectPermissionOverrideRepository: IProjectPermissionOverrideRepository;
   auditLogRepository: IAuditLogRepository;
   queryUsageRepository: IQueryUsageRepository;
+  subscriptionRepository: ISubscriptionRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;

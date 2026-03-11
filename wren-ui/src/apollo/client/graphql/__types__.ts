@@ -1333,6 +1333,8 @@ export type Query = {
   monthlyBilling: MonthlyBillingSummary;
   queryUsageOverview: QueryUsageOverview;
   queryUsageStats: QueryUsageStats;
+  subscription: SubscriptionInfo;
+  stripeEnabled: Scalars['Boolean'];
   askingTask?: Maybe<AskingTask>;
   autoGenerateRelation: Array<RecommendRelations>;
   dashboard: DetailedDashboard;
@@ -1543,6 +1545,55 @@ export type QueryQueryUsageStatsArgs = {
 };
 
 // ─── End Query Usage Types ────────────────────────────────
+
+// ─── Stripe / Subscription Types ──────────────────────────
+
+export enum SubscriptionPlan {
+  FREE = 'free',
+  PRO = 'pro',
+  ENTERPRISE = 'enterprise',
+}
+
+export enum SubscriptionStatus {
+  ACTIVE = 'active',
+  TRIALING = 'trialing',
+  PAST_DUE = 'past_due',
+  CANCELED = 'canceled',
+  UNPAID = 'unpaid',
+  INCOMPLETE = 'incomplete',
+  INCOMPLETE_EXPIRED = 'incomplete_expired',
+}
+
+export type SubscriptionInfo = {
+  __typename?: 'SubscriptionInfo';
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
+  stripeCustomerId?: Maybe<Scalars['String']>;
+  stripeSubscriptionId?: Maybe<Scalars['String']>;
+  currentPeriodStart?: Maybe<Scalars['String']>;
+  currentPeriodEnd?: Maybe<Scalars['String']>;
+  canceledAt?: Maybe<Scalars['String']>;
+  paymentMethodBrand?: Maybe<Scalars['String']>;
+  paymentMethodLast4?: Maybe<Scalars['String']>;
+};
+
+export type CheckoutSessionResult = {
+  __typename?: 'CheckoutSessionResult';
+  sessionId: Scalars['String'];
+  url: Scalars['String'];
+};
+
+export type PortalSessionResult = {
+  __typename?: 'PortalSessionResult';
+  url: Scalars['String'];
+};
+
+export type CreateCheckoutSessionInput = {
+  successUrl: Scalars['String'];
+  cancelUrl: Scalars['String'];
+};
+
+// ─── End Stripe Types ─────────────────────────────────────
 
 
 export type QueryApiUsageDashboardArgs = {
