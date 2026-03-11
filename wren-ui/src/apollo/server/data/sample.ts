@@ -417,18 +417,19 @@ export const sampleDatasets: Record<string, SampleDataset> = {
     ],
     questions: [
       {
-        question: 'What is the average salary for each position?',
-        label: 'Aggregation',
+        question:
+          'What was the average monthly attrition rate for each department?',
+        label: 'Descriptive',
       },
       {
         question:
-          'Compare the average salary of male and female employees in each department.',
-        label: 'Comparison',
+          'What is the total number of employees broken down by Department and Gender?',
+        label: 'Segmentation',
       },
       {
         question:
-          'What are the names of the managers and the departments they manage?',
-        label: 'Associating',
+          'What is the median salary for a Manager compared to a Non-Manager in the Sales department for the most recent date available?',
+        label: 'Comparative',
       },
     ],
     sampleContent: {
