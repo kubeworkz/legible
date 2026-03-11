@@ -12,9 +12,21 @@ const httpLink = new HttpLink({
   uri: '/api/graphql',
 });
 
+// Extract projectId from the URL path (e.g. /projects/29/home) as a fallback
+// when localStorage hasn't been populated yet (first login race condition).
+function getProjectIdFromUrl(): number | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const match = window.location.pathname.match(/\/projects\/(\d+)/);
+  if (match) {
+    const parsed = Number(match[1]);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
 // Dynamically inject X-Project-Id, X-Organization-Id and Authorization headers on every request
 const projectIdLink = setContext((_, { headers }) => {
-  const projectId = getStoredProjectId();
+  const projectId = getStoredProjectId() || getProjectIdFromUrl();
   const token = getAuthToken();
   const orgId = getStoredOrgId();
   return {
