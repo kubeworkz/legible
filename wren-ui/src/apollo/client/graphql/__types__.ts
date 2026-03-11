@@ -1337,6 +1337,9 @@ export type Query = {
   queryAllowance: QueryAllowance;
   subscription: SubscriptionInfo;
   adminSubscriptions: Array<AdminSubscription>;
+  invoices: Array<Invoice>;
+  upcomingInvoice?: Maybe<Invoice>;
+  overageBreakdown: OverageBreakdown;
   stripeEnabled: Scalars['Boolean'];
   askingTask?: Maybe<AskingTask>;
   autoGenerateRelation: Array<RecommendRelations>;
@@ -1630,6 +1633,56 @@ export type AdminSubscription = {
 export type AdminUpdateSubscriptionInput = {
   plan: SubscriptionPlan;
   status: SubscriptionStatus;
+};
+
+export type InvoiceLineItem = {
+  __typename?: 'InvoiceLineItem';
+  id: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  quantity?: Maybe<Scalars['Int']>;
+  unitAmount?: Maybe<Scalars['Float']>;
+  amount: Scalars['Float'];
+  currency: Scalars['String'];
+  periodStart?: Maybe<Scalars['String']>;
+  periodEnd?: Maybe<Scalars['String']>;
+  priceId?: Maybe<Scalars['String']>;
+  type: Scalars['String'];
+};
+
+export type Invoice = {
+  __typename?: 'Invoice';
+  id: Scalars['String'];
+  status?: Maybe<Scalars['String']>;
+  total: Scalars['Float'];
+  subtotal: Scalars['Float'];
+  amountDue: Scalars['Float'];
+  amountPaid: Scalars['Float'];
+  currency: Scalars['String'];
+  periodStart?: Maybe<Scalars['String']>;
+  periodEnd?: Maybe<Scalars['String']>;
+  created: Scalars['String'];
+  hostedInvoiceUrl?: Maybe<Scalars['String']>;
+  invoicePdfUrl?: Maybe<Scalars['String']>;
+  lineItems: Array<InvoiceLineItem>;
+};
+
+export type OverageLineItem = {
+  __typename?: 'OverageLineItem';
+  date: Scalars['String'];
+  paidQueries: Scalars['Int'];
+  costPerQuery: Scalars['Float'];
+  cost: Scalars['Float'];
+};
+
+export type OverageBreakdown = {
+  __typename?: 'OverageBreakdown';
+  periodStart: Scalars['String'];
+  periodEnd: Scalars['String'];
+  totalPaidQueries: Scalars['Int'];
+  totalCost: Scalars['Float'];
+  freeTierLimit: Scalars['Int'];
+  costPerQuery: Scalars['Float'];
+  dailyBreakdown: Array<OverageLineItem>;
 };
 
 // ─── End Stripe Types ─────────────────────────────────────

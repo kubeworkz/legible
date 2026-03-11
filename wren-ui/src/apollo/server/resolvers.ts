@@ -140,6 +140,9 @@ const resolvers = {
     subscription: stripeResolver.subscription,
     stripeEnabled: stripeResolver.stripeEnabled,
     adminSubscriptions: stripeResolver.adminSubscriptions,
+    invoices: stripeResolver.invoices,
+    upcomingInvoice: stripeResolver.upcomingInvoice,
+    overageBreakdown: stripeResolver.overageBreakdown,
 
     // Data Security
     sessionProperties: rlsPolicyResolver.listSessionProperties,

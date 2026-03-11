@@ -20,6 +20,7 @@ import {
   Divider,
   Badge,
   Alert,
+  Collapse,
 } from 'antd';
 import styled from 'styled-components';
 import SiderLayout from '@/components/layouts/SiderLayout';
@@ -31,6 +32,8 @@ import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import ThunderboltOutlined from '@ant-design/icons/ThunderboltOutlined';
 import CrownOutlined from '@ant-design/icons/CrownOutlined';
 import CreditCardOutlined from '@ant-design/icons/CreditCardOutlined';
+import FileTextOutlined from '@ant-design/icons/FileTextOutlined';
+import LinkOutlined from '@ant-design/icons/LinkOutlined';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   BILLING_OVERVIEW,
@@ -44,6 +47,9 @@ import {
   CREATE_PORTAL_SESSION,
   CANCEL_SUBSCRIPTION,
   RESUME_SUBSCRIPTION,
+  INVOICES,
+  UPCOMING_INVOICE,
+  OVERAGE_BREAKDOWN,
 } from '@/apollo/client/graphql/subscription';
 import {
   SubscriptionPlan,
@@ -56,6 +62,10 @@ import type {
   ApiTypeCostBreakdown,
   BillingConfig,
   SubscriptionInfo,
+  Invoice,
+  InvoiceLineItem,
+  OverageBreakdown,
+  OverageLineItem,
 } from '@/apollo/client/graphql/__types__';
 
 const { Text } = Typography;
@@ -249,6 +259,22 @@ export default function BillingPage() {
     { fetchPolicy: 'cache-first' },
   );
 
+  const { data: invoicesData } = useQuery<{ invoices: Invoice[] }>(
+    INVOICES,
+    { fetchPolicy: 'cache-and-network', skip: !stripeData?.stripeEnabled },
+  );
+
+  const { data: upcomingData } = useQuery<{
+    upcomingInvoice: Invoice | null;
+  }>(UPCOMING_INVOICE, {
+    fetchPolicy: 'cache-and-network',
+    skip: !stripeData?.stripeEnabled,
+  });
+
+  const { data: overageData } = useQuery<{
+    overageBreakdown: OverageBreakdown;
+  }>(OVERAGE_BREAKDOWN, { fetchPolicy: 'cache-and-network' });
+
   const [updateConfig] = useMutation(UPDATE_BILLING_CONFIG);
   const [recomputeBilling] = useMutation(RECOMPUTE_MONTHLY_BILLING);
   const [checkoutMutation] = useMutation(CREATE_CHECKOUT_SESSION);
@@ -264,6 +290,10 @@ export default function BillingPage() {
   const stripeEnabled = stripeData?.stripeEnabled ?? false;
 
   const currency = config?.currency || 'USD';
+
+  const pastInvoices = invoicesData?.invoices || [];
+  const upcomingInvoice = upcomingData?.upcomingInvoice || null;
+  const overageBreakdown = overageData?.overageBreakdown || null;
 
   const handleUpdateConfig = useCallback(
     async (configData: any) => {
@@ -841,6 +871,353 @@ export default function BillingPage() {
               />
             </Col>
           </Row>
+        )}
+
+        {/* ── Overage Breakdown ─────────────────────── */}
+        {overageBreakdown && overageBreakdown.totalPaidQueries > 0 && (
+          <>
+            <Divider />
+            <SectionTitle>
+              <ThunderboltOutlined className="mr-1" />
+              Overage Breakdown — Current Period
+            </SectionTitle>
+            <Card size="small" className="mb-4">
+              <Row gutter={16}>
+                <Col span={6}>
+                  <Text type="secondary">Billing Period</Text>
+                  <br />
+                  <Text strong>
+                    {new Date(overageBreakdown.periodStart).toLocaleDateString()}{' '}
+                    – {new Date(overageBreakdown.periodEnd).toLocaleDateString()}
+                  </Text>
+                </Col>
+                <Col span={6}>
+                  <Text type="secondary">Free Tier</Text>
+                  <br />
+                  <Text strong>
+                    {overageBreakdown.freeTierLimit.toLocaleString()} queries
+                    included
+                  </Text>
+                </Col>
+                <Col span={6}>
+                  <Text type="secondary">Overage Queries</Text>
+                  <br />
+                  <Text strong style={{ color: '#fa8c16' }}>
+                    {overageBreakdown.totalPaidQueries.toLocaleString()} @{' '}
+                    ${overageBreakdown.costPerQuery}/query
+                  </Text>
+                </Col>
+                <Col span={6}>
+                  <Text type="secondary">Overage Total</Text>
+                  <br />
+                  <Text strong style={{ color: '#f5222d', fontSize: 16 }}>
+                    ${overageBreakdown.totalCost.toFixed(2)}
+                  </Text>
+                </Col>
+              </Row>
+            </Card>
+            <Collapse
+              size="small"
+              className="mb-4"
+              items={[
+                {
+                  key: 'daily',
+                  label: `Daily overage detail (${overageBreakdown.dailyBreakdown.length} days with charges)`,
+                  children: (
+                    <Table<OverageLineItem>
+                      dataSource={overageBreakdown.dailyBreakdown}
+                      rowKey="date"
+                      pagination={false}
+                      size="small"
+                      columns={[
+                        {
+                          title: 'Date',
+                          dataIndex: 'date',
+                          key: 'date',
+                          width: 140,
+                        },
+                        {
+                          title: 'Paid Queries',
+                          dataIndex: 'paidQueries',
+                          key: 'paidQueries',
+                          align: 'right' as const,
+                          width: 120,
+                          render: (v: number) => v.toLocaleString(),
+                        },
+                        {
+                          title: 'Rate',
+                          dataIndex: 'costPerQuery',
+                          key: 'costPerQuery',
+                          align: 'right' as const,
+                          width: 100,
+                          render: (v: number) => `$${v.toFixed(2)}`,
+                        },
+                        {
+                          title: 'Cost',
+                          dataIndex: 'cost',
+                          key: 'cost',
+                          align: 'right' as const,
+                          width: 120,
+                          render: (v: number) => (
+                            <Text strong style={{ color: '#f5222d' }}>
+                              ${v.toFixed(2)}
+                            </Text>
+                          ),
+                        },
+                      ]}
+                      summary={() => (
+                        <Table.Summary.Row>
+                          <Table.Summary.Cell index={0}>
+                            <Text strong>Total</Text>
+                          </Table.Summary.Cell>
+                          <Table.Summary.Cell index={1} align="right">
+                            <Text strong>
+                              {overageBreakdown.totalPaidQueries.toLocaleString()}
+                            </Text>
+                          </Table.Summary.Cell>
+                          <Table.Summary.Cell index={2} />
+                          <Table.Summary.Cell index={3} align="right">
+                            <Text strong style={{ color: '#f5222d' }}>
+                              ${overageBreakdown.totalCost.toFixed(2)}
+                            </Text>
+                          </Table.Summary.Cell>
+                        </Table.Summary.Row>
+                      )}
+                    />
+                  ),
+                },
+              ]}
+            />
+          </>
+        )}
+
+        {/* ── Invoices ────────────────────────────────── */}
+        {stripeEnabled && (upcomingInvoice || pastInvoices.length > 0) && (
+          <>
+            <Divider />
+            <SectionTitle>
+              <FileTextOutlined className="mr-1" />
+              Invoices
+            </SectionTitle>
+
+            {upcomingInvoice && (
+              <Card
+                size="small"
+                className="mb-3"
+                title={
+                  <Space>
+                    <Tag color="blue">Upcoming</Tag>
+                    <Text>
+                      Next invoice · {upcomingInvoice.lineItems.length} line
+                      item{upcomingInvoice.lineItems.length !== 1 ? 's' : ''}
+                    </Text>
+                  </Space>
+                }
+                extra={
+                  <Text strong style={{ fontSize: 16 }}>
+                    ${upcomingInvoice.total.toFixed(2)}{' '}
+                    <Text
+                      type="secondary"
+                      style={{ fontSize: 12, fontWeight: 400 }}
+                    >
+                      {upcomingInvoice.currency.toUpperCase()}
+                    </Text>
+                  </Text>
+                }
+              >
+                <Table<InvoiceLineItem>
+                  dataSource={upcomingInvoice.lineItems}
+                  rowKey="id"
+                  pagination={false}
+                  size="small"
+                  columns={[
+                    {
+                      title: 'Description',
+                      dataIndex: 'description',
+                      key: 'description',
+                      render: (v: string | null) => v || '—',
+                    },
+                    {
+                      title: 'Qty',
+                      dataIndex: 'quantity',
+                      key: 'quantity',
+                      align: 'right' as const,
+                      width: 80,
+                      render: (v: number | null) =>
+                        v != null ? v.toLocaleString() : '—',
+                    },
+                    {
+                      title: 'Unit Price',
+                      dataIndex: 'unitAmount',
+                      key: 'unitAmount',
+                      align: 'right' as const,
+                      width: 110,
+                      render: (v: number | null) =>
+                        v != null ? `$${v.toFixed(2)}` : '—',
+                    },
+                    {
+                      title: 'Amount',
+                      dataIndex: 'amount',
+                      key: 'amount',
+                      align: 'right' as const,
+                      width: 110,
+                      render: (v: number) => (
+                        <Text strong>${v.toFixed(2)}</Text>
+                      ),
+                    },
+                    {
+                      title: 'Period',
+                      key: 'period',
+                      width: 200,
+                      render: (_: any, r: InvoiceLineItem) =>
+                        r.periodStart && r.periodEnd
+                          ? `${new Date(r.periodStart).toLocaleDateString()} – ${new Date(r.periodEnd).toLocaleDateString()}`
+                          : '—',
+                    },
+                  ]}
+                />
+              </Card>
+            )}
+
+            {pastInvoices.length > 0 && (
+              <Table<Invoice>
+                dataSource={pastInvoices}
+                rowKey="id"
+                size="small"
+                pagination={{ pageSize: 10 }}
+                expandable={{
+                  expandedRowRender: (record) => (
+                    <Table<InvoiceLineItem>
+                      dataSource={record.lineItems}
+                      rowKey="id"
+                      pagination={false}
+                      size="small"
+                      columns={[
+                        {
+                          title: 'Description',
+                          dataIndex: 'description',
+                          key: 'description',
+                          render: (v: string | null) => v || '—',
+                        },
+                        {
+                          title: 'Qty',
+                          dataIndex: 'quantity',
+                          key: 'quantity',
+                          align: 'right' as const,
+                          width: 80,
+                          render: (v: number | null) =>
+                            v != null ? v.toLocaleString() : '—',
+                        },
+                        {
+                          title: 'Unit Price',
+                          dataIndex: 'unitAmount',
+                          key: 'unitAmount',
+                          align: 'right' as const,
+                          width: 110,
+                          render: (v: number | null) =>
+                            v != null ? `$${v.toFixed(2)}` : '—',
+                        },
+                        {
+                          title: 'Amount',
+                          dataIndex: 'amount',
+                          key: 'amount',
+                          align: 'right' as const,
+                          width: 110,
+                          render: (v: number) => `$${v.toFixed(2)}`,
+                        },
+                      ]}
+                    />
+                  ),
+                  rowExpandable: (r) => r.lineItems.length > 0,
+                }}
+                columns={[
+                  {
+                    title: 'Date',
+                    dataIndex: 'created',
+                    key: 'created',
+                    width: 120,
+                    render: (v: string) =>
+                      new Date(v).toLocaleDateString(),
+                  },
+                  {
+                    title: 'Status',
+                    dataIndex: 'status',
+                    key: 'status',
+                    width: 100,
+                    render: (v: string | null) => (
+                      <Tag
+                        color={
+                          v === 'paid'
+                            ? 'green'
+                            : v === 'open'
+                              ? 'blue'
+                              : v === 'draft'
+                                ? 'default'
+                                : v === 'uncollectible'
+                                  ? 'red'
+                                  : 'orange'
+                        }
+                      >
+                        {v || 'unknown'}
+                      </Tag>
+                    ),
+                  },
+                  {
+                    title: 'Total',
+                    dataIndex: 'total',
+                    key: 'total',
+                    align: 'right' as const,
+                    width: 110,
+                    render: (v: number) => (
+                      <Text strong>${v.toFixed(2)}</Text>
+                    ),
+                  },
+                  {
+                    title: 'Line Items',
+                    key: 'lineCount',
+                    width: 100,
+                    align: 'center' as const,
+                    render: (_: any, r: Invoice) => (
+                      <Tag>{r.lineItems.length}</Tag>
+                    ),
+                  },
+                  {
+                    title: '',
+                    key: 'actions',
+                    width: 80,
+                    render: (_: any, r: Invoice) => (
+                      <Space size={4}>
+                        {r.hostedInvoiceUrl && (
+                          <Tooltip title="View invoice">
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={<LinkOutlined />}
+                              onClick={() =>
+                                window.open(r.hostedInvoiceUrl!, '_blank')
+                              }
+                            />
+                          </Tooltip>
+                        )}
+                        {r.invoicePdfUrl && (
+                          <Tooltip title="Download PDF">
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={<DownloadOutlined />}
+                              onClick={() =>
+                                window.open(r.invoicePdfUrl!, '_blank')
+                              }
+                            />
+                          </Tooltip>
+                        )}
+                      </Space>
+                    ),
+                  },
+                ]}
+              />
+            )}
+          </>
         )}
 
         {/* Monthly history */}

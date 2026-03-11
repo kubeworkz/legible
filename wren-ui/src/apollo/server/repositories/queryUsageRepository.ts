@@ -72,6 +72,19 @@ export interface IQueryUsageRepository extends IBasicRepository<QueryUsage> {
   getDailyUsage(
     filter: QueryUsageFilter,
   ): Promise<{ date: string; totalQueries: number; totalCost: number }[]>;
+
+  /** Get daily paid-query breakdown for overage invoice detail */
+  getOverageBreakdown(
+    organizationId: number,
+    since: Date,
+    until?: Date,
+  ): Promise<
+    {
+      date: string;
+      paidQueries: number;
+      cost: number;
+    }[]
+  >;
 }
 
 // ── Implementation ──────────────────────────────────────
@@ -191,6 +204,36 @@ export class QueryUsageRepository
       date: r.date,
       totalQueries: Number(r.total_queries) || 0,
       totalCost: Number(r.total_cost) || 0,
+    }));
+  }
+
+  public async getOverageBreakdown(
+    organizationId: number,
+    since: Date,
+    until?: Date,
+  ): Promise<{ date: string; paidQueries: number; cost: number }[]> {
+    const qb = this.knex(this.tableName)
+      .where('organization_id', organizationId)
+      .where('created_at', '>=', since.toISOString())
+      .andWhere(function () {
+        this.where('is_free_tier', 0).orWhere('is_free_tier', false);
+      });
+
+    if (until) {
+      qb.where('created_at', '<=', until.toISOString());
+    }
+
+    const rows = await qb
+      .select(this.knex.raw("DATE(created_at) as date"))
+      .count('* as paid_queries')
+      .sum({ cost: 'cost' })
+      .groupByRaw('DATE(created_at)')
+      .orderBy('date', 'asc');
+
+    return rows.map((r: any) => ({
+      date: r.date,
+      paidQueries: Number(r.paid_queries) || 0,
+      cost: Number(r.cost) || 0,
     }));
   }
 

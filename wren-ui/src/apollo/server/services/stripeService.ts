@@ -45,6 +45,35 @@ export interface CreatePortalResult {
   url: string;
 }
 
+export interface InvoiceLineItem {
+  id: string;
+  description: string | null;
+  quantity: number | null;
+  unitAmount: number | null;
+  amount: number;
+  currency: string;
+  periodStart: string | null;
+  periodEnd: string | null;
+  priceId: string | null;
+  type: string;
+}
+
+export interface Invoice {
+  id: string;
+  status: string | null;
+  total: number;
+  subtotal: number;
+  amountDue: number;
+  amountPaid: number;
+  currency: string;
+  periodStart: string | null;
+  periodEnd: string | null;
+  created: string;
+  hostedInvoiceUrl: string | null;
+  invoicePdfUrl: string | null;
+  lineItems: InvoiceLineItem[];
+}
+
 // ── Interface ───────────────────────────────────────────
 
 export interface IStripeService {
@@ -80,6 +109,12 @@ export interface IStripeService {
     organizationId: number,
     queryCount: number,
   ): Promise<void>;
+
+  /** Retrieve past invoices for an organization */
+  getInvoices(organizationId: number, limit?: number): Promise<Invoice[]>;
+
+  /** Retrieve the upcoming (draft) invoice with line items */
+  getUpcomingInvoice(organizationId: number): Promise<Invoice | null>;
 }
 
 // ── Implementation ──────────────────────────────────────
@@ -577,5 +612,105 @@ export class StripeService implements IStripeService {
         `Stripe meter event failed for org=${organizationId}: ${err.message}`,
       );
     }
+  }
+
+  // ── Invoice retrieval ─────────────────────────────────
+
+  public async getInvoices(
+    organizationId: number,
+    limit = 12,
+  ): Promise<Invoice[]> {
+    if (!this.stripe) return [];
+
+    const sub =
+      await this.subscriptionRepository.findByOrganizationId(organizationId);
+    if (!sub?.stripeCustomerId) return [];
+
+    try {
+      const invoices = await this.stripe.invoices.list({
+        customer: sub.stripeCustomerId,
+        limit,
+        expand: ['data.lines'],
+      });
+
+      return invoices.data.map((inv: any) => this.mapInvoice(inv));
+    } catch (err: any) {
+      logger.warn(`Failed to fetch invoices for org=${organizationId}: ${err.message}`);
+      return [];
+    }
+  }
+
+  public async getUpcomingInvoice(
+    organizationId: number,
+  ): Promise<Invoice | null> {
+    if (!this.stripe) return null;
+
+    const sub =
+      await this.subscriptionRepository.findByOrganizationId(organizationId);
+    if (!sub?.stripeCustomerId) return null;
+
+    try {
+      const inv = await this.stripe.invoices.retrieveUpcoming({
+        customer: sub.stripeCustomerId,
+        expand: ['lines'],
+      });
+      return this.mapInvoice(inv);
+    } catch (err: any) {
+      // 'invoice_upcoming_none' means no upcoming invoice exists
+      if (err.code === 'invoice_upcoming_none') return null;
+      logger.warn(
+        `Failed to fetch upcoming invoice for org=${organizationId}: ${err.message}`,
+      );
+      return null;
+    }
+  }
+
+  private mapInvoice(inv: any): Invoice {
+    const lines: InvoiceLineItem[] = (inv.lines?.data || []).map(
+      (line: any) => ({
+        id: line.id,
+        description: line.description || null,
+        quantity: line.quantity ?? null,
+        unitAmount: line.price?.unitAmount
+          ? line.price.unitAmount / 100
+          : null,
+        amount: (line.amount || 0) / 100,
+        currency: line.currency || inv.currency || 'usd',
+        periodStart: line.period?.start
+          ? new Date(line.period.start * 1000).toISOString()
+          : null,
+        periodEnd: line.period?.end
+          ? new Date(line.period.end * 1000).toISOString()
+          : null,
+        priceId: line.price?.id || null,
+        type: line.type || 'invoiceitem',
+      }),
+    );
+
+    return {
+      id: inv.id || 'upcoming',
+      status: inv.status || 'draft',
+      total: (inv.total || 0) / 100,
+      subtotal: (inv.subtotal || 0) / 100,
+      amountDue: (inv.amountDue ?? inv.amount_due ?? 0) / 100,
+      amountPaid: (inv.amountPaid ?? inv.amount_paid ?? 0) / 100,
+      currency: inv.currency || 'usd',
+      periodStart: inv.periodStart ?? inv.period_start
+        ? new Date(
+            (inv.periodStart ?? inv.period_start) * 1000,
+          ).toISOString()
+        : null,
+      periodEnd: inv.periodEnd ?? inv.period_end
+        ? new Date(
+            (inv.periodEnd ?? inv.period_end) * 1000,
+          ).toISOString()
+        : null,
+      created: inv.created
+        ? new Date(inv.created * 1000).toISOString()
+        : new Date().toISOString(),
+      hostedInvoiceUrl: inv.hostedInvoiceUrl ?? inv.hosted_invoice_url ?? null,
+      invoicePdfUrl: inv.invoicePdf ?? inv.invoice_pdf ?? null,
+      lineItems: lines,
+    };
   }
 }

@@ -6,6 +6,7 @@
 import { IContext } from '@server/types';
 import { MemberRole } from '@server/repositories/memberRepository';
 import { requireAuth, requireOrganization } from '../utils/authGuard';
+import { FREE_TIER_LIMIT, COST_PER_QUERY } from '../services/queryMeteringService';
 
 export class StripeResolver {
   constructor() {
@@ -17,6 +18,9 @@ export class StripeResolver {
     this.resumeSubscription = this.resumeSubscription.bind(this);
     this.adminSubscriptions = this.adminSubscriptions.bind(this);
     this.adminUpdateSubscription = this.adminUpdateSubscription.bind(this);
+    this.invoices = this.invoices.bind(this);
+    this.upcomingInvoice = this.upcomingInvoice.bind(this);
+    this.overageBreakdown = this.overageBreakdown.bind(this);
   }
 
   // ── Queries ───────────────────────────────────────────
@@ -85,6 +89,72 @@ export class StripeResolver {
       MemberRole.OWNER,
     ]);
     return ctx.stripeService.resumeSubscription(organizationId);
+  }
+
+  // ── Invoice / Overage queries ───────────────────────
+
+  public async invoices(_root: any, _args: any, ctx: IContext) {
+    const user = requireAuth(ctx);
+    const organizationId = requireOrganization(ctx);
+    await ctx.memberService.requireRole(organizationId, user.id, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
+    return ctx.stripeService.getInvoices(organizationId);
+  }
+
+  public async upcomingInvoice(_root: any, _args: any, ctx: IContext) {
+    const user = requireAuth(ctx);
+    const organizationId = requireOrganization(ctx);
+    await ctx.memberService.requireRole(organizationId, user.id, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
+    return ctx.stripeService.getUpcomingInvoice(organizationId);
+  }
+
+  public async overageBreakdown(_root: any, _args: any, ctx: IContext) {
+    const user = requireAuth(ctx);
+    const organizationId = requireOrganization(ctx);
+    await ctx.memberService.requireRole(organizationId, user.id, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
+
+    // Current billing month
+    const now = new Date();
+    const periodStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+    );
+    const periodEnd = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59),
+    );
+
+    const dailyBreakdown =
+      await ctx.queryUsageRepository.getOverageBreakdown(
+        organizationId,
+        periodStart,
+        periodEnd,
+      );
+
+    const totalPaidQueries = dailyBreakdown.reduce(
+      (sum, d) => sum + d.paidQueries,
+      0,
+    );
+    const totalCost = dailyBreakdown.reduce((sum, d) => sum + d.cost, 0);
+
+    return {
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+      totalPaidQueries,
+      totalCost: Math.round(totalCost * 100) / 100,
+      freeTierLimit: FREE_TIER_LIMIT,
+      costPerQuery: COST_PER_QUERY,
+      dailyBreakdown: dailyBreakdown.map((d) => ({
+        ...d,
+        costPerQuery: COST_PER_QUERY,
+      })),
+    };
   }
 
   // ── Admin ─────────────────────────────────────────────

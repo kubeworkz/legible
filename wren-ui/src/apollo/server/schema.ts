@@ -297,6 +297,52 @@ export const typeDefs = gql`
     status: SubscriptionStatus!
   }
 
+  type InvoiceLineItem {
+    id: String!
+    description: String
+    quantity: Int
+    unitAmount: Float
+    amount: Float!
+    currency: String!
+    periodStart: String
+    periodEnd: String
+    priceId: String
+    type: String!
+  }
+
+  type Invoice {
+    id: String!
+    status: String
+    total: Float!
+    subtotal: Float!
+    amountDue: Float!
+    amountPaid: Float!
+    currency: String!
+    periodStart: String
+    periodEnd: String
+    created: String!
+    hostedInvoiceUrl: String
+    invoicePdfUrl: String
+    lineItems: [InvoiceLineItem!]!
+  }
+
+  type OverageLineItem {
+    date: String!
+    paidQueries: Int!
+    costPerQuery: Float!
+    cost: Float!
+  }
+
+  type OverageBreakdown {
+    periodStart: String!
+    periodEnd: String!
+    totalPaidQueries: Int!
+    totalCost: Float!
+    freeTierLimit: Int!
+    costPerQuery: Float!
+    dailyBreakdown: [OverageLineItem!]!
+  }
+
   # ─── End Stripe Types ─────────────────────────────────────
 
   # ─── Query Usage / Metering Types ──────────────────────────
@@ -2096,6 +2142,9 @@ export const typeDefs = gql`
     subscription: SubscriptionInfo!
     stripeEnabled: Boolean!
     adminSubscriptions: [AdminSubscription!]!
+    invoices: [Invoice!]!
+    upcomingInvoice: Invoice
+    overageBreakdown: OverageBreakdown!
 
     # Data Security
     sessionProperties: [SessionProperty!]!

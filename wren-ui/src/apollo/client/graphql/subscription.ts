@@ -95,3 +95,79 @@ export const ADMIN_UPDATE_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const INVOICES = gql`
+  query Invoices {
+    invoices {
+      id
+      status
+      total
+      subtotal
+      amountDue
+      amountPaid
+      currency
+      periodStart
+      periodEnd
+      created
+      hostedInvoiceUrl
+      invoicePdfUrl
+      lineItems {
+        id
+        description
+        quantity
+        unitAmount
+        amount
+        currency
+        periodStart
+        periodEnd
+        priceId
+        type
+      }
+    }
+  }
+`;
+
+export const UPCOMING_INVOICE = gql`
+  query UpcomingInvoice {
+    upcomingInvoice {
+      id
+      status
+      total
+      subtotal
+      amountDue
+      currency
+      periodStart
+      periodEnd
+      lineItems {
+        id
+        description
+        quantity
+        unitAmount
+        amount
+        currency
+        periodStart
+        periodEnd
+        type
+      }
+    }
+  }
+`;
+
+export const OVERAGE_BREAKDOWN = gql`
+  query OverageBreakdown {
+    overageBreakdown {
+      periodStart
+      periodEnd
+      totalPaidQueries
+      totalCost
+      freeTierLimit
+      costPerQuery
+      dailyBreakdown {
+        date
+        paidQueries
+        costPerQuery
+        cost
+      }
+    }
+  }
+`;
