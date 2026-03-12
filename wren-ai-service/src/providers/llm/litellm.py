@@ -71,6 +71,16 @@ class LitellmLLMProvider(LLMProvider):
             **(self._model_kwargs or {}),
         }
 
+        # Groq doesn't natively support json_schema response format.
+        # LiteLLM converts it to function/tool calling, which often fails.
+        # Downgrade to json_object mode which Groq supports directly.
+        if self._model.startswith("groq/"):
+            rf = combined_generation_kwargs.get("response_format")
+            if isinstance(rf, dict) and rf.get("type") == "json_schema":
+                combined_generation_kwargs["response_format"] = {
+                    "type": "json_object"
+                }
+
         @backoff.on_exception(backoff.expo, openai.APIError, max_time=60.0, max_tries=3)
         async def _run(
             prompt: str,
