@@ -641,7 +641,7 @@ export default function SpreadsheetDetail() {
   }, []);
 
   return (
-    <SiderLayout loading={false} sidebar={homeSidebar}>
+    <SiderLayout loading={queryLoading && !spreadsheet} sidebar={homeSidebar}>
       <PageContainer>
         <Header>
           <div>
@@ -796,7 +796,7 @@ export default function SpreadsheetDetail() {
                 ) : undefined
               }
               overlay={
-                !hasRun ? (
+                !hasRun && !queryLoading && !spreadsheet?.sourceSql ? (
                   <DataSourceOverlay
                     onSelectModelView={handleSelectModelView}
                     onCreateFromSql={handleCreateFromSql}
