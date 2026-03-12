@@ -31,7 +31,6 @@ wren-ai-service/tools/dev/etc/**
 docker/config.yaml
 docker/docker-compose-local.yaml
 docker/data
-docker/.env
 
 # python
 .python-version
