@@ -87,6 +87,7 @@ export interface IContext {
   currentUser?: User | null;
   authToken?: string;
   clientIp?: string;
+  isInternalService?: boolean;
 
   // adaptor
   wrenEngineAdaptor: IWrenEngineAdaptor;

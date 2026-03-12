@@ -1,5 +1,6 @@
 volumes:
   data:
+  tei-models:
 
 networks:
   wren:
@@ -71,6 +72,24 @@ services:
       - wren
     depends_on:
       - qdrant
+      - text-embeddings-inference
+
+  text-embeddings-inference:
+    image: michaelf34/infinity:latest
+    restart: on-failure
+    command: v2 --model-id BAAI/bge-base-en-v1.5 --port 8081
+    expose:
+      - 8081
+    volumes:
+      - tei-models:/app/.cache
+    environment:
+      DO_NOT_TRACK: 1
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    networks:
+      - wren
 
   qdrant:
     image: qdrant/qdrant:v1.11.0

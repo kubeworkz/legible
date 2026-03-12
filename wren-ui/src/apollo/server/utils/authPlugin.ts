@@ -63,6 +63,7 @@ export function createAuthPlugin(): ApolloServerPlugin<IContext> {
               INTERNAL_SERVICE_TOKEN &&
               serviceToken === INTERNAL_SERVICE_TOKEN
             ) {
+              context.isInternalService = true;
               return; // Valid service-to-service call
             }
             // If no service token configured, reject — don't fall through to

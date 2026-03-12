@@ -16,6 +16,10 @@ if Path(".env.dev").exists():
 
 @backoff.on_exception(backoff.expo, aiohttp.ClientError, max_time=60, max_tries=3)
 async def force_deploy():
+    headers = {}
+    service_token = os.getenv("INTERNAL_SERVICE_TOKEN")
+    if service_token:
+        headers["X-Service-Token"] = service_token
     async with aiohttp.ClientSession() as session:
         async with session.post(
             f"{os.getenv("WREN_UI_ENDPOINT", "http://wren-ui:3000")}/api/graphql",
@@ -23,6 +27,7 @@ async def force_deploy():
                 "query": "mutation Deploy($force: Boolean) { deploy(force: $force) }",
                 "variables": {"force": True},
             },
+            headers=headers,
             timeout=aiohttp.ClientTimeout(total=60),  # 60 seconds
         ) as response:
             res = await response.json()

@@ -257,7 +257,9 @@ export class ModelResolver {
     args: { force: boolean },
     ctx: IContext,
   ): Promise<DeployResponse> {
-    await requireProjectWrite(ctx);
+    if (!ctx.isInternalService) {
+      await requireProjectWrite(ctx);
+    }
     const project = await ctx.projectService.getCurrentProject(ctx.projectId);
     if (!project.version && project.type !== DataSourceName.DUCKDB) {
       const version =

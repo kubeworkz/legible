@@ -137,6 +137,7 @@ export const PUBLIC_OPERATIONS = new Set([
  */
 export const INTERNAL_SERVICE_OPERATIONS = new Set([
   'previewSql',
+  'deploy',
 ]);
 
 // ── Section-aware guards ─────────────────────────────────
