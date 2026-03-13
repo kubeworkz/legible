@@ -630,6 +630,7 @@ export class AskingService implements IAskingService {
       histories,
       deployId,
       configurations: { language },
+      projectId,
       rerunFromCancelled,
       previousTaskId,
       threadResponseId,

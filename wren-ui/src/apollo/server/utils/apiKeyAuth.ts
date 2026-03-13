@@ -40,6 +40,12 @@ function extractBearerToken(req: NextApiRequest): string | undefined {
   if (authHeader.startsWith('Bearer ')) {
     return authHeader.slice(7).trim();
   }
+  // Fallback: check query parameter for SSE/EventSource endpoints
+  // (EventSource browser API cannot set custom headers)
+  const queryToken = req.query?.access_token;
+  if (typeof queryToken === 'string' && queryToken) {
+    return queryToken;
+  }
   return undefined;
 }
 

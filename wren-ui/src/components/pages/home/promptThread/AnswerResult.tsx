@@ -162,14 +162,17 @@ const AdjustmentInformation = (props: {
 };
 
 const isNeedGenerateAnswer = (answerDetail: ThreadResponseAnswerDetail) => {
+  // null answerDetail means answer was never generated
+  if (answerDetail === null || answerDetail === undefined) return true;
   const isFinished = getAnswerIsFinished(answerDetail?.status);
   // it means the background task has not started yet, but answer is pending for generating
   const isProcessing = [
     ThreadResponseAnswerStatus.NOT_STARTED,
     ThreadResponseAnswerStatus.PREPROCESSING,
     ThreadResponseAnswerStatus.FETCHING_DATA,
+    ThreadResponseAnswerStatus.STREAMING,
   ].includes(answerDetail?.status);
-  return answerDetail?.queryId === null && !isFinished && !isProcessing;
+  return !answerDetail?.queryId && !isFinished && !isProcessing;
 };
 
 export default function AnswerResult(props: Props) {

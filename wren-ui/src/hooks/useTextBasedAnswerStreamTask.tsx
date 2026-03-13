@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { getAuthToken } from '@/hooks/useAuth';
 
 type TextBasedAnswerStreamTaskReturn = [
   (responseId: number) => void,
@@ -26,8 +27,10 @@ export default function useTextBasedAnswerStreamTask() {
     setLoading(true);
     onReset();
 
+    const token = getAuthToken();
+    const tokenParam = token ? `&access_token=${encodeURIComponent(token)}` : '';
     const eventSource = new EventSource(
-      `/api/ask_task/streaming_answer?responseId=${responseId}`,
+      `/api/ask_task/streaming_answer?responseId=${responseId}${tokenParam}`,
     );
 
     eventSource.onmessage = (event) => {

@@ -253,6 +253,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
         id: input.deployId,
         histories: this.transformHistoryInput(input.histories),
         configurations: input.configurations,
+        project_id: input.projectId?.toString(),
       });
       return { queryId: res.data.query_id };
     } catch (err: any) {

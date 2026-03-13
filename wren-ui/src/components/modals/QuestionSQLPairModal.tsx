@@ -248,7 +248,7 @@ export default function QuestionSQLPairModal(props: Props) {
                 style={{ width: '100%' }}
               >
                 <span>Question</span>
-                <div className="gray-8 text-sm">
+                <div className="gray-8 text-sm" style={{ marginLeft: 8 }}>
                   Let AI create a matching question for this SQL statement.
                   <Button
                     className="ml-2"

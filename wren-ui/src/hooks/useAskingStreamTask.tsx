@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { getAuthToken } from '@/hooks/useAuth';
 
 type useAskingStreamTaskReturn = [
   (queryId: string) => void,
@@ -22,8 +23,10 @@ export default function useAskingStreamTask() {
     setLoading(true);
     reset();
 
+    const token = getAuthToken();
+    const tokenParam = token ? `&access_token=${encodeURIComponent(token)}` : '';
     const eventSource = new EventSource(
-      `/api/ask_task/streaming?queryId=${queryId}`,
+      `/api/ask_task/streaming?queryId=${queryId}${tokenParam}`,
     );
 
     eventSource.onmessage = (event) => {
