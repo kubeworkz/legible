@@ -48,6 +48,11 @@ export interface IConfig {
   stripePortalReturnUrl?: string;
   stripeTrialDays?: number;
 
+  // email (postmark)
+  postmarkServerToken?: string;
+  emailFrom?: string;
+  appBaseUrl?: string;
+
   // generate recommendation questions max categories
   projectRecommendationQuestionMaxCategories?: number;
   projectRecommendationQuestionsMaxQuestions?: number;
@@ -144,6 +149,11 @@ const config = {
   stripeProPriceId: process.env.STRIPE_PRO_PRICE_ID,
   stripePortalReturnUrl: process.env.STRIPE_PORTAL_RETURN_URL,
   stripeTrialDays: parseInt(process.env.STRIPE_TRIAL_DAYS || '0', 10),
+
+  // email (postmark)
+  postmarkServerToken: process.env.POSTMARK_SERVER_TOKEN,
+  emailFrom: process.env.EMAIL_FROM,
+  appBaseUrl: process.env.APP_BASE_URL,
 
   // generate recommendation questions max questions
   projectRecommendationQuestionMaxCategories: process.env

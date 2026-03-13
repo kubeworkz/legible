@@ -72,6 +72,7 @@ import {
 import { QueryUsageRepository } from './apollo/server/repositories/queryUsageRepository';
 import { QueryMeteringService } from './apollo/server/services/queryMeteringService';
 import { StripeService } from './apollo/server/services/stripeService';
+import { EmailService } from './apollo/server/services/emailService';
 import { SubscriptionRepository } from './apollo/server/repositories/subscriptionRepository';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
@@ -288,6 +289,12 @@ export const initComponents = () => {
   // Wire stripeService into metering (created earlier, avoids circular init)
   queryMeteringService.setStripeService(stripeService);
 
+  const emailService = new EmailService({
+    postmarkServerToken: serverConfig.postmarkServerToken,
+    emailFrom: serverConfig.emailFrom,
+    appBaseUrl: serverConfig.appBaseUrl,
+  });
+
   // background trackers
   const projectRecommendQuestionBackgroundTracker =
     new ProjectRecommendQuestionBackgroundTracker({
@@ -382,6 +389,7 @@ export const initComponents = () => {
     auditLogService,
     queryMeteringService,
     stripeService,
+    emailService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

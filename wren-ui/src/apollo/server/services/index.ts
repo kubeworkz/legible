@@ -18,3 +18,4 @@ export * from './spreadsheetService';
 export * from './projectMemberService';
 export * from './auditLogService';
 export * from './queryMeteringService';
+export * from './emailService';

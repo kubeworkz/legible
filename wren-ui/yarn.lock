@@ -15808,6 +15808,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postmark@npm:^4.0.5":
+  version: 4.0.7
+  resolution: "postmark@npm:4.0.7"
+  dependencies:
+    axios: "npm:^1.13.5"
+  checksum: 10c0/c846d5dd24ba8c6fb33c42b137e1c09d07d1a90816cf0c29504ce94e24ae8f1405debe802ef14ddd9698014d6c00cb303b5a56e21292886ba15ccdfd4fedddff
+  languageName: node
+  linkType: hard
+
 "preact@npm:^10.19.3":
   version: 10.20.2
   resolution: "preact@npm:10.20.2"
@@ -20264,6 +20273,7 @@ __metadata:
     pg-cursor: "npm:^2.7.4"
     posthog-js: "npm:^1.205.0"
     posthog-node: "npm:^4.3.2"
+    postmark: "npm:^4.0.5"
     prettier: "npm:^3.2.5"
     react: "npm:18.2.0"
     react-ace: "npm:^10.1.0"

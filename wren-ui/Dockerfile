@@ -21,7 +21,7 @@ FROM base AS deps
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-RUN yarn install --immutable
+RUN yarn install
 RUN yarn add sharp
 
 # Rebuild the source code only when needed
