@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button, Form, Input, Typography, message } from 'antd';
+import { Button, Form, Input, Typography, message, Divider } from 'antd';
+import { useMutation } from '@apollo/client';
 import styled from 'styled-components';
 import useAuth from '@/hooks/useAuth';
+import { REQUEST_MAGIC_LINK } from '@/apollo/client/graphql/auth';
 
 const { Title, Text } = Typography;
 
@@ -53,13 +55,20 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [form] = Form.useForm();
+  const [magicForm] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+  const [magicLinkMode, setMagicLinkMode] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [magicLinkEmail, setMagicLinkEmail] = useState('');
+
+  const [requestMagicLink] = useMutation(REQUEST_MAGIC_LINK);
 
   const onFinish = async (values: { email: string; password: string }) => {
     setSubmitting(true);
     try {
       await login(values.email, values.password);
-      router.push('/');
+      const redirect = router.query.redirect as string;
+      router.push(redirect || '/');
     } catch (err: any) {
       const msg =
         err?.graphQLErrors?.[0]?.message ||
@@ -70,6 +79,114 @@ export default function LoginPage() {
       setSubmitting(false);
     }
   };
+
+  const onMagicLinkSubmit = async (values: { email: string }) => {
+    setSubmitting(true);
+    try {
+      await requestMagicLink({ variables: { email: values.email } });
+      setMagicLinkSent(true);
+      setMagicLinkEmail(values.email);
+    } catch (err: any) {
+      const msg =
+        err?.graphQLErrors?.[0]?.message ||
+        err?.message ||
+        'Failed to send magic link';
+      message.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Magic link sent confirmation
+  if (magicLinkSent) {
+    return (
+      <Container>
+        <Card>
+          <LogoWrapper>
+            <Image
+              src="/images/logo.svg"
+              alt="Wren AI"
+              width={48}
+              height={48}
+            />
+          </LogoWrapper>
+          <StyledTitle level={3}>Check your email</StyledTitle>
+          <Subtitle>
+            We sent a sign-in link to <strong>{magicLinkEmail}</strong>.
+            Click the link in the email to sign in.
+          </Subtitle>
+          <Button
+            block
+            size="large"
+            onClick={() => {
+              setMagicLinkSent(false);
+              setMagicLinkMode(false);
+            }}
+          >
+            Back to login
+          </Button>
+        </Card>
+      </Container>
+    );
+  }
+
+  // Magic link form
+  if (magicLinkMode) {
+    return (
+      <Container>
+        <Card>
+          <LogoWrapper>
+            <Image
+              src="/images/logo.svg"
+              alt="Wren AI"
+              width={48}
+              height={48}
+            />
+          </LogoWrapper>
+          <StyledTitle level={3}>Sign in with email</StyledTitle>
+          <Subtitle>
+            We&apos;ll send a magic link to your email — no password needed.
+          </Subtitle>
+
+          <Form
+            form={magicForm}
+            layout="vertical"
+            onFinish={onMagicLinkSubmit}
+            requiredMark={false}
+            size="large"
+          >
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[
+                { required: true, message: 'Please enter your email' },
+                { type: 'email', message: 'Please enter a valid email' },
+              ]}
+            >
+              <Input placeholder="you@example.com" autoComplete="email" />
+            </Form.Item>
+
+            <Form.Item style={{ marginBottom: 12 }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={submitting}
+              >
+                Send magic link
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <Footer>
+            <Button type="link" onClick={() => setMagicLinkMode(false)}>
+              Sign in with password instead
+            </Button>
+          </Footer>
+        </Card>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -127,6 +244,16 @@ export default function LoginPage() {
             </Button>
           </Form.Item>
         </Form>
+
+        <Divider plain>or</Divider>
+
+        <Button
+          block
+          size="large"
+          onClick={() => setMagicLinkMode(true)}
+        >
+          Sign in with magic link
+        </Button>
 
         <Footer>
           <Text type="secondary">

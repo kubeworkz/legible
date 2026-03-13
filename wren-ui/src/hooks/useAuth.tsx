@@ -35,6 +35,7 @@ export interface AuthUser {
   displayName?: string;
   avatarUrl?: string;
   isActive: boolean;
+  emailVerified: boolean;
   lastLoginAt?: string;
   createdAt: string;
 }
@@ -57,7 +58,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 // Public auth pages that don't require authentication
-const PUBLIC_PATHS = ['/login', '/signup'];
+const PUBLIC_PATHS = ['/login', '/signup', '/accept-invite', '/verify-email', '/magic-link'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -156,10 +157,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.replace('/login');
     }
 
-    if (isAuthenticated && isPublicPath) {
+    // Redirect authenticated but unverified users to verify-email
+    // (except when they're already on verify-email or accepting an invite)
+    if (
+      isAuthenticated &&
+      user &&
+      !user.emailVerified &&
+      !router.pathname.startsWith('/verify-email') &&
+      !router.pathname.startsWith('/accept-invite')
+    ) {
+      router.replace('/verify-email');
+    }
+
+    if (
+      isAuthenticated &&
+      isPublicPath &&
+      !router.pathname.startsWith('/accept-invite') &&
+      !router.pathname.startsWith('/verify-email')
+    ) {
       router.replace('/');
     }
-  }, [loading, isAuthenticated, router.pathname]);
+  }, [loading, isAuthenticated, router.pathname, user?.emailVerified]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

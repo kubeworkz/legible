@@ -58,6 +58,7 @@ import { IRateLimitService } from '../services/rateLimitService';
 import { IBillingService } from '../services/billingService';
 import { IQueryMeteringService } from '../services/queryMeteringService';
 import { IStripeService } from '../services/stripeService';
+import { IEmailService } from '../services/emailService';
 import { ISubscriptionRepository } from '../repositories/subscriptionRepository';
 import { IFolderService } from '../services/folderService';
 import { IProjectMemberService } from '../services/projectMemberService';
@@ -118,6 +119,7 @@ export interface IContext {
   auditLogService: IAuditLogService;
   queryMeteringService: IQueryMeteringService;
   stripeService: IStripeService;
+  emailService: IEmailService;
 
   // repository
   projectRepository: IProjectRepository;

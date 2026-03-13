@@ -36,6 +36,7 @@ import {
   ProjectMemberRepository,
   ProjectPermissionOverrideRepository,
   AuditLogRepository,
+  MagicLinkRepository,
 } from '@server/repositories';
 import { FolderService } from '@server/services/folderService';
 import { SpreadsheetService } from '@server/services/spreadsheetService';
@@ -136,6 +137,7 @@ export const initComponents = () => {
   const monthlyUsageCacheRepository = new MonthlyUsageCacheRepository(knex);
   const queryUsageRepository = new QueryUsageRepository(knex);
   const subscriptionRepository = new SubscriptionRepository(knex);
+  const magicLinkRepository = new MagicLinkRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -218,12 +220,19 @@ export const initComponents = () => {
     instructionRepository,
     wrenAIAdaptor,
   });
+  const emailService = new EmailService({
+    postmarkServerToken: serverConfig.postmarkServerToken,
+    emailFrom: serverConfig.emailFrom,
+    appBaseUrl: serverConfig.appBaseUrl,
+  });
   const authService = new AuthService({
     userRepository,
     sessionRepository,
     organizationRepository,
     memberRepository,
     projectRepository,
+    magicLinkRepository,
+    emailService,
   });
   const organizationService = new OrganizationService({
     organizationRepository,
@@ -236,6 +245,7 @@ export const initComponents = () => {
     invitationRepository,
     userRepository,
     organizationRepository,
+    emailService,
   });
   const orgApiKeyService = new OrgApiKeyService({
     orgApiKeyRepository,
@@ -288,12 +298,6 @@ export const initComponents = () => {
 
   // Wire stripeService into metering (created earlier, avoids circular init)
   queryMeteringService.setStripeService(stripeService);
-
-  const emailService = new EmailService({
-    postmarkServerToken: serverConfig.postmarkServerToken,
-    emailFrom: serverConfig.emailFrom,
-    appBaseUrl: serverConfig.appBaseUrl,
-  });
 
   // background trackers
   const projectRecommendQuestionBackgroundTracker =

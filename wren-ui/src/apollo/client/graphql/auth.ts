@@ -8,6 +8,7 @@ export const ME = gql`
       displayName
       avatarUrl
       isActive
+      emailVerified
       lastLoginAt
       createdAt
     }
@@ -24,6 +25,7 @@ export const SIGNUP = gql`
         displayName
         avatarUrl
         isActive
+        emailVerified
         createdAt
       }
     }
@@ -40,6 +42,7 @@ export const LOGIN = gql`
         displayName
         avatarUrl
         isActive
+        emailVerified
         createdAt
       }
     }
@@ -49,6 +52,41 @@ export const LOGIN = gql`
 export const LOGOUT = gql`
   mutation Logout {
     logout
+  }
+`;
+
+export const VERIFY_EMAIL = gql`
+  mutation VerifyEmail($token: String!) {
+    verifyEmail(token: $token)
+  }
+`;
+
+export const RESEND_VERIFICATION_EMAIL = gql`
+  mutation ResendVerificationEmail {
+    resendVerificationEmail
+  }
+`;
+
+export const REQUEST_MAGIC_LINK = gql`
+  mutation RequestMagicLink($email: String!) {
+    requestMagicLink(email: $email)
+  }
+`;
+
+export const LOGIN_WITH_MAGIC_LINK = gql`
+  mutation LoginWithMagicLink($token: String!) {
+    loginWithMagicLink(token: $token) {
+      token
+      user {
+        id
+        email
+        displayName
+        avatarUrl
+        isActive
+        emailVerified
+        createdAt
+      }
+    }
   }
 `;
 

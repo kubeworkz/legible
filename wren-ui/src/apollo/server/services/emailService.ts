@@ -26,6 +26,20 @@ export interface IEmailService {
     organizationName: string;
     token: string;
   }): Promise<void>;
+
+  /** Send an email verification link */
+  sendVerificationEmail(params: {
+    to: string;
+    displayName: string;
+    token: string;
+  }): Promise<void>;
+
+  /** Send a magic-link login email */
+  sendMagicLinkEmail(params: {
+    to: string;
+    displayName: string;
+    token: string;
+  }): Promise<void>;
 }
 
 export class EmailService implements IEmailService {
@@ -125,6 +139,101 @@ export class EmailService implements IEmailService {
       htmlBody,
       textBody,
       tag: 'invitation',
+    });
+  }
+
+  public async sendVerificationEmail(params: {
+    to: string;
+    displayName: string;
+    token: string;
+  }): Promise<void> {
+    const verifyUrl = `${this.appBaseUrl}/verify-email?token=${encodeURIComponent(params.token)}`;
+
+    const subject = 'Verify your email address';
+    const htmlBody = `
+      <div style=\"font-family: sans-serif; max-width: 560px; margin: 0 auto;\">
+        <h2>Welcome to Legible!</h2>
+        <p>
+          Hi <strong>${this.escapeHtml(params.displayName)}</strong>, please verify your
+          email address to get started.
+        </p>
+        <p>
+          <a href=\"${this.escapeHtml(verifyUrl)}\"
+             style=\"display:inline-block;padding:12px 24px;background:#1890ff;color:#fff;
+                    border-radius:6px;text-decoration:none;font-weight:600;\">
+            Verify Email
+          </a>
+        </p>
+        <p style=\"color:#888;font-size:13px;\">
+          This link expires in 24 hours. If you didn't create an account, you can ignore this email.
+        </p>
+      </div>
+    `.trim();
+
+    const textBody = [
+      `Hi ${params.displayName},`,
+      '',
+      'Please verify your email address to get started with Legible.',
+      '',
+      `Verify your email: ${verifyUrl}`,
+      '',
+      'This link expires in 24 hours.',
+    ].join('\n');
+
+    await this.sendEmail({
+      to: params.to,
+      subject,
+      htmlBody,
+      textBody,
+      tag: 'email-verification',
+    });
+  }
+
+  public async sendMagicLinkEmail(params: {
+    to: string;
+    displayName: string;
+    token: string;
+  }): Promise<void> {
+    const loginUrl = `${this.appBaseUrl}/magic-link?token=${encodeURIComponent(params.token)}`;
+
+    const subject = 'Your sign-in link for Legible';
+    const htmlBody = `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
+        <h2>Sign in to Legible</h2>
+        <p>
+          Hi <strong>${this.escapeHtml(params.displayName)}</strong>, click the button
+          below to sign in. No password needed.
+        </p>
+        <p>
+          <a href="${this.escapeHtml(loginUrl)}"
+             style="display:inline-block;padding:12px 24px;background:#1890ff;color:#fff;
+                    border-radius:6px;text-decoration:none;font-weight:600;">
+            Sign In
+          </a>
+        </p>
+        <p style="color:#888;font-size:13px;">
+          This link expires in 15 minutes and can only be used once.
+          If you didn't request this, you can safely ignore this email.
+        </p>
+      </div>
+    `.trim();
+
+    const textBody = [
+      `Hi ${params.displayName},`,
+      '',
+      'Click this link to sign in to Legible (no password needed):',
+      '',
+      loginUrl,
+      '',
+      'This link expires in 15 minutes and can only be used once.',
+    ].join('\n');
+
+    await this.sendEmail({
+      to: params.to,
+      subject,
+      htmlBody,
+      textBody,
+      tag: 'magic-link',
     });
   }
 

@@ -63,7 +63,8 @@ export default function SignupPage() {
     setSubmitting(true);
     try {
       await signup(values.email, values.password, values.displayName);
-      router.push('/');
+      const redirect = router.query.redirect as string;
+      router.push(redirect || '/');
     } catch (err: any) {
       const msg =
         err?.graphQLErrors?.[0]?.message ||

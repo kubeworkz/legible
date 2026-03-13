@@ -37,3 +37,4 @@ export * from './projectMemberRepository';
 export * from './projectPermissionOverrideRepository';
 export * from './auditLogRepository';
 export * from './queryUsageRepository';
+export * from './magicLinkRepository';

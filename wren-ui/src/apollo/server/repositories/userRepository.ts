@@ -8,6 +8,9 @@ export interface User {
   displayName: string | null;
   avatarUrl: string | null;
   isActive: boolean;
+  emailVerified: boolean;
+  emailVerificationToken: string | null;
+  emailVerificationExpiresAt: string | null;
   lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string;

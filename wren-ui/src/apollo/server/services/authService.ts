@@ -18,10 +18,18 @@ import {
 import {
   IProjectRepository,
 } from '@server/repositories/projectRepository';
+import {
+  IMagicLinkRepository,
+} from '@server/repositories/magicLinkRepository';
+import { IEmailService } from './emailService';
 
 const SALT_ROUNDS = 12;
 const SESSION_TOKEN_BYTES = 48;
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const VERIFICATION_TOKEN_BYTES = 32;
+const VERIFICATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+const MAGIC_LINK_TOKEN_BYTES = 32;
+const MAGIC_LINK_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
 /**
  * Validates password meets minimum security requirements.
@@ -74,6 +82,10 @@ export interface IAuthService {
     newPassword: string,
   ): Promise<boolean>;
   deleteAccount(userId: number, token: string): Promise<boolean>;
+  verifyEmail(token: string): Promise<boolean>;
+  resendVerificationEmail(userId: number): Promise<boolean>;
+  requestMagicLink(email: string): Promise<boolean>;
+  loginWithMagicLink(token: string): Promise<AuthPayload>;
 }
 
 export class AuthService implements IAuthService {
@@ -82,6 +94,8 @@ export class AuthService implements IAuthService {
   private readonly organizationRepository: IOrganizationRepository;
   private readonly memberRepository: IMemberRepository;
   private readonly projectRepository: IProjectRepository;
+  private readonly magicLinkRepository: IMagicLinkRepository;
+  private readonly emailService: IEmailService;
 
   constructor({
     userRepository,
@@ -89,18 +103,24 @@ export class AuthService implements IAuthService {
     organizationRepository,
     memberRepository,
     projectRepository,
+    magicLinkRepository,
+    emailService,
   }: {
     userRepository: IUserRepository;
     sessionRepository: ISessionRepository;
     organizationRepository: IOrganizationRepository;
     memberRepository: IMemberRepository;
     projectRepository: IProjectRepository;
+    magicLinkRepository: IMagicLinkRepository;
+    emailService: IEmailService;
   }) {
     this.userRepository = userRepository;
     this.sessionRepository = sessionRepository;
     this.organizationRepository = organizationRepository;
     this.memberRepository = memberRepository;
     this.projectRepository = projectRepository;
+    this.magicLinkRepository = magicLinkRepository;
+    this.emailService = emailService;
   }
 
   public async signup(input: SignupInput): Promise<AuthPayload> {
@@ -150,6 +170,30 @@ export class AuthService implements IAuthService {
 
     // Create a session
     const session = await this.createSession(user.id);
+
+    // Generate email verification token and send verification email (best-effort)
+    try {
+      const verificationToken = crypto
+        .randomBytes(VERIFICATION_TOKEN_BYTES)
+        .toString('hex');
+      const verificationExpiresAt = new Date(
+        Date.now() + VERIFICATION_DURATION_MS,
+      ).toISOString();
+
+      await this.userRepository.updateOne(user.id, {
+        emailVerificationToken: verificationToken,
+        emailVerificationExpiresAt: verificationExpiresAt,
+      });
+
+      await this.emailService.sendVerificationEmail({
+        to: email,
+        displayName: user.displayName || email.split('@')[0],
+        token: verificationToken,
+      });
+    } catch (err) {
+      // Don't block signup if email sending fails
+      console.error('Failed to send verification email:', err);
+    }
 
     return { token: session.token, user };
   }
@@ -266,6 +310,152 @@ export class AuthService implements IAuthService {
     // Deactivate the user account
     await this.userRepository.updateOne(userId, { isActive: false });
     return true;
+  }
+
+  public async verifyEmail(token: string): Promise<boolean> {
+    if (!token) throw new Error('Verification token is required');
+
+    // Find user by verification token
+    const user = await this.userRepository.findOneBy({
+      emailVerificationToken: token,
+    } as Partial<User>);
+    if (!user) throw new Error('Invalid verification token');
+
+    if (user.emailVerified) return true; // Already verified
+
+    // Check expiration
+    if (
+      user.emailVerificationExpiresAt &&
+      new Date(user.emailVerificationExpiresAt) < new Date()
+    ) {
+      throw new Error(
+        'Verification token has expired. Please request a new one.',
+      );
+    }
+
+    // Mark email as verified and clear the token
+    await this.userRepository.updateOne(user.id, {
+      emailVerified: true,
+      emailVerificationToken: null,
+      emailVerificationExpiresAt: null,
+    });
+
+    return true;
+  }
+
+  public async resendVerificationEmail(userId: number): Promise<boolean> {
+    const user = await this.userRepository.findOneBy({
+      id: userId,
+    } as Partial<User>);
+    if (!user) throw new Error('User not found');
+    if (user.emailVerified) throw new Error('Email is already verified');
+
+    // Generate a new token
+    const verificationToken = crypto
+      .randomBytes(VERIFICATION_TOKEN_BYTES)
+      .toString('hex');
+    const verificationExpiresAt = new Date(
+      Date.now() + VERIFICATION_DURATION_MS,
+    ).toISOString();
+
+    await this.userRepository.updateOne(user.id, {
+      emailVerificationToken: verificationToken,
+      emailVerificationExpiresAt: verificationExpiresAt,
+    });
+
+    await this.emailService.sendVerificationEmail({
+      to: user.email,
+      displayName: user.displayName || user.email.split('@')[0],
+      token: verificationToken,
+    });
+
+    return true;
+  }
+
+  public async requestMagicLink(email: string): Promise<boolean> {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      // Don't reveal whether the email exists — return true silently
+      return true;
+    }
+    if (!user.isActive) return true;
+
+    // Clean up old/used tokens for this user
+    await this.magicLinkRepository.deleteExpiredByUserId(user.id);
+
+    // Generate magic link token
+    const token = crypto
+      .randomBytes(MAGIC_LINK_TOKEN_BYTES)
+      .toString('hex');
+    const expiresAt = new Date(
+      Date.now() + MAGIC_LINK_DURATION_MS,
+    ).toISOString();
+
+    await this.magicLinkRepository.createOne({
+      userId: user.id,
+      token,
+      expiresAt,
+    });
+
+    await this.emailService.sendMagicLinkEmail({
+      to: user.email,
+      displayName: user.displayName || user.email.split('@')[0],
+      token,
+    });
+
+    return true;
+  }
+
+  public async loginWithMagicLink(token: string): Promise<AuthPayload> {
+    if (!token) throw new Error('Magic link token is required');
+
+    const magicLink = await this.magicLinkRepository.findByToken(token);
+    if (!magicLink) throw new Error('Invalid or expired magic link');
+
+    // Check if already used
+    if (magicLink.usedAt) {
+      throw new Error('This magic link has already been used');
+    }
+
+    // Check expiration
+    if (new Date(magicLink.expiresAt) < new Date()) {
+      throw new Error('This magic link has expired');
+    }
+
+    // Mark as used
+    await this.magicLinkRepository.updateOne(magicLink.id, {
+      usedAt: new Date().toISOString(),
+    });
+
+    const user = await this.userRepository.findOneBy({
+      id: magicLink.userId,
+    } as Partial<User>);
+    if (!user || !user.isActive) {
+      throw new Error('Account not found or deactivated');
+    }
+
+    // Magic link login proves email ownership — auto-verify if needed
+    if (!user.emailVerified) {
+      await this.userRepository.updateOne(user.id, {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
+      });
+      user.emailVerified = true;
+    }
+
+    // Update last login
+    await this.userRepository.updateOne(user.id, {
+      lastLoginAt: new Date().toISOString(),
+    });
+
+    // Invalidate previous sessions
+    await this.sessionRepository.deleteAllByUserId(user.id);
+
+    // Create a new session
+    const session = await this.createSession(user.id);
+
+    return { token: session.token, user };
   }
 
   private async createSession(userId: number): Promise<Session> {

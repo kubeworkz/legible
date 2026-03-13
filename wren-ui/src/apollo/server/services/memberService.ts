@@ -13,6 +13,7 @@ import {
   IOrganizationRepository,
   Organization,
 } from '@server/repositories/organizationRepository';
+import { IEmailService } from './emailService';
 
 const INVITATION_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -49,22 +50,26 @@ export class MemberService implements IMemberService {
   private readonly invitationRepository: IInvitationRepository;
   private readonly userRepository: IUserRepository;
   private readonly organizationRepository: IOrganizationRepository;
+  private readonly emailService: IEmailService;
 
   constructor({
     memberRepository,
     invitationRepository,
     userRepository,
     organizationRepository,
+    emailService,
   }: {
     memberRepository: IMemberRepository;
     invitationRepository: IInvitationRepository;
     userRepository: IUserRepository;
     organizationRepository: IOrganizationRepository;
+    emailService: IEmailService;
   }) {
     this.memberRepository = memberRepository;
     this.invitationRepository = invitationRepository;
     this.userRepository = userRepository;
     this.organizationRepository = organizationRepository;
+    this.emailService = emailService;
   }
 
   public async inviteMember(
@@ -99,7 +104,7 @@ export class MemberService implements IMemberService {
       Date.now() + INVITATION_EXPIRY_MS,
     ).toISOString();
 
-    return this.invitationRepository.createOne({
+    const invitation = await this.invitationRepository.createOne({
       organizationId,
       email,
       role,
@@ -107,6 +112,24 @@ export class MemberService implements IMemberService {
       invitedBy: invitedByUserId,
       expiresAt,
     });
+
+    // Send invitation email (best-effort — don't fail the invite if email fails)
+    try {
+      const inviter = await this.userRepository.findOneBy({
+        id: invitedByUserId,
+      } as Partial<User>);
+      await this.emailService.sendInvitationEmail({
+        to: email,
+        inviterName: inviter?.displayName || inviter?.email || 'A team member',
+        organizationName: org.displayName || 'your organization',
+        token,
+      });
+    } catch (err) {
+      // Log but don't throw — invitation record is already created
+      console.error('Failed to send invitation email:', err);
+    }
+
+    return invitation;
   }
 
   public async acceptInvitation(

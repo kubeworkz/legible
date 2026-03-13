@@ -18,6 +18,7 @@ export const typeDefs = gql`
     displayName: String
     avatarUrl: String
     isActive: Boolean!
+    emailVerified: Boolean!
     lastLoginAt: String
     createdAt: String!
   }
@@ -2184,6 +2185,14 @@ export const typeDefs = gql`
     updateProfile(data: UpdateProfileInput!): AuthUser!
     changePassword(data: ChangePasswordInput!): Boolean!
     deleteAccount: Boolean!
+
+    # Email verification
+    verifyEmail(token: String!): Boolean!
+    resendVerificationEmail: Boolean!
+
+    # Magic link (passwordless login)
+    requestMagicLink(email: String!): Boolean!
+    loginWithMagicLink(token: String!): AuthPayload!
 
     # Organization
     createOrganization(data: CreateOrganizationInput!): OrganizationType!

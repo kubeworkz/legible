@@ -185,6 +185,14 @@ const resolvers = {
     changePassword: authResolver.changePassword,
     deleteAccount: authResolver.deleteAccount,
 
+    // Email verification
+    verifyEmail: authResolver.verifyEmail,
+    resendVerificationEmail: authResolver.resendVerificationEmail,
+
+    // Magic link
+    requestMagicLink: authResolver.requestMagicLink,
+    loginWithMagicLink: authResolver.loginWithMagicLink,
+
     // Organization
     createOrganization: organizationResolver.createOrganization,
     updateOrganization: organizationResolver.updateOrganization,

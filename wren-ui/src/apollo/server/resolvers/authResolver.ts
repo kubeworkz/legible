@@ -20,6 +20,10 @@ export class AuthResolver {
     this.updateProfile = this.updateProfile.bind(this);
     this.changePassword = this.changePassword.bind(this);
     this.deleteAccount = this.deleteAccount.bind(this);
+    this.verifyEmail = this.verifyEmail.bind(this);
+    this.resendVerificationEmail = this.resendVerificationEmail.bind(this);
+    this.requestMagicLink = this.requestMagicLink.bind(this);
+    this.loginWithMagicLink = this.loginWithMagicLink.bind(this);
   }
 
   public async me(
@@ -190,5 +194,69 @@ export class AuthResolver {
     });
 
     return ctx.authService.deleteAccount(user.id, ctx.authToken);
+  }
+
+  public async verifyEmail(
+    _root: any,
+    args: { token: string },
+    ctx: IContext,
+  ): Promise<boolean> {
+    const result = await ctx.authService.verifyEmail(args.token);
+
+    ctx.auditLogService.log({
+      userEmail: ctx.currentUser?.email,
+      clientIp: ctx.clientIp,
+      category: AuditCategory.AUTH,
+      action: AuditAction.PROFILE_UPDATED,
+      detail: { event: 'email_verified' },
+    });
+
+    return result;
+  }
+
+  public async resendVerificationEmail(
+    _root: any,
+    _args: any,
+    ctx: IContext,
+  ): Promise<boolean> {
+    const user = requireAuth(ctx);
+    return ctx.authService.resendVerificationEmail(user.id);
+  }
+
+  public async requestMagicLink(
+    _root: any,
+    args: { email: string },
+    ctx: IContext,
+  ): Promise<boolean> {
+    // Rate limit same as login
+    const ip = ctx.clientIp || 'unknown';
+    const rl = checkLoginRateLimit(ip);
+    if (!rl.allowed) {
+      throw new Error(rl.reason || 'Too many attempts');
+    }
+
+    return ctx.authService.requestMagicLink(args.email);
+  }
+
+  public async loginWithMagicLink(
+    _root: any,
+    args: { token: string },
+    ctx: IContext,
+  ) {
+    const result = await ctx.authService.loginWithMagicLink(args.token);
+    const { passwordHash, ...user } = result.user;
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      category: AuditCategory.AUTH,
+      action: AuditAction.LOGIN,
+      targetType: 'user',
+      targetId: user.id,
+      detail: { method: 'magic_link' },
+    });
+
+    return { token: result.token, user };
   }
 }
