@@ -5,6 +5,7 @@ import { OnboardingStatus } from '@/apollo/client/graphql/__types__';
 import { Path, buildPath } from '@/utils/enum';
 import useProject from '@/hooks/useProject';
 import useOrganization from '@/hooks/useOrganization';
+import useAuth from '@/hooks/useAuth';
 
 const redirectRoute = {
   [OnboardingStatus.DATASOURCE_SAVED]: Path.OnboardingModels,
@@ -15,16 +16,20 @@ const redirectRoute = {
 
 export const useWithOnboarding = () => {
   const router = useRouter();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const { currentProjectId, loading: projectsLoading, projects } = useProject();
   const { organizations, loading: orgsLoading } = useOrganization();
 
   // If the user has no organizations (e.g. after deleting the last one),
   // redirect to login to avoid an infinite loading spinner.
+  // Wait for auth to settle first — when auth is pending the org query is
+  // skipped, so orgsLoading=false and organizations=[] doesn't mean "no orgs".
   useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
     if (!orgsLoading && organizations.length === 0) {
       router.replace('/login');
     }
-  }, [orgsLoading, organizations, router]);
+  }, [authLoading, isAuthenticated, orgsLoading, organizations, router]);
 
   // Wait for projects to load and validate the currentProjectId before
   // querying onboarding status. This prevents stale project IDs (e.g. from

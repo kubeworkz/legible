@@ -65,10 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [initializing, setInitializing] = useState(true);
 
-  const token = getAuthToken();
+  // Use state for token so it doesn't flicker on every render
+  const [token, setToken] = useState<string | null>(() => getAuthToken());
 
   // Fetch current user on mount (if token exists)
-  const { loading: meLoading, refetch: refetchMe } = useQuery(ME, {
+  const { loading: meLoading } = useQuery(ME, {
     skip: !token,
     fetchPolicy: 'network-only',
     onCompleted: (data) => {
@@ -77,12 +78,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         // Token is invalid / expired
         clearAuthToken();
+        setToken(null);
         setUser(null);
       }
       setInitializing(false);
     },
     onError: () => {
       clearAuthToken();
+      setToken(null);
       setUser(null);
       setInitializing(false);
     },
@@ -113,6 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const { token: newToken, user: newUser } = data.login;
       setAuthToken(newToken);
+      setToken(newToken);
       setUser(newUser);
     },
     [loginMutation, clearSessionState],
@@ -126,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const { token: newToken, user: newUser } = data.signup;
       setAuthToken(newToken);
+      setToken(newToken);
       setUser(newUser);
     },
     [signupMutation, clearSessionState],
@@ -138,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore errors on logout
     }
     clearAuthToken();
+    setToken(null);
     clearSessionState();
     setUser(null);
     router.push('/login');
@@ -149,33 +155,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (loading) return;
-    const isPublicPath = PUBLIC_PATHS.some((p) =>
-      router.pathname.startsWith(p),
-    );
+    const path = router.pathname;
+    const isPublicPath = PUBLIC_PATHS.some((p) => path.startsWith(p));
 
+    // 1. Unauthenticated on a protected page → go to login
     if (!isAuthenticated && !isPublicPath) {
       router.replace('/login');
+      return;
     }
 
-    // Redirect authenticated but unverified users to verify-email
-    // (except when they're already on verify-email or accepting an invite)
+    // 2. Authenticated but email not verified → go to verify-email
+    //    (skip if already on verify-email, accept-invite, or magic-link)
     if (
       isAuthenticated &&
       user &&
       !user.emailVerified &&
-      !router.pathname.startsWith('/verify-email') &&
-      !router.pathname.startsWith('/accept-invite')
+      !path.startsWith('/verify-email') &&
+      !path.startsWith('/accept-invite') &&
+      !path.startsWith('/magic-link')
     ) {
       router.replace('/verify-email');
+      return;
     }
 
+    // 3. Authenticated + verified on /login or /signup → go home
+    //    (don't redirect from accept-invite, verify-email, or magic-link
+    //     — those pages handle their own navigation after completing)
     if (
       isAuthenticated &&
-      isPublicPath &&
-      !router.pathname.startsWith('/accept-invite') &&
-      !router.pathname.startsWith('/verify-email')
+      user?.emailVerified &&
+      (path.startsWith('/login') || path.startsWith('/signup'))
     ) {
       router.replace('/');
+      return;
     }
   }, [loading, isAuthenticated, router.pathname, user?.emailVerified]);
 
