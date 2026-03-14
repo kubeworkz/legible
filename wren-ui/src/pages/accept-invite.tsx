@@ -29,12 +29,14 @@ const Card = styled.div`
 export default function AcceptInvitePage() {
   const router = useRouter();
   const { token } = router.query;
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
   const [acceptInvitation] = useMutation(ACCEPT_INVITATION);
   const [status, setStatus] = useState<
-    'loading' | 'needsAuth' | 'accepting' | 'success' | 'error'
+    'loading' | 'needsAuth' | 'accepting' | 'success' | 'wrongAccount' | 'error'
   >('loading');
   const [errorMsg, setErrorMsg] = useState('');
+  // Track if user explicitly signed out so we don't re-trigger accept
+  const [signedOut, setSignedOut] = useState(false);
 
   useEffect(() => {
     if (authLoading || !router.isReady) return;
@@ -50,6 +52,9 @@ export default function AcceptInvitePage() {
       return;
     }
 
+    // Don't re-attempt if user just signed out (will become needsAuth next render)
+    if (signedOut) return;
+
     // Authenticated — accept the invitation
     setStatus('accepting');
     acceptInvitation({ variables: { token } })
@@ -58,14 +63,18 @@ export default function AcceptInvitePage() {
         setTimeout(() => router.push('/'), 2000);
       })
       .catch((err) => {
-        setStatus('error');
         const msg =
           err?.graphQLErrors?.[0]?.message ||
           err?.message ||
           'Failed to accept invitation';
+        if (msg.toLowerCase().includes('different email')) {
+          setStatus('wrongAccount');
+        } else {
+          setStatus('error');
+        }
         setErrorMsg(msg);
       });
-  }, [authLoading, isAuthenticated, token, router.isReady]);
+  }, [authLoading, isAuthenticated, token, router.isReady, signedOut]);
 
   if (status === 'loading' || status === 'accepting') {
     return (
@@ -120,6 +129,38 @@ export default function AcceptInvitePage() {
             status="success"
             title="Invitation accepted!"
             subTitle="Redirecting you to the dashboard..."
+          />
+        </Card>
+      </Container>
+    );
+  }
+
+  if (status === 'wrongAccount') {
+    const handleSignOut = async () => {
+      setSignedOut(true);
+      await logout();
+      // logout() navigates to /login by default — override by staying here
+      // The effect will re-run, see !isAuthenticated, and set status=needsAuth
+    };
+
+    return (
+      <Container>
+        <Card>
+          <Result
+            status="warning"
+            title="Wrong account"
+            subTitle={
+              <>
+                You&apos;re signed in as <strong>{user?.email}</strong>, but
+                this invitation was sent to a different email address. Please
+                sign out and sign in or sign up with the invited email.
+              </>
+            }
+            extra={
+              <Button type="primary" size="large" onClick={handleSignOut}>
+                Sign Out
+              </Button>
+            }
           />
         </Card>
       </Container>

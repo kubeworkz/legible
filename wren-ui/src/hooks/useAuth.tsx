@@ -146,7 +146,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     clearSessionState();
     setUser(null);
-    router.push('/login');
+    // Only redirect to /login from non-public pages.
+    // Public pages (e.g. /accept-invite) manage their own post-logout state.
+    const isPublic = PUBLIC_PATHS.some((p) => router.pathname.startsWith(p));
+    if (!isPublic) {
+      router.push('/login');
+    }
   }, [logoutMutation, router, clearSessionState]);
 
   // Route protection: redirect unauthenticated users to /login
