@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button, Form, Input, Typography, message } from 'antd';
+import { Button, Form, Input, Typography, message, Divider } from 'antd';
 import styled from 'styled-components';
 import useAuth from '@/hooks/useAuth';
+import SsoButtons from '@/components/SsoButtons';
 
 const { Title, Text } = Typography;
 
@@ -167,6 +168,10 @@ export default function SignupPage() {
             </Button>
           </Form.Item>
         </Form>
+
+        <Divider plain>or</Divider>
+
+        <SsoButtons actionText="Sign up" />
 
         <Footer>
           <Text type="secondary">

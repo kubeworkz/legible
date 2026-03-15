@@ -8,16 +8,22 @@ import {
   Modal,
   Divider,
   Card,
+  List,
+  Popconfirm,
+  Tag,
+  Empty,
 } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
 import useAuth from '@/hooks/useAuth';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   UPDATE_PROFILE,
   CHANGE_PASSWORD,
 } from '@/apollo/client/graphql/user';
 import { ME } from '@/apollo/client/graphql/auth';
+import { LINKED_IDENTITIES, UNLINK_IDENTITY } from '@/apollo/client/graphql/oidc';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -42,6 +48,13 @@ export default function SettingsUserProfile() {
     refetchQueries: [{ query: ME }],
   });
   const [changePassword] = useMutation(CHANGE_PASSWORD);
+  const { data: identitiesData, loading: identitiesLoading } = useQuery(
+    LINKED_IDENTITIES,
+    { fetchPolicy: 'cache-and-network' },
+  );
+  const [unlinkIdentity] = useMutation(UNLINK_IDENTITY, {
+    refetchQueries: [{ query: LINKED_IDENTITIES }],
+  });
 
   const handleSaveProfile = useCallback(async () => {
     try {
@@ -222,6 +235,65 @@ export default function SettingsUserProfile() {
             </Form.Item>
           </Form>
         </Modal>
+
+        <StyledCard title="Linked accounts" loading={identitiesLoading}>
+          {identitiesData?.linkedIdentities?.length > 0 ? (
+            <List
+              dataSource={identitiesData.linkedIdentities}
+              renderItem={(item: any) => (
+                <List.Item
+                  actions={[
+                    <Popconfirm
+                      key="unlink"
+                      title="Unlink this account?"
+                      description="You can always re-link it by signing in with this provider again."
+                      onConfirm={async () => {
+                        try {
+                          await unlinkIdentity({
+                            variables: { identityId: item.id },
+                          });
+                          message.success('Account unlinked.');
+                        } catch (err: any) {
+                          message.error(
+                            err?.graphQLErrors?.[0]?.message ||
+                              err?.message ||
+                              'Failed to unlink account.',
+                          );
+                        }
+                      }}
+                      okText="Unlink"
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        icon={<DeleteOutlined />}
+                      >
+                        Unlink
+                      </Button>
+                    </Popconfirm>,
+                  ]}
+                >
+                  <List.Item.Meta
+                    title={
+                      <>
+                        <Tag color="blue">{item.providerSlug}</Tag>
+                        {item.displayName || item.email}
+                      </>
+                    }
+                    description={item.email}
+                  />
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Empty
+              description="No linked SSO accounts"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          )}
+        </StyledCard>
       </PageContainer>
     </SettingsLayout>
   );

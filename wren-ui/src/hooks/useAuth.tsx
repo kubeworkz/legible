@@ -58,7 +58,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 // Public auth pages that don't require authentication
-const PUBLIC_PATHS = ['/login', '/signup', '/accept-invite', '/verify-email', '/magic-link'];
+const PUBLIC_PATHS = ['/login', '/signup', '/accept-invite', '/verify-email', '/magic-link', '/oidc/callback'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();

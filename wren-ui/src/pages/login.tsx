@@ -7,6 +7,7 @@ import { useMutation } from '@apollo/client';
 import styled from 'styled-components';
 import useAuth from '@/hooks/useAuth';
 import { REQUEST_MAGIC_LINK } from '@/apollo/client/graphql/auth';
+import SsoButtons from '@/components/SsoButtons';
 
 const { Title, Text } = Typography;
 
@@ -247,10 +248,13 @@ export default function LoginPage() {
 
         <Divider plain>or</Divider>
 
+        <SsoButtons actionText="Sign in" />
+
         <Button
           block
           size="large"
           onClick={() => setMagicLinkMode(true)}
+          style={{ marginTop: 8 }}
         >
           Sign in with magic link
         </Button>
