@@ -38,3 +38,5 @@ export * from './projectPermissionOverrideRepository';
 export * from './auditLogRepository';
 export * from './queryUsageRepository';
 export * from './magicLinkRepository';
+export * from './oidcProviderRepository';
+export * from './userIdentityRepository';

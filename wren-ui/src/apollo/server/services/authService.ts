@@ -210,6 +210,11 @@ export class AuthService implements IAuthService {
       throw new Error('Account is deactivated');
     }
 
+    // OIDC-only users have no password
+    if (!user.passwordHash) {
+      throw new Error('This account uses external sign-in. Please use your identity provider.');
+    }
+
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       throw new Error('Invalid email or password');
@@ -287,6 +292,11 @@ export class AuthService implements IAuthService {
   ): Promise<boolean> {
     const user = await this.userRepository.findOneBy({ id: userId } as Partial<User>);
     if (!user) throw new Error('User not found');
+
+    // OIDC-only users have no password to verify against
+    if (!user.passwordHash) {
+      throw new Error('This account uses external sign-in and has no password. Set a password first.');
+    }
 
     const valid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!valid) throw new Error('Current password is incorrect');

@@ -37,6 +37,8 @@ import {
   ProjectPermissionOverrideRepository,
   AuditLogRepository,
   MagicLinkRepository,
+  OidcProviderRepository,
+  UserIdentityRepository,
 } from '@server/repositories';
 import { FolderService } from '@server/services/folderService';
 import { SpreadsheetService } from '@server/services/spreadsheetService';
@@ -138,6 +140,8 @@ export const initComponents = () => {
   const queryUsageRepository = new QueryUsageRepository(knex);
   const subscriptionRepository = new SubscriptionRepository(knex);
   const magicLinkRepository = new MagicLinkRepository(knex);
+  const oidcProviderRepository = new OidcProviderRepository(knex);
+  const userIdentityRepository = new UserIdentityRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -362,6 +366,8 @@ export const initComponents = () => {
     auditLogRepository,
     queryUsageRepository,
     subscriptionRepository,
+    oidcProviderRepository,
+    userIdentityRepository,
 
     // adaptors
     wrenEngineAdaptor,

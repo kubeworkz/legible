@@ -4,7 +4,7 @@ import { BaseRepository, IBasicRepository } from './baseRepository';
 export interface User {
   id: number;
   email: string;
-  passwordHash: string;
+  passwordHash: string | null;
   displayName: string | null;
   avatarUrl: string | null;
   isActive: boolean;

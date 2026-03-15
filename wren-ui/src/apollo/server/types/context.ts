@@ -60,6 +60,8 @@ import { IQueryMeteringService } from '../services/queryMeteringService';
 import { IStripeService } from '../services/stripeService';
 import { IEmailService } from '../services/emailService';
 import { ISubscriptionRepository } from '../repositories/subscriptionRepository';
+import { IOidcProviderRepository } from '../repositories/oidcProviderRepository';
+import { IUserIdentityRepository } from '../repositories/userIdentityRepository';
 import { IFolderService } from '../services/folderService';
 import { IProjectMemberService } from '../services/projectMemberService';
 import { IAuditLogService } from '../services/auditLogService';
@@ -155,6 +157,8 @@ export interface IContext {
   auditLogRepository: IAuditLogRepository;
   queryUsageRepository: IQueryUsageRepository;
   subscriptionRepository: ISubscriptionRepository;
+  oidcProviderRepository: IOidcProviderRepository;
+  userIdentityRepository: IUserIdentityRepository;
 
   // background trackers
   projectRecommendQuestionBackgroundTracker: ProjectRecommendQuestionBackgroundTracker;
