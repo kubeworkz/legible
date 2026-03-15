@@ -462,6 +462,31 @@ export const typeDefs = gql`
     newPassword: String!
   }
 
+  # ─── OIDC Types ──────────────────────────────────────────────
+
+  type OidcProviderInfo {
+    slug: String!
+    displayName: String!
+    issuerUrl: String!
+    emailDomainFilter: String
+    enabled: Boolean!
+  }
+
+  type OidcAuthUrlPayload {
+    url: String!
+    state: String!
+    nonce: String!
+  }
+
+  type LinkedIdentity {
+    id: Int!
+    providerSlug: String!
+    email: String
+    displayName: String
+    avatarUrl: String
+    createdAt: String!
+  }
+
   # ─── End Auth & Organization Types ──────────────────────────
 
   enum ApiType {
@@ -2048,6 +2073,10 @@ export const typeDefs = gql`
   type Query {
     # Auth
     me: AuthUser
+
+    # OIDC
+    oidcProviders: [OidcProviderInfo!]!
+    linkedIdentities: [LinkedIdentity!]!
     listOrganizations: [OrganizationType!]!
     organization(organizationId: Int!): OrganizationType
     organizationMembers(organizationId: Int!): [MemberType!]!
@@ -2193,6 +2222,17 @@ export const typeDefs = gql`
     # Magic link (passwordless login)
     requestMagicLink(email: String!): Boolean!
     loginWithMagicLink(token: String!): AuthPayload!
+
+    # OIDC
+    oidcAuthUrl(providerSlug: String!, callbackUrl: String!): OidcAuthUrlPayload!
+    oidcCallback(
+      providerSlug: String!
+      code: String!
+      state: String!
+      nonce: String!
+      callbackUrl: String!
+    ): AuthPayload!
+    unlinkIdentity(identityId: Int!): Boolean!
 
     # Organization
     createOrganization(data: CreateOrganizationInput!): OrganizationType!

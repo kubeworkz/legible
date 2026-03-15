@@ -133,6 +133,7 @@ const bootstrapServer = async () => {
     billingService,
     stripeService,
     emailService,
+    oidcService,
     subscriptionRepository,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
@@ -340,6 +341,7 @@ const bootstrapServer = async () => {
         billingService,
         stripeService,
         emailService,
+        oidcService,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

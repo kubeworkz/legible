@@ -129,6 +129,9 @@ export const PUBLIC_OPERATIONS = new Set([
   'me',
   'acceptInvitation',
   'IntrospectionQuery',
+  'oidcProviders',
+  'oidcAuthUrl',
+  'oidcCallback',
 ]);
 
 /**

@@ -24,6 +24,9 @@ export enum AuditAction {
   LOGOUT = 'logout',
   PASSWORD_CHANGED = 'password_changed',
   ACCOUNT_DELETED = 'account_deleted',
+  OIDC_LOGIN = 'oidc_login',
+  OIDC_LOGIN_FAILED = 'oidc_login_failed',
+  OIDC_IDENTITY_UNLINKED = 'oidc_identity_unlinked',
   // profile
   PROFILE_UPDATED = 'profile_updated',
   // org

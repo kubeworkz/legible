@@ -22,6 +22,7 @@ import { ProjectMemberResolver } from './resolvers/projectMemberResolver';
 import { AuditLogResolver } from './resolvers/auditLogResolver';
 import { ByokResolver } from './resolvers/byokResolver';
 import { StripeResolver } from './resolvers/stripeResolver';
+import { OidcResolver } from './resolvers/oidcResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -48,6 +49,7 @@ const projectMemberResolver = new ProjectMemberResolver();
 const auditLogResolver = new AuditLogResolver();
 const byokResolver = new ByokResolver();
 const stripeResolver = new StripeResolver();
+const oidcResolver = new OidcResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -57,6 +59,10 @@ const resolvers = {
     listOrganizations: organizationResolver.listOrganizations,
     organization: organizationResolver.getOrganization,
     organizationMembers: organizationResolver.getOrganizationMembers,
+
+    // OIDC
+    oidcProviders: oidcResolver.oidcProviders,
+    linkedIdentities: oidcResolver.linkedIdentities,
 
     // API Keys
     listApiKeys: orgApiKeyResolver.listApiKeys,
@@ -192,6 +198,11 @@ const resolvers = {
     // Magic link
     requestMagicLink: authResolver.requestMagicLink,
     loginWithMagicLink: authResolver.loginWithMagicLink,
+
+    // OIDC
+    oidcAuthUrl: oidcResolver.oidcAuthUrl,
+    oidcCallback: oidcResolver.oidcCallback,
+    unlinkIdentity: oidcResolver.unlinkIdentity,
 
     // Organization
     createOrganization: organizationResolver.createOrganization,

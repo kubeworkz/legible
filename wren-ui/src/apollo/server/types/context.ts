@@ -59,6 +59,7 @@ import { IBillingService } from '../services/billingService';
 import { IQueryMeteringService } from '../services/queryMeteringService';
 import { IStripeService } from '../services/stripeService';
 import { IEmailService } from '../services/emailService';
+import { IOidcService } from '../services/oidcService';
 import { ISubscriptionRepository } from '../repositories/subscriptionRepository';
 import { IOidcProviderRepository } from '../repositories/oidcProviderRepository';
 import { IUserIdentityRepository } from '../repositories/userIdentityRepository';
@@ -122,6 +123,7 @@ export interface IContext {
   queryMeteringService: IQueryMeteringService;
   stripeService: IStripeService;
   emailService: IEmailService;
+  oidcService: IOidcService;
 
   // repository
   projectRepository: IProjectRepository;

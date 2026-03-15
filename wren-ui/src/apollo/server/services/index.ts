@@ -19,3 +19,4 @@ export * from './projectMemberService';
 export * from './auditLogService';
 export * from './queryMeteringService';
 export * from './emailService';
+export * from './oidcService';

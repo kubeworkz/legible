@@ -76,6 +76,7 @@ import { QueryUsageRepository } from './apollo/server/repositories/queryUsageRep
 import { QueryMeteringService } from './apollo/server/services/queryMeteringService';
 import { StripeService } from './apollo/server/services/stripeService';
 import { EmailService } from './apollo/server/services/emailService';
+import { OidcService } from './apollo/server/services/oidcService';
 import { SubscriptionRepository } from './apollo/server/repositories/subscriptionRepository';
 import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
 import {
@@ -237,6 +238,17 @@ export const initComponents = () => {
     projectRepository,
     magicLinkRepository,
     emailService,
+  });
+  const oidcService = new OidcService({
+    oidcProviderRepository,
+    userIdentityRepository,
+    userRepository,
+    sessionRepository,
+    organizationRepository,
+    memberRepository,
+    projectRepository,
+    encryptionPassword: serverConfig.encryptionPassword,
+    encryptionSalt: serverConfig.encryptionSalt,
   });
   const organizationService = new OrganizationService({
     organizationRepository,
@@ -400,6 +412,7 @@ export const initComponents = () => {
     queryMeteringService,
     stripeService,
     emailService,
+    oidcService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,
