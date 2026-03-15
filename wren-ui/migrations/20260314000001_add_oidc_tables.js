@@ -58,6 +58,31 @@ exports.up = async function (knex) {
     `);
 
     await knex.raw('DROP TABLE "user_old"');
+
+    // SQLite's ALTER TABLE RENAME rewrites FK references in other tables,
+    // so they now point to "user_old" instead of "user". Rebuild them.
+    const broken = await knex.raw(
+      `SELECT name, sql FROM sqlite_master WHERE type='table' AND sql LIKE '%user_old%'`
+    );
+    for (const row of broken) {
+      const tbl = row.name;
+      const fixedSql = row.sql
+        .replace(/"user_old"/g, '"user"')
+        .replace(
+          new RegExp('CREATE TABLE [`"]' + tbl + '[`"]'),
+          'CREATE TABLE "' + tbl + '_fk_fix"'
+        );
+      await knex.raw(fixedSql);
+      const cols = (await knex.raw(`PRAGMA table_info("${tbl}")`))
+        .map((c) => '"' + c.name + '"')
+        .join(', ');
+      await knex.raw(
+        `INSERT INTO "${tbl}_fk_fix" (${cols}) SELECT ${cols} FROM "${tbl}"`
+      );
+      await knex.raw(`DROP TABLE "${tbl}"`);
+      await knex.raw(`ALTER TABLE "${tbl}_fk_fix" RENAME TO "${tbl}"`);
+    }
+
     await knex.raw('PRAGMA foreign_keys = ON');
   } else {
     // Postgres / MySQL: simple ALTER COLUMN
