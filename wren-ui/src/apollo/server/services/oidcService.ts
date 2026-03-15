@@ -58,8 +58,49 @@ export interface LinkedIdentityInfo {
   createdAt: string;
 }
 
+export interface OidcProviderAdminInfo {
+  id: number;
+  slug: string;
+  displayName: string;
+  issuerUrl: string;
+  clientId: string;
+  scopes: string;
+  emailDomainFilter: string | null;
+  autoCreateOrg: boolean;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateOidcProviderInput {
+  slug: string;
+  displayName: string;
+  issuerUrl: string;
+  clientId: string;
+  clientSecret: string;
+  scopes?: string;
+  emailDomainFilter?: string;
+  autoCreateOrg?: boolean;
+  enabled?: boolean;
+}
+
+export interface UpdateOidcProviderInput {
+  displayName?: string;
+  issuerUrl?: string;
+  clientId?: string;
+  clientSecret?: string;
+  scopes?: string;
+  emailDomainFilter?: string;
+  autoCreateOrg?: boolean;
+  enabled?: boolean;
+}
+
 export interface IOidcService {
   listProviders(): Promise<OidcProviderPublicInfo[]>;
+  listAllProviders(): Promise<OidcProviderAdminInfo[]>;
+  createProvider(input: CreateOidcProviderInput): Promise<OidcProviderAdminInfo>;
+  updateProvider(id: number, input: UpdateOidcProviderInput): Promise<OidcProviderAdminInfo>;
+  deleteProvider(id: number): Promise<boolean>;
   getAuthorizationUrl(
     providerSlug: string,
     callbackUrl: string,
@@ -384,5 +425,115 @@ export class OidcService implements IOidcService {
     const prefix = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
     const suffix = crypto.randomBytes(4).toString('hex');
     return `${prefix}-${suffix}`;
+  }
+
+  // ── Admin CRUD methods ─────────────────────────────────────
+
+  private toAdminInfo(p: OidcProvider): OidcProviderAdminInfo {
+    return {
+      id: p.id,
+      slug: p.slug,
+      displayName: p.displayName,
+      issuerUrl: p.issuerUrl,
+      clientId: p.clientId,
+      scopes: p.scopes,
+      emailDomainFilter: p.emailDomainFilter,
+      autoCreateOrg: p.autoCreateOrg,
+      enabled: p.enabled,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+    };
+  }
+
+  private encryptSecret(secret: string): string {
+    return this.encryptor.encrypt(
+      JSON.parse(JSON.stringify({ secret })) as any,
+    );
+  }
+
+  public async listAllProviders(): Promise<OidcProviderAdminInfo[]> {
+    const providers = await this.oidcProviderRepository.findAll();
+    return providers.map((p) => this.toAdminInfo(p));
+  }
+
+  public async createProvider(
+    input: CreateOidcProviderInput,
+  ): Promise<OidcProviderAdminInfo> {
+    // Validate slug format
+    if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(input.slug) || input.slug.length < 2) {
+      throw new Error(
+        'Slug must be lowercase alphanumeric with hyphens, at least 2 characters',
+      );
+    }
+
+    // Check for duplicate slug
+    const existing = await this.oidcProviderRepository.findBySlug(input.slug);
+    if (existing) {
+      throw new Error(`Provider with slug "${input.slug}" already exists`);
+    }
+
+    const encrypted = this.encryptSecret(input.clientSecret);
+
+    const provider = await this.oidcProviderRepository.createOne({
+      slug: input.slug,
+      displayName: input.displayName,
+      issuerUrl: input.issuerUrl,
+      clientId: input.clientId,
+      clientSecretEncrypted: encrypted,
+      scopes: input.scopes || 'openid email profile',
+      emailDomainFilter: input.emailDomainFilter || null,
+      autoCreateOrg: input.autoCreateOrg ?? true,
+      enabled: input.enabled ?? true,
+    } as Partial<OidcProvider>);
+
+    return this.toAdminInfo(provider);
+  }
+
+  public async updateProvider(
+    id: number,
+    input: UpdateOidcProviderInput,
+  ): Promise<OidcProviderAdminInfo> {
+    const existing = await this.oidcProviderRepository.findOneBy({ id } as any);
+    if (!existing) {
+      throw new Error('OIDC provider not found');
+    }
+
+    const updates: Partial<OidcProvider> = {};
+
+    if (input.displayName !== undefined) updates.displayName = input.displayName;
+    if (input.issuerUrl !== undefined) updates.issuerUrl = input.issuerUrl;
+    if (input.clientId !== undefined) updates.clientId = input.clientId;
+    if (input.scopes !== undefined) updates.scopes = input.scopes;
+    if (input.emailDomainFilter !== undefined)
+      updates.emailDomainFilter = input.emailDomainFilter || null;
+    if (input.autoCreateOrg !== undefined)
+      updates.autoCreateOrg = input.autoCreateOrg;
+    if (input.enabled !== undefined) updates.enabled = input.enabled;
+
+    // Re-encrypt if client secret changed
+    if (input.clientSecret) {
+      updates.clientSecretEncrypted = this.encryptSecret(input.clientSecret);
+    }
+
+    const updated = await this.oidcProviderRepository.updateOne(id, updates);
+    return this.toAdminInfo(updated);
+  }
+
+  public async deleteProvider(id: number): Promise<boolean> {
+    const existing = await this.oidcProviderRepository.findOneBy({ id } as any);
+    if (!existing) {
+      throw new Error('OIDC provider not found');
+    }
+
+    // Delete all linked identities for this provider
+    const identities = await this.userIdentityRepository.findAllBy({
+      providerSlug: existing.slug,
+    } as any);
+    for (const identity of identities) {
+      await this.userIdentityRepository.deleteOne(identity.id);
+    }
+
+    await this.oidcProviderRepository.deleteOne(id);
+    return true;
   }
 }

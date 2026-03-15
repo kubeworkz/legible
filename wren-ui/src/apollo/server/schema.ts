@@ -487,6 +487,43 @@ export const typeDefs = gql`
     createdAt: String!
   }
 
+  type OidcProviderAdmin {
+    id: Int!
+    slug: String!
+    displayName: String!
+    issuerUrl: String!
+    clientId: String!
+    scopes: String!
+    emailDomainFilter: String
+    autoCreateOrg: Boolean!
+    enabled: Boolean!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input CreateOidcProviderInput {
+    slug: String!
+    displayName: String!
+    issuerUrl: String!
+    clientId: String!
+    clientSecret: String!
+    scopes: String
+    emailDomainFilter: String
+    autoCreateOrg: Boolean
+    enabled: Boolean
+  }
+
+  input UpdateOidcProviderInput {
+    displayName: String
+    issuerUrl: String
+    clientId: String
+    clientSecret: String
+    scopes: String
+    emailDomainFilter: String
+    autoCreateOrg: Boolean
+    enabled: Boolean
+  }
+
   # ─── End Auth & Organization Types ──────────────────────────
 
   enum ApiType {
@@ -2077,6 +2114,7 @@ export const typeDefs = gql`
     # OIDC
     oidcProviders: [OidcProviderInfo!]!
     linkedIdentities: [LinkedIdentity!]!
+    oidcProvidersAdmin: [OidcProviderAdmin!]!
     listOrganizations: [OrganizationType!]!
     organization(organizationId: Int!): OrganizationType
     organizationMembers(organizationId: Int!): [MemberType!]!
@@ -2233,6 +2271,11 @@ export const typeDefs = gql`
       callbackUrl: String!
     ): AuthPayload!
     unlinkIdentity(identityId: Int!): Boolean!
+
+    # OIDC Admin
+    createOidcProvider(data: CreateOidcProviderInput!): OidcProviderAdmin!
+    updateOidcProvider(id: Int!, data: UpdateOidcProviderInput!): OidcProviderAdmin!
+    deleteOidcProvider(id: Int!): Boolean!
 
     # Organization
     createOrganization(data: CreateOrganizationInput!): OrganizationType!

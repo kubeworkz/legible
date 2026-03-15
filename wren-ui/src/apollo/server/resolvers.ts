@@ -63,6 +63,7 @@ const resolvers = {
     // OIDC
     oidcProviders: oidcResolver.oidcProviders,
     linkedIdentities: oidcResolver.linkedIdentities,
+    oidcProvidersAdmin: oidcResolver.oidcProvidersAdmin,
 
     // API Keys
     listApiKeys: orgApiKeyResolver.listApiKeys,
@@ -203,6 +204,11 @@ const resolvers = {
     oidcAuthUrl: oidcResolver.oidcAuthUrl,
     oidcCallback: oidcResolver.oidcCallback,
     unlinkIdentity: oidcResolver.unlinkIdentity,
+
+    // OIDC Admin
+    createOidcProvider: oidcResolver.createOidcProvider,
+    updateOidcProvider: oidcResolver.updateOidcProvider,
+    deleteOidcProvider: oidcResolver.deleteOidcProvider,
 
     // Organization
     createOrganization: organizationResolver.createOrganization,

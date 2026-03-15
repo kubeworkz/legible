@@ -1,5 +1,6 @@
 import { IContext } from '@server/types';
-import { requireAuth } from '@server/utils/authGuard';
+import { requireAuth, requireOrganization } from '@server/utils/authGuard';
+import { MemberRole } from '@server/repositories/memberRepository';
 import {
   AuditCategory,
   AuditAction,
@@ -13,6 +14,10 @@ export class OidcResolver {
     this.oidcAuthUrl = this.oidcAuthUrl.bind(this);
     this.oidcCallback = this.oidcCallback.bind(this);
     this.unlinkIdentity = this.unlinkIdentity.bind(this);
+    this.oidcProvidersAdmin = this.oidcProvidersAdmin.bind(this);
+    this.createOidcProvider = this.createOidcProvider.bind(this);
+    this.updateOidcProvider = this.updateOidcProvider.bind(this);
+    this.deleteOidcProvider = this.deleteOidcProvider.bind(this);
   }
 
   public async oidcProviders(_root: any, _args: any, ctx: IContext) {
@@ -99,6 +104,91 @@ export class OidcResolver {
       action: AuditAction.OIDC_IDENTITY_UNLINKED,
       targetType: 'user_identity',
       targetId: args.identityId,
+    });
+
+    return result;
+  }
+
+  // ── Admin CRUD ─────────────────────────────────────────────
+
+  private async requireOrgAdmin(ctx: IContext) {
+    const user = requireAuth(ctx);
+    const organizationId = requireOrganization(ctx);
+    await ctx.memberService.requireRole(organizationId, user.id, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
+    return { user, organizationId };
+  }
+
+  public async oidcProvidersAdmin(_root: any, _args: any, ctx: IContext) {
+    await this.requireOrgAdmin(ctx);
+    return ctx.oidcService.listAllProviders();
+  }
+
+  public async createOidcProvider(
+    _root: any,
+    args: { data: any },
+    ctx: IContext,
+  ) {
+    const { user, organizationId } = await this.requireOrgAdmin(ctx);
+    const provider = await ctx.oidcService.createProvider(args.data);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId,
+      category: AuditCategory.AUTH,
+      action: AuditAction.OIDC_PROVIDER_CREATED,
+      targetType: 'oidc_provider',
+      targetId: provider.id,
+      detail: { slug: provider.slug },
+    });
+
+    return provider;
+  }
+
+  public async updateOidcProvider(
+    _root: any,
+    args: { id: number; data: any },
+    ctx: IContext,
+  ) {
+    const { user, organizationId } = await this.requireOrgAdmin(ctx);
+    const provider = await ctx.oidcService.updateProvider(args.id, args.data);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId,
+      category: AuditCategory.AUTH,
+      action: AuditAction.OIDC_PROVIDER_UPDATED,
+      targetType: 'oidc_provider',
+      targetId: provider.id,
+      detail: { slug: provider.slug },
+    });
+
+    return provider;
+  }
+
+  public async deleteOidcProvider(
+    _root: any,
+    args: { id: number },
+    ctx: IContext,
+  ) {
+    const { user, organizationId } = await this.requireOrgAdmin(ctx);
+    const result = await ctx.oidcService.deleteProvider(args.id);
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      organizationId,
+      category: AuditCategory.AUTH,
+      action: AuditAction.OIDC_PROVIDER_DELETED,
+      targetType: 'oidc_provider',
+      targetId: args.id,
     });
 
     return result;

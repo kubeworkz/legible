@@ -27,6 +27,9 @@ export enum AuditAction {
   OIDC_LOGIN = 'oidc_login',
   OIDC_LOGIN_FAILED = 'oidc_login_failed',
   OIDC_IDENTITY_UNLINKED = 'oidc_identity_unlinked',
+  OIDC_PROVIDER_CREATED = 'oidc_provider_created',
+  OIDC_PROVIDER_UPDATED = 'oidc_provider_updated',
+  OIDC_PROVIDER_DELETED = 'oidc_provider_deleted',
   // profile
   PROFILE_UPDATED = 'profile_updated',
   // org

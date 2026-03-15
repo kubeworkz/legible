@@ -165,6 +165,13 @@ const orgMenuItems: MenuItem[] = [
     visible: ({ isOrgAdmin }) => isOrgAdmin,
   },
   {
+    key: 'oidc-providers',
+    label: 'SSO Providers',
+    icon: <SafetyOutlined />,
+    path: Path.SettingsOidcProviders,
+    visible: ({ isOrgAdmin }) => isOrgAdmin,
+  },
+  {
     key: 'org-danger-zone',
     label: 'Danger zone',
     icon: <ExclamationCircleOutlined />,

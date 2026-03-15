@@ -34,6 +34,7 @@ export enum Path {
   SettingsApiKeys = '/projects/[projectId]/settings/api-keys',
   SettingsAuditLog = '/projects/[projectId]/settings/audit-log',
   SettingsSubscriptions = '/projects/[projectId]/settings/subscriptions',
+  SettingsOidcProviders = '/projects/[projectId]/settings/oidc-providers',
   SettingsProjectApiKeys = '/projects/[projectId]/settings/project-api-keys',
   SettingsByok = '/projects/[projectId]/settings/byok',
   SettingsUserProfile = '/projects/[projectId]/settings/user/profile',

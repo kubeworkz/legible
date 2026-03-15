@@ -69,3 +69,65 @@ export const UNLINK_IDENTITY = gql`
     unlinkIdentity(identityId: $identityId)
   }
 `;
+
+// ── Admin OIDC Provider Management ────────────────────────────
+
+export const OIDC_PROVIDERS_ADMIN = gql`
+  query OidcProvidersAdmin {
+    oidcProvidersAdmin {
+      id
+      slug
+      displayName
+      issuerUrl
+      clientId
+      scopes
+      emailDomainFilter
+      autoCreateOrg
+      enabled
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const CREATE_OIDC_PROVIDER = gql`
+  mutation CreateOidcProvider($data: CreateOidcProviderInput!) {
+    createOidcProvider(data: $data) {
+      id
+      slug
+      displayName
+      issuerUrl
+      clientId
+      scopes
+      emailDomainFilter
+      autoCreateOrg
+      enabled
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_OIDC_PROVIDER = gql`
+  mutation UpdateOidcProvider($id: Int!, $data: UpdateOidcProviderInput!) {
+    updateOidcProvider(id: $id, data: $data) {
+      id
+      slug
+      displayName
+      issuerUrl
+      clientId
+      scopes
+      emailDomainFilter
+      autoCreateOrg
+      enabled
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_OIDC_PROVIDER = gql`
+  mutation DeleteOidcProvider($id: Int!) {
+    deleteOidcProvider(id: $id)
+  }
+`;
