@@ -462,6 +462,11 @@ export const typeDefs = gql`
     newPassword: String!
   }
 
+  type LogoutPayload {
+    success: Boolean!
+    endSessionUrl: String
+  }
+
   # ─── OIDC Types ──────────────────────────────────────────────
 
   type OidcProviderInfo {
@@ -496,6 +501,7 @@ export const typeDefs = gql`
     scopes: String!
     emailDomainFilter: String
     autoCreateOrg: Boolean!
+    ssoEnforced: Boolean!
     enabled: Boolean!
     createdAt: String!
     updatedAt: String!
@@ -510,6 +516,7 @@ export const typeDefs = gql`
     scopes: String
     emailDomainFilter: String
     autoCreateOrg: Boolean
+    ssoEnforced: Boolean
     enabled: Boolean
   }
 
@@ -521,6 +528,7 @@ export const typeDefs = gql`
     scopes: String
     emailDomainFilter: String
     autoCreateOrg: Boolean
+    ssoEnforced: Boolean
     enabled: Boolean
   }
 
@@ -2246,7 +2254,7 @@ export const typeDefs = gql`
     # Auth
     signup(data: SignupInput!): AuthPayload!
     login(data: LoginInput!): AuthPayload!
-    logout: Boolean!
+    logout: LogoutPayload!
 
     # User Profile
     updateProfile(data: UpdateProfileInput!): AuthUser!

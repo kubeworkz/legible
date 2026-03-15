@@ -109,8 +109,8 @@ export class AuthResolver {
     _root: any,
     _args: any,
     ctx: IContext,
-  ): Promise<boolean> {
-    if (!ctx.authToken) return true;
+  ): Promise<{ success: boolean; endSessionUrl: string | null }> {
+    if (!ctx.authToken) return { success: true, endSessionUrl: null };
 
     ctx.auditLogService.log({
       userId: ctx.currentUser?.id,
@@ -121,7 +121,21 @@ export class AuthResolver {
       action: AuditAction.LOGOUT,
     });
 
-    return ctx.authService.logout(ctx.authToken);
+    await ctx.authService.logout(ctx.authToken);
+
+    // If the user has OIDC identities, get the provider's end_session_endpoint
+    let endSessionUrl: string | null = null;
+    if (ctx.currentUser) {
+      try {
+        endSessionUrl = await ctx.oidcService.getEndSessionUrl(
+          ctx.currentUser.id,
+        );
+      } catch {
+        // Non-critical — don't block logout if this fails
+      }
+    }
+
+    return { success: true, endSessionUrl };
   }
 
   public async updateProfile(

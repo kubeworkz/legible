@@ -21,6 +21,9 @@ import {
 import {
   IMagicLinkRepository,
 } from '@server/repositories/magicLinkRepository';
+import {
+  IOidcProviderRepository,
+} from '@server/repositories/oidcProviderRepository';
 import { IEmailService } from './emailService';
 
 const SALT_ROUNDS = 12;
@@ -95,6 +98,7 @@ export class AuthService implements IAuthService {
   private readonly memberRepository: IMemberRepository;
   private readonly projectRepository: IProjectRepository;
   private readonly magicLinkRepository: IMagicLinkRepository;
+  private readonly oidcProviderRepository: IOidcProviderRepository;
   private readonly emailService: IEmailService;
 
   constructor({
@@ -104,6 +108,7 @@ export class AuthService implements IAuthService {
     memberRepository,
     projectRepository,
     magicLinkRepository,
+    oidcProviderRepository,
     emailService,
   }: {
     userRepository: IUserRepository;
@@ -112,6 +117,7 @@ export class AuthService implements IAuthService {
     memberRepository: IMemberRepository;
     projectRepository: IProjectRepository;
     magicLinkRepository: IMagicLinkRepository;
+    oidcProviderRepository: IOidcProviderRepository;
     emailService: IEmailService;
   }) {
     this.userRepository = userRepository;
@@ -120,6 +126,7 @@ export class AuthService implements IAuthService {
     this.memberRepository = memberRepository;
     this.projectRepository = projectRepository;
     this.magicLinkRepository = magicLinkRepository;
+    this.oidcProviderRepository = oidcProviderRepository;
     this.emailService = emailService;
   }
 
@@ -128,6 +135,18 @@ export class AuthService implements IAuthService {
 
     // Validate password strength
     validatePassword(password);
+
+    // Check SSO enforcement before allowing password signup
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (domain) {
+      const enforced =
+        await this.oidcProviderRepository.findEnforcedByDomain(domain);
+      if (enforced) {
+        throw new Error(
+          `Your organization requires SSO. Please sign in with ${enforced.displayName}.`,
+        );
+      }
+    }
 
     // Check if user already exists
     const existing = await this.userRepository.findByEmail(email);
@@ -213,6 +232,18 @@ export class AuthService implements IAuthService {
     // OIDC-only users have no password
     if (!user.passwordHash) {
       throw new Error('This account uses external sign-in. Please use your identity provider.');
+    }
+
+    // Check SSO enforcement — block password login if domain is SSO-enforced
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (domain) {
+      const enforced =
+        await this.oidcProviderRepository.findEnforcedByDomain(domain);
+      if (enforced) {
+        throw new Error(
+          `Your organization requires SSO. Please sign in with ${enforced.displayName}.`,
+        );
+      }
     }
 
     const valid = await bcrypt.compare(password, user.passwordHash);

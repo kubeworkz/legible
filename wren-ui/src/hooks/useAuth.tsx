@@ -137,8 +137,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    let endSessionUrl: string | null = null;
     try {
-      await logoutMutation();
+      const { data } = await logoutMutation();
+      endSessionUrl = data?.logout?.endSessionUrl || null;
     } catch {
       // ignore errors on logout
     }
@@ -146,6 +148,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     clearSessionState();
     setUser(null);
+
+    // If the OIDC provider supports RP-initiated logout, redirect there
+    if (endSessionUrl) {
+      window.location.href = endSessionUrl;
+      return;
+    }
+
     // Only redirect to /login from non-public pages.
     // Public pages (e.g. /accept-invite) manage their own post-logout state.
     const isPublic = PUBLIC_PATHS.some((p) => router.pathname.startsWith(p));

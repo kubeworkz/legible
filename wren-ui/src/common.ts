@@ -237,6 +237,7 @@ export const initComponents = () => {
     memberRepository,
     projectRepository,
     magicLinkRepository,
+    oidcProviderRepository,
     emailService,
   });
   const oidcService = new OidcService({

@@ -8,6 +8,8 @@ import {
   Form,
   Input,
   Switch,
+  Select,
+  Alert,
   message,
   Popconfirm,
   Tooltip,
@@ -18,6 +20,7 @@ import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import SafetyOutlined from '@ant-design/icons/SafetyOutlined';
+import LockOutlined from '@ant-design/icons/LockOutlined';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
 import useOrganization from '@/hooks/useOrganization';
 import { useQuery, useMutation } from '@apollo/client';
@@ -51,10 +54,56 @@ interface OidcProviderRecord {
   scopes: string | null;
   emailDomainFilter: string | null;
   autoCreateOrg: boolean;
+  ssoEnforced: boolean;
   enabled: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
+// ── Provider Presets ──────────────────────────────────────────
+
+const PROVIDER_PRESETS = [
+  {
+    key: 'google',
+    label: 'Google',
+    slug: 'google',
+    displayName: 'Sign in with Google',
+    issuerUrl: 'https://accounts.google.com',
+    scopes: 'openid email profile',
+  },
+  {
+    key: 'microsoft',
+    label: 'Microsoft (Entra ID)',
+    slug: 'microsoft',
+    displayName: 'Sign in with Microsoft',
+    issuerUrl: 'https://login.microsoftonline.com/common/v2.0',
+    scopes: 'openid email profile',
+  },
+  {
+    key: 'github',
+    label: 'GitHub',
+    slug: 'github',
+    displayName: 'Sign in with GitHub',
+    issuerUrl: 'https://token.actions.githubusercontent.com',
+    scopes: 'openid email profile',
+  },
+  {
+    key: 'okta',
+    label: 'Okta',
+    slug: 'okta',
+    displayName: 'Sign in with Okta',
+    issuerUrl: '',
+    scopes: 'openid email profile',
+  },
+  {
+    key: 'custom',
+    label: 'Custom OIDC',
+    slug: '',
+    displayName: '',
+    issuerUrl: '',
+    scopes: 'openid email profile',
+  },
+];
 
 // ── Provider Form Modal ───────────────────────────────────────
 
@@ -78,6 +127,7 @@ function ProviderFormModal({
   useEffect(() => {
     if (visible && record) {
       form.setFieldsValue({
+        preset: undefined,
         slug: record.slug,
         displayName: record.displayName,
         issuerUrl: record.issuerUrl,
@@ -86,13 +136,33 @@ function ProviderFormModal({
         scopes: record.scopes || '',
         emailDomainFilter: record.emailDomainFilter || '',
         autoCreateOrg: record.autoCreateOrg,
+        ssoEnforced: record.ssoEnforced,
         enabled: record.enabled,
       });
     } else if (visible) {
       form.resetFields();
-      form.setFieldsValue({ autoCreateOrg: false, enabled: true });
+      form.setFieldsValue({
+        autoCreateOrg: false,
+        ssoEnforced: false,
+        enabled: true,
+      });
     }
   }, [visible, record, form]);
+
+  const handlePresetChange = useCallback(
+    (key: string) => {
+      const preset = PROVIDER_PRESETS.find((p) => p.key === key);
+      if (preset) {
+        form.setFieldsValue({
+          slug: preset.slug,
+          displayName: preset.displayName,
+          issuerUrl: preset.issuerUrl,
+          scopes: preset.scopes,
+        });
+      }
+    },
+    [form],
+  );
 
   const handleSave = useCallback(async () => {
     try {
@@ -122,6 +192,19 @@ function ProviderFormModal({
       width={560}
     >
       <Form form={form} layout="vertical">
+        {!isEdit && (
+          <Form.Item label="Provider Template" name="preset">
+            <Select
+              placeholder="Choose a template to auto-fill..."
+              allowClear
+              onChange={handlePresetChange}
+              options={PROVIDER_PRESETS.map((p) => ({
+                value: p.key,
+                label: p.label,
+              }))}
+            />
+          </Form.Item>
+        )}
         <Form.Item
           label="Slug"
           name="slug"
@@ -151,7 +234,7 @@ function ProviderFormModal({
             { required: true, message: 'Issuer URL is required' },
             { type: 'url', message: 'Must be a valid URL' },
           ]}
-          extra="OpenID Connect discovery endpoint base URL"
+          extra="OpenID Connect discovery endpoint base URL. Validated on save."
         >
           <Input placeholder="https://accounts.google.com" />
         </Form.Item>
@@ -188,6 +271,14 @@ function ProviderFormModal({
           label="Auto-create Organization"
           name="autoCreateOrg"
           valuePropName="checked"
+        >
+          <Switch />
+        </Form.Item>
+        <Form.Item
+          label="Enforce SSO"
+          name="ssoEnforced"
+          valuePropName="checked"
+          extra="When enabled, users with matching email domains must use this provider. Password login will be blocked for those domains."
         >
           <Switch />
         </Form.Item>
@@ -247,6 +338,7 @@ export default function SettingsOidcProviders() {
         if (values.emailDomainFilter !== undefined)
           input.emailDomainFilter = values.emailDomainFilter || null;
         input.autoCreateOrg = values.autoCreateOrg;
+        input.ssoEnforced = values.ssoEnforced;
         input.enabled = values.enabled;
 
         await updateProvider({
@@ -266,6 +358,7 @@ export default function SettingsOidcProviders() {
               scopes: values.scopes || null,
               emailDomainFilter: values.emailDomainFilter || null,
               autoCreateOrg: values.autoCreateOrg ?? false,
+              ssoEnforced: values.ssoEnforced ?? false,
               enabled: values.enabled ?? true,
             },
           },
@@ -340,15 +433,22 @@ export default function SettingsOidcProviders() {
     },
     {
       title: 'Status',
-      dataIndex: 'enabled',
-      key: 'enabled',
-      width: 100,
-      render: (enabled: boolean) =>
-        enabled ? (
-          <Tag color="green">Enabled</Tag>
-        ) : (
-          <Tag color="default">Disabled</Tag>
-        ),
+      key: 'status',
+      width: 140,
+      render: (_: any, record: OidcProviderRecord) => (
+        <Space direction="vertical" size={2}>
+          {record.enabled ? (
+            <Tag color="green">Enabled</Tag>
+          ) : (
+            <Tag color="default">Disabled</Tag>
+          )}
+          {record.ssoEnforced && (
+            <Tag color="blue" icon={<LockOutlined />}>
+              SSO Enforced
+            </Tag>
+          )}
+        </Space>
+      ),
     },
     {
       title: 'Created',

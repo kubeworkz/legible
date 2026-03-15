@@ -83,6 +83,7 @@ export const OIDC_PROVIDERS_ADMIN = gql`
       scopes
       emailDomainFilter
       autoCreateOrg
+      ssoEnforced
       enabled
       createdAt
       updatedAt
@@ -101,6 +102,7 @@ export const CREATE_OIDC_PROVIDER = gql`
       scopes
       emailDomainFilter
       autoCreateOrg
+      ssoEnforced
       enabled
       createdAt
       updatedAt
@@ -119,6 +121,7 @@ export const UPDATE_OIDC_PROVIDER = gql`
       scopes
       emailDomainFilter
       autoCreateOrg
+      ssoEnforced
       enabled
       createdAt
       updatedAt

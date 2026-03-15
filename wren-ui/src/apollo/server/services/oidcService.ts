@@ -67,6 +67,7 @@ export interface OidcProviderAdminInfo {
   scopes: string;
   emailDomainFilter: string | null;
   autoCreateOrg: boolean;
+  ssoEnforced: boolean;
   enabled: boolean;
   createdAt: string;
   updatedAt: string;
@@ -81,6 +82,7 @@ export interface CreateOidcProviderInput {
   scopes?: string;
   emailDomainFilter?: string;
   autoCreateOrg?: boolean;
+  ssoEnforced?: boolean;
   enabled?: boolean;
 }
 
@@ -92,6 +94,7 @@ export interface UpdateOidcProviderInput {
   scopes?: string;
   emailDomainFilter?: string;
   autoCreateOrg?: boolean;
+  ssoEnforced?: boolean;
   enabled?: boolean;
 }
 
@@ -114,6 +117,7 @@ export interface IOidcService {
   ): Promise<OidcCallbackResult>;
   listLinkedIdentities(userId: number): Promise<LinkedIdentityInfo[]>;
   unlinkIdentity(userId: number, identityId: number): Promise<boolean>;
+  getEndSessionUrl(userId: number): Promise<string | null>;
 }
 
 export class OidcService implements IOidcService {
@@ -275,6 +279,16 @@ export class OidcService implements IOidcService {
         if (!existingUser.isActive) {
           throw new Error('Account is deactivated');
         }
+        // Security: Only auto-link if the existing account has a verified
+        // email. This prevents a scenario where an attacker signs up with
+        // someone else's email (unverified) and then the real owner's OIDC
+        // login gets linked to the attacker's account.
+        if (existingUser.passwordHash && !existingUser.emailVerified) {
+          throw new Error(
+            'An account with this email exists but is not verified. ' +
+              'Please verify your email first, then link your identity from Settings.',
+          );
+        }
         user = existingUser;
       } else {
         // Create a new user (no password — OIDC-only)
@@ -380,6 +394,30 @@ export class OidcService implements IOidcService {
     return true;
   }
 
+  /**
+   * Discover the OIDC provider's end_session_endpoint for the user's
+   * most recently linked identity. Returns null if the user has no OIDC
+   * identities or the provider doesn't support RP-initiated logout.
+   */
+  public async getEndSessionUrl(userId: number): Promise<string | null> {
+    const identities =
+      await this.userIdentityRepository.findAllByUserId(userId);
+    if (identities.length === 0) return null;
+
+    // Use the first identity's provider
+    const providerSlug = identities[0].providerSlug;
+    const provider =
+      await this.oidcProviderRepository.findBySlug(providerSlug);
+    if (!provider || !provider.enabled) return null;
+
+    try {
+      const issuer = await Issuer.discover(provider.issuerUrl);
+      return (issuer.metadata.end_session_endpoint as string) || null;
+    } catch {
+      return null;
+    }
+  }
+
   // ── Private helpers ────────────────────────────────────────
 
   private async getEnabledProvider(slug: string): Promise<OidcProvider> {
@@ -439,6 +477,7 @@ export class OidcService implements IOidcService {
       scopes: p.scopes,
       emailDomainFilter: p.emailDomainFilter,
       autoCreateOrg: p.autoCreateOrg,
+      ssoEnforced: p.ssoEnforced,
       enabled: p.enabled,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
@@ -449,6 +488,21 @@ export class OidcService implements IOidcService {
     return this.encryptor.encrypt(
       JSON.parse(JSON.stringify({ secret })) as any,
     );
+  }
+
+  /**
+   * Validate that the issuer URL has a reachable OIDC discovery endpoint.
+   * Throws a descriptive error if unreachable or invalid.
+   */
+  private async validateDiscovery(issuerUrl: string): Promise<void> {
+    try {
+      await Issuer.discover(issuerUrl);
+    } catch (err: any) {
+      throw new Error(
+        `OIDC discovery failed for "${issuerUrl}": ${err.message || 'unreachable'}. ` +
+          'Ensure the issuer URL is correct and has a valid .well-known/openid-configuration endpoint.',
+      );
+    }
   }
 
   public async listAllProviders(): Promise<OidcProviderAdminInfo[]> {
@@ -472,6 +526,16 @@ export class OidcService implements IOidcService {
       throw new Error(`Provider with slug "${input.slug}" already exists`);
     }
 
+    // Validate OIDC discovery endpoint is reachable
+    await this.validateDiscovery(input.issuerUrl);
+
+    // SSO enforcement requires an email domain filter
+    if (input.ssoEnforced && !input.emailDomainFilter) {
+      throw new Error(
+        'Email domain filter is required when SSO enforcement is enabled',
+      );
+    }
+
     const encrypted = this.encryptSecret(input.clientSecret);
 
     const provider = await this.oidcProviderRepository.createOne({
@@ -483,6 +547,7 @@ export class OidcService implements IOidcService {
       scopes: input.scopes || 'openid email profile',
       emailDomainFilter: input.emailDomainFilter || null,
       autoCreateOrg: input.autoCreateOrg ?? true,
+      ssoEnforced: input.ssoEnforced ?? false,
       enabled: input.enabled ?? true,
     } as Partial<OidcProvider>);
 
@@ -508,11 +573,34 @@ export class OidcService implements IOidcService {
       updates.emailDomainFilter = input.emailDomainFilter || null;
     if (input.autoCreateOrg !== undefined)
       updates.autoCreateOrg = input.autoCreateOrg;
+    if (input.ssoEnforced !== undefined)
+      updates.ssoEnforced = input.ssoEnforced;
     if (input.enabled !== undefined) updates.enabled = input.enabled;
 
     // Re-encrypt if client secret changed
     if (input.clientSecret) {
       updates.clientSecretEncrypted = this.encryptSecret(input.clientSecret);
+    }
+
+    // Validate discovery if issuer URL is changing
+    const effectiveIssuerUrl = updates.issuerUrl || existing.issuerUrl;
+    if (input.issuerUrl && input.issuerUrl !== existing.issuerUrl) {
+      await this.validateDiscovery(input.issuerUrl);
+    }
+
+    // SSO enforcement requires email domain filter
+    const effectiveDomainFilter =
+      updates.emailDomainFilter !== undefined
+        ? updates.emailDomainFilter
+        : existing.emailDomainFilter;
+    const effectiveSsoEnforced =
+      updates.ssoEnforced !== undefined
+        ? updates.ssoEnforced
+        : existing.ssoEnforced;
+    if (effectiveSsoEnforced && !effectiveDomainFilter) {
+      throw new Error(
+        'Email domain filter is required when SSO enforcement is enabled',
+      );
     }
 
     const updated = await this.oidcProviderRepository.updateOne(id, updates);
