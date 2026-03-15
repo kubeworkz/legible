@@ -34,7 +34,7 @@ import {
 const { Title, Text, Paragraph } = Typography;
 
 const PageContainer = styled.div`
-  max-width: 960px;
+  max-width: 1200px;
   padding: 24px 32px;
 `;
 
@@ -530,7 +530,6 @@ export default function SettingsOidcProviders() {
           loading={providersLoading}
           pagination={false}
           size="middle"
-          scroll={{ x: 900 }}
           locale={{
             emptyText: (
               <div style={{ padding: '32px 0' }}>
