@@ -20,7 +20,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Wren AI</title>
+        <title>Legible AI</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ConfigProvider theme={admTheme}>

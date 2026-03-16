@@ -10,10 +10,10 @@ export default function LogoBar() {
     : '/';
 
   return (
-    <Link href={homePath} style={{ display: 'inline-flex' }}>
+    <Link href={homePath} style={{ display: 'inline-flex', marginTop: 4 }}>
       <Image
         src="/images/logo-white-with-text.svg"
-        alt="Wren AI"
+        alt="Legible"
         width={125}
         height={30}
       />
