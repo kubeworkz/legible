@@ -195,13 +195,13 @@ export default function LoginPage() {
         <LogoWrapper>
           <Image
             src="/images/logo.svg"
-            alt="Wren AI"
+            alt="Legible"
             width={48}
             height={48}
           />
         </LogoWrapper>
         <StyledTitle level={3}>Welcome back</StyledTitle>
-        <Subtitle>Sign in to your Wren AI account</Subtitle>
+        <Subtitle>Sign in to your Legible account</Subtitle>
 
         <Form
           form={form}
