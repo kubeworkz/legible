@@ -56,7 +56,7 @@ function fallbackCopy(text: string) {
 }
 
 const PageContainer = styled.div`
-  max-width: 960px;
+  max-width: 1200px;
   padding: 24px 32px;
 `;
 
@@ -661,7 +661,6 @@ export default function SettingsApiKeys() {
           loading={keysLoading}
           pagination={false}
           size="middle"
-          scroll={{ x: 1100 }}
           locale={{
             emptyText: (
               <div style={{ padding: '32px 0' }}>

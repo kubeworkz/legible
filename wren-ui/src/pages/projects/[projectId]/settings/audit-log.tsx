@@ -23,7 +23,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 const PageContainer = styled.div`
-  max-width: 1100px;
+  max-width: 1200px;
   padding: 24px 32px;
 `;
 
@@ -340,7 +340,6 @@ export default function SettingsAuditLog() {
           rowKey="id"
           loading={loading}
           size="small"
-          scroll={{ x: 1060 }}
           pagination={{
             current: currentPage,
             pageSize: PAGE_SIZE,
