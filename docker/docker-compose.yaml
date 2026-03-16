@@ -38,8 +38,15 @@ services:
     platform: ${PLATFORM}
     expose:
       - ${IBIS_SERVER_PORT}
+    ports:
+      - ${MCP_SERVER_PORT:-9000}:9000
     environment:
       WREN_ENGINE_ENDPOINT: http://wren-engine:${WREN_ENGINE_PORT}
+      ENABLE_MCP_SERVER: "true"
+      MCP_TRANSPORT: streamable-http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "9000"
+      WREN_URL: localhost:8000
     volumes:
       - ${LOCAL_STORAGE:-.}:/usr/src/app/data
     networks:
