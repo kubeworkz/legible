@@ -83,8 +83,8 @@ export default function SignupPage() {
         <LogoWrapper>
           <Image
             src="/images/logo.svg"
-            alt="Wren AI"
-            width={48}
+            alt="Legible"
+            width={150}
             height={48}
           />
         </LogoWrapper>

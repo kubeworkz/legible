@@ -106,8 +106,8 @@ export default function LoginPage() {
           <LogoWrapper>
             <Image
               src="/images/logo.svg"
-              alt="Wren AI"
-              width={48}
+              alt="Legible"
+              width={150}
               height={48}
             />
           </LogoWrapper>
@@ -139,8 +139,8 @@ export default function LoginPage() {
           <LogoWrapper>
             <Image
               src="/images/logo.svg"
-              alt="Wren AI"
-              width={48}
+              alt="Legible"
+              width={150}
               height={48}
             />
           </LogoWrapper>
@@ -196,7 +196,7 @@ export default function LoginPage() {
           <Image
             src="/images/logo.svg"
             alt="Legible"
-            width={48}
+            width={150}
             height={48}
           />
         </LogoWrapper>

@@ -158,9 +158,9 @@ function SetupPrompt() {
     <SetupPromptContainer>
       <Image
         src="/images/logo.svg"
-        alt="Wren AI"
-        width={64}
-        height={64}
+        alt="Legible"
+        width={150}
+        height={48}
         className="mb-4"
       />
       <Title level={4} className="gray-9 mb-1">
