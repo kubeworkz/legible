@@ -3,7 +3,7 @@
  *
  * Rules:
  *   • $0.02 per SQL query executed against a real data connection
- *   • First 500 queries per organization per month are free
+ *   • First 25 queries per organization per month are free
  *   • Pro/Enterprise subscribers get unlimited queries
  *   • Queries on sample/playground datasets are excluded
  *   • Dry-run (validation-only) calls are excluded
@@ -27,7 +27,7 @@ logger.level = 'debug';
 
 // ── Constants ───────────────────────────────────────────
 
-export const FREE_TIER_LIMIT = 500;
+export const FREE_TIER_LIMIT = 25;
 export const COST_PER_QUERY = 0.02;
 
 // ── Types ───────────────────────────────────────────────
@@ -86,7 +86,7 @@ export interface IQueryMeteringService {
 
   /**
    * Pre-execution check: is this org allowed to run another query?
-   * Pro/Enterprise → always allowed. Free → allowed if < 500 this month.
+   * Pro/Enterprise → always allowed. Free → allowed if < 25 this month.
    */
   checkQueryAllowance(organizationId: number): Promise<QueryAllowance>;
 
@@ -148,7 +148,7 @@ export class QueryMeteringService implements IQueryMeteringService {
     const isPaidPlan = plan === 'pro' || plan === 'enterprise';
 
     // Pro/Enterprise: always free (included in subscription)
-    // Free: first 500/month free, then $0.02/query
+    // Free: first 25/month free, then $0.02/query
     let isFreeTier: boolean;
     let cost: number;
     if (isPaidPlan) {

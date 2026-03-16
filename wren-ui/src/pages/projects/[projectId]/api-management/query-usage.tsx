@@ -71,7 +71,7 @@ const SectionTitle = styled.h3`
 
 // ── Helpers ───────────────────────────────────────────
 
-const FREE_TIER_LIMIT = 500;
+const FREE_TIER_LIMIT = 25;
 
 function formatCost(cost: number): string {
   return `$${cost.toFixed(2)}`;

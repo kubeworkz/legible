@@ -3,7 +3,7 @@
  * checkout sessions, and customer portal.
  *
  * Plan structure:
- *   • Free: $0/mo — 500 queries included, $0.02/query overage
+ *   • Free: $0/mo — 25 queries included, $0.02/query overage
  *   • Pro:  configurable via STRIPE_PRO_PRICE_ID — unlimited queries, priority support
  */
 
