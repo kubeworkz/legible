@@ -77,12 +77,6 @@ mkdir -p ~/wren-workspace
 
 ## Step 4 — Set up Wren Engine
 
-Choose either the **automated path** (recommended) or **manual path** depending on your preference.
-
----
-
-### Option A — Automated with `/wren-quickstart` (recommended)
-
 In your Claude Code session, run:
 
 ```
@@ -98,11 +92,16 @@ When prompted for connection details, provide:
 | Workspace path | `~/wren-workspace` |
 | jaffle_shop directory | your absolute path to `jaffle_shop_duckdb/` |
 
-The skill handles everything: pulling the Docker image, starting the container (with the DuckDB file mounted at `/data`), introspecting the schema, generating the MDL, saving the YAML project, and registering the MCP server.
+The skill handles everything: pulling the Docker image, starting the container (with the DuckDB file mounted at `/data`), configuring the connection, introspecting the schema, generating the MDL, saving the YAML project, and registering the MCP server.
 
 When it finishes, **start a new Claude Code session** and jump to [Step 5 — Start querying](#step-5--start-querying).
 
+> **Why use the skill?** DuckDB connection setup has several non-obvious requirements (the connection URL must point to a *directory*, not a `.duckdb` file; the catalog name is derived from the filename). The `/wren-quickstart` skill handles these details automatically. Manual setup is documented below for reference, but we strongly recommend using the skill for the first run.
+
 ---
+
+<details>
+<summary><b>Manual setup</b> (click to expand — for advanced users only)</summary>
 
 ### Option B — Manual setup
 
@@ -142,33 +141,27 @@ docker ps --filter name=wren-mcp
 curl http://localhost:8000/health
 ```
 
-#### Phase 2 — Generate the MDL
+#### Phase 2 — Configure connection and register MCP server
 
-In Claude Code, run each skill in sequence:
+Configure the DuckDB connection via the Web UI at `http://localhost:9001`:
 
-```
-/generate-mdl
-```
+1. Open `http://localhost:9001` in your browser
+2. Select data source type: **DUCKDB**
+3. Set the connection info:
 
-Before running `/generate-mdl`, configure the connection via the Web UI at `http://localhost:9001`:
-- Data source type: `DUCKDB`
-- Database folder path: `/data` (the folder containing `jaffle_shop.duckdb`)
+| Field | Value | Description |
+|-------|-------|-------------|
+| `format` | `duckdb` | Must be `"duckdb"` |
+| `url` | `/data` | Path to the **folder** containing `.duckdb` files (not the file itself) |
 
-Then run:
-
-```text
-/generate-mdl
-```
-
-Then save the MDL as a versioned YAML project:
-
-```text
-/wren-project
+The JSON looks like:
+```json
+{ "url": "/data", "format": "duckdb" }
 ```
 
-This writes human-readable YAML files to `~/wren-workspace/` and compiles `target/mdl.json`.
+> **Common mistake:** Do not point `url` to the `.duckdb` file directly (e.g. `/data/jaffle_shop.duckdb`). The ibis-server expects a **directory** — it scans for all `.duckdb` files in that directory and attaches them automatically. Pointing to the binary file causes a UTF-8 decode error.
 
-#### Phase 3 — Register the MCP server
+Then register the MCP server with Claude Code:
 
 ```bash
 claude mcp add --transport http wren http://localhost:9000/mcp
@@ -181,6 +174,26 @@ claude mcp list
 ```
 
 **Start a new Claude Code session** — MCP servers are only loaded at session start.
+
+#### Phase 3 — Generate the MDL
+
+In the new session, run the skills in sequence:
+
+```text
+/generate-mdl
+```
+
+The skill uses MCP tools (`health_check()`, `list_remote_tables()`, etc.) to introspect the database — these tools are only available after the MCP server is registered and a new session is started.
+
+Then save the MDL as a versioned YAML project:
+
+```text
+/wren-project
+```
+
+This writes human-readable YAML files to `~/wren-workspace/` and compiles `target/mdl.json`.
+
+</details>
 
 ---
 
@@ -241,6 +254,12 @@ Install the duckdb adapter: `uv tool install dbt-duckdb`
 **Container can't find the DuckDB file:**
 Check that the `-v` flag points to the directory containing `jaffle_shop.duckdb`, and that the path inside the container (`/data/jaffle_shop.duckdb`) matches what you gave for the connection.
 
+**`'utf-8' codec can't decode byte …` error when querying DuckDB:**
+The connection info `url` is pointing to the `.duckdb` file instead of its parent directory. The ibis-server tries to read the path as JSON, hits the binary file, and fails. Fix: set `url` to the **folder** (e.g. `/data`), not the file (e.g. `/data/jaffle_shop.duckdb`). See the [connection info table in Phase 2](#phase-2--configure-the-connection-and-generate-the-mdl).
+
+**`Catalog "xxx" does not exist` error:**
+When ibis-server attaches a DuckDB file, the catalog name is derived from the filename (e.g. `jaffle_shop.duckdb` → catalog `jaffle_shop`). Make sure the `catalog` in your MDL matches the DuckDB filename without the extension.
+
 **`/generate-mdl` fails immediately:**
 The container must be running first. Run `docker ps --filter name=wren-mcp` to confirm, then retry.
 
@@ -258,7 +277,24 @@ Check container logs: `docker logs wren-mcp`. Confirm ports are listening: `curl
 |------|---------|
 | Add or edit MDL models | `/wren-project` |
 | Write custom SQL | `/wren-sql` |
-| Connect a different database | `/wren-connection-info` |
+| Connect a different database | Web UI at `http://localhost:9001` (use `/wren-connection-info` for field reference) |
 | Day-to-day usage guide | `/wren-usage` |
 
 For a deeper dive into how skills work or how to connect a cloud database, see [Getting Started with Claude Code](./getting_started_with_claude_code.md).
+
+---
+
+## Locking down with read-only mode
+
+Once you have confirmed that queries are returning correct results and the MDL is working as expected, enable **read-only mode** in the Web UI:
+
+1. Open `http://localhost:9001`
+2. Toggle **Read-Only Mode** to on
+
+When read-only mode is enabled:
+
+- The AI agent can **query data** and **read metadata** through the deployed MDL as usual
+- The AI agent **cannot** modify connection info, change the data source, or call `list_remote_tables()` / `list_remote_constraints()` to introspect the database directly
+- This limits the agent to operating within the boundaries of the MDL you have defined, preventing it from accessing tables or schemas you have not explicitly modeled
+
+We recommend enabling read-only mode for day-to-day use. Turn it off temporarily when you need to regenerate the MDL or change connection settings.
