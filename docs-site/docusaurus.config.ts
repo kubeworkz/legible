@@ -75,6 +75,7 @@ const config: Config = {
             {label: 'Getting Started', to: '/getting-started/quickstart'},
             {label: 'Architecture', to: '/architecture/overview'},
             {label: 'Configuration', to: '/guides/configuration'},
+            {label: 'API Reference', to: '/api-reference/overview'},
           ],
         },
         {

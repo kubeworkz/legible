@@ -30,35 +30,15 @@ Use the filters to narrow results by API type or date range. You can also export
 
 ## API Reference
 
-### Query Endpoint
+For the full endpoint reference — including request/response schemas, streaming, knowledge management, and code examples — see the **[API Reference](/api-reference/overview)** section.
 
-```
-POST /api/v1/query
-```
+Quick links:
 
-Generate and execute SQL from a natural language question.
-
-**Headers:**
-```
-Authorization: Bearer <api-key>
-Content-Type: application/json
-```
-
-**Request body:**
-```json
-{
-  "question": "What are the top 10 customers by revenue?"
-}
-```
-
-**Response:**
-```json
-{
-  "sql": "SELECT ...",
-  "data": [...],
-  "columns": [...]
-}
-```
+- [SQL Endpoints](/api-reference/sql-endpoints) — Generate SQL, execute queries
+- [AI Analysis](/api-reference/ai-analysis) — Ask, summaries, charts
+- [Streaming](/api-reference/streaming) — Server-Sent Events for real-time UIs
+- [Models & Schema](/api-reference/models-schema) — Retrieve deployed models, generate descriptions
+- [Knowledge Base](/api-reference/knowledge-base) — Manage instructions and SQL pairs
 
 ### Query Usage
 
