@@ -39,8 +39,8 @@ services:
     expose:
       - ${IBIS_SERVER_PORT}
     ports:
-      - ${MCP_SERVER_PORT:-9000}:9000
-      - ${MCP_WEB_UI_PORT:-9001}:9001
+      - 127.0.0.1:${MCP_SERVER_PORT:-9000}:9000
+      - 127.0.0.1:${MCP_WEB_UI_PORT:-9001}:9001
     environment:
       WREN_ENGINE_ENDPOINT: http://wren-engine:${WREN_ENGINE_PORT}
       ENABLE_MCP_SERVER: "true"
@@ -164,7 +164,7 @@ services:
       NEXT_PUBLIC_DOCS_URL: ${DOCS_URL:-https://docs.kubeworkz.io}
     ports:
       # HOST_PORT is the port you want to expose to the host machine
-      - ${HOST_PORT}:3000
+      - 127.0.0.1:${HOST_PORT}:3000
     volumes:
       - data:/app/data
     networks:
@@ -177,6 +177,6 @@ services:
     image: legible-docs:local
     restart: on-failure
     ports:
-      - ${DOCS_PORT:-4000}:4000
+      - 127.0.0.1:${DOCS_PORT:-4000}:4000
     networks:
       - wren
