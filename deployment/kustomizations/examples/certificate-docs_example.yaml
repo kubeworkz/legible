@@ -1,12 +1,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: docs.myhost.net
+  name: docs.kubeworkz.io
 spec:
   dnsNames:
-    - docs.myhost.net
+    - docs.kubeworkz.io
   issuerRef:
     group: cert-manager.io
     kind: ClusterIssuer
-    name: myhost.net-prod
-  secretName: docs.myhost.net-tls
+    name: kubeworkz.io-prod
+  secretName: docs.kubeworkz.io-tls

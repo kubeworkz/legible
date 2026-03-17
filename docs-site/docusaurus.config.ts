@@ -11,7 +11,7 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://docs.legible.io',
+  url: 'https://docs.kubeworkz.io',
   baseUrl: '/',
 
   organizationName: 'kubeworkz',

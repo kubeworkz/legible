@@ -161,7 +161,7 @@ services:
       POSTMARK_SERVER_TOKEN: ${POSTMARK_SERVER_TOKEN:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
       APP_BASE_URL: ${APP_BASE_URL:-}
-      NEXT_PUBLIC_DOCS_URL: ${DOCS_URL:-http://localhost:4000}
+      NEXT_PUBLIC_DOCS_URL: ${DOCS_URL:-https://docs.kubeworkz.io}
     ports:
       # HOST_PORT is the port you want to expose to the host machine
       - ${HOST_PORT}:3000

@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: docs.myhost.net
+    - host: docs.kubeworkz.io
       http:
         paths:
           - path: /
@@ -22,5 +22,5 @@ spec:
                   number: 4000
   tls:
     - hosts:
-      - docs.myhost.net
-      secretName: docs.myhost.net-tls
+      - docs.kubeworkz.io
+      secretName: docs.kubeworkz.io-tls
