@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: docs.myhost.net
+spec:
+  dnsNames:
+    - docs.myhost.net
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: myhost.net-prod
+  secretName: docs.myhost.net-tls

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DOC_LINKS } from '@/utils/docLinks';
 import {
   Button,
   Input,
@@ -432,7 +433,7 @@ export default function SessionPropertyPage() {
             evaluate access conditions. Assign them to users or groups in the
             UI, or include them in API requests to apply policies correctly.{' '}
             <a
-              href="https://docs.getwren.ai/cp/guide/security/rls"
+              href={DOC_LINKS.rlsPolicy}
               target="_blank"
               rel="noopener noreferrer"
             >

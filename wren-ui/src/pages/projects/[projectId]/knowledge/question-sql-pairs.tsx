@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { DOC_LINKS } from '@/utils/docLinks';
 import { Button, message, Table, TableColumnsType, Typography } from 'antd';
 import { format } from 'sql-formatter';
 import SiderLayout from '@/components/layouts/SiderLayout';
@@ -148,7 +149,7 @@ export default function ManageQuestionSQLPairs() {
             it to generate queries that better align with your expectations.{' '}
             <Link
               className="gray-8 underline"
-              href="https://docs.getwren.ai/oss/guide/knowledge/question-sql-pairs"
+              href={DOC_LINKS.questionSQLPairs}
               rel="noopener noreferrer"
               target="_blank"
             >

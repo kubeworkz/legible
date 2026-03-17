@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { DOC_LINKS } from '@/utils/docLinks';
 import { Alert, Button, Form, Modal, Typography } from 'antd';
 import InfoCircleOutlined from '@ant-design/icons/InfoCircleOutlined';
 import { ERROR_TEXTS } from '@/utils/error';
@@ -146,7 +147,7 @@ export default function AdjustSQLModal(props: Props) {
               based on ANSI SQL and optimized for Wren AI.{` `}
               <Typography.Link
                 type="secondary"
-                href="https://docs.getwren.ai/oss/guide/home/wren_sql"
+                href={DOC_LINKS.wrenSQL}
                 target="_blank"
                 rel="noopener noreferrer"
               >

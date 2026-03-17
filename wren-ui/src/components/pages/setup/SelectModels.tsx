@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DOC_LINKS } from '@/utils/docLinks';
 import { Button, Col, Form, Row, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { ERROR_TEXTS } from '@/utils/error';
@@ -52,7 +53,7 @@ export default function SelectModels(props: Props) {
         understand your data.
         <br />
         <Link
-          href="https://docs.getwren.ai/oss/guide/modeling/overview"
+          href={DOC_LINKS.modelingOverview}
           target="_blank"
           rel="noopener noreferrer"
         >

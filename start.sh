@@ -118,6 +118,11 @@ build_images() {
   docker build -q -t wren-ui:local "$ROOT_DIR/wren-ui" >/dev/null
   ok "wren-ui:local"
 
+  # 6. Legible Docs
+  info "Building legible-docs:local ..."
+  docker build -q -t legible-docs:local "$ROOT_DIR/docs-site" >/dev/null
+  ok "legible-docs:local"
+
   echo ""
   ok "All images built successfully"
 }
@@ -170,11 +175,23 @@ start_services() {
     sleep 2
   done
 
+  # Wait for Docs
+  printf "  Docs            ... "
+  for i in $(seq 1 30); do
+    if curl -sf http://localhost:4000 &>/dev/null 2>&1; then
+      echo -e "${GREEN}ready${NC}"
+      break
+    fi
+    if [[ $i -eq 30 ]]; then echo -e "${YELLOW}timeout (may still be starting)${NC}"; fi
+    sleep 2
+  done
+
   echo ""
   ok "All services started"
   echo ""
   echo -e "  ${GREEN}Wren UI:${NC}         http://localhost:3000"
   echo -e "  ${GREEN}AI Service:${NC}      http://localhost:5555"
+  echo -e "  ${GREEN}Docs:${NC}            http://localhost:4000"
   echo ""
 }
 

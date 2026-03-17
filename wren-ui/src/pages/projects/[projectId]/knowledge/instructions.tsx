@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DOC_LINKS } from '@/utils/docLinks';
 import {
   Button,
   Tag,
@@ -186,7 +187,7 @@ export default function ManageInstructions() {
             accuracy and reducing the need for manual refinements.{' '}
             <Link
               className="gray-8 underline"
-              href="https://docs.getwren.ai/oss/guide/knowledge/instructions"
+              href={DOC_LINKS.instructions}
               rel="noopener noreferrer"
               target="_blank"
             >

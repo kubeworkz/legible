@@ -115,5 +115,11 @@ spec:
                 configMapKeyRef:
                   name: wren-config
                   key: IBIS_SERVER_ENDPOINT
+            # documentation
+            - name: NEXT_PUBLIC_DOCS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: wren-config
+                  key: DOCS_URL
           ports:
             - containerPort: 3000

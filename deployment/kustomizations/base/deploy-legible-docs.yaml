@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legible-docs-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: legible-docs
+  template:
+    metadata:
+      labels:
+        app: legible-docs
+    spec:
+      containers:
+        - name: legible-docs
+          image: ghcr.io/kubeworkz/legible-docs:latest
+          ports:
+            - containerPort: 4000
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 3
+            periodSeconds: 10

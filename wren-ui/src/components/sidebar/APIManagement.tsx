@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DOC_LINKS } from '@/utils/docLinks';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { Path, buildPath, MENU_KEY } from '@/utils/enum';
@@ -96,7 +97,7 @@ export default function APIManagement() {
       label: (
         <Link
           className="gray-8 d-inline-flex align-center"
-          href="https://wrenai.readme.io/reference/sql-generation"
+          href={DOC_LINKS.apiReference}
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DOC_LINKS } from '@/utils/docLinks';
 import { createRoot } from 'react-dom/client';
 import { NextRouter } from 'next/router';
 import { Select } from 'antd';
@@ -103,7 +104,7 @@ const playDataModelingGuide = (
             align with business logic, retrieve precise data, and generate
             meaningful insights.{' '}
             <a
-              href="https://docs.getwren.ai/oss/guide/modeling/overview"
+              href={DOC_LINKS.modelingOverview}
               target="_blank"
               rel="noopener noreferrer"
             >

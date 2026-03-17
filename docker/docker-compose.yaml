@@ -161,6 +161,7 @@ services:
       POSTMARK_SERVER_TOKEN: ${POSTMARK_SERVER_TOKEN:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
       APP_BASE_URL: ${APP_BASE_URL:-}
+      NEXT_PUBLIC_DOCS_URL: ${DOCS_URL:-http://localhost:4000}
     ports:
       # HOST_PORT is the port you want to expose to the host machine
       - ${HOST_PORT}:3000
@@ -171,3 +172,11 @@ services:
     depends_on:
       - wren-ai-service
       - wren-engine
+
+  legible-docs:
+    image: legible-docs:local
+    restart: on-failure
+    ports:
+      - ${DOCS_PORT:-4000}:4000
+    networks:
+      - wren

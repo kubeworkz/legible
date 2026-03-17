@@ -4,7 +4,9 @@ import { Button } from 'antd';
 import styled from 'styled-components';
 import { Path, buildPath } from '@/utils/enum';
 import { DiscordIcon, GithubIcon } from '@/utils/icons';
+import BookOutlined from '@ant-design/icons/BookOutlined';
 import SettingOutlined from '@ant-design/icons/SettingOutlined';
+import { DOC_LINKS } from '@/utils/docLinks';
 import Home, { Props as HomeSidebarProps } from './Home';
 import Modeling, { Props as ModelingSidebarProps } from './Modeling';
 import Knowledge from './Knowledge';
@@ -120,6 +122,16 @@ export default function Sidebar(props: Props) {
         <StyledButton type="text" block>
           <Link
             className="d-flex align-center"
+            href={DOC_LINKS.quickstart}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <BookOutlined className="mr-2" style={{ fontSize: 16 }} /> Documentation
+          </Link>
+        </StyledButton>
+        <StyledButton type="text" block>
+          <Link
+            className="d-flex align-center"
             href="https://discord.com/invite/5DvshJqG8Z"
             target="_blank"
             rel="noopener noreferrer"
@@ -132,7 +144,7 @@ export default function Sidebar(props: Props) {
         <StyledButton type="text" block>
           <Link
             className="d-flex align-center"
-            href="https://github.com/Canner/WrenAI"
+            href="https://github.com/kubeworkz/legible"
             target="_blank"
             rel="noopener noreferrer"
             data-ph-capture="true"

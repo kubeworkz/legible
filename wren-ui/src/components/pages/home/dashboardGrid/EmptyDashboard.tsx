@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DOC_LINKS } from '@/utils/docLinks';
 import Image from 'next/image';
 import { Row, Col } from 'antd';
 import { Logo } from '@/components/Logo';
@@ -52,7 +53,7 @@ const EmptyDashboard = (props: {
           Follow these steps to pin charts to your dashboard.{' '}
           <Link
             className="gray-8 underline"
-            href="https://docs.getwren.ai/oss/guide/home/dashboard"
+            href={DOC_LINKS.dashboard}
             rel="noopener noreferrer"
             target="_blank"
           >

@@ -1,0 +1,26 @@
+/**
+ * Legible docs theme — complements the main app branding.
+ */
+
+:root {
+  --ifm-color-primary: #3a6ea5;
+  --ifm-color-primary-dark: #34639a;
+  --ifm-color-primary-darker: #305d91;
+  --ifm-color-primary-darkest: #284d78;
+  --ifm-color-primary-light: #4079b0;
+  --ifm-color-primary-lighter: #467fb6;
+  --ifm-color-primary-lightest: #5a91c3;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #5a9fd4;
+  --ifm-color-primary-dark: #4591cd;
+  --ifm-color-primary-darker: #3d8ac9;
+  --ifm-color-primary-darkest: #2e76b3;
+  --ifm-color-primary-light: #6facdb;
+  --ifm-color-primary-lighter: #77b2de;
+  --ifm-color-primary-lightest: #96c5e7;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}

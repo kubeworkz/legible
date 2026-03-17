@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import { DOC_LINKS } from '@/utils/docLinks';
 import Image from 'next/image';
 import { useEffect } from 'react';
 import styled from 'styled-components';
@@ -119,7 +120,7 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
             syntax.
             <Typography.Link
               className="underline ml-1"
-              href="https://docs.getwren.ai/oss/guide/home/wren_sql"
+              href={DOC_LINKS.wrenSQL}
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { DOC_LINKS } from '@/utils/docLinks';
 import {
   Alert,
   Badge,
@@ -360,7 +361,7 @@ export default function RlsPolicyDrawer(props: Props) {
             <>
               First time setting up a policy?{' '}
               <a
-                href="https://docs.getwren.ai/cp/guide/security/rls"
+                href={DOC_LINKS.rlsPolicy}
                 target="_blank"
                 rel="noopener noreferrer"
               >

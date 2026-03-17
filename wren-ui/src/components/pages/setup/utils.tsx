@@ -12,6 +12,7 @@ import SelectModels from './SelectModels';
 import DefineRelations from './DefineRelations';
 import { SampleDatasetName } from '@/apollo/client/graphql/__types__';
 import { ERROR_CODES } from '@/utils/errorHandler';
+import { DOC_LINKS } from '@/utils/docLinks';
 import {
   getDataSourceConfig,
   getDataSourceFormComponent,
@@ -62,62 +63,62 @@ export const SETUP_STEPS = {
 export const DATA_SOURCE_OPTIONS = {
   [DATA_SOURCES.BIG_QUERY]: {
     ...getDataSourceConfig(DATA_SOURCES.BIG_QUERY),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/bigquery',
+    guide: DOC_LINKS.connectBigQuery,
     disabled: false,
   },
   [DATA_SOURCES.DUCKDB]: {
     ...getDataSourceConfig(DATA_SOURCES.DUCKDB),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/duckdb',
+    guide: DOC_LINKS.connectDuckDB,
     disabled: false,
   },
   [DATA_SOURCES.POSTGRES]: {
     ...getDataSourceConfig(DATA_SOURCES.POSTGRES),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/postgresql',
+    guide: DOC_LINKS.connectPostgres,
     disabled: false,
   },
   [DATA_SOURCES.MYSQL]: {
     ...getDataSourceConfig(DATA_SOURCES.MYSQL),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/mysql',
+    guide: DOC_LINKS.connectMySQL,
     disabled: false,
   },
   [DATA_SOURCES.ORACLE]: {
     ...getDataSourceConfig(DATA_SOURCES.ORACLE),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/oracle',
+    guide: DOC_LINKS.connectOracle,
     disabled: false,
   },
   [DATA_SOURCES.MSSQL]: {
     ...getDataSourceConfig(DATA_SOURCES.MSSQL),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/sqlserver',
+    guide: DOC_LINKS.connectSQLServer,
     disabled: false,
   },
   [DATA_SOURCES.CLICK_HOUSE]: {
     ...getDataSourceConfig(DATA_SOURCES.CLICK_HOUSE),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/clickhouse',
+    guide: DOC_LINKS.connectClickHouse,
     disabled: false,
   },
   [DATA_SOURCES.TRINO]: {
     ...getDataSourceConfig(DATA_SOURCES.TRINO),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/trino',
+    guide: DOC_LINKS.connectTrino,
     disabled: false,
   },
   [DATA_SOURCES.SNOWFLAKE]: {
     ...getDataSourceConfig(DATA_SOURCES.SNOWFLAKE),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/snowflake',
+    guide: DOC_LINKS.connectSnowflake,
     disabled: false,
   },
   [DATA_SOURCES.ATHENA]: {
     ...getDataSourceConfig(DATA_SOURCES.ATHENA),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/athena',
+    guide: DOC_LINKS.connectAthena,
     disabled: false,
   },
   [DATA_SOURCES.REDSHIFT]: {
     ...getDataSourceConfig(DATA_SOURCES.REDSHIFT),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/redshift',
+    guide: DOC_LINKS.connectRedshift,
     disabled: false,
   },
   [DATA_SOURCES.DATABRICKS]: {
     ...getDataSourceConfig(DATA_SOURCES.DATABRICKS),
-    guide: 'https://docs.getwren.ai/oss/guide/connect/databricks',
+    guide: DOC_LINKS.connectDatabricks,
     disabled: false,
   },
 } as { [key: string]: ButtonOption };
@@ -126,17 +127,17 @@ export const TEMPLATE_OPTIONS = {
   [SampleDatasetName.ECOMMERCE]: {
     label: 'E-commerce',
     IconComponent: ShoppingCartOutlined,
-    guide: 'https://docs.getwren.ai/oss/getting_started/sample_data/ecommerce',
+    guide: DOC_LINKS.sampleEcommerce,
   },
   [SampleDatasetName.HR]: {
     label: 'Human Resource',
     IconComponent: IdCardOutlined,
-    guide: 'https://docs.getwren.ai/oss/getting_started/sample_data/hr',
+    guide: DOC_LINKS.sampleHR,
   },
   [SampleDatasetName.CARD_TRANSACTION]: {
     label: 'Card Transaction',
     IconComponent: CreditCardOutlined,
-    guide: 'https://docs.getwren.ai/oss/getting_started/sample_data/card_transaction',
+    guide: DOC_LINKS.sampleCardTransaction,
   },
   [SampleDatasetName.HOTEL_RATING]: {
     label: 'Hotel Rating',
@@ -176,7 +177,7 @@ export const getPostgresErrorMessage = (error: Record<string, any>) => {
         If you are having trouble connecting to your PostgreSQL database, please
         refer to our{' '}
         <a
-          href="https://docs.getwren.ai/oss/guide/connect/postgresql#connect"
+          href={DOC_LINKS.connectPostgresTroubleshoot}
           target="_blank"
           rel="noopener noreferrer"
         >

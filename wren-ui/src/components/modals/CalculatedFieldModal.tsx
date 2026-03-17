@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DOC_LINKS } from '@/utils/docLinks';
 import { Modal, Form, Input, Typography, Button, Alert } from 'antd';
 import LinkOutlined from '@ant-design/icons/LinkOutlined';
 import { FORM_MODE } from '@/utils/enum';
@@ -151,7 +152,7 @@ export default function AddCalculatedFieldModal(props: Props) {
             <LinkOutlined className="gray-6 mr-2" />
             <Typography.Link
               type="secondary"
-              href="https://docs.getwren.ai/oss/guide/modeling/models#update-primary-key"
+              href={DOC_LINKS.modelingPrimaryKey}
               target="_blank"
               rel="noopener noreferrer"
             >

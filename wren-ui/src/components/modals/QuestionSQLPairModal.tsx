@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { DOC_LINKS } from '@/utils/docLinks';
 import styled from 'styled-components';
 import { Alert, Button, Form, Input, Modal, Typography } from 'antd';
 import { Logo } from '@/components/Logo';
@@ -218,7 +219,7 @@ export default function QuestionSQLPairModal(props: Props) {
                 based on ANSI SQL and optimized for Wren AI.{` `}
                 <Typography.Link
                   type="secondary"
-                  href="https://docs.getwren.ai/oss/guide/home/wren_sql"
+                  href={DOC_LINKS.wrenSQL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DOC_LINKS } from '@/utils/docLinks';
 import { useState } from 'react';
 import { Table, TableColumnsType, Button, Tag, Typography } from 'antd';
 import { getAbsoluteTime } from '@/utils/time';
@@ -177,7 +178,7 @@ export default function APIHistory() {
               inputs, responses, and execution details.{' '}
               <Link
                 className="gray-8 underline mr-2"
-                href="https://docs.getwren.ai/oss/guide/api-access/history"
+                href={DOC_LINKS.apiHistory}
                 target="_blank"
                 rel="noopener noreferrer"
               >

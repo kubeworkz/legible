@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { DOC_LINKS } from '@/utils/docLinks';
 import { isEmpty, debounce } from 'lodash';
 import clsx from 'clsx';
 import { Button, Typography, Tabs, Tag, Tooltip } from 'antd';
@@ -47,7 +48,7 @@ const knowledgeTooltip = (
     <br />
     <Typography.Link
       className="gray-1 underline"
-      href="https://docs.getwren.ai/oss/guide/knowledge/question-sql-pairs#save-to-knowledge"
+      href={DOC_LINKS.questionSQLPairsSave}
       target="_blank"
       rel="noopener noreferrer"
     >
