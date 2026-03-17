@@ -57,7 +57,7 @@ export const DOC_LINKS = {
 
   // API
   apiHistory: doc('/guides/api-access'),
-  apiReference: doc('/guides/api-access#api-reference'),
+  apiReference: doc('/api-reference/overview'),
 
   // Security
   rlsPolicy: doc('/guides/data-security'),

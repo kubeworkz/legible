@@ -22,7 +22,7 @@
 | **Talk to Your Data** | Ask in any language → precise SQL & answers | Slash the SQL learning curve﻿ |
 | **GenBI Insights** | AI-written summaries, charts & reports | Decision-ready context in one click﻿ |
 | **Semantic Layer** | MDL models encode schema, metrics, joins | Keeps LLM outputs accurate & governed﻿ |
-| **Embed via API**  | Generate queries & charts inside your apps ([API Docs](https://wrenai.readme.io/reference/cloud-getting-started)) | Build custom agents, SaaS features, chatbots﻿ |
+| **Embed via API**  | Generate queries & charts inside your apps ([API Docs](http://docs.kubeworkz.io/api-reference/overview/)) | Build custom agents, SaaS features, chatbots﻿ |
 
 ## 🚀 Getting Started
 
@@ -76,11 +76,11 @@ Check [configuration examples here](https://github.com/kubeworkz/legible/tree/ma
 
 ## 📚 Documentation
 
-Visit [Legible documentation](https://docs.kubieworkz.io) to view the full documentation.
+Visit [Legible documentation](https://docs.kubeworkz.io) to view the full documentation.
 
 ## 📪 Keep Posted?
 
-[Subscribe to our blog](https://www.getwren.ai/blog/?utm_source=github&utm_medium=content&utm_campaign=readme) and [Follow our LinkedIn](https://www.linkedin.com/company/wrenai)
+[Subscribe to our blog](https://www.getwren.ai/blog/?utm_source=github&utm_medium=content&utm_campaign=readme) and [Follow our LinkedIn](www.linkedin.com/in/legiblequery)
 
 ## 🛠️ Contribution
 
