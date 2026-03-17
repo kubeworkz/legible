@@ -23,7 +23,7 @@ export class QueryUsageResolver {
 
   public async queryUsageStats(
     _root: any,
-    args: { filter?: { projectId?: number; startDate?: string; endDate?: string } },
+    args: { filter?: { projectId?: number; startDate?: string; endDate?: string; sourcePrefix?: string } },
     ctx: IContext,
   ) {
     await requireAuth(ctx);
@@ -40,6 +40,7 @@ export class QueryUsageResolver {
       endDate: args.filter?.endDate
         ? new Date(args.filter.endDate)
         : undefined,
+      sourcePrefix: args.filter?.sourcePrefix,
     };
     return ctx.queryMeteringService.getUsageStats(filter);
   }

@@ -1,12 +1,15 @@
 import { useMemo, useCallback } from 'react';
-import { Typography, message, Button, Alert } from 'antd';
+import { Typography, message, Button, Alert, Progress, Card, Row, Col } from 'antd';
 import styled from 'styled-components';
 import CopyOutlined from '@ant-design/icons/CopyOutlined';
 import KeyOutlined from '@ant-design/icons/KeyOutlined';
+import BarChartOutlined from '@ant-design/icons/BarChartOutlined';
 import { useRouter } from 'next/router';
+import { useQuery } from '@apollo/client';
 import SettingsLayout from '@/components/layouts/SettingsLayout';
 import useProject from '@/hooks/useProject';
 import { Path, buildPath } from '@/utils/enum';
+import { QUERY_USAGE_OVERVIEW } from '@/apollo/client/graphql/queryUsage';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -65,6 +68,19 @@ const FieldDescription = styled.div`
   margin-bottom: 16px;
 `;
 
+const StatLabel = styled.div`
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+  margin-bottom: 2px;
+`;
+
+const StatValue = styled.div`
+  font-size: 20px;
+  font-weight: 600;
+`;
+
+const FREE_TIER_LIMIT = 25;
+
 function copyText(text: string) {
   if (navigator.clipboard) {
     navigator.clipboard
@@ -95,6 +111,12 @@ export default function SettingsMcp() {
   const { currentProject } = useProject();
   const router = useRouter();
 
+  // Fetch usage overview for the summary card
+  const { data: usageData } = useQuery(QUERY_USAGE_OVERVIEW, {
+    fetchPolicy: 'cache-and-network',
+  });
+  const overview = usageData?.queryUsageOverview;
+
   // Build the MCP endpoint URL.
   // In production this is the same host the user is on, port 9000.
   const mcpEndpoint = useMemo(() => {
@@ -106,6 +128,12 @@ export default function SettingsMcp() {
   const navigateToApiKeys = useCallback(() => {
     if (currentProject?.id) {
       router.push(buildPath(Path.SettingsProjectApiKeys, currentProject.id));
+    }
+  }, [currentProject, router]);
+
+  const navigateToUsage = useCallback(() => {
+    if (currentProject?.id) {
+      router.push(buildPath(Path.APIManagementQueryUsage, currentProject.id));
     }
   }, [currentProject, router]);
 
@@ -185,6 +213,66 @@ export default function SettingsMcp() {
             Manage Project API Keys
           </Button>
         </Section>
+
+        {overview && (
+          <Section>
+            <FieldLabel>Query Usage</FieldLabel>
+            <FieldDescription>
+              MCP queries count toward your organization&apos;s usage quota.
+            </FieldDescription>
+            <Card size="small" style={{ marginBottom: 12 }}>
+              <Row gutter={24}>
+                <Col span={8}>
+                  <StatLabel>Queries This Month</StatLabel>
+                  <StatValue>{overview.summary.totalQueries}</StatValue>
+                </Col>
+                <Col span={8}>
+                  <StatLabel>Free Tier Remaining</StatLabel>
+                  <StatValue
+                    style={{
+                      color:
+                        overview.freeTierRemaining <= 0
+                          ? '#cf1322'
+                          : undefined,
+                    }}
+                  >
+                    {overview.freeTierRemaining}
+                  </StatValue>
+                </Col>
+                <Col span={8}>
+                  <StatLabel>Total Cost</StatLabel>
+                  <StatValue>${overview.summary.totalCost.toFixed(2)}</StatValue>
+                </Col>
+              </Row>
+              {overview.isFreeTier && (
+                <Progress
+                  percent={Math.min(
+                    100,
+                    Math.round(
+                      ((FREE_TIER_LIMIT - overview.freeTierRemaining) /
+                        FREE_TIER_LIMIT) *
+                        100,
+                    ),
+                  )}
+                  size="small"
+                  status={
+                    overview.freeTierRemaining <= 0 ? 'exception' : 'active'
+                  }
+                  style={{ marginTop: 12 }}
+                  format={() =>
+                    `${FREE_TIER_LIMIT - overview.freeTierRemaining} / ${FREE_TIER_LIMIT}`
+                  }
+                />
+              )}
+            </Card>
+            <Button
+              icon={<BarChartOutlined />}
+              onClick={navigateToUsage}
+            >
+              View Full Usage Dashboard
+            </Button>
+          </Section>
+        )}
 
         <Section>
           <FieldLabel>Client Configuration</FieldLabel>

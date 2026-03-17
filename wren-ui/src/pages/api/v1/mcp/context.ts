@@ -68,7 +68,7 @@ export default async function handler(
       return res.status(401).json({ error: 'Invalid or expired API key' });
     }
 
-    const { projectId, organizationId, keyId } = keyResult;
+    const { projectId, organizationId, keyId, rateLimitRpm, rateLimitRpd } = keyResult;
 
     // Check query allowance
     const allowance = await queryMeteringService.checkQueryAllowance(organizationId);
@@ -138,6 +138,8 @@ export default async function handler(
       manifestStr,
       connectionInfo,
       queryAllowance: allowance,
+      rateLimitRpm: rateLimitRpm ?? null,
+      rateLimitRpd: rateLimitRpd ?? null,
     });
   } catch (err) {
     logger.error(`MCP context error: ${(err as Error).message}`);

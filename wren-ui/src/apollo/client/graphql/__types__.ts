@@ -1542,6 +1542,7 @@ export type QueryUsageFilterInput = {
   projectId?: Maybe<Scalars['Int']>;
   startDate?: Maybe<Scalars['String']>;
   endDate?: Maybe<Scalars['String']>;
+  sourcePrefix?: Maybe<Scalars['String']>;
 };
 
 export type QueryQueryUsageOverviewArgs = {};

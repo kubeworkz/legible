@@ -48,6 +48,7 @@ export interface QueryUsageFilter {
   userId?: number;
   startDate?: Date;
   endDate?: Date;
+  sourcePrefix?: string;
 }
 
 // ── Interface ───────────────────────────────────────────
@@ -105,6 +106,7 @@ export class QueryUsageRepository
     this.applyDateFilter(qb, filter);
     if (filter.projectId) qb.where('project_id', filter.projectId);
     if (filter.userId) qb.where('user_id', filter.userId);
+    if (filter.sourcePrefix) qb.where('source', 'like', `${filter.sourcePrefix}%`);
 
     const row: any = await qb
       .select(
@@ -149,6 +151,7 @@ export class QueryUsageRepository
       .where('organization_id', filter.organizationId);
     this.applyDateFilter(qb, filter);
     if (filter.projectId) qb.where('project_id', filter.projectId);
+    if (filter.sourcePrefix) qb.where('source', 'like', `${filter.sourcePrefix}%`);
 
     const rows = await qb
       .select('source')
@@ -170,6 +173,7 @@ export class QueryUsageRepository
     const qb = this.knex(this.tableName)
       .where('organization_id', filter.organizationId);
     this.applyDateFilter(qb, filter);
+    if (filter.sourcePrefix) qb.where('source', 'like', `${filter.sourcePrefix}%`);
 
     const rows = await qb
       .select('project_id')
@@ -192,6 +196,7 @@ export class QueryUsageRepository
       .where('organization_id', filter.organizationId);
     this.applyDateFilter(qb, filter);
     if (filter.projectId) qb.where('project_id', filter.projectId);
+    if (filter.sourcePrefix) qb.where('source', 'like', `${filter.sourcePrefix}%`);
 
     const rows = await qb
       .select(this.knex.raw("DATE(created_at) as date"))

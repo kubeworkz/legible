@@ -1,4 +1,5 @@
 import base64
+from collections import defaultdict
 from contextvars import ContextVar
 import hashlib
 import time
@@ -38,11 +39,64 @@ _request_project_ctx: ContextVar[dict | None] = ContextVar("_request_project_ctx
 # Cache validated project contexts to avoid hitting wren-ui on every MCP call
 # Key: sha256(api_key), Value: { ..., "expires_at": unix_timestamp }
 _PROJECT_CTX_CACHE: dict[str, dict] = {}
+# Reverse index: org_id -> set of cache keys (for org-wide invalidation)
+_ORG_CACHE_KEYS: dict[int, set[str]] = defaultdict(set)
 _CACHE_TTL_SECONDS = 300  # 5 minutes
 
 
 def _cache_key(api_key: str) -> str:
     return hashlib.sha256(api_key.encode()).hexdigest()
+
+
+# ── In-memory sliding-window rate limiter ────────────────
+class _RateLimiter:
+    """Per-key sliding-window rate limiter (RPM and RPD)."""
+
+    def __init__(self):
+        # key_id -> list of epoch-second timestamps
+        self._rpm_windows: dict[int, list[float]] = defaultdict(list)
+        self._rpd_windows: dict[int, list[float]] = defaultdict(list)
+
+    def check(self, key_id: int, rpm_limit: int | None, rpd_limit: int | None) -> tuple[bool, str | None, int]:
+        """Check if a request is allowed. Returns (allowed, reason, retry_after_seconds)."""
+        now = time.time()
+
+        # Check RPM
+        if rpm_limit is not None:
+            window = self._rpm_windows[key_id]
+            cutoff = now - 60
+            # Prune old entries
+            self._rpm_windows[key_id] = window = [t for t in window if t > cutoff]
+            if len(window) >= rpm_limit:
+                oldest = window[0] if window else now
+                retry_after = int(oldest + 60 - now) + 1
+                return False, f"Rate limit exceeded: {rpm_limit} requests per minute", retry_after
+
+        # Check RPD
+        if rpd_limit is not None:
+            window = self._rpd_windows[key_id]
+            cutoff = now - 86400
+            self._rpd_windows[key_id] = window = [t for t in window if t > cutoff]
+            if len(window) >= rpd_limit:
+                oldest = window[0] if window else now
+                retry_after = int(oldest + 86400 - now) + 1
+                return False, f"Rate limit exceeded: {rpd_limit} requests per day", retry_after
+
+        return True, None, 0
+
+    def record(self, key_id: int) -> None:
+        """Record a request for the given key."""
+        now = time.time()
+        self._rpm_windows[key_id].append(now)
+        self._rpd_windows[key_id].append(now)
+
+    def clear(self, key_id: int) -> None:
+        """Clear windows for a key."""
+        self._rpm_windows.pop(key_id, None)
+        self._rpd_windows.pop(key_id, None)
+
+
+_rate_limiter = _RateLimiter()
 
 
 async def _validate_api_key(api_key: str) -> dict | None:
@@ -73,6 +127,10 @@ async def _validate_api_key(api_key: str) -> dict | None:
         ctx = resp.json()
         ctx["expires_at"] = time.time() + _CACHE_TTL_SECONDS
         _PROJECT_CTX_CACHE[cache_k] = ctx
+        # Track org→cache_key for org-wide invalidation
+        org_id = ctx.get("organizationId")
+        if org_id is not None:
+            _ORG_CACHE_KEYS[org_id].add(cache_k)
         return ctx
     except ValueError:
         raise
@@ -516,9 +574,12 @@ async def query(sql: str) -> str:
     if project_ctx and AUTH_ENABLED and hasattr(response, 'status_code') and response.status_code == 200:
         sql_hash = hashlib.sha256(sql.encode()).hexdigest()[:16]
         await _record_query_metering(project_ctx, duration_ms, sql_hash)
-        # Invalidate cache so next request re-checks allowance
-        cache_k = _cache_key(project_ctx.get("_api_key", ""))
-        _PROJECT_CTX_CACHE.pop(cache_k, None)
+        # Invalidate caches for ALL keys in the same org so quota is re-checked
+        org_id = project_ctx.get("organizationId")
+        if org_id is not None:
+            for ck in list(_ORG_CACHE_KEYS.get(org_id, [])):
+                _PROJECT_CTX_CACHE.pop(ck, None)
+            _ORG_CACHE_KEYS.pop(org_id, None)
 
     return response.text
 
@@ -979,6 +1040,20 @@ if AUTH_ENABLED and MCP_TRANSPORT == "streamable-http":
                     {"error": "Invalid or expired API key"},
                     status_code=401,
                 )
+
+            # ── Per-key rate limiting ──
+            key_id = project_ctx.get("keyId")
+            rpm_limit = project_ctx.get("rateLimitRpm")
+            rpd_limit = project_ctx.get("rateLimitRpd")
+            if key_id is not None and (rpm_limit is not None or rpd_limit is not None):
+                allowed, reason, retry_after = _rate_limiter.check(key_id, rpm_limit, rpd_limit)
+                if not allowed:
+                    return JSONResponse(
+                        {"error": reason},
+                        status_code=429,
+                        headers={"Retry-After": str(retry_after)},
+                    )
+                _rate_limiter.record(key_id)
 
             # Store the raw key for cache invalidation in query metering
             project_ctx["_api_key"] = api_key

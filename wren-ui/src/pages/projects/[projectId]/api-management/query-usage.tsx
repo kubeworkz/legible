@@ -12,6 +12,7 @@ import {
   Progress,
   DatePicker,
   Space,
+  Segmented,
 } from 'antd';
 import styled from 'styled-components';
 import SiderLayout from '@/components/layouts/SiderLayout';
@@ -169,14 +170,19 @@ export default function QueryUsagePage() {
   const [dateRange, setDateRange] = useState<
     [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
   >(null);
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
 
   const filter = useMemo(() => {
-    if (!dateRange || !dateRange[0] || !dateRange[1]) return undefined;
-    return {
-      startDate: dateRange[0].format('YYYY-MM-DD'),
-      endDate: dateRange[1].format('YYYY-MM-DD'),
-    };
-  }, [dateRange]);
+    const f: Record<string, string | undefined> = {};
+    if (dateRange && dateRange[0] && dateRange[1]) {
+      f.startDate = dateRange[0].format('YYYY-MM-DD');
+      f.endDate = dateRange[1].format('YYYY-MM-DD');
+    }
+    if (sourceFilter === 'mcp') {
+      f.sourcePrefix = 'mcp_';
+    }
+    return Object.keys(f).length > 0 ? f : undefined;
+  }, [dateRange, sourceFilter]);
 
   const {
     data: overviewData,
@@ -310,17 +316,32 @@ export default function QueryUsagePage() {
             )}
           </FreeTierBar>
 
-          {/* ── Date Range Filter ──────────────────────── */}
-          <div>
-            <Text strong style={{ marginRight: 12 }}>
-              Filter by date range:
-            </Text>
-            <RangePicker
-              value={dateRange}
-              onChange={(dates) => setDateRange(dates)}
-              allowClear
-              style={{ width: 300 }}
-            />
+          {/* ── Filters ─────────────────────────────── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div>
+              <Text strong style={{ marginRight: 8 }}>
+                Source:
+              </Text>
+              <Segmented
+                value={sourceFilter}
+                onChange={(val) => setSourceFilter(val as string)}
+                options={[
+                  { label: 'All Sources', value: 'all' },
+                  { label: 'MCP Only', value: 'mcp' },
+                ]}
+              />
+            </div>
+            <div>
+              <Text strong style={{ marginRight: 8 }}>
+                Date range:
+              </Text>
+              <RangePicker
+                value={dateRange}
+                onChange={(dates) => setDateRange(dates)}
+                allowClear
+                style={{ width: 300 }}
+              />
+            </div>
           </div>
 
           {/* ── Usage by Source ─────────────────────────── */}

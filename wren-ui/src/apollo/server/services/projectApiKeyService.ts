@@ -52,6 +52,9 @@ export interface ValidateProjectApiKeyResult {
   organizationId: number;
   permissions: string[];
   keyId: number;
+  // Per-key rate limits (null = unlimited)
+  rateLimitRpm: number | null;
+  rateLimitRpd: number | null;
 }
 
 export interface IProjectApiKeyService {
@@ -195,6 +198,8 @@ export class ProjectApiKeyService implements IProjectApiKeyService {
       organizationId: record.organizationId,
       permissions,
       keyId: record.id,
+      rateLimitRpm: record.rateLimitRpm ?? null,
+      rateLimitRpd: record.rateLimitRpd ?? null,
     };
   }
 

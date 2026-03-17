@@ -390,6 +390,7 @@ export const typeDefs = gql`
     projectId: Int
     startDate: String
     endDate: String
+    sourcePrefix: String
   }
 
   # ─── End Query Usage Types ────────────────────────────────
