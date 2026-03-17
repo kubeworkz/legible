@@ -20,6 +20,7 @@ import UserOutlined from '@ant-design/icons/UserOutlined';
 import FileSearchOutlined from '@ant-design/icons/FileSearchOutlined';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import DollarOutlined from '@ant-design/icons/DollarOutlined';
+import LinkOutlined from '@ant-design/icons/LinkOutlined';
 
 const { Sider, Content } = Layout;
 
@@ -118,6 +119,13 @@ const projectMenuItems: MenuItem[] = [
     label: 'API Keys',
     icon: <KeyOutlined />,
     path: Path.SettingsProjectApiKeys,
+    visible: ({ canAdmin }) => canAdmin,
+  },
+  {
+    key: 'mcp',
+    label: 'MCP Connection',
+    icon: <LinkOutlined />,
+    path: Path.SettingsMcp,
     visible: ({ canAdmin }) => canAdmin,
   },
   {

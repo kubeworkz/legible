@@ -33,7 +33,8 @@ export default function useRouteGuard() {
       (!canAdmin && pathname.startsWith(Path.SettingsAccessControl)) ||
       (!canAdmin && pathname.startsWith(Path.SettingsDangerZone)) ||
       (!canAdmin && pathname.startsWith(Path.SettingsProjectApiKeys)) ||
-      (!canAdmin && pathname.startsWith(Path.SettingsByok));
+      (!canAdmin && pathname.startsWith(Path.SettingsByok)) ||
+      (!canAdmin && pathname.startsWith(Path.SettingsMcp));
 
     if (shouldRedirect) {
       router.replace(buildPath(Path.Home, currentProjectId));

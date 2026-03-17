@@ -37,6 +37,7 @@ export enum Path {
   SettingsOidcProviders = '/projects/[projectId]/settings/oidc-providers',
   SettingsProjectApiKeys = '/projects/[projectId]/settings/project-api-keys',
   SettingsByok = '/projects/[projectId]/settings/byok',
+  SettingsMcp = '/projects/[projectId]/settings/mcp',
   SettingsUserProfile = '/projects/[projectId]/settings/user/profile',
   SettingsUserDangerZone = '/projects/[projectId]/settings/user/danger-zone',
 }
