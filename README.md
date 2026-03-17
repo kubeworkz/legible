@@ -76,23 +76,23 @@ Check [configuration examples here](https://github.com/kubeworkz/legible/tree/ma
 
 ## 📚 Documentation
 
-Visit [Legible documentation](https://docs.getwren.ai/oss/overview/introduction?utm_source=github&utm_medium=content&utm_campaign=readme) to view the full documentation.
+Visit [Legible documentation](https://docs.kubieworkz.io) to view the full documentation.
 
 ## 📪 Keep Posted?
 
-[Subscribe our blog](https://www.getwren.ai/blog/?utm_source=github&utm_medium=content&utm_campaign=readme) and [Follow our LinkedIn](https://www.linkedin.com/company/wrenai)
+[Subscribe to our blog](https://www.getwren.ai/blog/?utm_source=github&utm_medium=content&utm_campaign=readme) and [Follow our LinkedIn](https://www.linkedin.com/company/wrenai)
 
 ## 🛠️ Contribution
 
 1.	Star ⭐ the repo to show support (it really helps).
 2.	Open an issue for bugs, ideas, or discussions.
-3.	Read [Contribution Guidelines](https://github.com/Canner/WrenAI/blob/main/CONTRIBUTING.md) for setup & PR guidelines.
+3.	Read [Contribution Guidelines](https://github.com/kubeworkz/legible/blob/main/CONTRIBUTING.md) for setup & PR guidelines.
 
 ## ⭐️ Community
 
 - Join developers in our [Discord](https://discord.gg/5DvshJqG8Z) for real-time help and previews.
 - If there are any issues, please visit [GitHub Issues](https://github.com/kubeworkz/legible/issues).
-- Explore our [public roadmap](https://wrenai.notion.site/) to stay updated on upcoming features and improvements!
+- Explore our [public roadmap](https://legible.notion.site/) to stay updated on upcoming features and improvements!
 
 Please note that our [Code of Conduct](./CODE_OF_CONDUCT.md) applies to all Legible community channels. Users are **highly encouraged** to read and adhere to them to avoid repercussions.
 
