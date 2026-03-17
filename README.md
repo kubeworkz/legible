@@ -12,7 +12,7 @@
 > ⚡ GenBI (Generative BI) queries any database in natural language, generates accurate SQL (Text-to-SQL), charts (Text-to-Chart), and AI-powered business intelligence in seconds. ️
 
 <p align="center">
-  <img width="1920" height="1080" alt="1" src="https://github.com/user-attachments/assets/bba9d37a-33e3-49ab-b7cb-32fd6dddc8d1" />
+  <img width="1920" height="1080" alt="1" src="https://github.com/kubeworkz/legible/blob/main/misc/readme1.png" />
 </p>
  
 ## 🤖 Features
@@ -29,19 +29,19 @@
 Using Legible is super simple, you can set it up within 3 minutes, and start to interact with your data!
 
 <p align="center">
-  <img width="1920" height="1080" alt="2" src="https://github.com/user-attachments/assets/6555f539-9ef2-485d-9135-0071741fda96" />
+  <img width="1920" height="1080" alt="2" src="https://github.com/kubeworkz/legible/blob/main/misc/readme3.png" />
 </p>
 
 ## 🏗️ Architecture
 
 <p align="center">
-  <img width="1011" height="682" alt="wrenai-architecture" src="https://github.com/user-attachments/assets/e99b999f-9912-4fa7-921a-9c86b6b83354" />
+  <img width="1011" height="682" alt="wrenai-architecture" src="https://github.com/kubeworkz/legible/blob/main/misc/readme2.png" />
 </p>
 
 
 ## 🔌 Data Sources
 
-If your data source is not listed here, vote for it in our [GitHub discussion thread](https://github.com/kubeworkz/legible/discussions/327). It will be a valuable input for us to decide on the next supported data sources.
+If your data source is not listed here, vote for it in our [GitHub discussion thread](https://github.com/kubeworkz/legible/discussions/3). It will be a valuable input for us to decide on the next supported data sources.
 - Athena (Trino)
 - Redshift
 - BigQuery
