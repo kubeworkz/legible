@@ -64,4 +64,7 @@ export const DOC_LINKS = {
 
   // MCP
   mcpIntegration: doc('/guides/mcp-integration'),
+
+  // CLI
+  cli: doc('/guides/cli'),
 } as const;
