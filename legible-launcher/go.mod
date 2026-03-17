@@ -1,4 +1,4 @@
-module github.com/Canner/WrenAI/wren-launcher
+module github.com/Canner/WrenAI/legible-launcher
 
 go 1.24.9
 

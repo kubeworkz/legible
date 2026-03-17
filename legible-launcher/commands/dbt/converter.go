@@ -12,8 +12,8 @@ import (
 	"github.com/pterm/pterm"
 )
 
-// Note: All struct definitions (WrenMDLManifest, WrenModel, etc.) are defined
-// in wren_mdl.go to prevent "redeclared in this block" compilation errors.
+// Note: All struct definitions (LegibleMDLManifest, LegibleModel, etc.) are defined
+// in legible_mdl.go to prevent "redeclared in this block" compilation errors.
 
 // ConvertOptions holds the options for dbt project conversion
 type ConvertOptions struct {
@@ -93,7 +93,7 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 		pterm.Info.Println("semantic_manifest.json not found, skipping metric and primary key conversion.")
 	}
 
-	// Convert profiles.yml to WrenDataSource (if profiles found)
+	// Convert profiles.yml to LegibleDataSource (if profiles found)
 	var dataSourceGenerated bool
 	var ds DataSource
 	localStoragePath := "." // default value
@@ -130,23 +130,23 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 			ds = dataSources[0]
 
 			// Check if the first data source is duckdb (local file)
-			if localFileDS, ok := dataSources[0].(*WrenLocalFileDataSource); ok {
+			if localFileDS, ok := dataSources[0].(*LegibleLocalFileDataSource); ok {
 				localStoragePath = localFileDS.Url
 				pterm.Info.Printf("Found DuckDB data source, using local storage path: %s\n", localStoragePath)
 			}
 
-			// Create WrenDataSource JSON
-			var wrenDataSource map[string]interface{}
+			// Create LegibleDataSource JSON
+			var legibleDataSource map[string]interface{}
 
 			switch typedDS := ds.(type) {
-			case *WrenPostgresDataSource:
+			case *LegiblePostgresDataSource:
 				var host string
 				if opts.UsedByContainer {
 					host = handleLocalhostForContainer(typedDS.Host)
 				} else {
 					host = typedDS.Host
 				}
-				wrenDataSource = map[string]interface{}{
+				legibleDataSource = map[string]interface{}{
 					"type": "postgres",
 					"properties": map[string]interface{}{
 						"host":     host,
@@ -156,14 +156,14 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 						"password": typedDS.Password,
 					},
 				}
-			case *WrenMSSQLDataSource:
+			case *LegibleMSSQLDataSource:
 				var host string
 				if opts.UsedByContainer {
 					host = handleLocalhostForContainer(typedDS.Host)
 				} else {
 					host = typedDS.Host
 				}
-				wrenDataSource = map[string]interface{}{
+				legibleDataSource = map[string]interface{}{
 					"type": "mssql",
 					"properties": map[string]interface{}{
 						"host":        host,
@@ -176,7 +176,7 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 						"kwargs":      typedDS.Kwargs,
 					},
 				}
-			case *WrenLocalFileDataSource:
+			case *LegibleLocalFileDataSource:
 				var url string
 				if opts.UsedByContainer {
 					// For container usage, the file path will be mounted to the following path
@@ -184,15 +184,15 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 				} else {
 					url = typedDS.Url
 				}
-				wrenDataSource = map[string]interface{}{
+				legibleDataSource = map[string]interface{}{
 					"type": "local_file",
 					"properties": map[string]interface{}{
 						"url":    url,
 						"format": typedDS.Format,
 					},
 				}
-			case *WrenBigQueryDataSource:
-				wrenDataSource = map[string]interface{}{
+			case *LegibleBigQueryDataSource:
+				legibleDataSource = map[string]interface{}{
 					"type": "bigquery",
 					"properties": map[string]interface{}{
 						"project_id":  typedDS.Project,
@@ -200,8 +200,8 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 						"credentials": typedDS.Credentials,
 					},
 				}
-			case *WrenMysqlDataSource:
-				wrenDataSource = map[string]interface{}{
+			case *LegibleMysqlDataSource:
+				legibleDataSource = map[string]interface{}{
 					"type": "mysql",
 					"properties": map[string]interface{}{
 						"host":     typedDS.Host,
@@ -214,15 +214,15 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 				}
 			default:
 				pterm.Warning.Printf("Warning: Unsupported data source type: %s\n", ds.GetType())
-				wrenDataSource = map[string]interface{}{
+				legibleDataSource = map[string]interface{}{
 					"type":       ds.GetType(),
 					"properties": map[string]interface{}{},
 				}
 			}
 
-			// Write WrenDataSource JSON
-			dataSourcePath := filepath.Join(opts.OutputDir, "wren-datasource.json")
-			dataSourceJSON, err := json.MarshalIndent(wrenDataSource, "", "  ")
+			// Write LegibleDataSource JSON
+			dataSourcePath := filepath.Join(opts.OutputDir, "legible-datasource.json")
+			dataSourceJSON, err := json.MarshalIndent(legibleDataSource, "", "  ")
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal data source JSON: %w", err)
 			}
@@ -231,12 +231,12 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 				return nil, fmt.Errorf("failed to write data source file: %w", err)
 			}
 
-			pterm.Success.Printf("✓ WrenDataSource saved to: %s\n", dataSourcePath)
+			pterm.Success.Printf("✓ LegibleDataSource saved to: %s\n", dataSourcePath)
 			dataSourceGenerated = true
 		}
 	}
 
-	// Convert catalog.json to Wren MDL
+	// Convert catalog.json to Legible MDL
 	pterm.Info.Printf("Converting catalog.json from: %s\n", catalogPath)
 
 	// Create a default data source if none was found
@@ -244,13 +244,13 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 		ds = &DefaultDataSource{}
 	}
 
-	manifest, err := ConvertDbtCatalogToWrenMDL(catalogPath, ds, manifestPathForConversion, semanticManifestPathForConversion, opts.IncludeStagingModels)
+	manifest, err := ConvertDbtCatalogToLegibleMDL(catalogPath, ds, manifestPathForConversion, semanticManifestPathForConversion, opts.IncludeStagingModels)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert catalog: %w", err)
 	}
 
-	// Write Wren MDL JSON
-	mdlPath := filepath.Join(opts.OutputDir, "wren-mdl.json")
+	// Write Legible MDL JSON
+	mdlPath := filepath.Join(opts.OutputDir, "legible-mdl.json")
 	mdlJSON, err := json.MarshalIndent(manifest, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal MDL JSON: %w", err)
@@ -260,7 +260,7 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 		return nil, fmt.Errorf("failed to write MDL file: %w", err)
 	}
 
-	pterm.Success.Printf("✓ Wren MDL saved to: %s\n", mdlPath)
+	pterm.Success.Printf("✓ Legible MDL saved to: %s\n", mdlPath)
 
 	// Summary
 	pterm.Success.Println("\n🎉 Conversion completed successfully!")
@@ -271,15 +271,15 @@ func ConvertDbtProjectCore(opts ConvertOptions) (*ConvertResult, error) {
 
 	if dataSourceGenerated {
 		pterm.Info.Println("Generated files:")
-		pterm.Info.Printf("  - WrenDataSource: %s\n", filepath.Join(opts.OutputDir, "wren-datasource.json"))
-		pterm.Info.Printf("  - Wren MDL: %s\n", filepath.Join(opts.OutputDir, "wren-mdl.json"))
+		pterm.Info.Printf("  - LegibleDataSource: %s\n", filepath.Join(opts.OutputDir, "legible-datasource.json"))
+		pterm.Info.Printf("  - Legible MDL: %s\n", filepath.Join(opts.OutputDir, "legible-mdl.json"))
 	} else {
 		pterm.Info.Println("Generated files:")
-		pterm.Info.Printf("  - Wren MDL: %s\n", filepath.Join(opts.OutputDir, "wren-mdl.json"))
+		pterm.Info.Printf("  - Legible MDL: %s\n", filepath.Join(opts.OutputDir, "legible-mdl.json"))
 		if profilesPath != "" {
-			pterm.Warning.Println("  - WrenDataSource: Not generated (no compatible data sources found)")
+			pterm.Warning.Println("  - LegibleDataSource: Not generated (no compatible data sources found)")
 		} else {
-			pterm.Warning.Println("  - WrenDataSource: Not generated (profiles.yml not found)")
+			pterm.Warning.Println("  - LegibleDataSource: Not generated (profiles.yml not found)")
 		}
 	}
 
@@ -302,9 +302,9 @@ func handleLocalhostForContainer(host string) string {
 	return host
 }
 
-// ConvertDbtCatalogToWrenMDL is the main function to convert a dbt catalog into a Wren MDL manifest.
+// ConvertDbtCatalogToLegibleMDL is the main function to convert a dbt catalog into a Legible MDL manifest.
 // It orchestrates the reading of dbt artifacts and processes each dbt node to convert it into a Wren model.
-func ConvertDbtCatalogToWrenMDL(catalogPath string, dataSource DataSource, manifestPath string, semanticManifestPath string, includeStagingModels bool) (*WrenMDLManifest, error) {
+func ConvertDbtCatalogToLegibleMDL(catalogPath string, dataSource DataSource, manifestPath string, semanticManifestPath string, includeStagingModels bool) (*LegibleMDLManifest, error) {
 	// --- 1. Read and Parse All Necessary DBT Artifact Files ---
 
 	// Read and unmarshal the primary catalog.json file.
@@ -342,12 +342,12 @@ func ConvertDbtCatalogToWrenMDL(catalogPath string, dataSource DataSource, manif
 
 	// --- 2. Initialize Wren Manifest and Pre-process Metadata ---
 
-	manifest := &WrenMDLManifest{
-		JsonSchema:      "https://raw.githubusercontent.com/Canner/WrenAI/main/wren-mdl/mdl.schema.json",
+	manifest := &LegibleMDLManifest{
+		JsonSchema:      "https://raw.githubusercontent.com/Canner/Legible/main/wren-mdl/mdl.schema.json",
 		Catalog:         "wren",
 		Schema:          "public",
 		EnumDefinitions: []EnumDefinition{},
-		Models:          []WrenModel{},
+		Models:          []LegibleModel{},
 		Relationships:   []Relationship{},
 		Metrics:         []Metric{},
 		Views:           []View{},
@@ -399,7 +399,7 @@ func ConvertDbtCatalogToWrenMDL(catalogPath string, dataSource DataSource, manif
 		}
 
 		// Perform the conversion for the single node.
-		model, err := convertDbtNodeToWrenModel(nodeKey, nodeMap, dataSource, manifestData, columnToEnumNameMap, columnToNotNullMap, modelToPrimaryKeyMap)
+		model, err := convertDbtNodeToLegibleModel(nodeKey, nodeMap, dataSource, manifestData, columnToEnumNameMap, columnToNotNullMap, modelToPrimaryKeyMap)
 		if err != nil {
 			pterm.Warning.Printf("Failed to convert model %s: %v\n", nodeKey, err)
 			continue
@@ -416,7 +416,7 @@ func ConvertDbtCatalogToWrenMDL(catalogPath string, dataSource DataSource, manif
 
 	// Generate metrics from the semantic manifest.
 	if semanticManifestData != nil {
-		manifest.Metrics = convertDbtMetricsToWrenMetrics(semanticManifestData)
+		manifest.Metrics = convertDbtMetricsToLegibleMetrics(semanticManifestData)
 	}
 
 	return manifest, nil
@@ -703,10 +703,10 @@ func processColumnForTests(nodeKey, modelName, columnName string, colMap map[str
 	}
 }
 
-// convertDbtMetricsToWrenMetrics converts dbt metrics from the semantic manifest into the Wren MDL format.
+// convertDbtMetricsToLegibleMetrics converts dbt metrics from the semantic manifest into the Legible MDL format.
 // It serves as the main entry point for metric conversion, orchestrating the creation of lookup tables
 // and processing each metric definition.
-func convertDbtMetricsToWrenMetrics(semanticData map[string]interface{}) []Metric {
+func convertDbtMetricsToLegibleMetrics(semanticData map[string]interface{}) []Metric {
 	var wrenMetrics []Metric
 
 	// --- 1. Pre-process semantic models to build fast lookup maps ---
@@ -948,13 +948,13 @@ func extractDescriptionsFromManifest(manifestData map[string]interface{}, nodeKe
 	return modelDescription, columnDescriptions
 }
 
-// buildWrenColumn creates a single WrenColumn from its corresponding dbt column data map.
+// buildLegibleColumn creates a single LegibleColumn from its corresponding dbt column data map.
 // It populates the name, type, and properties like enums, descriptions, and comments.
-func buildWrenColumn(colMap map[string]interface{}, nodeKey string, dataSource DataSource, columnDescriptions map[string]string, columnToEnumNameMap map[string]string, columnToNotNullMap map[string]bool) WrenColumn {
+func buildLegibleColumn(colMap map[string]interface{}, nodeKey string, dataSource DataSource, columnDescriptions map[string]string, columnToEnumNameMap map[string]string, columnToNotNullMap map[string]bool) LegibleColumn {
 	columnName := getStringFromMap(colMap, "name", "")
 	columnKey := fmt.Sprintf("%s.%s", nodeKey, columnName)
 
-	column := WrenColumn{
+	column := LegibleColumn{
 		Name:        columnName,
 		DisplayName: getStringFromMap(getMapFromMap(colMap, "meta", nil), "label", ""),
 		Type:        dataSource.MapType(getStringFromMap(colMap, "type", "")),
@@ -984,8 +984,8 @@ func buildWrenColumn(colMap map[string]interface{}, nodeKey string, dataSource D
 	return column
 }
 
-// convertAndSortColumns extracts, sorts, and converts dbt columns to the WrenColumn format.
-func convertAndSortColumns(nodeData map[string]interface{}, nodeKey string, dataSource DataSource, columnDescriptions map[string]string, columnToEnumNameMap map[string]string, columnToNotNullMap map[string]bool) ([]WrenColumn, error) {
+// convertAndSortColumns extracts, sorts, and converts dbt columns to the LegibleColumn format.
+func convertAndSortColumns(nodeData map[string]interface{}, nodeKey string, dataSource DataSource, columnDescriptions map[string]string, columnToEnumNameMap map[string]string, columnToNotNullMap map[string]bool) ([]LegibleColumn, error) {
 	columnsValue, exists := nodeData["columns"]
 	if !exists {
 		return nil, fmt.Errorf("no columns found for model %s", nodeKey)
@@ -1014,22 +1014,22 @@ func convertAndSortColumns(nodeData map[string]interface{}, nodeKey string, data
 		return getStringFromMap(columnsData[i], "name", "") < getStringFromMap(columnsData[j], "name", "")
 	})
 
-	// Build the final slice of WrenColumns
-	var wrenColumns []WrenColumn
+	// Build the final slice of LegibleColumns
+	var wrenColumns []LegibleColumn
 	for _, colMap := range columnsData {
 		if getStringFromMap(colMap, "name", "") == "" {
 			continue
 		}
-		column := buildWrenColumn(colMap, nodeKey, dataSource, columnDescriptions, columnToEnumNameMap, columnToNotNullMap)
+		column := buildLegibleColumn(colMap, nodeKey, dataSource, columnDescriptions, columnToEnumNameMap, columnToNotNullMap)
 		wrenColumns = append(wrenColumns, column)
 	}
 
 	return wrenColumns, nil
 }
 
-// convertDbtNodeToWrenModel converts a single dbt node to a Wren model.
+// convertDbtNodeToLegibleModel converts a single dbt node to a Wren model.
 // This function now orchestrates calls to helpers to perform the conversion.
-func convertDbtNodeToWrenModel(nodeKey string, nodeData map[string]interface{}, dataSource DataSource, manifestData map[string]interface{}, columnToEnumNameMap map[string]string, columnToNotNullMap map[string]bool, modelToPrimaryKeyMap map[string]string) (*WrenModel, error) {
+func convertDbtNodeToLegibleModel(nodeKey string, nodeData map[string]interface{}, dataSource DataSource, manifestData map[string]interface{}, columnToEnumNameMap map[string]string, columnToNotNullMap map[string]bool, modelToPrimaryKeyMap map[string]string) (*LegibleModel, error) {
 	modelName := getModelNameFromNodeKey(nodeKey)
 	if modelName == "" {
 		return nil, fmt.Errorf("invalid node key format: %s", nodeKey)
@@ -1059,8 +1059,8 @@ func convertDbtNodeToWrenModel(nodeKey string, nodeData map[string]interface{}, 
 		return nil, err
 	}
 
-	// --- 4. Assemble the Final WrenModel ---
-	model := &WrenModel{
+	// --- 4. Assemble the Final LegibleModel ---
+	model := &LegibleModel{
 		Name:           modelName,
 		TableReference: tableRef,
 		Columns:        wrenColumns,

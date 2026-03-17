@@ -1,4 +1,4 @@
-# golangci-lint configuration for WrenAI wren-launcher
+# golangci-lint configuration for WrenAI legible-launcher
 version: "2"
 
 run:

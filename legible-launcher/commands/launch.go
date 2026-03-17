@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Canner/WrenAI/wren-launcher/config"
-	utils "github.com/Canner/WrenAI/wren-launcher/utils"
+	"github.com/Canner/WrenAI/legible-launcher/config"
+	utils "github.com/Canner/WrenAI/legible-launcher/utils"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/manifoldco/promptui"
 	"github.com/pterm/pterm"
@@ -20,13 +20,13 @@ import (
 )
 
 func prepareProjectDir() string {
-	// create a project directory under ~/.wrenai
+	// create a project directory under ~/.legible
 	homedir, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
 
-	projectDir := path.Join(homedir, ".wrenai")
+	projectDir := path.Join(homedir, ".legible")
 
 	if _, err := os.Stat(projectDir); os.IsNotExist(err) {
 		if err := os.Mkdir(projectDir, 0750); err != nil {
@@ -41,17 +41,17 @@ func evaluateTelemetryPreferences() (bool, error) {
 	// let users know we're asking for telemetry consent
 	disableTelemetry := config.IsTelemetryDisabled()
 	if disableTelemetry {
-		fmt.Println("You have disabled telemetry, Wren AI will not collect any data.")
+		fmt.Println("You have disabled telemetry, Legible will not collect any data.")
 		return false, nil
 	}
-	fmt.Println("Wren AI relies on anonymous usage statistics to continuously improve.")
+	fmt.Println("Legible relies on anonymous usage statistics to continuously improve.")
 	fmt.Println("You can opt out of sharing these statistics by manually adding flag `--disable-telemetry` as described at https://docs.getwren.ai/oss/overview/telemetry")
 	return true, nil
 }
 
 func askForLLMProvider() (string, error) {
 	// let users know we're asking for a LLM provider
-	pterm.Warning.Println("We highly recommend using OpenAI models with Wren AI, especially the latest models.")
+	pterm.Warning.Println("We highly recommend using OpenAI models with Legible, especially the latest models.")
 	pterm.Warning.Println("These models have been extensively tested to ensure optimal performance and compatibility.")
 	pterm.Warning.Println("While it is technically possible to integrate other AI models, please note that they have not been fully tested with our system.")
 	pterm.Warning.Println("Therefore, using alternative models is at your own risk and may result in unexpected behavior or suboptimal performance.")
@@ -221,9 +221,9 @@ func Launch() {
 			os.Exit(0)
 		}
 	}()
-	// print Wren AI header
+	// print Legible header
 	fmt.Println(strings.Repeat("=", 55))
-	myFigure := figure.NewFigure("WrenAI", "", true)
+	myFigure := figure.NewFigure("Legible", "", true)
 	myFigure.Print()
 	fmt.Println(strings.Repeat("=", 55))
 
@@ -305,7 +305,7 @@ func Launch() {
 		time.Sleep(5 * time.Second)
 	}
 
-	// download docker-compose file and env file template for Wren AI
+	// download docker-compose file and env file template for Legible
 	pterm.Info.Println("Downloading docker-compose file and env file")
 	// find an available port
 	uiPort := utils.FindAvailablePort(3000)
@@ -338,15 +338,15 @@ func Launch() {
 		panic(err)
 	}
 
-	// launch Wren AI
-	pterm.Info.Println("Launching Wren AI")
-	const projectName string = "wrenai"
+	// launch Legible
+	pterm.Info.Println("Launching Legible")
+	const projectName string = "legible"
 	err = utils.RunDockerCompose(projectName, projectDir, llmProvider)
 	if err != nil {
 		panic(err)
 	}
 
-	pterm.Info.Println("Wren AI is starting, please wait for a moment...")
+	pterm.Info.Println("Legible is starting, please wait for a moment...")
 	uiUrl := fmt.Sprintf("http://localhost:%d", uiPort)
 	aiUrl := fmt.Sprintf("http://localhost:%d", aiPort)
 	// wait until checking if CheckUIServiceStarted return without error
@@ -366,7 +366,7 @@ func Launch() {
 		time.Sleep(5 * time.Second)
 	}
 
-	// wait until checking if CheckWrenAIStarted return without error
+	// wait until checking if CheckLegibleStarted return without error
 	// if timeout 30 minutes, panic
 	timeoutTime = time.Now().Add(30 * time.Minute)
 	for {

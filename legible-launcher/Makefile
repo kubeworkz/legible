@@ -1,4 +1,4 @@
-BINARY_NAME=wren-launcher
+BINARY_NAME=legible-launcher
 
 # Build targets
 build:

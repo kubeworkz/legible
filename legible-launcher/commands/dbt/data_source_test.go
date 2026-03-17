@@ -17,7 +17,7 @@ const (
 )
 
 // Helper function to validate PostgreSQL data source
-func validatePostgresDataSource(t *testing.T, ds *WrenPostgresDataSource, expectedDB string) {
+func validatePostgresDataSource(t *testing.T, ds *LegiblePostgresDataSource, expectedDB string) {
 	t.Helper()
 
 	if ds.Host != testHost {
@@ -76,9 +76,9 @@ func TestFromDbtProfiles_Postgres(t *testing.T) {
 		t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 	}
 
-	ds, ok := dataSources[0].(*WrenPostgresDataSource)
+	ds, ok := dataSources[0].(*LegiblePostgresDataSource)
 	if !ok {
-		t.Fatalf("Expected WrenPostgresDataSource, got %T", dataSources[0])
+		t.Fatalf("Expected LegiblePostgresDataSource, got %T", dataSources[0])
 	}
 
 	validatePostgresDataSource(t, ds, "test_db")
@@ -113,9 +113,9 @@ func TestFromDbtProfiles_PostgresWithDefaultPort(t *testing.T) {
 		t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 	}
 
-	ds, ok := dataSources[0].(*WrenPostgresDataSource)
+	ds, ok := dataSources[0].(*LegiblePostgresDataSource)
 	if !ok {
-		t.Fatalf("Expected WrenPostgresDataSource, got %T", dataSources[0])
+		t.Fatalf("Expected LegiblePostgresDataSource, got %T", dataSources[0])
 	}
 
 	if ds.Host != "localhost" {
@@ -170,9 +170,9 @@ func TestFromDbtProfiles_LocalFile(t *testing.T) {
 		t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 	}
 
-	ds, ok := dataSources[0].(*WrenLocalFileDataSource)
+	ds, ok := dataSources[0].(*LegibleLocalFileDataSource)
 	if !ok {
-		t.Fatalf("Expected WrenLocalFileDataSource, got %T", dataSources[0])
+		t.Fatalf("Expected LegibleLocalFileDataSource, got %T", dataSources[0])
 	}
 
 	if filepath.ToSlash(ds.Url) != "/abs_path" {
@@ -249,9 +249,9 @@ func TestFromMssqlProfiles(t *testing.T) {
 		t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 	}
 
-	ds, ok := dataSources[0].(*WrenMSSQLDataSource)
+	ds, ok := dataSources[0].(*LegibleMSSQLDataSource)
 	if !ok {
-		t.Fatalf("Expected WrenMSSQLDataSource, got %T", dataSources[0])
+		t.Fatalf("Expected LegibleMSSQLDataSource, got %T", dataSources[0])
 	}
 
 	if ds.Host != testHost {
@@ -382,9 +382,9 @@ func TestFromDbtProfiles_BigQuery(t *testing.T) {
 			t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 		}
 
-		ds, ok := dataSources[0].(*WrenBigQueryDataSource)
+		ds, ok := dataSources[0].(*LegibleBigQueryDataSource)
 		if !ok {
-			t.Fatalf("Expected WrenBigQueryDataSource, got %T", dataSources[0])
+			t.Fatalf("Expected LegibleBigQueryDataSource, got %T", dataSources[0])
 		}
 
 		if ds.Project != "test-project" {
@@ -434,9 +434,9 @@ func TestFromDbtProfiles_BigQuery(t *testing.T) {
 			t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 		}
 
-		ds, ok := dataSources[0].(*WrenBigQueryDataSource)
+		ds, ok := dataSources[0].(*LegibleBigQueryDataSource)
 		if !ok {
-			t.Fatalf("Expected WrenBigQueryDataSource, got %T", dataSources[0])
+			t.Fatalf("Expected LegibleBigQueryDataSource, got %T", dataSources[0])
 		}
 
 		encodedContent, _ := base64.StdEncoding.DecodeString(ds.Credentials)
@@ -484,9 +484,9 @@ func TestFromDbtProfiles_BigQuery(t *testing.T) {
 			t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 		}
 
-		ds, ok := dataSources[0].(*WrenBigQueryDataSource)
+		ds, ok := dataSources[0].(*LegibleBigQueryDataSource)
 		if !ok {
-			t.Fatalf("Expected WrenBigQueryDataSource, got %T", dataSources[0])
+			t.Fatalf("Expected LegibleBigQueryDataSource, got %T", dataSources[0])
 		}
 
 		encodedContent, _ := base64.StdEncoding.DecodeString(ds.Credentials)
@@ -499,12 +499,12 @@ func TestFromDbtProfiles_BigQuery(t *testing.T) {
 func TestBigQueryDataSourceValidation(t *testing.T) {
 	tests := []struct {
 		name    string
-		ds      *WrenBigQueryDataSource
+		ds      *LegibleBigQueryDataSource
 		wantErr bool
 	}{
 		{
 			name: "valid",
-			ds: &WrenBigQueryDataSource{
+			ds: &LegibleBigQueryDataSource{
 				Project:     "test-project",
 				Dataset:     "test-dataset",
 				Credentials: "dGVzdC1jcmVkZW50aWFscw==", // "test-credentials"
@@ -513,7 +513,7 @@ func TestBigQueryDataSourceValidation(t *testing.T) {
 		},
 		{
 			name: "invalid - missing project",
-			ds: &WrenBigQueryDataSource{
+			ds: &LegibleBigQueryDataSource{
 				Project:     "",
 				Dataset:     "test-dataset",
 				Credentials: "dGVzdC1jcmVkZW50aWFscw==",
@@ -522,7 +522,7 @@ func TestBigQueryDataSourceValidation(t *testing.T) {
 		},
 		{
 			name: "invalid - missing dataset",
-			ds: &WrenBigQueryDataSource{
+			ds: &LegibleBigQueryDataSource{
 				Project:     "test-project",
 				Dataset:     "",
 				Credentials: "dGVzdC1jcmVkZW50aWFscw==",
@@ -531,7 +531,7 @@ func TestBigQueryDataSourceValidation(t *testing.T) {
 		},
 		{
 			name: "invalid - missing credentials",
-			ds: &WrenBigQueryDataSource{
+			ds: &LegibleBigQueryDataSource{
 				Project:     "test-project",
 				Dataset:     "test-dataset",
 				Credentials: "",
@@ -551,7 +551,7 @@ func TestBigQueryDataSourceValidation(t *testing.T) {
 }
 
 func TestPostgresDataSourceValidation(t *testing.T) {
-	validDS := &WrenPostgresDataSource{
+	validDS := &LegiblePostgresDataSource{
 		Host:     testHost,
 		Port:     "5432",
 		Database: "test",
@@ -564,7 +564,7 @@ func TestPostgresDataSourceValidation(t *testing.T) {
 	}{
 		{
 			"empty host",
-			&WrenPostgresDataSource{
+			&LegiblePostgresDataSource{
 				Port:     "5432",
 				Database: "test",
 				User:     "user",
@@ -572,7 +572,7 @@ func TestPostgresDataSourceValidation(t *testing.T) {
 		},
 		{
 			"empty database",
-			&WrenPostgresDataSource{
+			&LegiblePostgresDataSource{
 				Host: testHost,
 				Port: "5432",
 				User: "user",
@@ -580,7 +580,7 @@ func TestPostgresDataSourceValidation(t *testing.T) {
 		},
 		{
 			"invalid port",
-			&WrenPostgresDataSource{
+			&LegiblePostgresDataSource{
 				Host:     testHost,
 				Port:     "0",
 				Database: "test",
@@ -596,12 +596,12 @@ func TestMysqlDataSourceValidation(t *testing.T) {
 	// Test MySQL data source validation
 	tests := []struct {
 		name    string
-		ds      *WrenMysqlDataSource
+		ds      *LegibleMysqlDataSource
 		wantErr bool
 	}{
 		{
 			name: "valid",
-			ds: &WrenMysqlDataSource{
+			ds: &LegibleMysqlDataSource{
 				Host:     "localhost",
 				Port:     "3306",
 				Database: "test",
@@ -611,7 +611,7 @@ func TestMysqlDataSourceValidation(t *testing.T) {
 		},
 		{
 			name: "empty host",
-			ds: &WrenMysqlDataSource{
+			ds: &LegibleMysqlDataSource{
 				Port:     "3306",
 				Database: "test",
 				User:     "user",
@@ -620,7 +620,7 @@ func TestMysqlDataSourceValidation(t *testing.T) {
 		},
 		{
 			name: "empty database",
-			ds: &WrenMysqlDataSource{
+			ds: &LegibleMysqlDataSource{
 				Host: "localhost",
 				Port: "3306",
 				User: "user",
@@ -629,7 +629,7 @@ func TestMysqlDataSourceValidation(t *testing.T) {
 		},
 		{
 			name: "invalid port",
-			ds: &WrenMysqlDataSource{
+			ds: &LegibleMysqlDataSource{
 				Host:     "localhost",
 				Port:     "",
 				Database: "test",
@@ -683,7 +683,7 @@ func TestGetActiveDataSources(t *testing.T) {
 		t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 	}
 
-	ds := dataSources[0].(*WrenPostgresDataSource)
+	ds := dataSources[0].(*LegiblePostgresDataSource)
 	if ds.Database != "dev_db" {
 		t.Errorf("Expected dev database, got %s", ds.Database)
 	}
@@ -697,7 +697,7 @@ func TestGetActiveDataSources(t *testing.T) {
 		t.Fatalf("Expected 1 data source, got %d", len(dataSources))
 	}
 
-	ds = dataSources[0].(*WrenPostgresDataSource)
+	ds = dataSources[0].(*LegiblePostgresDataSource)
 	if ds.Database != "prod_db" {
 		t.Errorf("Expected prod database, got %s", ds.Database)
 	}
@@ -781,25 +781,25 @@ func TestMapType(t *testing.T) {
 	}{
 		{
 			name:       "BigQuery INT64 to integer",
-			dataSource: &WrenBigQueryDataSource{},
+			dataSource: &LegibleBigQueryDataSource{},
 			sourceType: "INT64",
 			want:       "integer",
 		},
 		{
 			name:       "BigQuery STRING to varchar",
-			dataSource: &WrenBigQueryDataSource{},
+			dataSource: &LegibleBigQueryDataSource{},
 			sourceType: "STRING",
 			want:       "varchar",
 		},
 		{
 			name:       "LocalFile INTEGER to integer",
-			dataSource: &WrenLocalFileDataSource{},
+			dataSource: &LegibleLocalFileDataSource{},
 			sourceType: "INTEGER",
 			want:       "integer",
 		},
 		{
 			name:       "LocalFile VARCHAR to varchar",
-			dataSource: &WrenLocalFileDataSource{},
+			dataSource: &LegibleLocalFileDataSource{},
 			sourceType: "VARCHAR",
 			want:       "varchar",
 		},
@@ -811,7 +811,7 @@ func TestMapType(t *testing.T) {
 		},
 		{
 			name:       "PostgresDataSource (no mapping)",
-			dataSource: &WrenPostgresDataSource{},
+			dataSource: &LegiblePostgresDataSource{},
 			sourceType: "unknown_type",
 			want:       "unknown_type",
 		},

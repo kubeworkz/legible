@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestFindWrenUIContainer(t *testing.T) {
-	container, error := findWrenUIContainer()
+func TestFindLegibleUIContainer(t *testing.T) {
+	container, error := findLegibleUIContainer()
 	if error != nil {
 		t.Errorf("Error: %v", error)
 	}

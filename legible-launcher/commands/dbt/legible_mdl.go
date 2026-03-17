@@ -1,12 +1,12 @@
 package dbt
 
-// WrenMDLManifest represents the complete Wren MDL structure
-type WrenMDLManifest struct {
+// LegibleMDLManifest represents the complete Legible MDL structure
+type LegibleMDLManifest struct {
 	JsonSchema      string           `json:"$schema"`
 	Catalog         string           `json:"catalog"`
 	Schema          string           `json:"schema"`
 	EnumDefinitions []EnumDefinition `json:"enumDefinitions,omitempty"`
-	Models          []WrenModel      `json:"models"`
+	Models          []LegibleModel      `json:"models"`
 	Relationships   []Relationship   `json:"relationships"`
 	Metrics         []Metric         `json:"metrics,omitempty"`
 	Views           []View           `json:"views"`
@@ -24,11 +24,11 @@ type EnumValue struct {
 	Value string `json:"value,omitempty"`
 }
 
-// WrenModel represents a model in the Wren MDL format
-type WrenModel struct {
+// LegibleModel represents a model in the Legible MDL format
+type LegibleModel struct {
 	Name           string            `json:"name"`
 	TableReference TableReference    `json:"tableReference"`
-	Columns        []WrenColumn      `json:"columns"`
+	Columns        []LegibleColumn      `json:"columns"`
 	PrimaryKey     string            `json:"primaryKey,omitempty"`
 	Cached         bool              `json:"cached,omitempty"`
 	RefreshTime    string            `json:"refreshTime,omitempty"`
@@ -42,8 +42,8 @@ type TableReference struct {
 	Table   string `json:"table"`
 }
 
-// WrenColumn represents a column in the Wren MDL format
-type WrenColumn struct {
+// LegibleColumn represents a column in the Legible MDL format
+type LegibleColumn struct {
 	Name         string            `json:"name"`
 	DisplayName  string            `json:"displayName,omitempty"`
 	Type         string            `json:"type"`
@@ -63,7 +63,7 @@ type Relationship struct {
 	Properties map[string]string `json:"properties,omitempty"`
 }
 
-// Metric defines a business-level calculation in Wren MDL.
+// Metric defines a business-level calculation in Legible MDL.
 type Metric struct {
 	Name        string   `json:"name"`
 	Models      []string `json:"models"`
@@ -73,7 +73,7 @@ type Metric struct {
 	Description string   `json:"description,omitempty"`
 }
 
-// View represents a view in the Wren MDL format
+// View represents a view in the Legible MDL format
 type View struct {
 	Name       string            `json:"name"`
 	Statement  string            `json:"statement"`

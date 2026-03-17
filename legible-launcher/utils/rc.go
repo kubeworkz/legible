@@ -1,5 +1,5 @@
-// the wrenrc.go package is responsible for writing and reading rcfile
-// the rc file should located in ~/.wrenai/.wrenrc
+// the legiblerc.go package is responsible for writing and reading rcfile
+// the rc file should located in ~/.legible/.legiblerc
 // should have  public methods "append" and "read"(read by key or all)
 // the structure of the rcfile is a env like file with key value pairs,
 // eg:
@@ -16,15 +16,15 @@ import (
 	"strings"
 )
 
-type WrenRC struct {
+type LegibleRC struct {
 	rcFileDir string
 }
 
-func (w *WrenRC) getWrenRcFilePath() string {
-	return path.Join(w.rcFileDir, ".wrenrc")
+func (w *LegibleRC) getLegibleRcFilePath() string {
+	return path.Join(w.rcFileDir, ".legiblerc")
 }
 
-func (w *WrenRC) ensureRcFile() (string, error) {
+func (w *LegibleRC) ensureRcFile() (string, error) {
 	// ensure folder created
 	err := os.MkdirAll(w.rcFileDir, 0750)
 	if err != nil {
@@ -32,7 +32,7 @@ func (w *WrenRC) ensureRcFile() (string, error) {
 	}
 
 	// ensure file created
-	rcFilePath := w.getWrenRcFilePath()
+	rcFilePath := w.getLegibleRcFilePath()
 	_, err = os.Stat(rcFilePath)
 	if os.IsNotExist(err) {
 		f, err := os.Create(rcFilePath) // #nosec G304 -- rcFilePath is controlled by application
@@ -44,7 +44,7 @@ func (w *WrenRC) ensureRcFile() (string, error) {
 	return rcFilePath, nil
 }
 
-func (w *WrenRC) parseInto() (map[string]string, error) {
+func (w *LegibleRC) parseInto() (map[string]string, error) {
 	rcFilePath, err := w.ensureRcFile()
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (w *WrenRC) parseInto() (map[string]string, error) {
 }
 
 // set a key value pair to the rc file
-func (w *WrenRC) Set(key string, value string, override bool) error {
+func (w *LegibleRC) Set(key string, value string, override bool) error {
 	// get the parsed key value pairs
 	m, err := w.parseInto()
 	if err != nil {
@@ -121,8 +121,8 @@ func (w *WrenRC) Set(key string, value string, override bool) error {
 }
 
 // overrite the rc file with the given key value pairs
-func (w *WrenRC) write(m map[string]string) error {
-	rcFilePath := w.getWrenRcFilePath()
+func (w *LegibleRC) write(m map[string]string) error {
+	rcFilePath := w.getLegibleRcFilePath()
 	f, err := os.Create(rcFilePath) // #nosec G304 -- rcFilePath is controlled by application
 	if err != nil {
 		return err
@@ -140,7 +140,7 @@ func (w *WrenRC) write(m map[string]string) error {
 }
 
 // read the value of a key from the rc file
-func (w *WrenRC) Read(key string) (string, error) {
+func (w *LegibleRC) Read(key string) (string, error) {
 	m, err := w.parseInto()
 	if err != nil {
 		return "", err

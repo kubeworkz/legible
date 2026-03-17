@@ -4,12 +4,12 @@ import (
 	"flag"
 	"os"
 
-	"github.com/Canner/WrenAI/wren-launcher/commands/dbt"
+	"github.com/Canner/WrenAI/legible-launcher/commands/dbt"
 	"github.com/pterm/pterm"
 )
 
 // DbtAutoConvert automatically searches for dbt profiles and catalog.json,
-// then converts them to WrenDataSource and Wren MDL format
+// then converts them to LegibleDataSource and Legible MDL format
 func DbtAutoConvert() {
 	var opts struct {
 		ProjectPath          string
@@ -30,13 +30,13 @@ func DbtAutoConvert() {
 	// Validate required parameters
 	if opts.ProjectPath == "" {
 		pterm.Error.Println("Error: --path parameter is required")
-		pterm.Info.Println("Usage: wren-launcher dbt-auto-convert --path /path/to/dbt/project --output /path/to/output")
+		pterm.Info.Println("Usage: legible-launcher dbt-auto-convert --path /path/to/dbt/project --output /path/to/output")
 		os.Exit(1)
 	}
 
 	if opts.OutputDir == "" {
 		pterm.Error.Println("Error: --output parameter is required")
-		pterm.Info.Println("Usage: wren-launcher dbt-auto-convert --path /path/to/dbt/project --output /path/to/output")
+		pterm.Info.Println("Usage: legible-launcher dbt-auto-convert --path /path/to/dbt/project --output /path/to/output")
 		os.Exit(1)
 	}
 

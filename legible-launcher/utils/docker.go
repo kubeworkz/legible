@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Canner/WrenAI/wren-launcher/config"
+	"github.com/Canner/WrenAI/legible-launcher/config"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/flags"
 	cmdCompose "github.com/docker/compose/v2/cmd/compose"
@@ -23,10 +23,10 @@ import (
 
 const (
 	// please change the version when the version is updated
-	WREN_PRODUCT_VERSION	string = "0.29.1"
-	DOCKER_COMPOSE_YAML_URL string = "https://raw.githubusercontent.com/Canner/WrenAI/" + WREN_PRODUCT_VERSION + "/docker/docker-compose.yaml"
-	DOCKER_COMPOSE_ENV_URL  string = "https://raw.githubusercontent.com/Canner/WrenAI/" + WREN_PRODUCT_VERSION + "/docker/.env.example"
-	AI_SERVICE_CONFIG_URL   string = "https://raw.githubusercontent.com/Canner/WrenAI/" + WREN_PRODUCT_VERSION + "/docker/config.example.yaml"
+	LEGIBLE_PRODUCT_VERSION	string = "0.29.1"
+	DOCKER_COMPOSE_YAML_URL string = "https://raw.githubusercontent.com/kubeworkz/legible/" + LEGIBLE_PRODUCT_VERSION + "/docker/docker-compose.yaml"
+	DOCKER_COMPOSE_ENV_URL  string = "https://raw.githubusercontent.com/kubeworkz/legible/" + LEGIBLE_PRODUCT_VERSION + "/docker/.env.example"
+	AI_SERVICE_CONFIG_URL   string = "https://raw.githubusercontent.com/kubeworkz/legible/" + LEGIBLE_PRODUCT_VERSION + "/docker/config.example.yaml"
 )
 
 var generationModelToModelName = map[string]string{
@@ -131,13 +131,13 @@ func CheckDockerDaemonRunning() (bool, error) {
 }
 
 func prepareUserUUID(projectDir string) (string, error) {
-	wrenRC := WrenRC{projectDir}
-	err := wrenRC.Set("USER_UUID", uuid.New().String(), false)
+	legibleRC := LegibleRC{projectDir}
+	err := legibleRC.Set("USER_UUID", uuid.New().String(), false)
 	if err != nil {
 		return "", err
 	}
 
-	userUUID, err := wrenRC.Read("USER_UUID")
+	userUUID, err := legibleRC.Read("USER_UUID")
 	if err != nil {
 		return "", err
 	}
@@ -305,12 +305,12 @@ func PrepareDockerFiles(openaiApiKey string, openaiGenerationModel string, hostP
 	} else if strings.ToLower(llmProvider) == "custom" {
 		// if .env file does not exist, return error
 		if _, err := os.Stat(getEnvFilePath(projectDir)); os.IsNotExist(err) {
-			return fmt.Errorf(".env file does not exist, please download the env file from %s to ~/.wrenai, rename it to .env and fill in the required information", DOCKER_COMPOSE_ENV_URL)
+			return fmt.Errorf(".env file does not exist, please download the env file from %s to ~/.legible, rename it to .env and fill in the required information", DOCKER_COMPOSE_ENV_URL)
 		}
 
 		// if config.yaml file does not exist, return error
 		if _, err := os.Stat(getConfigFilePath(projectDir)); os.IsNotExist(err) {
-			return fmt.Errorf("config.yaml file does not exist, please download the config.yaml file from %s to ~/.wrenai, rename it to config.yaml and fill in the required information", AI_SERVICE_CONFIG_URL)
+			return fmt.Errorf("config.yaml file does not exist, please download the config.yaml file from %s to ~/.legible, rename it to config.yaml and fill in the required information", AI_SERVICE_CONFIG_URL)
 		}
 	}
 
@@ -339,7 +339,7 @@ func getConfigFilePath(projectDir string) string {
 //
 // Example:
 //
-//	err := RunDockerCompose("wren", "/path/to/project", "openai")
+//	err := RunDockerCompose("legible", "/path/to/project", "openai")
 func RunDockerCompose(projectName string, projectDir string, llmProvider string) error {
 	ctx := context.Background()
 	composeFilePath := path.Join(projectDir, "docker-compose.yaml")
@@ -430,7 +430,7 @@ func listProcess() ([]container.Summary, error) {
 	return containers, nil
 }
 
-func findWrenUIContainer() (container.Summary, error) {
+func findLegibleUIContainer() (container.Summary, error) {
 	containers, err := listProcess()
 	if err != nil {
 		return container.Summary{}, err
@@ -438,12 +438,12 @@ func findWrenUIContainer() (container.Summary, error) {
 
 	for _, cont := range containers {
 		// return if com.docker.compose.project == wrenai && com.docker.compose.service=wren-ui
-		if cont.Labels["com.docker.compose.project"] == "wrenai" && cont.Labels["com.docker.compose.service"] == "wren-ui" {
+		if cont.Labels["com.docker.compose.project"] == "legible" && cont.Labels["com.docker.compose.service"] == "wren-ui" {
 			return cont, nil
 		}
 	}
 
-	return container.Summary{}, fmt.Errorf("WrenUI container not found")
+	return container.Summary{}, fmt.Errorf("LegibleUI container not found")
 }
 
 func findAIServiceContainer() (container.Summary, error) {
@@ -453,16 +453,16 @@ func findAIServiceContainer() (container.Summary, error) {
 	}
 
 	for _, cont := range containers {
-		if cont.Labels["com.docker.compose.project"] == "wrenai" && cont.Labels["com.docker.compose.service"] == "wren-ai-service" {
+		if cont.Labels["com.docker.compose.project"] == "legible" && cont.Labels["com.docker.compose.service"] == "wren-ai-service" {
 			return cont, nil
 		}
 	}
 
-	return container.Summary{}, fmt.Errorf("WrenAI service container not found")
+	return container.Summary{}, fmt.Errorf("Legible service container not found")
 }
 
-func IfPortUsedByWrenUI(port int) bool {
-	container, err := findWrenUIContainer()
+func IfPortUsedByLegibleUI(port int) bool {
+	container, err := findLegibleUIContainer()
 	if err != nil {
 		return false
 	}
@@ -500,7 +500,7 @@ func CheckUIServiceStarted(url string) error {
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("wren AI is not started yet")
+		return fmt.Errorf("Legible is not started yet")
 	}
 	return nil
 }
