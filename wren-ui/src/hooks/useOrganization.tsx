@@ -141,6 +141,7 @@ export function OrganizationProvider({
   const {
     data: orgsData,
     loading: orgsLoading,
+    error: orgsError,
     refetch: refetchOrgs,
   } = useQuery(LIST_ORGANIZATIONS, {
     skip: !isAuthenticated,
@@ -289,7 +290,7 @@ export function OrganizationProvider({
   // still report loading=false for one render frame while data is undefined.
   // Treat that as "still loading" to prevent premature "no orgs" redirects.
   const effectiveOrgsLoading =
-    orgsLoading || (isAuthenticated && !orgsData);
+    orgsLoading || (isAuthenticated && !orgsData && !orgsError);
 
   const value = useMemo<OrganizationContextValue>(
     () => ({

@@ -68,8 +68,10 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await login(values.email, values.password);
+      // Hard redirect ensures a completely fresh React state, avoiding
+      // stale provider data from the login page's component tree.
       const redirect = router.query.redirect as string;
-      router.push(redirect || '/');
+      window.location.href = redirect || '/';
     } catch (err: any) {
       const msg =
         err?.graphQLErrors?.[0]?.message ||

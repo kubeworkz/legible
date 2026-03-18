@@ -20,6 +20,13 @@ export const useWithOnboarding = () => {
   const { currentProjectId, loading: projectsLoading, projects } = useProject();
   const { organizations, loading: orgsLoading } = useOrganization();
 
+  // Wait for projects to load and validate the currentProjectId before
+  // querying onboarding status. This prevents stale project IDs (e.g. from
+  // localStorage of a deleted project) from being used in the X-Project-Id header.
+  // We also verify the ID exists in the loaded projects list so the query stays
+  // skipped until the useProject hook has corrected a stale ID.
+  const projectsReady = !projectsLoading && projects.length > 0 && !!currentProjectId && projects.some((p) => p.id === currentProjectId);
+
   // If the user has no organizations (e.g. after deleting the last one),
   // redirect to login to avoid an infinite loading spinner.
   // Wait for auth to settle first — when auth is pending the org query is
@@ -31,19 +38,21 @@ export const useWithOnboarding = () => {
     }
   }, [authLoading, isAuthenticated, orgsLoading, organizations, router]);
 
-  // Wait for projects to load and validate the currentProjectId before
-  // querying onboarding status. This prevents stale project IDs (e.g. from
-  // localStorage of a deleted project) from being used in the X-Project-Id header.
-  // We also verify the ID exists in the loaded projects list so the query stays
-  // skipped until the useProject hook has corrected a stale ID.
-  const projectsReady = !projectsLoading && projects.length > 0 && !!currentProjectId && projects.some((p) => p.id === currentProjectId);
-
-  const { data, loading } = useOnboardingStatusQuery({
+  const { data, loading, error: onboardingError } = useOnboardingStatusQuery({
     skip: !projectsReady,
     fetchPolicy: 'network-only',
   });
 
   const onboardingStatus = data?.onboardingStatus?.status;
+
+  // If the onboarding status query fails but we have a valid project,
+  // redirect to home anyway instead of staying on the loading spinner forever.
+  useEffect(() => {
+    if (!projectsReady || !onboardingError) return;
+    if (router.pathname === '/' && currentProjectId) {
+      router.push(buildPath(Path.Home, currentProjectId));
+    }
+  }, [projectsReady, onboardingError, currentProjectId, router.pathname]);
 
   useEffect(() => {
     if (!projectsReady) return;

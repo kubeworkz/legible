@@ -94,7 +94,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     number | undefined
   >(() => getStoredProjectId());
 
-  const { data, loading, refetch } = useQuery(LIST_PROJECTS, {
+  const { data, loading, error: listProjectsError, refetch } = useQuery(LIST_PROJECTS, {
     skip: !isAuthenticated,
     fetchPolicy: 'cache-and-network',
   });
@@ -103,9 +103,11 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const [updateProjectMutation] = useMutation(UPDATE_PROJECT);
   const [deleteProjectMutation] = useMutation(DELETE_PROJECT);
 
-  // Same as OrganizationProvider: treat the skip→active transition as loading
-  // to prevent stale loading=false when data hasn't arrived yet.
-  const effectiveLoading = loading || (isAuthenticated && !data);
+  // When skip transitions from true→false (auth just completed), Apollo may
+  // report loading=false for one render frame before the query starts.
+  // Treat that gap as "still loading" — but NOT if the query errored,
+  // otherwise effectiveLoading stays true forever on network failures.
+  const effectiveLoading = loading || (isAuthenticated && !data && !listProjectsError);
 
   const projects: ProjectInfo[] = useMemo(
     () => data?.listProjects ?? [],
