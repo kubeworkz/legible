@@ -90,7 +90,7 @@ Visit [Legible documentation](https://docs.kubeworkz.io) to view the full docume
 
 ## ⭐️ Community
 
-- Join developers in our [Discord](https://discord.gg/5DvshJqG8Z) for real-time help and previews.
+- Join everyone in our [Discord](https://discord.gg/twQwNmsAG8) for real-time help and previews.
 - If there are any issues, please visit [GitHub Issues](https://github.com/kubeworkz/legible/issues).
 - Explore our [public roadmap](https://legible.notion.site/) to stay updated on upcoming features and improvements!
 

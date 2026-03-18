@@ -103,6 +103,10 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const [updateProjectMutation] = useMutation(UPDATE_PROJECT);
   const [deleteProjectMutation] = useMutation(DELETE_PROJECT);
 
+  // Same as OrganizationProvider: treat the skip→active transition as loading
+  // to prevent stale loading=false when data hasn't arrived yet.
+  const effectiveLoading = loading || (isAuthenticated && !data);
+
   const projects: ProjectInfo[] = useMemo(
     () => data?.listProjects ?? [],
     [data],
@@ -116,19 +120,19 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       const parsed = Number(urlProjectId);
       if (Number.isFinite(parsed) && parsed !== currentProjectId) {
         // Only sync if we haven't loaded projects yet or the project is valid
-        if (loading || projects.length === 0 || projects.some((p) => p.id === parsed)) {
+        if (effectiveLoading || projects.length === 0 || projects.some((p) => p.id === parsed)) {
           setCurrentProjectIdState(parsed);
           setStoredProjectId(parsed);
         }
       }
     }
-  }, [router.query.projectId, loading, projects]);
+  }, [router.query.projectId, effectiveLoading, projects]);
 
   // Once projects load, ensure we have a valid currentProjectId.
   // If the URL points to a project the user doesn't have access to,
   // or if no project is selected at all, default to the first project.
   useEffect(() => {
-    if (loading || projects.length === 0) return;
+    if (effectiveLoading || projects.length === 0) return;
     const stored = currentProjectId;
     const valid = stored && projects.some((p) => p.id === stored);
     if (!valid) {
@@ -150,7 +154,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
         router.replace(correctedPath);
       }
     }
-  }, [projects, loading, currentProjectId]);
+  }, [projects, effectiveLoading, currentProjectId]);
 
   const currentProject = useMemo(
     () => projects.find((p) => p.id === currentProjectId) ?? null,
@@ -222,7 +226,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       currentProjectId,
       setCurrentProjectId,
       clearCurrentProjectId,
-      loading,
+      loading: effectiveLoading,
       refetchProjects,
       createProject: handleCreateProject,
       updateProject: handleUpdateProject,
@@ -234,7 +238,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       currentProjectId,
       setCurrentProjectId,
       clearCurrentProjectId,
-      loading,
+      effectiveLoading,
       refetchProjects,
       handleCreateProject,
       handleUpdateProject,

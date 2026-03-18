@@ -95,7 +95,7 @@ export default function APIManagement() {
     },
     {
       label: (
-        <Link
+        <a
           className="gray-8 d-inline-flex align-center"
           href={DOC_LINKS.apiReference}
           target="_blank"
@@ -103,7 +103,7 @@ export default function APIManagement() {
         >
           API reference
           <OpenInNewIcon className="ml-1" />
-        </Link>
+        </a>
       ),
       icon: <ReadOutlined />,
       key: MENU_KEY.API_REFERENCE,

@@ -285,13 +285,19 @@ export function OrganizationProvider({
 
   // ── Value ───────────────────────────────────────────────────
 
+  // When skip transitions from true→false (auth just completed), Apollo may
+  // still report loading=false for one render frame while data is undefined.
+  // Treat that as "still loading" to prevent premature "no orgs" redirects.
+  const effectiveOrgsLoading =
+    orgsLoading || (isAuthenticated && !orgsData);
+
   const value = useMemo<OrganizationContextValue>(
     () => ({
       organizations,
       currentOrganization,
       currentOrgId,
       setCurrentOrgId,
-      loading: orgsLoading,
+      loading: effectiveOrgsLoading,
       members,
       membersLoading,
       currentUserRole,
@@ -310,7 +316,7 @@ export function OrganizationProvider({
       currentOrganization,
       currentOrgId,
       setCurrentOrgId,
-      orgsLoading,
+      effectiveOrgsLoading,
       members,
       membersLoading,
       currentUserRole,

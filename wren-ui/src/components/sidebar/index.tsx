@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Button } from 'antd';
 import styled from 'styled-components';
@@ -120,17 +119,17 @@ export default function Sidebar(props: Props) {
           Settings
         </StyledButton>
         <StyledButton type="text" block>
-          <Link
+          <a
             className="d-flex align-center"
             href={DOC_LINKS.quickstart}
             target="_blank"
             rel="noopener noreferrer"
           >
             <BookOutlined className="mr-2" style={{ fontSize: 16 }} /> Documentation
-          </Link>
+          </a>
         </StyledButton>
         <StyledButton type="text" block>
-          <Link
+          <a
             className="d-flex align-center"
             href="https://discord.com/invite/5DvshJqG8Z"
             target="_blank"
@@ -139,10 +138,10 @@ export default function Sidebar(props: Props) {
             data-ph-capture-attribute-name="cta_go_to_discord"
           >
             <DiscordIcon className="mr-2" style={{ width: 16 }} /> Discord
-          </Link>
+          </a>
         </StyledButton>
         <StyledButton type="text" block>
-          <Link
+          <a
             className="d-flex align-center"
             href="https://github.com/kubeworkz/legible"
             target="_blank"
@@ -151,7 +150,7 @@ export default function Sidebar(props: Props) {
             data-ph-capture-attribute-name="cta_go_to_github"
           >
             <GithubIcon className="mr-2" style={{ width: 16 }} /> GitHub
-          </Link>
+          </a>
         </StyledButton>
       </div>
     </Layout>

@@ -37,6 +37,8 @@ COPY tsconfig.json ./
 
 # Limit Node.js memory to avoid OOM on resource-constrained hosts
 ENV NODE_OPTIONS=--max-old-space-size=8192
+ARG NEXT_PUBLIC_DOCS_URL=https://docs.kubeworkz.io
+ENV NEXT_PUBLIC_DOCS_URL=${NEXT_PUBLIC_DOCS_URL}
 RUN yarn build
 
 # Production image, copy all the files and run next
