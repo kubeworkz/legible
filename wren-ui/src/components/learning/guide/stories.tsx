@@ -351,9 +351,9 @@ const playSwitchProjectLanguageGuide = (
             nextButton.setAttribute('disabled', 'true');
             nextButton.appendChild(loadingSvg);
             await dispatcher
-              ?.onSaveLanguage(input.value as ProjectLanguage)
-              .catch((err) => console.error(err))
-              .finally(() => {
+              ?.onSaveLanguage?.(input.value as ProjectLanguage)
+              ?.catch((err) => console.error(err))
+              ?.finally(() => {
                 nextButton.removeAttribute('disabled');
                 nextButton.removeChild(loadingSvg);
               });
