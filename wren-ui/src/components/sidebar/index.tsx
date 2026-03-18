@@ -131,7 +131,7 @@ export default function Sidebar(props: Props) {
         <StyledButton type="text" block>
           <a
             className="d-flex align-center"
-            href="https://discord.com/invite/5DvshJqG8Z"
+            href="https://discord.com/invite/twQwNmsAG8"
             target="_blank"
             rel="noopener noreferrer"
             data-ph-capture="true"
