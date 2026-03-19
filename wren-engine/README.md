@@ -30,7 +30,7 @@
 > Wren Engine is the open foundation behind Wren AI: a semantic, governed, agent-ready context layer for business data.
 
 <p align="center">
-  <img width="1267" height="705" alt="with_wren_engine" src="https://github.com/user-attachments/assets/3a6531fe-4731-4f21-ae9a-786b219f3c0e" />
+  <img width="2199" height="1537" alt="engine-architecture" src="https://github.com/user-attachments/assets/302351e7-9ac3-4916-99f6-972d33aee076" />
 </p>
 
 ## Why Wren Engine
@@ -42,12 +42,12 @@ Enterprise data is not just rows in a warehouse. It is definitions, metrics, rel
 This is not just our thesis. In [Your Data Agents Need Context](https://a16z.com/your-data-agents-need-context/), a16z argues that data agents break down when they only have connectivity and SQL generation, but lack business definitions, source-of-truth context, and the operational knowledge that explains how a company actually runs.
 
 <p align="center">
-  <img width="920" height="638" alt="without_wren_engine" src="https://github.com/user-attachments/assets/3295dde5-ce41-4e56-a8ad-daff6a0c3459" />
+  <img width="888" height="678" alt="before Wren Engine Challenge" src="https://github.com/user-attachments/assets/62e2cbe6-ee28-4417-ba69-805de35d3187" />
 </p>
 
 Wren Engine exists to solve that gap.
 
-It gives AI agents a semantic engine they can reason over, so they can:
+It gives AI agents a context engine they can reason over, so they can:
 
 - understand models instead of raw tables
 - use trusted metrics instead of inventing SQL
@@ -62,6 +62,10 @@ This is the open source context engine for teams building the next generation of
 We believe the future of AI is not tool calling alone. It is context-rich systems where agents can reason, retrieve, plan, and act on top of a shared understanding of business reality.
 
 Wren Engine is our open source contribution to that future.
+
+<p align="center">
+  <img width="1267" height="705" alt="with_wren_engine" src="https://github.com/user-attachments/assets/3a6531fe-4731-4f21-ae9a-786b219f3c0e" />
+</p>
 
 It is the semantic and execution foundation beneath Wren AI, and it is designed to be useful well beyond a single product:
 
@@ -91,42 +95,12 @@ That means your agent is no longer asking, "Which raw table should I query?"
 
 It is asking, "Which business concept, metric, or governed slice of context do I need to answer this task correctly?"
 
-## Wren Engine vs. Other Data Tools
-
-People often compare Wren Engine to catalog services like DataHub, raw database MCP servers, BI semantic tools, or text-to-SQL agents.
-
-The simple difference is:
-
-- those tools usually help an agent find data or generate SQL
-- Wren Engine helps an agent understand business meaning and produce the right query through a semantic engine
-
-| Tool type | What it gives the agent | What Wren Engine adds |
-| --- | --- | --- |
-| Data catalog services | Tables, columns, lineage, owners, descriptions | Business models, metrics, relationships, and governed query planning |
-| Raw database or schema access | Direct access to schemas and SQL execution | A business layer above raw tables so the agent does not have to guess intent |
-| BI or semantic tools | Curated metrics and entities for analytics workflows | An open context layer designed for MCP and agent workflows |
-| Text-to-SQL agents | Fast SQL generation from natural language | Better accuracy by grounding generation in explicit business definitions |
-
-Many teams will want both:
-
-- a catalog to inventory and document the data estate
-- Wren Engine to turn that data into agent-ready context
-
-Why that matters:
-
-- more accurate answers because joins and metrics are defined instead of guessed
-- more consistent answers because every agent uses the same business definitions
-- safer data access because governance can be carried into query planning
-- less prompt engineering because the context lives in the engine, not in the prompt
-
-Without Wren, an agent may know where the data is but still not know how to answer the question correctly.
-
 ## Built For Agent Builders
 
 Wren Engine is especially useful for the open source community building agent-native workflows in tools like:
 
 - OpenClaw
-- Cloud Code
+- Claude Code
 - VS Code
 - Claude Desktop
 - Cline
@@ -143,56 +117,6 @@ Use it to power experiences like:
 - internal AI tools that should be grounded in semantic models instead of ad hoc SQL
 
 This is especially important in developer-facing agent environments, where the assistant may understand your codebase but still lacks the business context required to answer data questions correctly.
-
-## Why Open Source
-
-We think agent infrastructure should be composable.
-
-The world does not need one more closed box that only works in one UI, one cloud, or one workflow. It needs shared infrastructure that developers can inspect, extend, self-host, and integrate anywhere.
-
-Wren Engine is open source so the community can:
-
-- run it locally or in their own stack
-- connect it to their preferred MCP client or IDE
-- contribute connectors, optimizations, and semantic capabilities
-- build opinionated agent products on a transparent foundation
-- help define what a real context layer for AI should look like
-
-We want that context layer to be inspectable, composable, and community-owned, not trapped inside a single proprietary interface.
-
-## Architecture At A Glance
-
-```text
-User / Agent
-  -> MCP Client or App (OpenClaw, Cloud Code, VS Code, Claude Desktop, Cline, Cursor, etc.)
-  -> Wren MCP Server or HTTP API
-  -> Wren Engine semantic engine
-  -> Query planning and optimization
-  -> Your warehouse, database, or file-backed data source
-```
-
-Core ideas:
-
-- `MDL` captures business meaning, not just physical schema
-- `wren-core` performs semantic analysis and query planning in Rust
-- `ibis-server` provides the execution and connector-facing API layer
-- `mcp-server` makes Wren easy to use from MCP-compatible agents
-
-That last point matters: context only helps agents when it is available at runtime. Wren is built to expose that layer over MCP and APIs.
-
-## Repository Map
-
-This repository contains the core engine modules:
-
-| Module | What it does |
-| --- | --- |
-| [`wren-core`](./wren-core) | Rust context engine powered by Apache DataFusion for MDL analysis, planning, and optimization |
-| [`wren-core-base`](./wren-core-base) | Shared manifest and modeling types |
-| [`wren-core-py`](./wren-core-py) | PyO3 bindings that expose the engine to Python |
-| [`ibis-server`](./ibis-server/) | FastAPI server for query execution, validation, metadata, and connectors |
-| [`mcp-server`](./mcp-server/) | MCP server for AI agents and MCP-compatible clients |
-
-Supporting modules include `wren-core-legacy`, `example`, `mock-web-server`, and benchmarking utilities.
 
 ## Supported Data Sources
 
@@ -244,6 +168,52 @@ The MCP server includes:
 - [Your Data Agents Need Context](https://a16z.com/your-data-agents-need-context/)
 - [Powering Semantic SQL for AI Agents with Apache DataFusion](https://getwren.ai/post/powering-semantic-sql-for-ai-agents-with-apache-datafusion)
 
+
+
+## Wren Engine vs. Other Data Tools
+
+People often compare Wren Engine to catalog services like DataHub, raw database MCP servers, BI semantic tools, or text-to-SQL agents.
+
+The simple difference is:
+
+- those tools usually help an agent find data or generate SQL
+- Wren Engine helps an agent understand business meaning and produce the right query through a context engine
+
+| Tool type | What it gives the agent | What Wren Engine adds |
+| --- | --- | --- |
+| Data catalog services | Tables, columns, lineage, owners, descriptions | Business models, metrics, relationships, and governed query planning |
+| Raw database or schema access | Direct access to schemas and SQL execution | A business layer above raw tables so the agent does not have to guess intent |
+| BI or semantic tools | Curated metrics and entities for analytics workflows | An open context layer designed for MCP and agent workflows |
+| Text-to-SQL agents | Fast SQL generation from natural language | Better accuracy by grounding generation in explicit business definitions |
+
+Many teams will want both:
+
+- a catalog to inventory and document the data estate
+- Wren Engine to turn that data into agent-ready context
+
+Why that matters:
+
+- more accurate answers because joins and metrics are defined instead of guessed
+- more consistent answers because every agent uses the same business definitions
+- safer data access because governance can be carried into query planning
+- less prompt engineering because the context lives in the engine, not in the prompt
+
+Without Wren, an agent may know where the data is but still not know how to answer the question correctly.
+
+## Repository Map
+
+This repository contains the core engine modules:
+
+| Module | What it does |
+| --- | --- |
+| [`wren-core`](./wren-core) | Rust context engine powered by Apache DataFusion for MDL analysis, planning, and optimization |
+| [`wren-core-base`](./wren-core-base) | Shared manifest and modeling types |
+| [`wren-core-py`](./wren-core-py) | PyO3 bindings that expose the engine to Python |
+| [`ibis-server`](./ibis-server/) | FastAPI server for query execution, validation, metadata, and connectors |
+| [`mcp-server`](./mcp-server/) | MCP server for AI agents and MCP-compatible clients |
+
+Supporting modules include `wren-core-legacy`, `example`, `mock-web-server`, and benchmarking utilities.
+
 ### Developer entry points
 
 - [`wren-core/README.md`](./wren-core/README.md)
@@ -272,7 +242,7 @@ cd mcp-server
 
 ## Project Status
 
-Wren Engine is actively evolving in the open. The current focus is to make the semantic engine, execution path, and MCP integration stronger for real-world agent workflows.
+Wren Engine is actively evolving in the open. The current focus is to make the context engine, execution path, and MCP integration stronger for real-world agent workflows.
 
 If you are building with agents today, this is a great time to get involved.
 
@@ -281,7 +251,6 @@ If you are building with agents today, this is a great time to get involved.
 - Join our [Discord community](https://discord.gg/5DvshJqG8Z)
 - Open a [GitHub issue](https://github.com/Canner/wren-engine/issues)
 - Explore [Wren AI](https://github.com/Canner/WrenAI) to see the broader product vision
-- Read our mission piece: [Fueling the Next Wave of AI Agents](https://getwren.ai/post/fueling-the-next-wave-of-ai-agents-building-the-foundation-for-future-mcp-clients-and-enterprise-data-access)
 - Read the market thesis from a16z: [Your Data Agents Need Context](https://a16z.com/your-data-agents-need-context/)
 
 Wren Engine is for builders who believe AI needs better context, not just better prompts.
