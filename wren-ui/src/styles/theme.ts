@@ -7,7 +7,7 @@ import type { ThemeConfig } from 'antd';
 export const admTheme: ThemeConfig = {
   token: {
     // Primary color
-    colorPrimary: '#2f54eb', // @geekblue-6
+    colorPrimary: '#13c2c2', // teal
 
     // Text colors
     colorText: '#262626', // @gray-10
