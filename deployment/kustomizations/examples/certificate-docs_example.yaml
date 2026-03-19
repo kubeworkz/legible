@@ -1,12 +1,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: docs.kubeworkz.io
+  name: docs.legiblequery.ai
 spec:
   dnsNames:
-    - docs.kubeworkz.io
+    - docs.legiblequery.ai
   issuerRef:
     group: cert-manager.io
     kind: ClusterIssuer
-    name: kubeworkz.io-prod
-  secretName: docs.kubeworkz.io-tls
+    name: legiblequery.ai-prod
+  secretName: docs.legiblequery.ai-tls

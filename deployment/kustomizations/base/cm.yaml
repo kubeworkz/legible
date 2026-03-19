@@ -44,7 +44,7 @@ data:
   IBIS_SERVER_ENDPOINT: http://wren-ibis-server-svc:8000
 
   # Documentation site URL (override for custom domain)
-  DOCS_URL: https://docs.kubeworkz.io
+  DOCS_URL: https://docs.legiblequery.ai
 ---
 apiVersion: v1
 kind: ConfigMap

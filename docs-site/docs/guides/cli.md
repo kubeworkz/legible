@@ -47,7 +47,7 @@ legible login
 ```
 
 You'll be prompted for:
-- **Endpoint** — Your Legible server URL (e.g. `https://legible.kubeworkz.io`)
+- **Endpoint** — Your Legible server URL (e.g. `https://legible.legiblequery.ai`)
 - **API Key** — An organization API key (`osk-...`) created in the UI under **Settings → API Keys**
 
 The CLI validates credentials against the server, then saves them to `~/.legible/config.yaml`.
@@ -55,7 +55,7 @@ The CLI validates credentials against the server, then saves them to `~/.legible
 You can also log in non-interactively:
 
 ```bash
-legible login --endpoint https://legible.kubeworkz.io --api-key osk-your-key-here
+legible login --endpoint https://legible.legiblequery.ai --api-key osk-your-key-here
 ```
 
 ### 2. Select a Project
@@ -96,7 +96,7 @@ legible run-sql "SELECT * FROM customers LIMIT 10"
 The CLI stores configuration in `~/.legible/config.yaml`:
 
 ```yaml
-endpoint: https://legible.kubeworkz.io
+endpoint: https://legible.legiblequery.ai
 api_key: osk-abc123...
 project_id: "1"
 ```
@@ -106,7 +106,7 @@ View or update individual values:
 ```bash
 legible config get                    # Show all values
 legible config get endpoint           # Show one value
-legible config set endpoint https://legible.kubeworkz.io
+legible config set endpoint https://legible.legiblequery.ai
 legible config set api-key osk-new-key
 legible config set project-id 2
 ```

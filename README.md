@@ -22,7 +22,7 @@
 | **Talk to Your Data** | Ask in any language → precise SQL & answers | Slash the SQL learning curve﻿ |
 | **GenBI Insights** | AI-written summaries, charts & reports | Decision-ready context in one click﻿ |
 | **Semantic Layer** | MDL models encode schema, metrics, joins | Keeps LLM outputs accurate & governed﻿ |
-| **Embed via API**  | Generate queries & charts inside your apps ([API Docs](http://docs.kubeworkz.io/api-reference/overview/)) | Build custom agents, SaaS features, chatbots﻿ |
+| **Embed via API**  | Generate queries & charts inside your apps ([API Docs](https://docs.legiblequery.ai/api-reference/overview/)) | Build custom agents, SaaS features, chatbots﻿ |
 
 ## 🚀 Getting Started
 
@@ -76,7 +76,7 @@ Check [configuration examples here](https://github.com/kubeworkz/legible/tree/ma
 
 ## 📚 Documentation
 
-Visit [Legible documentation](https://docs.kubeworkz.io) to view the full documentation.
+Visit [Legible documentation](https://docs.legiblequery.ai) to view the full documentation.
 
 ## 📪 Keep Posted?
 

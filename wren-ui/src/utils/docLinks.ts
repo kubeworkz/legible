@@ -3,7 +3,7 @@
  * Base URL is configurable via NEXT_PUBLIC_DOCS_URL env var.
  */
 const DOCS_BASE =
-  process.env.NEXT_PUBLIC_DOCS_URL || 'https://docs.kubeworkz.io';
+  process.env.NEXT_PUBLIC_DOCS_URL || 'https://docs.legiblequery.ai';
 
 function doc(path: string) {
   return `${DOCS_BASE}${path}`;

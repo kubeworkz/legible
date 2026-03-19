@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: docs.kubeworkz.io
+    - host: docs.legiblequery.ai
       http:
         paths:
           - path: /
@@ -22,5 +22,5 @@ spec:
                   number: 4000
   tls:
     - hosts:
-      - docs.kubeworkz.io
-      secretName: docs.kubeworkz.io-tls
+      - docs.legiblequery.ai
+      secretName: docs.legiblequery.ai-tls

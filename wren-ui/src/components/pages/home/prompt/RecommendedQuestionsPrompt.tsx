@@ -117,7 +117,7 @@ export default function RecommendedQuestionsPrompt(props: Props) {
       <div className="d-flex align-center mb-3">
         <Logo size={24} color="var(--gray-8)" />
         <div className="text-md text-medium gray-8 mx-3">
-          Know more about your data.
+          Know your data.
         </div>
         <div className="text-medium gray-7">
           Try asking some of the following questions
