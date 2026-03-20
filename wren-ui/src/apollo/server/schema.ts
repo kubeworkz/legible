@@ -18,6 +18,7 @@ export const typeDefs = gql`
     displayName: String
     avatarUrl: String
     isActive: Boolean!
+    isSuperadmin: Boolean!
     emailVerified: Boolean!
     lastLoginAt: String
     createdAt: String!
@@ -2115,6 +2116,67 @@ export const typeDefs = gql`
     offset: Int!
   }
 
+  # ─── Superadmin Types ────────────────────────────────
+
+  type AdminOrganization {
+    id: Int!
+    displayName: String!
+    slug: String!
+    logoUrl: String
+    timezone: String
+    memberCount: Int!
+    plan: String!
+    subscriptionStatus: String
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type AdminOrganizationDetail {
+    id: Int!
+    displayName: String!
+    slug: String!
+    logoUrl: String
+    timezone: String
+    memberCount: Int!
+    plan: String!
+    subscriptionStatus: String
+    projectCount: Int!
+    members: [MemberType!]!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type AdminUserMembership {
+    organizationId: Int!
+    organizationName: String
+    role: String!
+  }
+
+  type AdminUser {
+    id: Int!
+    email: String!
+    displayName: String
+    avatarUrl: String
+    isActive: Boolean!
+    isSuperadmin: Boolean!
+    emailVerified: Boolean!
+    lastLoginAt: String
+    createdAt: String!
+    organizations: [AdminUserMembership!]!
+  }
+
+  type PlanCount {
+    plan: String!
+    count: Int!
+  }
+
+  type AdminPlatformStats {
+    totalUsers: Int!
+    activeUsers: Int!
+    totalOrganizations: Int!
+    subscriptionsByPlan: [PlanCount!]!
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -2249,6 +2311,12 @@ export const typeDefs = gql`
       filter: AuditLogFilterInput
       pagination: AuditLogPaginationInput!
     ): AuditLogPaginatedResponse!
+
+    # Superadmin
+    adminListOrganizations: [AdminOrganization!]!
+    adminGetOrganization(organizationId: Int!): AdminOrganizationDetail!
+    adminListUsers: [AdminUser!]!
+    adminPlatformStats: AdminPlatformStats!
   }
 
   type Mutation {
@@ -2536,5 +2604,9 @@ export const typeDefs = gql`
     # BYOK
     setProjectLlmKey(data: SetProjectLlmKeyInput!): ProjectLlmConfig!
     clearProjectLlmKey: ProjectLlmConfig!
+
+    # Superadmin
+    adminSetSuperadmin(userId: Int!): Boolean!
+    adminRevokeSuperadmin(userId: Int!): Boolean!
   }
 `;

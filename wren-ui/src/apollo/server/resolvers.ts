@@ -23,6 +23,7 @@ import { AuditLogResolver } from './resolvers/auditLogResolver';
 import { ByokResolver } from './resolvers/byokResolver';
 import { StripeResolver } from './resolvers/stripeResolver';
 import { OidcResolver } from './resolvers/oidcResolver';
+import { SuperadminResolver } from './resolvers/superadminResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -50,6 +51,7 @@ const auditLogResolver = new AuditLogResolver();
 const byokResolver = new ByokResolver();
 const stripeResolver = new StripeResolver();
 const oidcResolver = new OidcResolver();
+const superadminResolver = new SuperadminResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -180,6 +182,12 @@ const resolvers = {
     spreadsheets: spreadsheetResolver.getSpreadsheets,
     spreadsheet: spreadsheetResolver.getSpreadsheet,
     spreadsheetHistory: spreadsheetResolver.getSpreadsheetHistory,
+
+    // Superadmin
+    adminListOrganizations: superadminResolver.adminListOrganizations,
+    adminGetOrganization: superadminResolver.adminGetOrganization,
+    adminListUsers: superadminResolver.adminListUsers,
+    adminPlatformStats: superadminResolver.adminPlatformStats,
   },
   Mutation: {
     // Auth
@@ -402,6 +410,10 @@ const resolvers = {
     saveSpreadsheetWithHistory: spreadsheetResolver.saveSpreadsheetWithHistory,
     restoreSpreadsheetVersion: spreadsheetResolver.restoreSpreadsheetVersion,
     duplicateSpreadsheet: spreadsheetResolver.duplicateSpreadsheet,
+
+    // Superadmin
+    adminSetSuperadmin: superadminResolver.adminSetSuperadmin,
+    adminRevokeSuperadmin: superadminResolver.adminRevokeSuperadmin,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),

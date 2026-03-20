@@ -14,6 +14,7 @@ export enum AuditCategory {
   PROJECT_PERMISSION = 'project_permission',
   API_KEY = 'api_key',
   DEPLOY = 'deploy',
+  SUPERADMIN = 'superadmin',
 }
 
 export enum AuditAction {
@@ -60,6 +61,13 @@ export enum AuditAction {
   PROJECT_KEY_DELETED = 'project_key_deleted',
   // deploy
   MODEL_DEPLOYED = 'model_deployed',
+  // superadmin
+  ADMIN_LIST_ORGS = 'admin_list_orgs',
+  ADMIN_VIEW_ORG = 'admin_view_org',
+  ADMIN_LIST_USERS = 'admin_list_users',
+  ADMIN_GRANT_SUPERADMIN = 'admin_grant_superadmin',
+  ADMIN_REVOKE_SUPERADMIN = 'admin_revoke_superadmin',
+  ADMIN_UPDATE_SUBSCRIPTION = 'admin_update_subscription',
 }
 
 export enum AuditResult {
