@@ -67,6 +67,7 @@ export enum AuditAction {
   ADMIN_LIST_USERS = 'admin_list_users',
   ADMIN_GRANT_SUPERADMIN = 'admin_grant_superadmin',
   ADMIN_REVOKE_SUPERADMIN = 'admin_revoke_superadmin',
+  ADMIN_VIEW_REVENUE = 'admin_view_revenue',
   ADMIN_UPDATE_SUBSCRIPTION = 'admin_update_subscription',
 }
 

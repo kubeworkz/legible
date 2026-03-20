@@ -86,3 +86,32 @@ export const ADMIN_REVOKE_SUPERADMIN = gql`
     adminRevokeSuperadmin(userId: $userId)
   }
 `;
+
+export const ADMIN_REVENUE_STATS = gql`
+  query AdminRevenueStats {
+    adminRevenueStats {
+      mrr
+      arr
+      arpu
+      churnRate
+      totalPaidOrgs
+      totalFreeOrgs
+      totalCanceledOrgs
+      planBreakdown {
+        plan
+        count
+        mrr
+      }
+      orgRevenue {
+        organizationId
+        organizationName
+        plan
+        status
+        mrr
+        currentPeriodStart
+        currentPeriodEnd
+        canceledAt
+      }
+    }
+  }
+`;

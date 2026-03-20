@@ -5,12 +5,20 @@ import {
   AuditAction,
 } from '@server/repositories/auditLogRepository';
 
+// Plan prices in cents per month (used for MRR calculations)
+const PLAN_PRICE_CENTS: Record<string, number> = {
+  free: 0,
+  pro: 4900, // $49/mo
+  enterprise: 19900, // $199/mo
+};
+
 export class SuperadminResolver {
   constructor() {
     this.adminListOrganizations = this.adminListOrganizations.bind(this);
     this.adminGetOrganization = this.adminGetOrganization.bind(this);
     this.adminListUsers = this.adminListUsers.bind(this);
     this.adminPlatformStats = this.adminPlatformStats.bind(this);
+    this.adminRevenueStats = this.adminRevenueStats.bind(this);
     this.adminSetSuperadmin = this.adminSetSuperadmin.bind(this);
     this.adminRevokeSuperadmin = this.adminRevokeSuperadmin.bind(this);
   }
@@ -181,6 +189,99 @@ export class SuperadminResolver {
       subscriptionsByPlan: Object.entries(planCounts).map(
         ([plan, count]) => ({ plan, count }),
       ),
+    };
+  }
+
+  public async adminRevenueStats(_root: any, _args: any, ctx: IContext) {
+    const admin = requireSuperAdmin(ctx);
+
+    const subscriptions = await ctx.subscriptionRepository.findAll();
+    const orgs = await ctx.organizationRepository.findAll();
+    const orgsById = new Map(orgs.map((o) => [o.id, o]));
+
+    // Active paid subscriptions
+    const activePaid = subscriptions.filter(
+      (s) => s.status === 'active' && s.plan !== 'free',
+    );
+
+    // MRR = sum of monthly price for all active paid subs
+    const mrrCents = activePaid.reduce(
+      (sum, s) => sum + (PLAN_PRICE_CENTS[s.plan] || 0),
+      0,
+    );
+    const mrr = mrrCents / 100;
+    const arr = mrr * 12;
+
+    // ARPU = MRR / total active paid orgs (avoid div by zero)
+    const arpu = activePaid.length > 0 ? mrr / activePaid.length : 0;
+
+    // Churn: subscriptions canceled in the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentlyCanceled = subscriptions.filter(
+      (s) =>
+        s.status === 'canceled' &&
+        s.canceledAt &&
+        new Date(s.canceledAt) >= thirtyDaysAgo,
+    );
+    // Churn rate = canceled in last 30d / (active paid + recently canceled)
+    const churnBase = activePaid.length + recentlyCanceled.length;
+    const churnRate =
+      churnBase > 0 ? (recentlyCanceled.length / churnBase) * 100 : 0;
+
+    // Plan breakdown
+    const planBreakdown: Record<
+      string,
+      { plan: string; count: number; mrr: number }
+    > = {};
+    for (const sub of subscriptions) {
+      if (!planBreakdown[sub.plan]) {
+        planBreakdown[sub.plan] = { plan: sub.plan, count: 0, mrr: 0 };
+      }
+      planBreakdown[sub.plan].count += 1;
+      if (sub.status === 'active') {
+        planBreakdown[sub.plan].mrr +=
+          (PLAN_PRICE_CENTS[sub.plan] || 0) / 100;
+      }
+    }
+
+    // Per-org revenue
+    const orgRevenue = subscriptions.map((s) => {
+      const org = orgsById.get(s.organizationId);
+      return {
+        organizationId: s.organizationId,
+        organizationName: org?.displayName ?? 'Unknown',
+        plan: s.plan,
+        status: s.status,
+        mrr: s.status === 'active' ? (PLAN_PRICE_CENTS[s.plan] || 0) / 100 : 0,
+        currentPeriodStart: s.currentPeriodStart,
+        currentPeriodEnd: s.currentPeriodEnd,
+        canceledAt: s.canceledAt,
+      };
+    });
+
+    ctx.auditLogService.log({
+      userId: admin.id,
+      userEmail: admin.email,
+      clientIp: ctx.clientIp,
+      category: AuditCategory.SUPERADMIN,
+      action: AuditAction.ADMIN_VIEW_REVENUE,
+    });
+
+    return {
+      mrr,
+      arr,
+      arpu: Math.round(arpu * 100) / 100,
+      churnRate: Math.round(churnRate * 100) / 100,
+      totalPaidOrgs: activePaid.length,
+      totalFreeOrgs: subscriptions.filter(
+        (s) => s.plan === 'free' && s.status === 'active',
+      ).length,
+      totalCanceledOrgs: subscriptions.filter(
+        (s) => s.status === 'canceled',
+      ).length,
+      planBreakdown: Object.values(planBreakdown),
+      orgRevenue,
     };
   }
 

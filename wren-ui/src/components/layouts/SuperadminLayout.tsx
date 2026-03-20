@@ -8,6 +8,7 @@ import DashboardOutlined from '@ant-design/icons/DashboardOutlined';
 import BankOutlined from '@ant-design/icons/BankOutlined';
 import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import CrownOutlined from '@ant-design/icons/CrownOutlined';
+import DollarOutlined from '@ant-design/icons/DollarOutlined';
 
 const { Sider, Content } = Layout;
 
@@ -86,6 +87,12 @@ const menuItems: MenuItem[] = [
     href: '/superadmin/organizations',
   },
   {
+    key: 'revenue',
+    label: 'Revenue',
+    icon: <DollarOutlined />,
+    href: '/superadmin/revenue',
+  },
+  {
     key: 'users',
     label: 'Users',
     icon: <TeamOutlined />,
@@ -106,6 +113,7 @@ export default function SuperadminLayout(props: Props) {
     const path = router.pathname;
     if (path === '/superadmin') return 'overview';
     if (path.startsWith('/superadmin/organizations')) return 'organizations';
+    if (path.startsWith('/superadmin/revenue')) return 'revenue';
     if (path.startsWith('/superadmin/users')) return 'users';
     return 'overview';
   }, [router.pathname]);

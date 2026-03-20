@@ -2177,6 +2177,35 @@ export const typeDefs = gql`
     subscriptionsByPlan: [PlanCount!]!
   }
 
+  type AdminPlanBreakdown {
+    plan: String!
+    count: Int!
+    mrr: Float!
+  }
+
+  type AdminOrgRevenue {
+    organizationId: Int!
+    organizationName: String!
+    plan: String!
+    status: String!
+    mrr: Float!
+    currentPeriodStart: String
+    currentPeriodEnd: String
+    canceledAt: String
+  }
+
+  type AdminRevenueStats {
+    mrr: Float!
+    arr: Float!
+    arpu: Float!
+    churnRate: Float!
+    totalPaidOrgs: Int!
+    totalFreeOrgs: Int!
+    totalCanceledOrgs: Int!
+    planBreakdown: [AdminPlanBreakdown!]!
+    orgRevenue: [AdminOrgRevenue!]!
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -2317,6 +2346,7 @@ export const typeDefs = gql`
     adminGetOrganization(organizationId: Int!): AdminOrganizationDetail!
     adminListUsers: [AdminUser!]!
     adminPlatformStats: AdminPlatformStats!
+    adminRevenueStats: AdminRevenueStats!
   }
 
   type Mutation {
