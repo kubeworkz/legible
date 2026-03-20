@@ -8,6 +8,7 @@ export const ME = gql`
       displayName
       avatarUrl
       isActive
+      isSuperadmin
       emailVerified
       lastLoginAt
       createdAt

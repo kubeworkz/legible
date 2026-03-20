@@ -21,6 +21,8 @@ import FileSearchOutlined from '@ant-design/icons/FileSearchOutlined';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import DollarOutlined from '@ant-design/icons/DollarOutlined';
 import LinkOutlined from '@ant-design/icons/LinkOutlined';
+import CrownOutlined from '@ant-design/icons/CrownOutlined';
+import useAuth from '@/hooks/useAuth';
 
 const { Sider, Content } = Layout;
 
@@ -214,6 +216,7 @@ export default function SettingsLayout(props: Props) {
   const { currentProjectId } = useProject();
   const { canAdmin } = useProjectRole();
   const { isAdmin: isOrgAdmin } = useOrganization();
+  const { user: authUser } = useAuth();
   const bp = (path: Path) => buildPath(path, currentProjectId);
 
   const visCtx = { canAdmin, isOrgAdmin };
@@ -310,6 +313,25 @@ export default function SettingsLayout(props: Props) {
                 {item.label}
               </StyledMenuButton>
             ))}
+
+            {authUser?.isSuperadmin && (
+              <>
+                <Typography.Text
+                  className="d-block px-3 py-1 mt-3 gray-6 text-xs"
+                  style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                >
+                  Superadmin
+                </Typography.Text>
+                <StyledMenuButton
+                  type="text"
+                  block
+                  onClick={() => router.push('/superadmin')}
+                  icon={<CrownOutlined />}
+                >
+                  Admin Dashboard
+                </StyledMenuButton>
+              </>
+            )}
           </div>
         </StyledSider>
         <StyledContentLayout>

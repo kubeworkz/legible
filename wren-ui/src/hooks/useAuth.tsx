@@ -35,6 +35,7 @@ export interface AuthUser {
   displayName?: string;
   avatarUrl?: string;
   isActive: boolean;
+  isSuperadmin: boolean;
   emailVerified: boolean;
   lastLoginAt?: string;
   createdAt: string;
