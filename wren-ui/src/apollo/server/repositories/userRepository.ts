@@ -8,6 +8,7 @@ export interface User {
   displayName: string | null;
   avatarUrl: string | null;
   isActive: boolean;
+  isSuperadmin: boolean;
   emailVerified: boolean;
   emailVerificationToken: string | null;
   emailVerificationExpiresAt: string | null;

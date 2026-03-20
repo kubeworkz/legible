@@ -201,3 +201,15 @@ export async function requireKnowledgeRead(ctx: IContext): Promise<number> {
   }
   return projectId;
 }
+
+/**
+ * Ensures the authenticated user has the superadmin flag set.
+ * Returns the authenticated superadmin user.
+ */
+export function requireSuperAdmin(ctx: IContext): User {
+  const user = requireAuth(ctx);
+  if (!user.isSuperadmin) {
+    throw new Error('Superadmin access required');
+  }
+  return user;
+}
