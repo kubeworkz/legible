@@ -2206,6 +2206,21 @@ export const typeDefs = gql`
     orgRevenue: [AdminOrgRevenue!]!
   }
 
+  type AdminSecurityOverview {
+    failedLogins24h: Int!
+    failedOidcLogins24h: Int!
+    superadminActions7d: Int!
+    totalEvents24h: Int!
+    oidcProviderCount: Int!
+    oidcEnabledCount: Int!
+    ssoEnforcedCount: Int!
+    activeSessions: Int!
+    totalSessions: Int!
+    superadminCount: Int!
+    totalUsers: Int!
+    recentSecurityEvents: [AuditLogEntry!]!
+  }
+
   # Query and Mutation
   type Query {
     # Auth
@@ -2347,6 +2362,11 @@ export const typeDefs = gql`
     adminListUsers: [AdminUser!]!
     adminPlatformStats: AdminPlatformStats!
     adminRevenueStats: AdminRevenueStats!
+    adminAuditLogs(
+      filter: AuditLogFilterInput
+      pagination: AuditLogPaginationInput!
+    ): AuditLogPaginatedResponse!
+    adminSecurityOverview: AdminSecurityOverview!
   }
 
   type Mutation {

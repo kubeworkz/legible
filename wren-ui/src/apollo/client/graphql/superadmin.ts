@@ -115,3 +115,55 @@ export const ADMIN_REVENUE_STATS = gql`
     }
   }
 `;
+
+export const ADMIN_AUDIT_LOGS = gql`
+  query AdminAuditLogs(
+    $filter: AuditLogFilterInput
+    $pagination: AuditLogPaginationInput!
+  ) {
+    adminAuditLogs(filter: $filter, pagination: $pagination) {
+      data {
+        id
+        timestamp
+        userId
+        userEmail
+        clientIp
+        organizationId
+        category
+        action
+        targetType
+        targetId
+        result
+        detail
+      }
+      total
+    }
+  }
+`;
+
+export const ADMIN_SECURITY_OVERVIEW = gql`
+  query AdminSecurityOverview {
+    adminSecurityOverview {
+      failedLogins24h
+      failedOidcLogins24h
+      superadminActions7d
+      totalEvents24h
+      oidcProviderCount
+      oidcEnabledCount
+      ssoEnforcedCount
+      activeSessions
+      totalSessions
+      superadminCount
+      totalUsers
+      recentSecurityEvents {
+        id
+        timestamp
+        userEmail
+        category
+        action
+        result
+        detail
+      }
+    }
+  }
+`;

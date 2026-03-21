@@ -189,6 +189,8 @@ const resolvers = {
     adminListUsers: superadminResolver.adminListUsers,
     adminPlatformStats: superadminResolver.adminPlatformStats,
     adminRevenueStats: superadminResolver.adminRevenueStats,
+    adminAuditLogs: superadminResolver.adminAuditLogs,
+    adminSecurityOverview: superadminResolver.adminSecurityOverview,
   },
   Mutation: {
     // Auth

@@ -3,6 +3,7 @@ import { requireSuperAdmin } from '../utils/authGuard';
 import {
   AuditCategory,
   AuditAction,
+  AuditLogFilter,
 } from '@server/repositories/auditLogRepository';
 
 // Plan prices in cents per month (used for MRR calculations)
@@ -19,6 +20,8 @@ export class SuperadminResolver {
     this.adminListUsers = this.adminListUsers.bind(this);
     this.adminPlatformStats = this.adminPlatformStats.bind(this);
     this.adminRevenueStats = this.adminRevenueStats.bind(this);
+    this.adminAuditLogs = this.adminAuditLogs.bind(this);
+    this.adminSecurityOverview = this.adminSecurityOverview.bind(this);
     this.adminSetSuperadmin = this.adminSetSuperadmin.bind(this);
     this.adminRevokeSuperadmin = this.adminRevokeSuperadmin.bind(this);
   }
@@ -282,6 +285,147 @@ export class SuperadminResolver {
       ).length,
       planBreakdown: Object.values(planBreakdown),
       orgRevenue,
+    };
+  }
+
+  public async adminAuditLogs(
+    _root: any,
+    args: {
+      filter?: {
+        category?: string;
+        action?: string;
+        userId?: number;
+        organizationId?: number;
+        result?: string;
+        startTime?: string;
+        endTime?: string;
+      };
+      pagination: { limit: number; offset: number };
+    },
+    ctx: IContext,
+  ) {
+    const admin = requireSuperAdmin(ctx);
+
+    const filter: AuditLogFilter = {};
+    if (args.filter) {
+      if (args.filter.category) filter.category = args.filter.category as any;
+      if (args.filter.action) filter.action = args.filter.action as any;
+      if (args.filter.userId) filter.userId = args.filter.userId;
+      if (args.filter.organizationId)
+        filter.organizationId = args.filter.organizationId;
+      if (args.filter.result) filter.result = args.filter.result as any;
+      if (args.filter.startTime) filter.startTime = args.filter.startTime;
+      if (args.filter.endTime) filter.endTime = args.filter.endTime;
+    }
+    // NOTE: no org-scoping — superadmin sees ALL audit logs
+
+    const pagination = {
+      limit: Math.min(args.pagination.limit, 500),
+      offset: args.pagination.offset ?? 0,
+    };
+
+    ctx.auditLogService.log({
+      userId: admin.id,
+      userEmail: admin.email,
+      clientIp: ctx.clientIp,
+      category: AuditCategory.SUPERADMIN,
+      action: AuditAction.ADMIN_VIEW_AUDIT,
+    });
+
+    return ctx.auditLogService.query(filter, pagination);
+  }
+
+  public async adminSecurityOverview(
+    _root: any,
+    _args: any,
+    ctx: IContext,
+  ) {
+    const admin = requireSuperAdmin(ctx);
+
+    // Failed logins in last 24h
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    const recentFailedLogins = await ctx.auditLogService.query(
+      {
+        action: AuditAction.LOGIN_FAILED,
+        startTime: oneDayAgo.toISOString(),
+      },
+      { limit: 1, offset: 0 },
+    );
+
+    // Failed OIDC logins in last 24h
+    const recentFailedOidc = await ctx.auditLogService.query(
+      {
+        action: AuditAction.OIDC_LOGIN_FAILED,
+        startTime: oneDayAgo.toISOString(),
+      },
+      { limit: 1, offset: 0 },
+    );
+
+    // Superadmin actions in last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const superadminActions = await ctx.auditLogService.query(
+      {
+        category: AuditCategory.SUPERADMIN,
+        startTime: sevenDaysAgo.toISOString(),
+      },
+      { limit: 1, offset: 0 },
+    );
+
+    // Total audit events in last 24h
+    const recentAllEvents = await ctx.auditLogService.query(
+      { startTime: oneDayAgo.toISOString() },
+      { limit: 1, offset: 0 },
+    );
+
+    // OIDC provider count
+    const oidcProviders = await ctx.oidcProviderRepository.findAll();
+    const enabledOidc = oidcProviders.filter((p: any) => p.enabled || p.is_enabled);
+    const ssoEnforced = oidcProviders.filter(
+      (p: any) => p.ssoEnforced || p.sso_enforced,
+    );
+
+    // Active sessions
+    const sessions = await ctx.sessionRepository.findAll();
+    const now = new Date();
+    const activeSessions = sessions.filter(
+      (s: any) => s.expiresAt && new Date(s.expiresAt) > now,
+    );
+
+    // Superadmin users count
+    const users = await ctx.userRepository.findAll();
+    const superadmins = users.filter((u) => u.isSuperadmin);
+
+    // Recent security events (last 10 notable events)
+    const securityEvents = await ctx.auditLogService.query(
+      {
+        startTime: sevenDaysAgo.toISOString(),
+      },
+      { limit: 10, offset: 0 },
+    );
+
+    ctx.auditLogService.log({
+      userId: admin.id,
+      userEmail: admin.email,
+      clientIp: ctx.clientIp,
+      category: AuditCategory.SUPERADMIN,
+      action: AuditAction.ADMIN_VIEW_SECURITY,
+    });
+
+    return {
+      failedLogins24h: recentFailedLogins.total,
+      failedOidcLogins24h: recentFailedOidc.total,
+      superadminActions7d: superadminActions.total,
+      totalEvents24h: recentAllEvents.total,
+      oidcProviderCount: oidcProviders.length,
+      oidcEnabledCount: enabledOidc.length,
+      ssoEnforcedCount: ssoEnforced.length,
+      activeSessions: activeSessions.length,
+      totalSessions: sessions.length,
+      superadminCount: superadmins.length,
+      totalUsers: users.length,
+      recentSecurityEvents: securityEvents.data,
     };
   }
 

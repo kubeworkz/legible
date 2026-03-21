@@ -9,6 +9,8 @@ import BankOutlined from '@ant-design/icons/BankOutlined';
 import TeamOutlined from '@ant-design/icons/TeamOutlined';
 import CrownOutlined from '@ant-design/icons/CrownOutlined';
 import DollarOutlined from '@ant-design/icons/DollarOutlined';
+import SafetyCertificateOutlined from '@ant-design/icons/SafetyCertificateOutlined';
+import FileSearchOutlined from '@ant-design/icons/FileSearchOutlined';
 
 const { Sider, Content } = Layout;
 
@@ -98,6 +100,18 @@ const menuItems: MenuItem[] = [
     icon: <TeamOutlined />,
     href: '/superadmin/users',
   },
+  {
+    key: 'security',
+    label: 'Security',
+    icon: <SafetyCertificateOutlined />,
+    href: '/superadmin/security',
+  },
+  {
+    key: 'audit',
+    label: 'Audit Log',
+    icon: <FileSearchOutlined />,
+    href: '/superadmin/audit',
+  },
 ];
 
 interface Props {
@@ -115,6 +129,8 @@ export default function SuperadminLayout(props: Props) {
     if (path.startsWith('/superadmin/organizations')) return 'organizations';
     if (path.startsWith('/superadmin/revenue')) return 'revenue';
     if (path.startsWith('/superadmin/users')) return 'users';
+    if (path.startsWith('/superadmin/security')) return 'security';
+    if (path.startsWith('/superadmin/audit')) return 'audit';
     return 'overview';
   }, [router.pathname]);
 
