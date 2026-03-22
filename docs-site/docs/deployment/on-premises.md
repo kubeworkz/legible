@@ -222,5 +222,5 @@ Legible on-premises is built for organisations that can't afford to send data ou
 
 For enterprise architecture review, model selection guidance, Helm chart customisation, SSO integration, and dedicated onboarding:
 
-- **Enterprise sales:** [onprem@legiblequery.ai](mailto:onprem@legiblequery.ai)
+- **Enterprise sales:** [enterprise@legiblequery.ai](mailto:enterprise@legiblequery.ai)
 - **General:** [hello@legiblequery.ai](mailto:hello@legiblequery.ai)
