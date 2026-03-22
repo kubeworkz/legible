@@ -103,7 +103,8 @@ class MisleadingAssistance(BasicPipeline):
             ),
             "generator_name": llm_provider.get_model(),
             "prompt_builder": PromptBuilder(
-                template=misleading_assistance_user_prompt_template
+                template=misleading_assistance_user_prompt_template,
+                required_variables=[]
             ),
         }
 

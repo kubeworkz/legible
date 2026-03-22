@@ -127,7 +127,8 @@ class ChartGeneration(BasicPipeline):
     ):
         self._components = {
             "prompt_builder": PromptBuilder(
-                template=chart_generation_user_prompt_template
+                template=chart_generation_user_prompt_template,
+                required_variables=[]
             ),
             "generator": llm_provider.get_generator(
                 system_prompt=chart_generation_system_prompt,

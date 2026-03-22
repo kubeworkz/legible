@@ -104,7 +104,7 @@ class SQLQuestion(BasicPipeline):
                 generation_kwargs=SQL_QUESTION_MODEL_KWARGS,
             ),
             "generator_name": llm_provider.get_model(),
-            "prompt_builder": PromptBuilder(template=sql_question_user_prompt_template),
+            "prompt_builder": PromptBuilder(template=sql_question_user_prompt_template, required_variables=[]),
         }
 
         super().__init__(

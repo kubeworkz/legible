@@ -362,7 +362,8 @@ class IntentClassification(BasicPipeline):
             ),
             "generator_name": llm_provider.get_model(),
             "prompt_builder": PromptBuilder(
-                template=intent_classification_user_prompt_template
+                template=intent_classification_user_prompt_template,
+                required_variables=[]
             ),
         }
 

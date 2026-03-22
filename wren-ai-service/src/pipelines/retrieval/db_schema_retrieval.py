@@ -475,7 +475,8 @@ class DbSchemaRetrieval(BasicPipeline):
             ),
             "generator_name": llm_provider.get_model(),
             "prompt_builder": PromptBuilder(
-                template=table_columns_selection_user_prompt_template
+                template=table_columns_selection_user_prompt_template,
+                required_variables=[]
             ),
         }
 

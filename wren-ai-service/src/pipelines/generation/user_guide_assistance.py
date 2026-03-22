@@ -93,7 +93,8 @@ class UserGuideAssistance(BasicPipeline):
             ),
             "generator_name": llm_provider.get_model(),
             "prompt_builder": PromptBuilder(
-                template=user_guide_assistance_user_prompt_template
+                template=user_guide_assistance_user_prompt_template,
+                required_variables=[]
             ),
         }
         self._configs = {

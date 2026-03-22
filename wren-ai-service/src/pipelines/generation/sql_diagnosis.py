@@ -126,7 +126,8 @@ class SQLDiagnosis(BasicPipeline):
             ),
             "generator_name": llm_provider.get_model(),
             "prompt_builder": PromptBuilder(
-                template=sql_diagnosis_user_prompt_template
+                template=sql_diagnosis_user_prompt_template,
+                required_variables=[]
             ),
         }
 

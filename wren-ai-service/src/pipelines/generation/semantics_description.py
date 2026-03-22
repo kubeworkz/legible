@@ -219,7 +219,7 @@ SEMANTICS_DESCRIPTION_MODEL_KWARGS = {
 class SemanticsDescription(BasicPipeline):
     def __init__(self, llm_provider: LLMProvider, **_):
         self._components = {
-            "prompt_builder": PromptBuilder(template=user_prompt_template),
+            "prompt_builder": PromptBuilder(template=user_prompt_template, required_variables=[]),
             "generator": llm_provider.get_generator(
                 system_prompt=system_prompt,
                 generation_kwargs=SEMANTICS_DESCRIPTION_MODEL_KWARGS,

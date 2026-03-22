@@ -109,7 +109,8 @@ class SQLTablesExtraction(BasicPipeline):
             ),
             "generator_name": llm_provider.get_model(),
             "prompt_builder": PromptBuilder(
-                template=sql_tables_extraction_user_prompt_template
+                template=sql_tables_extraction_user_prompt_template,
+                required_variables=[]
             ),
         }
 

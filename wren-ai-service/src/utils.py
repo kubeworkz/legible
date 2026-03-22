@@ -76,15 +76,22 @@ def remove_trailing_slash(endpoint: str) -> str:
 
 
 def init_langfuse(settings: Settings):
+    public_key = os.getenv("LANGFUSE_PUBLIC_KEY")
+    secret_key = os.getenv("LANGFUSE_SECRET_KEY")
+    enabled = settings.langfuse_enable and bool(public_key) and bool(secret_key)
+
     Langfuse(
         host=settings.langfuse_host,
-        public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
-        secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
-        tracing_enabled=settings.langfuse_enable,
+        public_key=public_key,
+        secret_key=secret_key,
+        tracing_enabled=enabled,
     )
 
-    logger.info(f"LANGFUSE_ENABLE: {settings.langfuse_enable}")
-    logger.info(f"LANGFUSE_HOST: {settings.langfuse_host}")
+    logger.info(f"LANGFUSE_ENABLE: {enabled}")
+    if enabled:
+        logger.info(f"LANGFUSE_HOST: {settings.langfuse_host}")
+    elif settings.langfuse_enable:
+        logger.info("Langfuse disabled: LANGFUSE_PUBLIC_KEY or LANGFUSE_SECRET_KEY not set")
 
 
 def trace_metadata(func):

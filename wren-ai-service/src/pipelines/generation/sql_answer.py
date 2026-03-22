@@ -98,7 +98,8 @@ class SQLAnswer(BasicPipeline):
         self._user_queues = {}
         self._components = {
             "prompt_builder": PromptBuilder(
-                template=sql_to_answer_user_prompt_template
+                template=sql_to_answer_user_prompt_template,
+                required_variables=[]
             ),
             "generator": llm_provider.get_generator(
                 system_prompt=sql_to_answer_system_prompt,

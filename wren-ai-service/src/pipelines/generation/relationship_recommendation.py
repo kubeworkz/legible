@@ -205,7 +205,7 @@ class RelationshipRecommendation(BasicPipeline):
         **_,
     ):
         self._components = {
-            "prompt_builder": PromptBuilder(template=user_prompt_template),
+            "prompt_builder": PromptBuilder(template=user_prompt_template, required_variables=[]),
             "generator": llm_provider.get_generator(
                 system_prompt=system_prompt,
                 generation_kwargs=RELATIONSHIP_RECOMMENDATION_MODEL_KWARGS,
