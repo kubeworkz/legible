@@ -25,6 +25,8 @@ export enum AuditAction {
   LOGOUT = 'logout',
   PASSWORD_CHANGED = 'password_changed',
   ACCOUNT_DELETED = 'account_deleted',
+  SESSION_CREATED = 'session_created',
+  SESSION_EXPIRED = 'session_expired',
   OIDC_LOGIN = 'oidc_login',
   OIDC_LOGIN_FAILED = 'oidc_login_failed',
   OIDC_IDENTITY_UNLINKED = 'oidc_identity_unlinked',

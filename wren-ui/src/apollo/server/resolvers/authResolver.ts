@@ -4,6 +4,9 @@ import { requireAuth } from '@server/utils/authGuard';
 import {
   checkLoginRateLimit,
   checkSignupRateLimit,
+  checkAccountLockout,
+  recordFailedLogin,
+  clearFailedLogins,
 } from '@server/utils/authRateLimiter';
 import {
   AuditCategory,
@@ -62,6 +65,16 @@ export class AuthResolver {
       detail: { email: user.email },
     });
 
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      category: AuditCategory.AUTH,
+      action: AuditAction.SESSION_CREATED,
+      targetType: 'session',
+      detail: { method: 'signup' },
+    });
+
     return { token: result.token, user };
   }
 
@@ -77,9 +90,26 @@ export class AuthResolver {
       throw new Error(rl.reason || 'Too many login attempts');
     }
 
+    // Account lockout by email
+    const lockout = checkAccountLockout(args.data.email);
+    if (!lockout.allowed) {
+      ctx.auditLogService.log({
+        userEmail: args.data.email,
+        clientIp: ctx.clientIp,
+        category: AuditCategory.AUTH,
+        action: AuditAction.LOGIN_FAILED,
+        result: AuditResult.FAILURE,
+        detail: { email: args.data.email, reason: 'account_locked' },
+      });
+      throw new Error(lockout.reason || 'Account temporarily locked');
+    }
+
     try {
       const result = await ctx.authService.login(args.data);
       const { passwordHash, ...user } = result.user;
+
+      // Clear lockout on successful login
+      clearFailedLogins(args.data.email);
 
       ctx.auditLogService.log({
         userId: user.id,
@@ -91,8 +121,21 @@ export class AuthResolver {
         targetId: user.id,
       });
 
+      ctx.auditLogService.log({
+        userId: user.id,
+        userEmail: user.email,
+        clientIp: ctx.clientIp,
+        category: AuditCategory.AUTH,
+        action: AuditAction.SESSION_CREATED,
+        targetType: 'session',
+        detail: { method: 'password' },
+      });
+
       return { token: result.token, user };
     } catch (err) {
+      // Record failed attempt for account lockout
+      recordFailedLogin(args.data.email);
+
       ctx.auditLogService.log({
         userEmail: args.data.email,
         clientIp: ctx.clientIp,
@@ -268,6 +311,16 @@ export class AuthResolver {
       action: AuditAction.LOGIN,
       targetType: 'user',
       targetId: user.id,
+      detail: { method: 'magic_link' },
+    });
+
+    ctx.auditLogService.log({
+      userId: user.id,
+      userEmail: user.email,
+      clientIp: ctx.clientIp,
+      category: AuditCategory.AUTH,
+      action: AuditAction.SESSION_CREATED,
+      targetType: 'session',
       detail: { method: 'magic_link' },
     });
 

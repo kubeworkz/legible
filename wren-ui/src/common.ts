@@ -85,6 +85,7 @@ import {
   DashboardCacheBackgroundTracker,
 } from './apollo/server/backgrounds';
 import { SqlPairService } from './apollo/server/services/sqlPairService';
+import { getLogger } from '@server/utils';
 
 export const serverConfig = getConfig();
 
@@ -424,3 +425,40 @@ export const initComponents = () => {
 
 // singleton components
 export const components = initComponents();
+
+// ----- Scheduled maintenance tasks -----
+
+const maintenanceLogger = getLogger('MAINTENANCE');
+
+// Auto-purge expired sessions every hour
+setInterval(async () => {
+  try {
+    const deleted = await components.sessionRepository.deleteExpired();
+    if (deleted > 0) {
+      maintenanceLogger.info(`Purged ${deleted} expired session(s)`);
+      // Audit log the session expiry
+      components.auditLogService.log({
+        category: 'auth' as any,
+        action: 'session_expired' as any,
+        detail: { expiredCount: deleted, trigger: 'scheduled_cleanup' },
+      });
+    }
+  } catch (err: any) {
+    maintenanceLogger.error(`Session cleanup failed: ${err.message}`);
+  }
+}, 60 * 60 * 1000); // 1 hour
+
+// Auto-purge old audit logs daily
+const retentionDays = serverConfig.auditLogRetentionDays || 365;
+setInterval(async () => {
+  try {
+    const deleted = await components.auditLogService.purge(retentionDays);
+    if (deleted > 0) {
+      maintenanceLogger.info(
+        `Purged ${deleted} audit log(s) older than ${retentionDays} days`,
+      );
+    }
+  } catch (err: any) {
+    maintenanceLogger.error(`Audit log retention failed: ${err.message}`);
+  }
+}, 24 * 60 * 60 * 1000); // 24 hours

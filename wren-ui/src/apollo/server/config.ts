@@ -58,6 +58,9 @@ export interface IConfig {
   projectRecommendationQuestionsMaxQuestions?: number;
   threadRecommendationQuestionMaxCategories?: number;
   threadRecommendationQuestionsMaxQuestions?: number;
+
+  // audit log retention (days)
+  auditLogRetentionDays?: number;
 }
 
 const defaultConfig = {
@@ -86,9 +89,9 @@ const defaultConfig = {
   experimentalEngineRustVersion: true,
   ibisServerEndpoint: 'http://127.0.0.1:8000',
 
-  // encryption
-  encryptionPassword: 'sementic',
-  encryptionSalt: 'layer',
+  // encryption — NO DEFAULTS; these must be set via environment variables
+  encryptionPassword: '',
+  encryptionSalt: '',
 };
 
 const config = {
@@ -172,8 +175,30 @@ const config = {
     .THREAD_RECOMMENDATION_QUESTIONS_MAX_QUESTIONS
     ? parseInt(process.env.THREAD_RECOMMENDATION_QUESTIONS_MAX_QUESTIONS)
     : 1,
+
+  // audit log retention
+  auditLogRetentionDays: parseInt(
+    process.env.AUDIT_LOG_RETENTION_DAYS || '365',
+    10,
+  ),
 };
 
 export function getConfig(): IConfig {
-  return { ...defaultConfig, ...pickBy(config) };
+  const cfg = { ...defaultConfig, ...pickBy(config) };
+
+  // Fail fast if encryption secrets are not configured
+  if (!cfg.encryptionPassword || cfg.encryptionPassword.length < 16) {
+    throw new Error(
+      'ENCRYPTION_PASSWORD env var is required and must be at least 16 characters. ' +
+        'Generate one with: openssl rand -base64 32',
+    );
+  }
+  if (!cfg.encryptionSalt || cfg.encryptionSalt.length < 8) {
+    throw new Error(
+      'ENCRYPTION_SALT env var is required and must be at least 8 characters. ' +
+        'Generate one with: openssl rand -base64 16',
+    );
+  }
+
+  return cfg;
 }
