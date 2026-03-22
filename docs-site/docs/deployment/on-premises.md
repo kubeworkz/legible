@@ -20,19 +20,19 @@ Run Legible entirely within your own infrastructure — on-premise, in a private
 Every component runs inside your boundary:
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                YOUR INFRASTRUCTURE                   │
-│                                                      │
-│   User ──▶ Legible Web App ──▶ Legible API Server   │
-│                                       │              │
-│                           ┌───────────┴──────────┐   │
-│                           ▼                      ▼   │
-│                   AI / LLM Runtime         Your DBs  │
-│                   (Ollama · vLLM ·        (Postgres · │
-│                    Bedrock VPC ·           MySQL ·    │
-│                    Azure Private)          ClickHouse)│
-│                                                      │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                YOUR INFRASTRUCTURE                       │
+│                                                          │
+│   User ──▶ Legible Web App ──▶ Legible API Server       │
+│                                       │                  │
+│                           ┌───────────┴──────────┐       │
+│                           ▼                      ▼       │
+│                   AI / LLM Runtime         Your DBs      │
+│                   (Ollama · vLLM ·        (Postgres ·    │
+│                    Bedrock VPC ·           MySQL ·       │
+│                    Azure Private)          ClickHouse)   │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
 ```
 
 Every LLM inference call stays inside your network. Query text, schema metadata, and results never leave your perimeter.
