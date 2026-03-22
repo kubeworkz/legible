@@ -6,7 +6,7 @@ from hamilton import base
 from hamilton.async_driver import AsyncDriver
 from haystack import Document, component
 from haystack_integrations.document_stores.qdrant import QdrantDocumentStore
-from langfuse.decorators import observe
+from langfuse import observe
 
 from src.core.pipeline import BasicPipeline
 from src.core.provider import DocumentStoreProvider, EmbedderProvider
@@ -51,7 +51,9 @@ async def count_documents(
         else None
     )
 
-    return await view_questions_store.count_documents(filters=filters)
+    if filters:
+        return await view_questions_store.count_documents_by_filter_async(filters)
+    return await view_questions_store.count_documents_async()
 
 
 @observe(capture_input=False, capture_output=False)
@@ -80,7 +82,7 @@ async def retrieval(
             else None
         )
 
-        view_question_res = await view_questions_retriever.run(
+        view_question_res = await view_questions_retriever.run_async(
             query_embedding=embedding.get("embedding"),
             filters=filters,
         )

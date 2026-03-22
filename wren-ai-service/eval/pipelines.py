@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Literal
 
 import orjson
 from haystack import Document
-from langfuse.decorators import langfuse_context, observe
+from langfuse import get_client, observe, propagate_attributes
 from tqdm.asyncio import tqdm_asyncio
 
 from src.core.pipeline import PipelineComponent
@@ -126,9 +126,10 @@ class Eval:
 
     @observe(name="Prediction Process", capture_input=False)
     async def process(self, params: dict) -> dict:
+        client = get_client()
         prediction = {
-            "trace_id": langfuse_context.get_current_trace_id(),
-            "trace_url": langfuse_context.get_current_trace_url(),
+            "trace_id": client.get_current_trace_id(),
+            "trace_url": client.get_trace_url(),
             "input": params["question"],
             "actual_output": {},
             "expected_output": params["sql"],
@@ -141,15 +142,14 @@ class Eval:
             "elapsed_time": 0,
         }
 
-        langfuse_context.update_current_trace(
+        with propagate_attributes(
             session_id=self._meta.get("session_id"),
             user_id=self._meta.get("user_id"),
-            metadata=trace_metadata(self._meta, type=prediction["type"]),
-        )
-
-        start_time = datetime.now()
-        returned = await self._process(prediction, **params)
-        returned["elapsed_time"] = (datetime.now() - start_time).total_seconds()
+            metadata={k: str(v) for k, v in trace_metadata(self._meta, type=prediction["type"]).items() if v is not None},
+        ):
+            start_time = datetime.now()
+            returned = await self._process(prediction, **params)
+            returned["elapsed_time"] = (datetime.now() - start_time).total_seconds()
 
         return returned
 

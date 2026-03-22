@@ -6,7 +6,7 @@ import aiohttp
 from cachetools import TTLCache
 from hamilton import base
 from hamilton.async_driver import AsyncDriver
-from langfuse.decorators import observe
+from langfuse import observe
 
 from src.core.engine import Engine
 from src.core.pipeline import BasicPipeline

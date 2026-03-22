@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, Literal, Optional
 
 from cachetools import TTLCache
-from langfuse.decorators import observe
+from langfuse import observe
 from pydantic import BaseModel
 
 from src.core.pipeline import BasicPipeline

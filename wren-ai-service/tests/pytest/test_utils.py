@@ -57,9 +57,9 @@ def test_service_metadata(service_metadata: ServiceMetadata):
 
 
 def test_trace_metadata(service_metadata: ServiceMetadata, mocker: MockFixture):
-    function = mocker.patch(
-        "src.utils.langfuse_context.update_current_trace", return_value=None
-    )
+    mock_propagate = mocker.patch("src.utils.propagate_attributes")
+    mock_client = mocker.MagicMock()
+    mocker.patch("src.utils.get_client", return_value=mock_client)
 
     class Request:
         project_id = "mock-project-id"
@@ -73,10 +73,12 @@ def test_trace_metadata(service_metadata: ServiceMetadata, mocker: MockFixture):
 
     asyncio.run(my_function("", Request(), service_metadata=asdict(service_metadata)))
 
-    function.assert_called_once_with(
+    mock_propagate.assert_called_once_with(
         user_id=None,
         session_id="mock-thread-id",
-        release=service_metadata.service_version,
+        version=service_metadata.service_version,
+    )
+    mock_client.update_current_span.assert_called_once_with(
         metadata={
             "mdl_hash": "mock-mdl-hash",
             "project_id": "mock-project-id",

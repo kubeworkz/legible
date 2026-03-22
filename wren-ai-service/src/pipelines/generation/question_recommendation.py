@@ -6,7 +6,7 @@ import orjson
 from hamilton import base
 from hamilton.async_driver import AsyncDriver
 from haystack.components.builders.prompt_builder import PromptBuilder
-from langfuse.decorators import observe
+from langfuse import observe
 from pydantic import BaseModel
 
 from src.core.pipeline import BasicPipeline

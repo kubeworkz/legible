@@ -6,8 +6,7 @@ from typing import Tuple
 from deepeval import evaluate
 from deepeval.evaluate import TestResult
 from deepeval.test_case import LLMTestCase
-from langfuse import Langfuse
-from langfuse.decorators import langfuse_context, observe
+from langfuse import Langfuse, get_client, observe, propagate_attributes
 
 sys.path.append(f"{Path().parent.resolve()}")
 import traceback
@@ -131,33 +130,33 @@ class Evaluator:
 
     @observe(name="Summary Trace", capture_input=False, capture_output=False)
     def _average_score(self, meta: dict) -> None:
-        langfuse_context.update_current_trace(
+        client = get_client()
+        with propagate_attributes(
             session_id=meta.get("session_id"),
             user_id=meta.get("user_id"),
-            metadata=trace_metadata(meta, type="summary"),
-        )
+            metadata={k: str(v) for k, v in trace_metadata(meta, type="summary").items() if v is not None},
+        ):
+            summary = {
+                "query_count": meta["query_count"],
+                "expected_batch_size": meta["expected_batch_size"],
+                "actual_batch_size": meta["actual_batch_size"],
+                "valid_eval_count": meta["actual_batch_size"] - self._failed_count,
+            }
+            client.update_current_span(output=summary)
 
-        summary = {
-            "query_count": meta["query_count"],
-            "expected_batch_size": meta["expected_batch_size"],
-            "actual_batch_size": meta["actual_batch_size"],
-            "valid_eval_count": meta["actual_batch_size"] - self._failed_count,
-        }
-        langfuse_context.update_current_observation(output=summary)
+            for name, scores in self._score_collector.items():
+                client.score_current_trace(
+                    name=name,
+                    value=sum(scores) / len(scores),
+                    comment=f"Average score for {name}",
+                )
 
-        for name, scores in self._score_collector.items():
-            langfuse_context.score_current_trace(
-                name=name,
-                value=sum(scores) / len(scores),
-                comment=f"Average score for {name}",
-            )
-
-        for metric in self._post_metrics:
-            langfuse_context.score_current_trace(
-                name=metric.__name__,
-                value=metric.measure(),
-                comment=f"Average score for {metric.__name__}",
-            )
+            for metric in self._post_metrics:
+                client.score_current_trace(
+                    name=metric.__name__,
+                    value=metric.measure(),
+                    comment=f"Average score for {metric.__name__}",
+                )
 
 
 if __name__ == "__main__":
@@ -192,7 +191,7 @@ if __name__ == "__main__":
     # else:
     #     evaluator.eval(meta, predictions)
 
-    langfuse_context.flush()
+    get_client().flush()
 
     if meta["langfuse_url"]:
         print(

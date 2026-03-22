@@ -6,7 +6,7 @@ import aiohttp
 from hamilton import base
 from hamilton.async_driver import AsyncDriver
 from haystack import component
-from langfuse.decorators import observe
+from langfuse import observe
 
 from src.core.engine import Engine
 from src.core.pipeline import BasicPipeline

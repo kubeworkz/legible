@@ -102,7 +102,7 @@ services:
       - wren
 
   qdrant:
-    image: qdrant/qdrant:v1.11.0
+    image: qdrant/qdrant:v1.17.0
     restart: on-failure
     expose:
       - 6333

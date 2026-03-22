@@ -9,7 +9,7 @@ from hamilton.function_modifiers import extract_fields
 from haystack import Document, component
 from haystack.components.writers import DocumentWriter
 from haystack.document_stores.types import DuplicatePolicy
-from langfuse.decorators import observe
+from langfuse import observe
 from tqdm import tqdm
 
 from src.core.pipeline import BasicPipeline
@@ -126,7 +126,7 @@ async def clean(
 
 @observe(capture_input=False)
 async def write(clean: Dict[str, Any], writer: DocumentWriter) -> None:
-    return await writer.run(documents=clean["documents"])
+    return await writer.run_async(documents=clean["documents"])
 
 
 ## End of Pipeline

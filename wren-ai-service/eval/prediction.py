@@ -8,7 +8,7 @@ from typing import Any, Dict, Tuple
 
 import orjson
 from git import Repo
-from langfuse.decorators import langfuse_context
+from langfuse import get_client
 from tomlkit import document, dumps
 
 sys.path.append(f"{Path().parent.resolve()}")
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     meta["actual_batch_size"] = len(predictions)
 
     write_prediction(meta, predictions)
-    langfuse_context.flush()
+    get_client().flush()
 
     if meta["langfuse_url"]:
         print(

@@ -7,7 +7,7 @@ from hamilton import base
 from hamilton.async_driver import AsyncDriver
 from haystack import Document, component
 from haystack.document_stores.types import DocumentStore, DuplicatePolicy
-from langfuse.decorators import observe
+from langfuse import observe
 from pydantic import BaseModel
 
 from src.core.pipeline import BasicPipeline
@@ -75,7 +75,7 @@ class InstructionsCleaner:
                 {"field": "project_id", "operator": "==", "value": project_id}
             )
 
-        return await self.store.delete_documents(filter)
+        return await self.store.delete_by_filter_async(filter)
 
 
 ## Start of Pipeline
@@ -118,7 +118,7 @@ async def write(
     clean: Dict[str, Any],
     writer: AsyncDocumentWriter,
 ) -> None:
-    return await writer.run(documents=clean["documents"])
+    return await writer.run_async(documents=clean["documents"])
 
 
 ## End of Pipeline

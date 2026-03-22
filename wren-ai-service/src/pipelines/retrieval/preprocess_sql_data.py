@@ -5,7 +5,7 @@ from typing import Dict
 import tiktoken
 from hamilton import base
 from hamilton.driver import Driver
-from langfuse.decorators import observe
+from langfuse import observe
 
 from src.core.pipeline import BasicPipeline
 from src.core.provider import LLMProvider

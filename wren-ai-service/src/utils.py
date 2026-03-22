@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
-from langfuse.decorators import langfuse_context
+from langfuse import Langfuse, get_client, propagate_attributes
 
 from src.config import Settings
 
@@ -76,11 +76,11 @@ def remove_trailing_slash(endpoint: str) -> str:
 
 
 def init_langfuse(settings: Settings):
-    langfuse_context.configure(
-        enabled=settings.langfuse_enable,
+    Langfuse(
         host=settings.langfuse_host,
         public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
         secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
+        tracing_enabled=settings.langfuse_enable,
     )
 
     logger.info(f"LANGFUSE_ENABLE: {settings.langfuse_enable}")
@@ -125,15 +125,7 @@ def trace_metadata(func):
 
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
-        trace_id = langfuse_context.get_current_trace_id()
-
-        results = await func(*args, **kwargs, trace_id=trace_id)
-
-        addition = {}
-        if isinstance(results, dict):
-            additional_metadata = results.get("metadata", {})
-            addition.update(additional_metadata)
-
+        client = get_client()
         metadata = extract(*args)
         service_metadata = kwargs.get(
             "service_metadata",
@@ -142,6 +134,20 @@ def trace_metadata(func):
                 "service_version": "",
             },
         )
+
+        with propagate_attributes(
+            user_id=metadata.get("user_id"),
+            session_id=metadata.get("thread_id"),
+            version=service_metadata.get("service_version"),
+        ):
+            trace_id = client.get_current_trace_id()
+            results = await func(*args, **kwargs, trace_id=trace_id)
+
+        addition = {}
+        if isinstance(results, dict):
+            additional_metadata = results.get("metadata", {})
+            addition.update(additional_metadata)
+
         langfuse_metadata = {
             **service_metadata.get("pipes_metadata"),
             **addition,
@@ -149,12 +155,7 @@ def trace_metadata(func):
             "project_id": metadata.get("project_id"),
             "query": metadata.get("query"),
         }
-        langfuse_context.update_current_trace(
-            user_id=metadata.get("user_id"),
-            session_id=metadata.get("thread_id"),
-            release=service_metadata.get("service_version"),
-            metadata=langfuse_metadata,
-        )
+        client.update_current_span(metadata=langfuse_metadata)
 
         return results
 
@@ -169,11 +170,12 @@ def trace_cost(func):
         if isinstance(result, dict):
             if meta := result.get("meta", []):
                 model = meta[0].get("model")
-                langfuse_context.update_current_observation(
+                client = get_client()
+                client.update_current_generation(
                     model=model,
                     usage_details=meta[0].get("usage", {}),
                 )
-                langfuse_context.update_current_trace(
+                client.update_current_span(
                     metadata={"fallback_is_triggered": model != generator_name}
                 )
 

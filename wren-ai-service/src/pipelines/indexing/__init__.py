@@ -31,17 +31,19 @@ class DocumentCleaner:
                 store.to_dict().get("init_parameters", {}).get("index", "unknown")
             )
             logger.info(f"Project ID: {project_id}, Cleaning documents in {store_name}")
-            filters = (
-                {
+            if project_id:
+                filters = {
                     "operator": "AND",
                     "conditions": [
                         {"field": "project_id", "operator": "==", "value": project_id},
                     ],
                 }
-                if project_id
-                else None
-            )
-            await store.delete_documents(filters)
+                await store.delete_by_filter_async(filters)
+            else:
+                # Delete all documents by getting IDs first
+                all_docs = store.filter_documents()
+                if all_docs:
+                    await store.delete_documents_async([doc.id for doc in all_docs])
 
         await asyncio.gather(
             *[_clear_documents(store, project_id) for store in self._stores]
@@ -75,17 +77,9 @@ class MDLValidator:
 
 @component
 class AsyncDocumentWriter(DocumentWriter):
-    @component.output_types(documents_written=int)
-    async def run(
-        self, documents: List[Document], policy: Optional[DuplicatePolicy] = None
-    ):
-        if policy is None:
-            policy = self.policy
+    """Subclass for type identity — parent handles async natively in v2.26."""
 
-        documents_written = await self.document_store.write_documents(
-            documents=documents, policy=policy
-        )
-        return {"documents_written": documents_written}
+    pass
 
 
 def clean_display_name(display_name: str) -> str:

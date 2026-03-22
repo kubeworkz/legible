@@ -8,7 +8,7 @@ from hamilton import base
 from hamilton.async_driver import AsyncDriver
 from haystack import Document
 from haystack.components.builders.prompt_builder import PromptBuilder
-from langfuse.decorators import observe
+from langfuse import observe
 from pydantic import BaseModel
 
 from src.core.pipeline import BasicPipeline
@@ -189,7 +189,7 @@ async def table_retrieval(
             {"field": "project_id", "operator": "==", "value": project_id}
         )
 
-    return await table_retriever.run(
+    return await table_retriever.run_async(
         query_embedding=embedding.get("embedding"),
         filters=filters,
     )
@@ -225,7 +225,7 @@ async def dbschema_retrieval(
             {"field": "project_id", "operator": "==", "value": project_id}
         )
 
-    results = await dbschema_retriever.run(
+    results = await dbschema_retriever.run_async(
         query_embedding=embedding.get("embedding"), filters=filters
     )
     return results["documents"]
