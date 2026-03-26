@@ -31,6 +31,10 @@ dependencies = [
     "opendal>=0.45",
     "pandas>=2",
     "boto3>=1.26",
+    # Transitive dependency constraints for security patches
+    "requests>=2.33.0",
+    "pyasn1>=0.6.3",
+    "pyopenssl>=26.0.0",
 ]
 
 [project.optional-dependencies]
@@ -46,7 +50,7 @@ redshift    = ["redshift_connector"]
 spark       = ["pyspark>=3.5"]
 athena      = ["ibis-framework[athena]"]
 oracle      = ["ibis-framework[oracle]", "oracledb"]
-all         = ["wren[postgres,mysql,bigquery,snowflake,clickhouse,trino,mssql,databricks,redshift,athena,oracle]"]
+all         = ["wren-engine[postgres,mysql,bigquery,snowflake,clickhouse,trino,mssql,databricks,redshift,athena,oracle]"]
 dev         = ["pytest>=8", "ruff>=0.4", "orjson>=3", "testcontainers[postgres]>=4"]
 
 [project.scripts]

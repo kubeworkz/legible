@@ -1,8 +1,4 @@
 import base64
-from collections import defaultdict
-from contextvars import ContextVar
-import hashlib
-import time
 from dotenv import load_dotenv
 import orjson
 import json
@@ -24,152 +20,6 @@ load_dotenv()
 MCP_TRANSPORT = os.getenv("MCP_TRANSPORT", "stdio")
 MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
 MCP_PORT = int(os.getenv("MCP_PORT", "9000"))
-
-# ── Per-user auth via wren-ui (Phase 2) ─────────────────
-# When WREN_UI_ENDPOINT is set, MCP requires a project API key (psk-...)
-# in the Authorization header. The key is validated against wren-ui, which
-# returns the project's MDL, connection info, and billing allowance.
-WREN_UI_ENDPOINT = os.getenv("WREN_UI_ENDPOINT")  # e.g. http://wren-ui:3000
-INTERNAL_SERVICE_TOKEN = os.getenv("INTERNAL_SERVICE_TOKEN", "")
-AUTH_ENABLED = bool(WREN_UI_ENDPOINT and INTERNAL_SERVICE_TOKEN)
-
-# Context variable for per-request project context (set by auth middleware)
-_request_project_ctx: ContextVar[dict | None] = ContextVar("_request_project_ctx", default=None)
-
-# Cache validated project contexts to avoid hitting wren-ui on every MCP call
-# Key: sha256(api_key), Value: { ..., "expires_at": unix_timestamp }
-_PROJECT_CTX_CACHE: dict[str, dict] = {}
-# Reverse index: org_id -> set of cache keys (for org-wide invalidation)
-_ORG_CACHE_KEYS: dict[int, set[str]] = defaultdict(set)
-_CACHE_TTL_SECONDS = 300  # 5 minutes
-
-
-def _cache_key(api_key: str) -> str:
-    return hashlib.sha256(api_key.encode()).hexdigest()
-
-
-# ── In-memory sliding-window rate limiter ────────────────
-class _RateLimiter:
-    """Per-key sliding-window rate limiter (RPM and RPD)."""
-
-    def __init__(self):
-        # key_id -> list of epoch-second timestamps
-        self._rpm_windows: dict[int, list[float]] = defaultdict(list)
-        self._rpd_windows: dict[int, list[float]] = defaultdict(list)
-
-    def check(self, key_id: int, rpm_limit: int | None, rpd_limit: int | None) -> tuple[bool, str | None, int]:
-        """Check if a request is allowed. Returns (allowed, reason, retry_after_seconds)."""
-        now = time.time()
-
-        # Check RPM
-        if rpm_limit is not None:
-            window = self._rpm_windows[key_id]
-            cutoff = now - 60
-            # Prune old entries
-            self._rpm_windows[key_id] = window = [t for t in window if t > cutoff]
-            if len(window) >= rpm_limit:
-                oldest = window[0] if window else now
-                retry_after = int(oldest + 60 - now) + 1
-                return False, f"Rate limit exceeded: {rpm_limit} requests per minute", retry_after
-
-        # Check RPD
-        if rpd_limit is not None:
-            window = self._rpd_windows[key_id]
-            cutoff = now - 86400
-            self._rpd_windows[key_id] = window = [t for t in window if t > cutoff]
-            if len(window) >= rpd_limit:
-                oldest = window[0] if window else now
-                retry_after = int(oldest + 86400 - now) + 1
-                return False, f"Rate limit exceeded: {rpd_limit} requests per day", retry_after
-
-        return True, None, 0
-
-    def record(self, key_id: int) -> None:
-        """Record a request for the given key."""
-        now = time.time()
-        self._rpm_windows[key_id].append(now)
-        self._rpd_windows[key_id].append(now)
-
-    def clear(self, key_id: int) -> None:
-        """Clear windows for a key."""
-        self._rpm_windows.pop(key_id, None)
-        self._rpd_windows.pop(key_id, None)
-
-
-_rate_limiter = _RateLimiter()
-
-
-async def _validate_api_key(api_key: str) -> dict | None:
-    """Validate a project API key against wren-ui and return project context.
-    Returns dict on success, None on auth failure, or raises ValueError with
-    upstream error for non-auth failures (e.g. DuckDB not supported)."""
-    cache_k = _cache_key(api_key)
-    cached = _PROJECT_CTX_CACHE.get(cache_k)
-    if cached and cached.get("expires_at", 0) > time.time():
-        return cached
-
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(
-                f"{WREN_UI_ENDPOINT}/api/v1/mcp/context",
-                json={"apiKey": api_key},
-                headers={"X-Service-Token": INTERNAL_SERVICE_TOKEN},
-            )
-        if resp.status_code == 401:
-            return None
-        if resp.status_code != 200:
-            # Pass through upstream error (e.g. DuckDB not supported, no deployment)
-            try:
-                msg = resp.json().get("error", resp.text)
-            except Exception:
-                msg = resp.text
-            raise ValueError(msg)
-        ctx = resp.json()
-        ctx["expires_at"] = time.time() + _CACHE_TTL_SECONDS
-        _PROJECT_CTX_CACHE[cache_k] = ctx
-        # Track org→cache_key for org-wide invalidation
-        org_id = ctx.get("organizationId")
-        if org_id is not None:
-            _ORG_CACHE_KEYS[org_id].add(cache_k)
-        return ctx
-    except ValueError:
-        raise
-    except Exception as e:
-        print(f"Auth validation error: {e}")  # noqa: T201
-        return None
-
-
-async def _record_query_metering(project_ctx: dict, duration_ms: int = 0, sql_hash: str = "") -> None:
-    """Fire-and-forget: report a query execution to wren-ui for billing."""
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            await client.post(
-                f"{WREN_UI_ENDPOINT}/api/v1/mcp/record-query",
-                json={
-                    "organizationId": project_ctx.get("organizationId"),
-                    "projectId": project_ctx.get("projectId"),
-                    "keyId": project_ctx.get("keyId"),
-                    "durationMs": duration_ms,
-                    "sqlHash": sql_hash,
-                },
-                headers={"X-Service-Token": INTERNAL_SERVICE_TOKEN},
-            )
-    except Exception:
-        pass  # fire-and-forget
-
-
-def _get_effective_context() -> tuple[str | None, str | None, dict | None]:
-    """Return (data_source, manifest_base64, connection_info) for the current request.
-    Uses per-request project context if auth is enabled, else global state."""
-    project_ctx = _request_project_ctx.get()
-    if project_ctx:
-        return (
-            project_ctx.get("dataSource"),
-            project_ctx.get("manifestStr"),
-            project_ctx.get("connectionInfo"),
-        )
-    return data_source, mdl_cache.get_base64(), connection_info
-
 
 mcp = FastMCP("Wren Engine", host=MCP_HOST, port=MCP_PORT)
 
@@ -269,16 +119,6 @@ connection_info = None
 read_only_mode = False
 
 
-def _get_mdl_cache() -> MdlCache:
-    """Return the appropriate MdlCache for the current request context."""
-    project_ctx = _request_project_ctx.get()
-    if project_ctx and project_ctx.get("manifestStr"):
-        cache = MdlCache()
-        cache.set_mdl(project_ctx["manifestStr"])
-        return cache
-    return mdl_cache
-
-
 def _read_only_error(tool_name: str) -> str:
     return f"ERROR: '{tool_name}' is disabled because read-only mode is active. Toggle it off in the Wren Engine Web UI."
 
@@ -306,13 +146,18 @@ def _save_settings() -> None:
 _load_settings()
 
 if mdl_path:
-    with open(mdl_path) as f:
-        mdl_schema = json.load(f)
-        data_source = mdl_schema["dataSource"].lower()
-        mdl_cache.set_mdl(dict_to_base64_string(mdl_schema))
-        models = mdl_schema.get("models", [])
-        total_columns = sum(len(m.get("columns", [])) for m in models)
-        print(f"Loaded MDL {f.name} ({len(models)} models, {total_columns} columns)")  # noqa: T201
+    try:
+        with open(mdl_path) as f:
+            mdl_schema = json.load(f)
+            data_source = mdl_schema.get("dataSource", "").lower() or None
+            mdl_cache.set_mdl(dict_to_base64_string(mdl_schema))
+            models = mdl_schema.get("models", [])
+            total_columns = sum(len(m.get("columns", [])) for m in models)
+            print(f"Loaded MDL {f.name} ({len(models)} models, {total_columns} columns)")  # noqa: T201
+    except FileNotFoundError:
+        print(f"MDL file not found at {mdl_path} — starting without a loaded MDL")  # noqa: T201
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"Failed to parse MDL file {mdl_path}: {e} — starting without a loaded MDL")  # noqa: T201
 else:
     print("No MDL_PATH environment variable found")
 
@@ -334,17 +179,16 @@ else:
 
 
 async def make_query_request(sql: str, dry_run: bool = False):
-    eff_ds, eff_manifest, eff_conn = _get_effective_context()
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json", "x-wren-fallback_disable": "true"}
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
-                f"http://{WREN_URL}/v3/connector/{eff_ds}/query?dryRun={dry_run}",
+                f"http://{WREN_URL}/v3/connector/{data_source}/query?dryRun={dry_run}",
                 headers=headers,
                 json={
                     "sql": sql,
-                    "manifestStr": eff_manifest,
-                    "connectionInfo": eff_conn,
+                    "manifestStr": mdl_cache.get_base64(),
+                    "connectionInfo": connection_info,
                 },
                 timeout=30,
             )
@@ -354,14 +198,13 @@ async def make_query_request(sql: str, dry_run: bool = False):
 
 
 async def make_table_list_request():
-    eff_ds, _eff_manifest, eff_conn = _get_effective_context()
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
-                f"http://{WREN_URL}/v2/connector/{eff_ds}/metadata/tables",
+                f"http://{WREN_URL}/v2/connector/{data_source}/metadata/tables",
                 headers=headers,
-                json={"connectionInfo": eff_conn},
+                json={"connectionInfo": connection_info},
             )
             return response.text
         except Exception as e:
@@ -369,26 +212,24 @@ async def make_table_list_request():
 
 
 async def make_constraints_list_request():
-    eff_ds, _eff_manifest, eff_conn = _get_effective_context()
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
-                f"http://{WREN_URL}/v2/connector/{eff_ds}/metadata/constraints",
+                f"http://{WREN_URL}/v2/connector/{data_source}/metadata/constraints",
                 headers=headers,
-                json={"connectionInfo": eff_conn},
+                json={"connectionInfo": connection_info},
             )
             return response.text
         except Exception as e:
             return e
 
 async def make_get_available_functions_request():
-    eff_ds, _eff_manifest, _eff_conn = _get_effective_context()
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
-                f"http://{WREN_URL}/v3/connector/{eff_ds}/functions",
+                f"http://{WREN_URL}/v3/connector/{data_source}/functions",
                 headers=headers,
             )
             return response.text
@@ -512,7 +353,7 @@ async def is_deployed() -> str:
     """
     Check if the MDL JSON schema is deployed
     """
-    if _get_mdl_cache().is_deployed():
+    if mdl_cache.is_deployed():
         return "MDL is deployed"
     return "MDL is not deployed. Please deploy the MDL first"
 
@@ -559,28 +400,7 @@ async def query(sql: str) -> str:
     """
     Query the Wren Engine with the given SQL query
     """
-    # Check query allowance when auth is active
-    project_ctx = _request_project_ctx.get()
-    if project_ctx:
-        allowance = project_ctx.get("queryAllowance", {})
-        if not allowance.get("allowed", True):
-            return f"ERROR: Query not allowed — {allowance.get('reason', 'quota exceeded')}"
-
-    start_ms = time.time()
     response = await make_query_request(sql)
-    duration_ms = int((time.time() - start_ms) * 1000)
-
-    # Record metering if auth is active
-    if project_ctx and AUTH_ENABLED and hasattr(response, 'status_code') and response.status_code == 200:
-        sql_hash = hashlib.sha256(sql.encode()).hexdigest()[:16]
-        await _record_query_metering(project_ctx, duration_ms, sql_hash)
-        # Invalidate caches for ALL keys in the same org so quota is re-checked
-        org_id = project_ctx.get("organizationId")
-        if org_id is not None:
-            for ck in list(_ORG_CACHE_KEYS.get(org_id, [])):
-                _PROJECT_CTX_CACHE.pop(ck, None)
-            _ORG_CACHE_KEYS.pop(org_id, None)
-
     return response.text
 
 
@@ -608,7 +428,7 @@ async def get_full_manifest() -> str:
     """
     Get the current deployed manifest in Wren Engine
     """
-    return base64.b64decode(_get_mdl_cache().get_base64()).decode("utf-8")
+    return base64.b64decode(mdl_cache.get_base64()).decode("utf-8")
 
 
 @mcp.tool(
@@ -623,7 +443,7 @@ async def get_manifest() -> str:
     If the number of deployed tables and columns is small, then it's better to use this tool.
     Otherwise, use `get_available_tables` and `get_table_info` and `get_column_info` tools.
     """
-    return base64.b64decode(_get_mdl_cache().get_base64()).decode("utf-8")
+    return base64.b64decode(mdl_cache.get_base64()).decode("utf-8")
 
 
 @mcp.resource("wren://metadata/tables")
@@ -631,7 +451,7 @@ async def get_available_tables_resource() -> str:
     """
     Get the available tables in Wren Engine
     """
-    return _get_mdl_cache().get_table_names()
+    return mdl_cache.get_table_names()
 
 
 @mcp.tool(
@@ -644,7 +464,7 @@ async def get_available_tables() -> list[str]:
     """
     Get the available tables in Wren Engine
     """
-    return _get_mdl_cache().get_table_names()   
+    return mdl_cache.get_table_names()   
 
 
 @mcp.tool(
@@ -666,12 +486,11 @@ async def get_table_columns_info(
     """
     result = []
     for table_column in table_columns:
-        _mc = _get_mdl_cache()
-        model = _mc.get_model(table_column.table_name)
+        model = mdl_cache.get_model(table_column.table_name)
         if model is None:
             return f"Table not found: {table_column.table_name}"
 
-        columns_dict = _mc.get_columns_dict(table_column.table_name)
+        columns_dict = mdl_cache.get_columns_dict(table_column.table_name)
 
         if table_column.column_names and len(table_column.column_names) > 0:
             columns = []
@@ -705,7 +524,7 @@ async def get_table_info(table_name: str) -> str:
     """
     Get the table info for the given table name in Wren Engine
     """
-    model = _get_mdl_cache().get_model(table_name)
+    model = mdl_cache.get_model(table_name)
     if model is None:
         return orjson.dumps([]).decode("utf-8")
 
@@ -724,12 +543,11 @@ async def get_column_info(table_name: str, column_name: str) -> str:
     """
     Get the column info for the given table and column name in Wren Engine
     """
-    _mc = _get_mdl_cache()
-    model = _mc.get_model(table_name)
+    model = mdl_cache.get_model(table_name)
     if model is None:
         return "Table not found"
 
-    column = _mc.get_column(table_name, column_name)
+    column = mdl_cache.get_column(table_name, column_name)
     if column is None:
         return "Column not found"
 
@@ -746,7 +564,7 @@ async def get_relationships() -> str:
     """
     Get the relationships in Wren Engine
     """
-    return orjson.dumps(_get_mdl_cache().get_relationships()).decode("utf-8")
+    return orjson.dumps(mdl_cache.get_relationships()).decode("utf-8")
 
 
 @mcp.tool(
@@ -772,10 +590,9 @@ async def get_current_data_source_type() -> str:
     """
     Get the current data source type
     """
-    eff_ds, _, _ = _get_effective_context()
-    if eff_ds is None:
+    if data_source is None:
         return "No data source connected. Please deploy the MDL first and assign `dataSource` field."
-    return eff_ds
+    return data_source
 
 @mcp.tool(
     annotations=ToolAnnotations(
@@ -864,8 +681,7 @@ async def health_check() -> str:
     guidance: list[str] = []
 
     # Check MDL deployment
-    _mc = _get_mdl_cache()
-    if not _mc.is_deployed():
+    if not mdl_cache.is_deployed():
         issues.append("MDL is not deployed")
         guidance.append(
             "- Deploy MDL: call `deploy(mdl_file_path=<path>)` with a path to your MDL JSON file, "
@@ -873,8 +689,7 @@ async def health_check() -> str:
         )
 
     # Check connection info
-    eff_ds, _eff_manifest, eff_conn = _get_effective_context()
-    if eff_conn is None:
+    if connection_info is None:
         issues.append("Database connection is not configured")
         guidance.append(
             "- Configure connection: open the Wren Engine Web UI and set your data source "
@@ -882,7 +697,7 @@ async def health_check() -> str:
         )
 
     # Check data source
-    if eff_ds is None:
+    if data_source is None:
         issues.append("Data source type is not set")
         guidance.append(
             "- Set data source: deploy an MDL that has a `dataSource` field, "
@@ -997,91 +812,5 @@ if WEB_UI_ENABLED:
     _web_start(host=MCP_HOST, port=WEB_UI_PORT)
 
 
-# ── Auth-aware startup ──────────────────────────────────
-# When AUTH_ENABLED, wrap the Starlette app with middleware that validates
-# the Bearer token on every request to /mcp and sets the per-request context.
-
-if AUTH_ENABLED and MCP_TRANSPORT == "streamable-http":
-    import asyncio
-    import uvicorn
-    from starlette.middleware.base import BaseHTTPMiddleware
-    from starlette.requests import Request
-    from starlette.responses import JSONResponse
-
-    class McpAuthMiddleware(BaseHTTPMiddleware):
-        async def dispatch(self, request: Request, call_next):
-            # Only gate the /mcp endpoint
-            if not request.url.path.startswith("/mcp"):
-                return await call_next(request)
-
-            auth_header = request.headers.get("authorization", "")
-            if not auth_header.startswith("Bearer "):
-                return JSONResponse(
-                    {"error": "Authorization: Bearer <project-api-key> required"},
-                    status_code=401,
-                )
-
-            api_key = auth_header[7:].strip()
-            if not api_key.startswith("psk-"):
-                return JSONResponse(
-                    {"error": "Only project API keys (psk-...) are accepted"},
-                    status_code=401,
-                )
-
-            try:
-                project_ctx = await _validate_api_key(api_key)
-            except ValueError as e:
-                return JSONResponse(
-                    {"error": str(e)},
-                    status_code=400,
-                )
-            if project_ctx is None:
-                return JSONResponse(
-                    {"error": "Invalid or expired API key"},
-                    status_code=401,
-                )
-
-            # ── Per-key rate limiting ──
-            key_id = project_ctx.get("keyId")
-            rpm_limit = project_ctx.get("rateLimitRpm")
-            rpd_limit = project_ctx.get("rateLimitRpd")
-            if key_id is not None and (rpm_limit is not None or rpd_limit is not None):
-                allowed, reason, retry_after = _rate_limiter.check(key_id, rpm_limit, rpd_limit)
-                if not allowed:
-                    return JSONResponse(
-                        {"error": reason},
-                        status_code=429,
-                        headers={"Retry-After": str(retry_after)},
-                    )
-                _rate_limiter.record(key_id)
-
-            # Store the raw key for cache invalidation in query metering
-            project_ctx["_api_key"] = api_key
-
-            # Set context variable for this request
-            token = _request_project_ctx.set(project_ctx)
-            try:
-                response = await call_next(request)
-                return response
-            finally:
-                _request_project_ctx.reset(token)
-
-    async def _run_with_auth():
-        starlette_app = mcp.streamable_http_app()
-        starlette_app.add_middleware(McpAuthMiddleware)
-
-        config = uvicorn.Config(
-            starlette_app,
-            host=MCP_HOST,
-            port=MCP_PORT,
-            log_level="info",
-        )
-        server = uvicorn.Server(config)
-        await server.serve()
-
-    if __name__ == "__main__":
-        print(f"MCP auth enabled (wren-ui: {WREN_UI_ENDPOINT})")  # noqa: T201
-        asyncio.run(_run_with_auth())
-else:
-    if __name__ == "__main__":
-        mcp.run(transport=MCP_TRANSPORT)
+if __name__ == "__main__":
+    mcp.run(transport=MCP_TRANSPORT)
