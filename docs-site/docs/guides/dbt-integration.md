@@ -7,6 +7,16 @@ title: dbt Integration
 
 The `legible` CLI can import models, columns, and relationships directly from a [dbt](https://www.getdbt.com/) project. This lets you bootstrap a Legible semantic layer from your existing dbt models without manual configuration.
 
+## Supported Databases
+
+The dbt integration supports the following data sources:
+
+- PostgreSQL
+- MySQL
+- BigQuery
+- Redshift
+- Snowflake
+
 ## Prerequisites
 
 Before you begin, make sure you have:

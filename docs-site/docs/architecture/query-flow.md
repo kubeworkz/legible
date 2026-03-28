@@ -13,10 +13,10 @@ This page explains the detailed path a query takes through the system, from natu
 User: "What are the top 10 customers by revenue?"
   │
   ▼
-┌─────────────────────────────────────────┐
-│ 1. Wren UI (Next.js)                    │
-│    POST /api/ask → AI Service           │
-└──────────────────┬──────────────────────┘
+┌────────────────────────────────────────────┐
+│ 1. Legible UI (Next.js)                    │
+│    POST /api/ask → AI Sv  ervice           │
+└──────────────────┬─────────────────────────┘
                    ▼
 ┌─────────────────────────────────────────┐
 │ 2. AI Service (Python/FastAPI)          │
