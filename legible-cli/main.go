@@ -1,6 +1,6 @@
 package main
 
-import "github.com/Canner/WrenAI/wren-cli/cmd"
+import "github.com/Kubeworkz/legible/legible-cli/cmd"
 
 func main() {
 	cmd.Execute()

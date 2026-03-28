@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Canner/WrenAI/legible-launcher/config"
-	utils "github.com/Canner/WrenAI/legible-launcher/utils"
+	"github.com/Kubeworkz/legible/legible-launcher/config"
+	utils "github.com/Kubeworkz/legible/legible-launcher/utils"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/manifoldco/promptui"
 	"github.com/pterm/pterm"

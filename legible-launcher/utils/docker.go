@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Canner/WrenAI/legible-launcher/config"
+	"github.com/Kubeworkz/legible/legible-launcher/config"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/flags"
 	cmdCompose "github.com/docker/compose/v2/cmd/compose"

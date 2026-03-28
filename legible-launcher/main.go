@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
-	"github.com/Canner/WrenAI/legible-launcher/commands"
-	"github.com/Canner/WrenAI/legible-launcher/config"
+	"github.com/Kubeworkz/legible/legible-launcher/commands"
+	"github.com/Kubeworkz/legible/legible-launcher/config"
 	"github.com/pterm/pterm"
 )
 

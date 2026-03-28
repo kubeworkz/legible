@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Canner/WrenAI/wren-cli/internal/client"
-	"github.com/Canner/WrenAI/wren-cli/internal/config"
+	"github.com/Kubeworkz/legible/legible-cli/internal/client"
+	"github.com/Kubeworkz/legible/legible-cli/internal/config"
 	"github.com/spf13/cobra"
 )
 

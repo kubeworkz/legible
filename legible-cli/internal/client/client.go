@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Canner/WrenAI/wren-cli/internal/config"
+	"github.com/Kubeworkz/legible/legible-cli/internal/config"
 )
 
 // Client is an HTTP client for the Legible REST and GraphQL APIs.

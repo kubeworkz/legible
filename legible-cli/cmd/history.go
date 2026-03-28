@@ -6,7 +6,7 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/Canner/WrenAI/wren-cli/internal/client"
+	"github.com/Kubeworkz/legible/legible-cli/internal/client"
 	"github.com/spf13/cobra"
 )
 

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/Canner/WrenAI/legible-launcher/commands/dbt"
+	"github.com/Kubeworkz/legible/legible-launcher/commands/dbt"
 	"github.com/pterm/pterm"
 )
 
