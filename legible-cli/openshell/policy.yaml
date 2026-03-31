@@ -1,0 +1,79 @@
+# Legible Agent Sandbox Policy
+#
+# This policy governs what sandboxed agents can access.
+# Network rules are hot-reloadable; filesystem/process rules are locked at creation.
+#
+# Applied via: openshell policy set <sandbox> --policy policy.yaml
+
+network:
+  egress:
+    # Allow access to the Legible MCP server (streamable-http transport)
+    - destination: "${LEGIBLE_MCP_HOST:-host.docker.internal}:${LEGIBLE_MCP_PORT:-9000}"
+      methods: ["GET", "POST"]
+      paths:
+        - "/mcp/*"       # MCP streamable-http endpoint
+        - "/sse"         # SSE fallback transport
+        - "/messages"    # SSE message endpoint
+
+    # Allow access to the Legible UI API (for GraphQL queries)
+    - destination: "${LEGIBLE_UI_HOST:-host.docker.internal}:${LEGIBLE_UI_PORT:-3000}"
+      methods: ["GET", "POST"]
+      paths:
+        - "/api/graphql"
+
+    # Allow access to the Legible docs site
+    - destination: "${LEGIBLE_DOCS_HOST:-host.docker.internal}:${LEGIBLE_DOCS_PORT:-4000}"
+      methods: ["GET"]
+      paths:
+        - "/*"
+
+    # Allow HTTPS for package managers and git (needed for agent setup)
+    - destination: "*.github.com:443"
+      methods: ["GET"]
+    - destination: "*.npmjs.org:443"
+      methods: ["GET"]
+    - destination: "*.pypi.org:443"
+      methods: ["GET"]
+
+    # LLM API access (needed for AI agents inside sandbox)
+    # These are routed through OpenShell's privacy router when inference is configured
+    - destination: "api.anthropic.com:443"
+      methods: ["POST"]
+      paths:
+        - "/v1/messages"
+    - destination: "api.openai.com:443"
+      methods: ["POST"]
+      paths:
+        - "/v1/chat/completions"
+    - destination: "generativelanguage.googleapis.com:443"
+      methods: ["POST"]
+      paths:
+        - "/v1beta/models/*"
+
+filesystem:
+  # Read-only access to project workspace
+  read:
+    - "/workspace"
+    - "/home/sandbox"
+  # Write access limited to workspace and tmp
+  write:
+    - "/workspace"
+    - "/home/sandbox"
+    - "/tmp"
+  # Block access to sensitive paths
+  deny:
+    - "/etc/shadow"
+    - "/etc/passwd"
+    - "/root"
+
+process:
+  # Deny privilege escalation
+  deny_privilege_escalation: true
+  # Allow common developer tools
+  allow:
+    - "python*"
+    - "node"
+    - "npm"
+    - "git"
+    - "curl"
+    - "legible"
