@@ -22,3 +22,5 @@ export * from './emailService';
 export * from './oidcService';
 export * from './agentService';
 export * from './blueprintService';
+export * from './blueprintRegistryService';
+export * from './autoProvisionService';

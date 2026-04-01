@@ -17,6 +17,7 @@ import { components } from '@/common';
 import { byokStore } from '@server/utils/byokContext';
 import { getDecryptedByokKey } from '@server/resolvers/byokResolver';
 import depthLimit from 'graphql-depth-limit';
+import { seedBuiltinRegistryEntries } from '@server/utils/seedRegistry';
 
 const serverConfig = getConfig();
 const logger = getLogger('APOLLO');
@@ -136,6 +137,8 @@ const bootstrapServer = async () => {
     oidcService,
     agentService,
     blueprintService,
+    blueprintRegistryService,
+    autoProvisionService,
     subscriptionRepository,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
@@ -160,6 +163,9 @@ const bootstrapServer = async () => {
     projectRecommendQuestionBackgroundTracker.initialize(),
     threadRecommendQuestionBackgroundTracker.initialize(),
   ]);
+
+  // Seed built-in blueprint registry entries (idempotent)
+  await seedBuiltinRegistryEntries(blueprintRegistryService);
 
   const apolloServer: ApolloServer = new ApolloServer({
     typeDefs,
@@ -346,6 +352,8 @@ const bootstrapServer = async () => {
         oidcService,
         agentService,
         blueprintService,
+        blueprintRegistryService,
+        autoProvisionService,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

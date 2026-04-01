@@ -92,6 +92,10 @@ import {
 import { AgentService } from './apollo/server/services/agentService';
 import { BlueprintRepository } from './apollo/server/repositories/blueprintRepository';
 import { BlueprintService } from './apollo/server/services/blueprintService';
+import { BlueprintRegistryRepository } from './apollo/server/repositories/blueprintRegistryRepository';
+import { BlueprintRegistryService } from './apollo/server/services/blueprintRegistryService';
+import { AutoProvisionConfigRepository } from './apollo/server/repositories/autoProvisionConfigRepository';
+import { AutoProvisionService } from './apollo/server/services/autoProvisionService';
 import { getLogger } from '@server/utils';
 
 export const serverConfig = getConfig();
@@ -154,6 +158,8 @@ export const initComponents = () => {
   const agentRepository = new AgentRepository(knex);
   const agentAuditLogRepository = new AgentAuditLogRepository(knex);
   const blueprintRepository = new BlueprintRepository(knex);
+  const blueprintRegistryRepository = new BlueprintRegistryRepository(knex);
+  const autoProvisionConfigRepository = new AutoProvisionConfigRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -333,6 +339,18 @@ export const initComponents = () => {
     blueprintRepository,
   });
 
+  const blueprintRegistryService = new BlueprintRegistryService({
+    blueprintRegistryRepository,
+    blueprintRepository,
+  });
+
+  const autoProvisionService = new AutoProvisionService({
+    autoProvisionConfigRepository,
+    blueprintRepository,
+    blueprintRegistryRepository,
+    agentRepository,
+  });
+
   // Wire stripeService into metering (created earlier, avoids circular init)
   queryMeteringService.setStripeService(stripeService);
 
@@ -438,6 +456,8 @@ export const initComponents = () => {
     oidcService,
     agentService,
     blueprintService,
+    blueprintRegistryService,
+    autoProvisionService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

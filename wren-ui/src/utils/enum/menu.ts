@@ -10,4 +10,5 @@ export enum MENU_KEY {
   SESSION_PROPERTY = 'session-property',
   AGENTS = 'agents',
   BLUEPRINTS = 'blueprints',
+  BLUEPRINT_REGISTRY = 'blueprint-registry',
 }

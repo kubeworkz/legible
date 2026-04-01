@@ -1,0 +1,67 @@
+# Legible Agent Blueprint — Microsoft SQL Server
+#
+# A NemoClaw-compatible blueprint optimized for MSSQL.
+# Includes sqlcmd CLI and tailored network policies.
+
+version: "0.1.0"
+min_openshell_version: "0.1.0"
+description: |
+  MSSQL-optimized Legible agent blueprint. Pre-installed with sqlcmd
+  and mssql-tools. Network policies allow TDS protocol and Legible
+  MCP/UI access.
+
+supported_connectors:
+  - MSSQL
+
+components:
+  sandbox:
+    image: "legible-sandbox:latest"
+    build:
+      dockerfile: "../../Dockerfile"
+    name: "legible-mssql-agent"
+    forward_ports:
+      - 9000
+
+  inference:
+    profiles:
+      openai:
+        provider_type: "openai"
+        provider_name: "openai-inference"
+        endpoint: "https://api.openai.com/v1"
+        model: "gpt-4o"
+      anthropic:
+        provider_type: "anthropic"
+        provider_name: "anthropic-inference"
+        endpoint: "https://api.anthropic.com/v1"
+        model: "claude-sonnet-4-20250514"
+      local:
+        provider_type: "ollama"
+        provider_name: "local-inference"
+        endpoint: "http://host.docker.internal:11434/v1"
+        model: "llama3.1:8b"
+
+  mcp:
+    servers:
+      legible:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9000/mcp"
+
+  tools:
+    install:
+      - mssql-tools18
+      - unixodbc-dev
+
+policies:
+  network: "policies/legible-mssql.yaml"
+  filesystem:
+    read_only: [/usr, /lib, /proc, /app, /etc]
+    read_write: [/home/sandbox, /workspace, /tmp]
+  process:
+    deny_privilege_escalation: true
+    run_as_user: sandbox
+    run_as_group: sandbox
+
+agent:
+  type: "claude"
+  allowed_types: [claude, codex, opencode, copilot]
+  entrypoint: "/usr/local/bin/sandbox-entrypoint.sh"

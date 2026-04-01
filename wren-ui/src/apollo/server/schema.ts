@@ -1865,6 +1865,7 @@ export const typeDefs = gql`
     metadata: JSON
     blueprintId: Int
     inferenceProfile: String
+    autoProvisioned: Boolean!
     createdAt: String!
     updatedAt: String!
   }
@@ -1914,6 +1915,10 @@ export const typeDefs = gql`
     inferenceProfiles: JSON
     policyYaml: String
     isBuiltin: Boolean!
+    supportedConnectors: [String!]
+    category: String
+    tags: [String!]
+    source: String
     createdAt: String!
     updatedAt: String!
   }
@@ -1928,6 +1933,10 @@ export const typeDefs = gql`
     inferenceProfiles: JSON
     policyYaml: String
     isBuiltin: Boolean
+    supportedConnectors: [String!]
+    category: String
+    tags: [String!]
+    source: String
   }
 
   input UpdateBlueprintInput {
@@ -1938,6 +1947,9 @@ export const typeDefs = gql`
     defaultAgentType: String
     inferenceProfiles: JSON
     policyYaml: String
+    supportedConnectors: [String!]
+    category: String
+    tags: [String!]
   }
 
   input BlueprintWhereInput {
@@ -1946,6 +1958,82 @@ export const typeDefs = gql`
 
   input BlueprintWhereByNameInput {
     name: String!
+  }
+
+  # ── Blueprint Registry Types ──────────────────────────────────
+
+  type BlueprintRegistryEntryType {
+    id: Int!
+    name: String!
+    version: String!
+    description: String
+    supportedConnectors: [String!]!
+    category: String!
+    tags: [String!]
+    sandboxImage: String
+    defaultAgentType: String!
+    blueprintYaml: String!
+    policyYaml: String
+    inferenceProfiles: JSON
+    isOfficial: Boolean!
+    installCount: Int!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input CreateRegistryEntryInput {
+    name: String!
+    version: String!
+    blueprintYaml: String!
+    supportedConnectors: [String!]!
+    category: String!
+    description: String
+    tags: [String!]
+    sandboxImage: String
+    defaultAgentType: String
+    policyYaml: String
+    inferenceProfiles: JSON
+    isOfficial: Boolean
+  }
+
+  type InstallResult {
+    blueprintId: Int!
+  }
+
+  # ── Auto-Provision Types ──────────────────────────────────────
+
+  type AutoProvisionConfigType {
+    id: Int!
+    projectId: Int!
+    enabled: Boolean!
+    connectorType: String!
+    blueprintId: Int
+    blueprintRegistryName: String
+    inferenceProfile: String
+    agentNameTemplate: String!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input SetAutoProvisionConfigInput {
+    connectorType: String!
+    enabled: Boolean
+    blueprintId: Int
+    blueprintRegistryName: String
+    inferenceProfile: String
+    agentNameTemplate: String
+  }
+
+  type AutoProvisionResultType {
+    agentId: Int!
+    agentName: String!
+    blueprintName: String!
+    connectorType: String!
+  }
+
+  type RecommendedBlueprintType {
+    connectorType: String!
+    blueprintName: String!
   }
 
   # ── End Blueprint Types ───────────────────────────────────────
@@ -2483,6 +2571,18 @@ export const typeDefs = gql`
     blueprints: [BlueprintType!]!
     blueprint(where: BlueprintWhereInput!): BlueprintType!
     blueprintByName(where: BlueprintWhereByNameInput!): BlueprintType!
+
+    # Blueprint Registry
+    blueprintRegistry: [BlueprintRegistryEntryType!]!
+    blueprintRegistryEntry(where: BlueprintWhereInput!): BlueprintRegistryEntryType!
+    blueprintRegistryByConnector(connectorType: String!): [BlueprintRegistryEntryType!]!
+    blueprintRegistryByCategory(category: String!): [BlueprintRegistryEntryType!]!
+    recommendedBlueprint(connectorType: String!): BlueprintRegistryEntryType
+
+    # Auto-Provision
+    autoProvisionConfig: [AutoProvisionConfigType!]!
+    autoProvisionConfigForConnector(connectorType: String!): AutoProvisionConfigType
+    recommendedBlueprintForConnector(connectorType: String!): RecommendedBlueprintType!
   }
 
   type Mutation {
@@ -2784,5 +2884,15 @@ export const typeDefs = gql`
     createBlueprint(data: CreateBlueprintInput!): BlueprintType!
     updateBlueprint(where: BlueprintWhereInput!, data: UpdateBlueprintInput!): BlueprintType!
     deleteBlueprint(where: BlueprintWhereInput!): Boolean!
+
+    # Blueprint Registry
+    createRegistryEntry(data: CreateRegistryEntryInput!): BlueprintRegistryEntryType!
+    deleteRegistryEntry(where: BlueprintWhereInput!): Boolean!
+    installRegistryEntry(registryEntryId: Int!): InstallResult!
+
+    # Auto-Provision
+    setAutoProvisionConfig(data: SetAutoProvisionConfigInput!): AutoProvisionConfigType!
+    deleteAutoProvisionConfig(where: BlueprintWhereInput!): Boolean!
+    provisionAgent(connectorType: String!): AutoProvisionResultType!
   }
 `;

@@ -76,6 +76,8 @@ import {
 import { ISqlPairService } from '../services/sqlPairService';
 import { IAgentService } from '../services/agentService';
 import { IBlueprintService } from '../services/blueprintService';
+import { IBlueprintRegistryService } from '../services/blueprintRegistryService';
+import { IAutoProvisionService } from '../services/autoProvisionService';
 import { User } from '@server/repositories/userRepository';
 
 export interface IContext {
@@ -128,6 +130,8 @@ export interface IContext {
   oidcService: IOidcService;
   agentService: IAgentService;
   blueprintService: IBlueprintService;
+  blueprintRegistryService: IBlueprintRegistryService;
+  autoProvisionService: IAutoProvisionService;
 
   // repository
   projectRepository: IProjectRepository;

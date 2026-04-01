@@ -67,11 +67,41 @@ Examples:
 	RunE: runBlueprintInstall,
 }
 
+var blueprintRecommendCmd = &cobra.Command{
+	Use:   "recommend [connector-type]",
+	Short: "Recommend a blueprint for a data source",
+	Long: `Show the recommended blueprint for a given data source connector type.
+
+Supported connector types:
+  POSTGRES, BIG_QUERY, SNOWFLAKE, MYSQL, CLICK_HOUSE, DUCKDB,
+  MSSQL, ORACLE, TRINO, REDSHIFT, DATABRICKS, ATHENA
+
+Examples:
+  legible blueprint recommend POSTGRES
+  legible blueprint recommend SNOWFLAKE`,
+	Args: cobra.ExactArgs(1),
+	RunE: runBlueprintRecommend,
+}
+
+var blueprintForConnectorCmd = &cobra.Command{
+	Use:   "for-connector [connector-type]",
+	Short: "List blueprints compatible with a connector",
+	Long: `List all available blueprints that support the given connector type.
+
+Examples:
+  legible blueprint for-connector POSTGRES
+  legible blueprint for-connector BIG_QUERY`,
+	Args: cobra.ExactArgs(1),
+	RunE: runBlueprintForConnector,
+}
+
 func init() {
 	blueprintCmd.AddCommand(blueprintListCmd)
 	blueprintCmd.AddCommand(blueprintShowCmd)
 	blueprintCmd.AddCommand(blueprintValidateCmd)
 	blueprintCmd.AddCommand(blueprintInstallCmd)
+	blueprintCmd.AddCommand(blueprintRecommendCmd)
+	blueprintCmd.AddCommand(blueprintForConnectorCmd)
 	rootCmd.AddCommand(blueprintCmd)
 }
 
@@ -88,7 +118,7 @@ func runBlueprintList(cmd *cobra.Command, args []string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
-	fmt.Fprintln(w, "NAME\tVERSION\tDESCRIPTION")
+	fmt.Fprintln(w, "NAME\tVERSION\tCONNECTORS\tDESCRIPTION")
 	for _, name := range names {
 		dir, err := agent.BundledBlueprintDir(name)
 		if err != nil {
@@ -96,7 +126,7 @@ func runBlueprintList(cmd *cobra.Command, args []string) error {
 		}
 		bp, err := agent.LoadBlueprintFromDir(dir)
 		if err != nil {
-			fmt.Fprintf(w, "%s\t%s\t%s\n", name, "?", "(error loading)")
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", name, "?", "?", "(error loading)")
 			continue
 		}
 		desc := strings.TrimSpace(bp.Description)
@@ -107,7 +137,14 @@ func runBlueprintList(cmd *cobra.Command, args []string) error {
 		if len(desc) > 60 {
 			desc = desc[:57] + "..."
 		}
-		fmt.Fprintf(w, "%s\t%s\t%s\n", name, bp.Version, desc)
+		connectors := "all"
+		if len(bp.SupportedConnectors) > 0 {
+			connectors = strings.Join(bp.SupportedConnectors, ",")
+			if len(connectors) > 30 {
+				connectors = fmt.Sprintf("%d types", len(bp.SupportedConnectors))
+			}
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", name, bp.Version, connectors, desc)
 	}
 	w.Flush()
 	return nil
@@ -127,6 +164,9 @@ func runBlueprintShow(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  Min OpenShell: %s\n", bp.MinOpenshellVersion)
 	}
 	fmt.Printf("  Description: %s\n", strings.TrimSpace(bp.Description))
+	if len(bp.SupportedConnectors) > 0 {
+		fmt.Printf("  Connectors:  %s\n", strings.Join(bp.SupportedConnectors, ", "))
+	}
 	fmt.Println()
 
 	fmt.Println("  Sandbox:")
@@ -248,6 +288,80 @@ func runBlueprintInstall(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("Blueprint %q installed to %s\n", name, destDir)
 	fmt.Printf("Use it with: legible agent create <name> --blueprint %s\n", name)
+	return nil
+}
+
+func runBlueprintRecommend(cmd *cobra.Command, args []string) error {
+	connectorType := strings.ToUpper(args[0])
+	recommended := agent.RecommendedBlueprintForConnector(connectorType)
+
+	fmt.Printf("Recommended blueprint for %s: %s\n", connectorType, recommended)
+
+	dir, err := agent.BundledBlueprintDir(recommended)
+	if err != nil {
+		fmt.Printf("\nNote: Blueprint %q is not installed locally.\n", recommended)
+		return nil
+	}
+
+	bp, err := agent.LoadBlueprintFromDir(dir)
+	if err != nil {
+		return nil
+	}
+
+	fmt.Printf("  Version:     %s\n", bp.Version)
+	fmt.Printf("  Description: %s\n", strings.TrimSpace(bp.Description))
+	if bp.Components.Tools != nil && len(bp.Components.Tools.Install) > 0 {
+		fmt.Printf("  Tools:       %s\n", strings.Join(bp.Components.Tools.Install, ", "))
+	}
+	fmt.Println()
+	fmt.Printf("Create an agent with:\n  legible agent create my-%s-agent --blueprint %s\n",
+		strings.ToLower(strings.ReplaceAll(connectorType, "_", "-")), recommended)
+	return nil
+}
+
+func runBlueprintForConnector(cmd *cobra.Command, args []string) error {
+	connectorType := strings.ToUpper(args[0])
+
+	_, matchingNames, err := agent.BlueprintsForConnector(connectorType)
+	if err != nil {
+		return err
+	}
+
+	if len(matchingNames) == 0 {
+		fmt.Printf("No blueprints found for connector %s.\n", connectorType)
+		fmt.Printf("The default blueprint (legible-default) supports all connectors.\n")
+		return nil
+	}
+
+	recommended := agent.RecommendedBlueprintForConnector(connectorType)
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
+	fmt.Fprintf(w, "Blueprints supporting %s:\n\n", connectorType)
+	fmt.Fprintln(w, "NAME\tVERSION\tRECOMMENDED\tDESCRIPTION")
+
+	for _, name := range matchingNames {
+		dir, err := agent.BundledBlueprintDir(name)
+		if err != nil {
+			continue
+		}
+		bp, err := agent.LoadBlueprintFromDir(dir)
+		if err != nil {
+			continue
+		}
+		desc := strings.TrimSpace(bp.Description)
+		if idx := strings.Index(desc, "\n"); idx > 0 {
+			desc = desc[:idx]
+		}
+		if len(desc) > 50 {
+			desc = desc[:47] + "..."
+		}
+		rec := ""
+		if name == recommended {
+			rec = "★"
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", name, bp.Version, rec, desc)
+	}
+	w.Flush()
 	return nil
 }
 

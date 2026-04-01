@@ -14,6 +14,10 @@ export interface Blueprint {
   inferenceProfiles: Record<string, any> | null;
   policyYaml: string | null;
   isBuiltin: boolean;
+  supportedConnectors: string[] | null;
+  category: string | null;
+  tags: string[] | null;
+  source: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,7 +31,7 @@ export class BlueprintRepository
   extends BaseRepository<Blueprint>
   implements IBlueprintRepository
 {
-  private readonly jsonbColumns = ['inference_profiles'];
+  private readonly jsonbColumns = ['inference_profiles', 'supported_connectors', 'tags'];
 
   constructor(knexPg: Knex) {
     super({ knexPg, tableName: 'blueprint' });
@@ -50,7 +54,7 @@ export class BlueprintRepository
     }
     const camelCaseData = mapKeys(data, (_value, key) => camelCase(key));
     const transformData = mapValues(camelCaseData, (value, key) => {
-      if (key === 'inferenceProfiles') {
+      if (['inferenceProfiles', 'supportedConnectors', 'tags'].includes(key)) {
         if (typeof value === 'string') {
           return value ? JSON.parse(value) : value;
         }
@@ -66,8 +70,8 @@ export class BlueprintRepository
       throw new Error('Unexpected dbdata');
     }
     const transformedData = mapValues(data, (value, key) => {
-      if (key === 'inferenceProfiles') {
-        return JSON.stringify(value);
+      if (['inferenceProfiles', 'supportedConnectors', 'tags'].includes(key)) {
+        return value != null ? JSON.stringify(value) : value;
       }
       return value;
     });

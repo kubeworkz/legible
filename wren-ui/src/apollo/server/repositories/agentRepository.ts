@@ -14,6 +14,7 @@ export interface Agent {
   metadata: Record<string, any> | null;
   blueprintId: number | null;
   inferenceProfile: string | null;
+  autoProvisioned: boolean;
   createdAt: string;
   updatedAt: string;
 }

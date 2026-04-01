@@ -19,6 +19,10 @@ export interface BlueprintData {
   inferenceProfiles: Record<string, any> | null;
   policyYaml: string | null;
   isBuiltin: boolean;
+  supportedConnectors: string[] | null;
+  category: string | null;
+  tags: string[] | null;
+  source: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,6 +37,10 @@ export interface CreateBlueprintInput {
   inferenceProfiles?: Record<string, any>;
   policyYaml?: string;
   isBuiltin?: boolean;
+  supportedConnectors?: string[];
+  category?: string;
+  tags?: string[];
+  source?: string;
 }
 
 export interface UpdateBlueprintInput {
@@ -43,6 +51,9 @@ export interface UpdateBlueprintInput {
   defaultAgentType?: string;
   inferenceProfiles?: Record<string, any>;
   policyYaml?: string;
+  supportedConnectors?: string[];
+  category?: string;
+  tags?: string[];
 }
 
 export function useBlueprintsQuery() {

@@ -42,3 +42,5 @@ export * from './oidcProviderRepository';
 export * from './userIdentityRepository';
 export * from './agentRepository';
 export * from './blueprintRepository';
+export * from './blueprintRegistryRepository';
+export * from './autoProvisionConfigRepository';

@@ -13,6 +13,10 @@ const BLUEPRINT_FIELDS = gql`
     inferenceProfiles
     policyYaml
     isBuiltin
+    supportedConnectors
+    category
+    tags
+    source
     createdAt
     updatedAt
   }

@@ -15,6 +15,7 @@ import {
 import RobotOutlined from '@ant-design/icons/RobotOutlined';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
+import ThunderboltOutlined from '@ant-design/icons/ThunderboltOutlined';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
@@ -27,6 +28,8 @@ import {
   useUpdateAgentMutation,
 } from '@/apollo/client/graphql/agents.generated';
 import { useBlueprintsQuery } from '@/apollo/client/graphql/blueprints.generated';
+import { useProvisionAgentMutation } from '@/apollo/client/graphql/registry.generated';
+import useProject from '@/hooks/useProject';
 
 const { Text } = Typography;
 
@@ -48,6 +51,8 @@ export default function AgentsPage() {
     number | undefined
   >();
   const [form] = Form.useForm();
+  const { currentProject } = useProject();
+  const connectorType = currentProject?.type || '';
 
   const { data, loading } = useAgentsQuery({
     fetchPolicy: 'cache-and-network',
@@ -58,6 +63,9 @@ export default function AgentsPage() {
     () => blueprintData?.blueprints || [],
     [blueprintData],
   );
+
+  const [provisionAgent, { loading: provisioning }] =
+    useProvisionAgentMutation();
 
   const selectedBlueprint = useMemo(
     () => blueprints.find((bp) => bp.id === selectedBlueprintId),
@@ -215,6 +223,26 @@ export default function AgentsPage() {
     });
   };
 
+  const handleAutoProvision = async () => {
+    if (!connectorType) {
+      message.warning('No data source connected to this project');
+      return;
+    }
+    try {
+      const result = await provisionAgent({
+        variables: { connectorType },
+        refetchQueries: ['Agents'],
+        awaitRefetchQueries: true,
+      });
+      const { agentName, blueprintName } = result.data?.provisionAgent || {};
+      message.success(
+        `Agent "${agentName}" auto-provisioned with blueprint "${blueprintName}"`,
+      );
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to auto-provision agent');
+    }
+  };
+
   return (
     <SiderLayout>
       <PageLayout
@@ -226,13 +254,24 @@ export default function AgentsPage() {
         }
         description="Create and manage sandboxed AI agents that connect to your semantic layer via MCP."
         titleExtra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Create Agent
-          </Button>
+          <Space>
+            {connectorType && (
+              <Button
+                icon={<ThunderboltOutlined />}
+                loading={provisioning}
+                onClick={handleAutoProvision}
+              >
+                Auto-Provision for {connectorType}
+              </Button>
+            )}
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Create Agent
+            </Button>
+          </Space>
         }
       >
         <Table

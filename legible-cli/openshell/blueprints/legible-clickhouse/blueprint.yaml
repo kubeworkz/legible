@@ -1,0 +1,90 @@
+# Legible Agent Blueprint — ClickHouse
+#
+# A NemoClaw-compatible blueprint optimized for ClickHouse.
+# Includes clickhouse-client and tailored network policies.
+#
+# Usage:
+#   legible agent create my-ch-agent --blueprint legible-clickhouse
+
+version: "0.1.0"
+min_openshell_version: "0.1.0"
+description: |
+  ClickHouse-optimized Legible agent blueprint. Pre-installed with
+  clickhouse-client. Network policies allow ClickHouse native and
+  HTTP protocols plus Legible MCP/UI access.
+
+supported_connectors:
+  - CLICK_HOUSE
+
+components:
+  sandbox:
+    image: "legible-sandbox:latest"
+    build:
+      dockerfile: "../../Dockerfile"
+    name: "legible-ch-agent"
+    forward_ports:
+      - 9000
+
+  inference:
+    profiles:
+      nvidia:
+        provider_type: "nvidia"
+        provider_name: "nvidia-inference"
+        endpoint: "https://integrate.api.nvidia.com/v1"
+        model: "nvidia/nemotron-3-super-120b-a12b"
+      openai:
+        provider_type: "openai"
+        provider_name: "openai-inference"
+        endpoint: "https://api.openai.com/v1"
+        model: "gpt-4o"
+      anthropic:
+        provider_type: "anthropic"
+        provider_name: "anthropic-inference"
+        endpoint: "https://api.anthropic.com/v1"
+        model: "claude-sonnet-4-20250514"
+      local:
+        provider_type: "ollama"
+        provider_name: "local-inference"
+        endpoint: "http://host.docker.internal:11434/v1"
+        model: "llama3.1:8b"
+
+  mcp:
+    servers:
+      legible:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9000/mcp"
+
+  tools:
+    install:
+      - clickhouse-client
+    scripts:
+      - name: "ch-check"
+        command: "clickhouse-client --version"
+        description: "Check ClickHouse client availability"
+
+policies:
+  network: "policies/legible-clickhouse.yaml"
+  filesystem:
+    read_only:
+      - /usr
+      - /lib
+      - /proc
+      - /app
+      - /etc
+    read_write:
+      - /home/sandbox
+      - /workspace
+      - /tmp
+  process:
+    deny_privilege_escalation: true
+    run_as_user: sandbox
+    run_as_group: sandbox
+
+agent:
+  type: "claude"
+  allowed_types:
+    - claude
+    - codex
+    - opencode
+    - copilot
+  entrypoint: "/usr/local/bin/sandbox-entrypoint.sh"

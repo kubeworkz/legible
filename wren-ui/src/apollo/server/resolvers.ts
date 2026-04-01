@@ -26,6 +26,10 @@ import { OidcResolver } from './resolvers/oidcResolver';
 import { SuperadminResolver } from './resolvers/superadminResolver';
 import { AgentResolver } from './resolvers/agentResolver';
 import { BlueprintResolver } from './resolvers/blueprintResolver';
+import {
+  BlueprintRegistryResolver,
+  AutoProvisionResolver,
+} from './resolvers/blueprintRegistryResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -56,6 +60,8 @@ const oidcResolver = new OidcResolver();
 const superadminResolver = new SuperadminResolver();
 const agentResolver = new AgentResolver();
 const blueprintResolver = new BlueprintResolver();
+const blueprintRegistryResolver = new BlueprintRegistryResolver();
+const autoProvisionResolver = new AutoProvisionResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -201,6 +207,14 @@ const resolvers = {
     blueprints: blueprintResolver.listBlueprints,
     blueprint: blueprintResolver.getBlueprint,
     blueprintByName: blueprintResolver.getBlueprintByName,
+    blueprintRegistry: blueprintRegistryResolver.listRegistryEntries,
+    blueprintRegistryEntry: blueprintRegistryResolver.getRegistryEntry,
+    blueprintRegistryByConnector: blueprintRegistryResolver.searchRegistryByConnector,
+    blueprintRegistryByCategory: blueprintRegistryResolver.searchRegistryByCategory,
+    recommendedBlueprint: blueprintRegistryResolver.recommendBlueprint,
+    autoProvisionConfig: autoProvisionResolver.autoProvisionConfig,
+    autoProvisionConfigForConnector: autoProvisionResolver.autoProvisionConfigForConnector,
+    recommendedBlueprintForConnector: autoProvisionResolver.recommendedBlueprint,
   },
   Mutation: {
     // Auth
@@ -433,6 +447,12 @@ const resolvers = {
     createBlueprint: blueprintResolver.createBlueprint,
     updateBlueprint: blueprintResolver.updateBlueprint,
     deleteBlueprint: blueprintResolver.deleteBlueprint,
+    createRegistryEntry: blueprintRegistryResolver.createRegistryEntry,
+    deleteRegistryEntry: blueprintRegistryResolver.deleteRegistryEntry,
+    installRegistryEntry: blueprintRegistryResolver.installRegistryEntry,
+    setAutoProvisionConfig: autoProvisionResolver.setAutoProvisionConfig,
+    deleteAutoProvisionConfig: autoProvisionResolver.deleteAutoProvisionConfig,
+    provisionAgent: autoProvisionResolver.provisionAgent,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),

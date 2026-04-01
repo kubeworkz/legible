@@ -1,0 +1,90 @@
+# Legible Agent Blueprint — DuckDB
+#
+# A NemoClaw-compatible blueprint optimized for DuckDB (local/embedded).
+# Includes duckdb CLI — no external network access to databases needed.
+#
+# Usage:
+#   legible agent create my-duck-agent --blueprint legible-duckdb
+
+version: "0.1.0"
+min_openshell_version: "0.1.0"
+description: |
+  DuckDB-optimized Legible agent blueprint. Pre-installed with duckdb
+  CLI for local/embedded analytics. Minimal network policies since
+  DuckDB runs locally inside the sandbox.
+
+supported_connectors:
+  - DUCKDB
+
+components:
+  sandbox:
+    image: "legible-sandbox:latest"
+    build:
+      dockerfile: "../../Dockerfile"
+    name: "legible-duck-agent"
+    forward_ports:
+      - 9000
+
+  inference:
+    profiles:
+      nvidia:
+        provider_type: "nvidia"
+        provider_name: "nvidia-inference"
+        endpoint: "https://integrate.api.nvidia.com/v1"
+        model: "nvidia/nemotron-3-super-120b-a12b"
+      openai:
+        provider_type: "openai"
+        provider_name: "openai-inference"
+        endpoint: "https://api.openai.com/v1"
+        model: "gpt-4o"
+      anthropic:
+        provider_type: "anthropic"
+        provider_name: "anthropic-inference"
+        endpoint: "https://api.anthropic.com/v1"
+        model: "claude-sonnet-4-20250514"
+      local:
+        provider_type: "ollama"
+        provider_name: "local-inference"
+        endpoint: "http://host.docker.internal:11434/v1"
+        model: "llama3.1:8b"
+
+  mcp:
+    servers:
+      legible:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9000/mcp"
+
+  tools:
+    install:
+      - duckdb
+    scripts:
+      - name: "duck-check"
+        command: "duckdb --version"
+        description: "Check DuckDB CLI availability"
+
+policies:
+  network: "policies/legible-duckdb.yaml"
+  filesystem:
+    read_only:
+      - /usr
+      - /lib
+      - /proc
+      - /app
+      - /etc
+    read_write:
+      - /home/sandbox
+      - /workspace
+      - /tmp
+  process:
+    deny_privilege_escalation: true
+    run_as_user: sandbox
+    run_as_group: sandbox
+
+agent:
+  type: "claude"
+  allowed_types:
+    - claude
+    - codex
+    - opencode
+    - copilot
+  entrypoint: "/usr/local/bin/sandbox-entrypoint.sh"

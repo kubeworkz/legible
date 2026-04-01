@@ -1,0 +1,65 @@
+# Legible Agent Blueprint — Amazon Redshift
+#
+# A NemoClaw-compatible blueprint optimized for Amazon Redshift.
+
+version: "0.1.0"
+min_openshell_version: "0.1.0"
+description: |
+  Redshift-optimized Legible agent blueprint. Uses psql (Redshift-compatible)
+  and AWS CLI. Network policies allow Redshift endpoints and Legible access.
+
+supported_connectors:
+  - REDSHIFT
+
+components:
+  sandbox:
+    image: "legible-sandbox:latest"
+    build:
+      dockerfile: "../../Dockerfile"
+    name: "legible-redshift-agent"
+    forward_ports:
+      - 9000
+
+  inference:
+    profiles:
+      openai:
+        provider_type: "openai"
+        provider_name: "openai-inference"
+        endpoint: "https://api.openai.com/v1"
+        model: "gpt-4o"
+      anthropic:
+        provider_type: "anthropic"
+        provider_name: "anthropic-inference"
+        endpoint: "https://api.anthropic.com/v1"
+        model: "claude-sonnet-4-20250514"
+      local:
+        provider_type: "ollama"
+        provider_name: "local-inference"
+        endpoint: "http://host.docker.internal:11434/v1"
+        model: "llama3.1:8b"
+
+  mcp:
+    servers:
+      legible:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9000/mcp"
+
+  tools:
+    install:
+      - postgresql-client
+      - awscli
+
+policies:
+  network: "policies/legible-redshift.yaml"
+  filesystem:
+    read_only: [/usr, /lib, /proc, /app, /etc]
+    read_write: [/home/sandbox, /workspace, /tmp]
+  process:
+    deny_privilege_escalation: true
+    run_as_user: sandbox
+    run_as_group: sandbox
+
+agent:
+  type: "claude"
+  allowed_types: [claude, codex, opencode, copilot]
+  entrypoint: "/usr/local/bin/sandbox-entrypoint.sh"

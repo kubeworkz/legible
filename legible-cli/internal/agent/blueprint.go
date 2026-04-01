@@ -13,16 +13,44 @@ type Blueprint struct {
 	Version             string              `yaml:"version" json:"version"`
 	MinOpenshellVersion string              `yaml:"min_openshell_version,omitempty" json:"min_openshell_version,omitempty"`
 	Description         string              `yaml:"description" json:"description"`
+	SupportedConnectors []string            `yaml:"supported_connectors,omitempty" json:"supported_connectors,omitempty"`
 	Components          BlueprintComponents `yaml:"components" json:"components"`
 	Policies            BlueprintPolicies   `yaml:"policies" json:"policies"`
 	Agent               BlueprintAgent      `yaml:"agent" json:"agent"`
 }
 
-// BlueprintComponents defines sandbox, inference, and MCP configuration.
+// SupportsConnector checks if the blueprint supports the given connector type.
+func (b *Blueprint) SupportsConnector(connectorType string) bool {
+	if len(b.SupportedConnectors) == 0 {
+		return true // no restriction means all connectors
+	}
+	for _, c := range b.SupportedConnectors {
+		if c == connectorType {
+			return true
+		}
+	}
+	return false
+}
+
+// BlueprintComponents defines sandbox, inference, MCP, and tools configuration.
 type BlueprintComponents struct {
 	Sandbox   SandboxComponent   `yaml:"sandbox" json:"sandbox"`
 	Inference InferenceComponent `yaml:"inference" json:"inference"`
 	MCP       MCPComponent       `yaml:"mcp,omitempty" json:"mcp,omitempty"`
+	Tools     *ToolsComponent    `yaml:"tools,omitempty" json:"tools,omitempty"`
+}
+
+// ToolsComponent defines additional tools to install in the sandbox.
+type ToolsComponent struct {
+	Install []string       `yaml:"install,omitempty" json:"install,omitempty"`
+	Scripts []ToolScript   `yaml:"scripts,omitempty" json:"scripts,omitempty"`
+}
+
+// ToolScript defines a named script available in the sandbox.
+type ToolScript struct {
+	Name        string `yaml:"name" json:"name"`
+	Command     string `yaml:"command" json:"command"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 }
 
 // SandboxComponent defines the sandbox container image and settings.
@@ -182,4 +210,64 @@ func ListBundledBlueprints() ([]string, error) {
 		}
 	}
 	return names, nil
+}
+
+// connectorBlueprintMap maps data source types to their recommended blueprint.
+var connectorBlueprintMap = map[string]string{
+	"POSTGRES":    "legible-postgres",
+	"BIG_QUERY":   "legible-bigquery",
+	"SNOWFLAKE":   "legible-snowflake",
+	"MYSQL":       "legible-mysql",
+	"CLICK_HOUSE": "legible-clickhouse",
+	"DUCKDB":      "legible-duckdb",
+	"MSSQL":       "legible-mssql",
+	"ORACLE":      "legible-oracle",
+	"TRINO":       "legible-trino",
+	"REDSHIFT":    "legible-redshift",
+	"DATABRICKS":  "legible-databricks",
+	"ATHENA":      "legible-athena",
+}
+
+// RecommendedBlueprintForConnector returns the recommended blueprint name
+// for a given data source connector type. Returns "legible-default" if
+// no connector-specific blueprint exists.
+func RecommendedBlueprintForConnector(connectorType string) string {
+	if name, ok := connectorBlueprintMap[connectorType]; ok {
+		return name
+	}
+	return "legible-default"
+}
+
+// ListConnectorBlueprints returns all connector-to-blueprint mappings.
+func ListConnectorBlueprints() map[string]string {
+	result := make(map[string]string, len(connectorBlueprintMap))
+	for k, v := range connectorBlueprintMap {
+		result[k] = v
+	}
+	return result
+}
+
+// BlueprintsForConnector returns all blueprints that support the given connector.
+func BlueprintsForConnector(connectorType string) ([]*Blueprint, []string, error) {
+	names, err := ListBundledBlueprints()
+	if err != nil {
+		return nil, nil, err
+	}
+	var matching []*Blueprint
+	var matchingNames []string
+	for _, name := range names {
+		dir, err := BundledBlueprintDir(name)
+		if err != nil {
+			continue
+		}
+		bp, err := LoadBlueprintFromDir(dir)
+		if err != nil {
+			continue
+		}
+		if bp.SupportsConnector(connectorType) {
+			matching = append(matching, bp)
+			matchingNames = append(matchingNames, name)
+		}
+	}
+	return matching, matchingNames, nil
 }

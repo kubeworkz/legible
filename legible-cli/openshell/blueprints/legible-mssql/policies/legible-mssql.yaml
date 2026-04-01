@@ -1,0 +1,96 @@
+# Legible MSSQL Agent Network Policy
+
+version: 1
+
+network_policies:
+  legible_mcp:
+    name: legible_mcp
+    description: "Access to Legible MCP server"
+    endpoints:
+      - host: host.docker.internal
+        port: 9000
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: GET, path: "/mcp/**" }
+          - allow: { method: POST, path: "/mcp/**" }
+          - allow: { method: GET, path: "/sse" }
+          - allow: { method: POST, path: "/messages" }
+    binaries:
+      - { path: /usr/local/bin/legible }
+      - { path: /usr/local/bin/node }
+
+  legible_ui:
+    name: legible_ui
+    description: "Access to Legible UI API"
+    endpoints:
+      - host: host.docker.internal
+        port: 3000
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: GET, path: "/api/graphql" }
+          - allow: { method: POST, path: "/api/graphql" }
+    binaries:
+      - { path: /usr/local/bin/legible }
+
+  mssql_tds:
+    name: mssql_tds
+    description: "SQL Server TDS protocol access"
+    endpoints:
+      - host: "*"
+        port: 1433
+        protocol: tcp
+        enforcement: enforce
+      - host: "*"
+        port: 1434
+        protocol: tcp
+        enforcement: enforce
+    binaries:
+      - { path: /opt/mssql-tools18/bin/sqlcmd }
+      - { path: /opt/mssql-tools18/bin/bcp }
+
+  azure_sql:
+    name: azure_sql
+    description: "Azure SQL Database endpoint access"
+    endpoints:
+      - host: "*.database.windows.net"
+        port: 1433
+        protocol: tcp
+        enforcement: enforce
+
+  inference_anthropic:
+    name: inference_anthropic
+    endpoints:
+      - host: api.anthropic.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        tls: terminate
+        rules:
+          - allow: { method: POST, path: "/v1/messages" }
+          - allow: { method: GET, path: "/v1/models" }
+
+  inference_openai:
+    name: inference_openai
+    endpoints:
+      - host: api.openai.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        tls: terminate
+        rules:
+          - allow: { method: POST, path: "/v1/chat/completions" }
+          - allow: { method: GET, path: "/v1/models" }
+
+filesystem_policy:
+  include_workdir: true
+  read_only: [/usr, /lib, /proc, /dev/urandom, /app, /etc]
+  read_write: [/home/sandbox, /workspace, /tmp, /dev/null]
+
+landlock:
+  compatibility: best_effort
+
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox

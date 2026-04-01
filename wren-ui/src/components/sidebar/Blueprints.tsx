@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import BlockOutlined from '@ant-design/icons/BlockOutlined';
+import AppstoreOutlined from '@ant-design/icons/AppstoreOutlined';
 import { Path, buildPath, MENU_KEY } from '@/utils/enum';
 import SidebarMenu from '@/components/sidebar/SidebarMenu';
 import useProject from '@/hooks/useProject';
@@ -17,6 +18,7 @@ const Layout = styled.div`
 `;
 
 const MENU_KEY_MAP = {
+  [Path.BlueprintRegistry]: MENU_KEY.BLUEPRINT_REGISTRY,
   [Path.Blueprints]: MENU_KEY.BLUEPRINTS,
 };
 
@@ -31,6 +33,12 @@ export default function Blueprints() {
       key: MENU_KEY.BLUEPRINTS,
       icon: <BlockOutlined />,
       onClick: () => router.push(bp(Path.Blueprints)),
+    },
+    {
+      label: 'Template Gallery',
+      key: MENU_KEY.BLUEPRINT_REGISTRY,
+      icon: <AppstoreOutlined />,
+      onClick: () => router.push(bp(Path.BlueprintRegistry)),
     },
   ];
 

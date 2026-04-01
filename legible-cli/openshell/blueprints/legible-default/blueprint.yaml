@@ -14,6 +14,20 @@ description: |
   with MCP access to your Legible project's semantic layer, pre-configured
   network policies, and inference routing.
 
+supported_connectors:
+  - POSTGRES
+  - BIG_QUERY
+  - SNOWFLAKE
+  - MYSQL
+  - ORACLE
+  - MSSQL
+  - CLICK_HOUSE
+  - TRINO
+  - DUCKDB
+  - ATHENA
+  - REDSHIFT
+  - DATABRICKS
+
 components:
   sandbox:
     image: "legible-sandbox:latest"

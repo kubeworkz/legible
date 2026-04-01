@@ -1,0 +1,65 @@
+# Legible Agent Blueprint — Amazon Athena
+#
+# A NemoClaw-compatible blueprint optimized for Amazon Athena.
+
+version: "0.1.0"
+min_openshell_version: "0.1.0"
+description: |
+  Athena-optimized Legible agent blueprint. Pre-installed with AWS CLI
+  for Athena query execution. Network policies allow Athena and S3
+  endpoints.
+
+supported_connectors:
+  - ATHENA
+
+components:
+  sandbox:
+    image: "legible-sandbox:latest"
+    build:
+      dockerfile: "../../Dockerfile"
+    name: "legible-athena-agent"
+    forward_ports:
+      - 9000
+
+  inference:
+    profiles:
+      openai:
+        provider_type: "openai"
+        provider_name: "openai-inference"
+        endpoint: "https://api.openai.com/v1"
+        model: "gpt-4o"
+      anthropic:
+        provider_type: "anthropic"
+        provider_name: "anthropic-inference"
+        endpoint: "https://api.anthropic.com/v1"
+        model: "claude-sonnet-4-20250514"
+      local:
+        provider_type: "ollama"
+        provider_name: "local-inference"
+        endpoint: "http://host.docker.internal:11434/v1"
+        model: "llama3.1:8b"
+
+  mcp:
+    servers:
+      legible:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9000/mcp"
+
+  tools:
+    install:
+      - awscli
+
+policies:
+  network: "policies/legible-athena.yaml"
+  filesystem:
+    read_only: [/usr, /lib, /proc, /app, /etc]
+    read_write: [/home/sandbox, /workspace, /tmp]
+  process:
+    deny_privilege_escalation: true
+    run_as_user: sandbox
+    run_as_group: sandbox
+
+agent:
+  type: "claude"
+  allowed_types: [claude, codex, opencode, copilot]
+  entrypoint: "/usr/local/bin/sandbox-entrypoint.sh"

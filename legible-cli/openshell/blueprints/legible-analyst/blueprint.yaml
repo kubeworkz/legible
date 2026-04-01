@@ -10,6 +10,20 @@ description: |
   Restricted data analyst agent. Read-only access to the Legible semantic layer.
   Cannot install packages at runtime. Uses pre-built tools only.
 
+supported_connectors:
+  - POSTGRES
+  - BIG_QUERY
+  - SNOWFLAKE
+  - MYSQL
+  - ORACLE
+  - MSSQL
+  - CLICK_HOUSE
+  - TRINO
+  - DUCKDB
+  - ATHENA
+  - REDSHIFT
+  - DATABRICKS
+
 components:
   sandbox:
     image: "legible-sandbox:latest"
