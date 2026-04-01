@@ -24,6 +24,7 @@ import { ByokResolver } from './resolvers/byokResolver';
 import { StripeResolver } from './resolvers/stripeResolver';
 import { OidcResolver } from './resolvers/oidcResolver';
 import { SuperadminResolver } from './resolvers/superadminResolver';
+import { AgentResolver } from './resolvers/agentResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -52,6 +53,7 @@ const byokResolver = new ByokResolver();
 const stripeResolver = new StripeResolver();
 const oidcResolver = new OidcResolver();
 const superadminResolver = new SuperadminResolver();
+const agentResolver = new AgentResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -191,6 +193,9 @@ const resolvers = {
     adminRevenueStats: superadminResolver.adminRevenueStats,
     adminAuditLogs: superadminResolver.adminAuditLogs,
     adminSecurityOverview: superadminResolver.adminSecurityOverview,
+    agents: agentResolver.listAgents,
+    agent: agentResolver.getAgent,
+    agentLogs: agentResolver.getAgentLogs,
   },
   Mutation: {
     // Auth
@@ -417,6 +422,9 @@ const resolvers = {
     // Superadmin
     adminSetSuperadmin: superadminResolver.adminSetSuperadmin,
     adminRevokeSuperadmin: superadminResolver.adminRevokeSuperadmin,
+    createAgent: agentResolver.createAgent,
+    updateAgent: agentResolver.updateAgent,
+    deleteAgent: agentResolver.deleteAgent,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),

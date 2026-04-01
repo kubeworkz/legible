@@ -1844,6 +1844,58 @@ export const typeDefs = gql`
     id: Int!
   }
 
+  # ── Agent Types ────────────────────────────────────────────────
+
+  enum AgentStatus {
+    CREATING
+    RUNNING
+    STOPPED
+    FAILED
+  }
+
+  type AgentType {
+    id: Int!
+    projectId: Int!
+    name: String!
+    sandboxName: String!
+    status: AgentStatus!
+    providerName: String
+    policyYaml: String
+    image: String
+    metadata: JSON
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type AgentAuditLogEntry {
+    id: Int!
+    agentId: Int!
+    action: String!
+    detail: String
+    createdAt: String!
+  }
+
+  input CreateAgentInput {
+    name: String!
+    sandboxName: String!
+    providerName: String
+    policyYaml: String
+    image: String
+    metadata: JSON
+  }
+
+  input UpdateAgentInput {
+    status: AgentStatus
+    policyYaml: String
+    metadata: JSON
+  }
+
+  input AgentWhereInput {
+    id: Int!
+  }
+
+  # ── End Agent Types ────────────────────────────────────────────
+
   # ── Data Security: Session Properties ──────────────────────────
 
   type SessionProperty {
@@ -2367,6 +2419,11 @@ export const typeDefs = gql`
       pagination: AuditLogPaginationInput!
     ): AuditLogPaginatedResponse!
     adminSecurityOverview: AdminSecurityOverview!
+
+    # Agents
+    agents: [AgentType!]!
+    agent(where: AgentWhereInput!): AgentType!
+    agentLogs(where: AgentWhereInput!, limit: Int): [AgentAuditLogEntry!]!
   }
 
   type Mutation {
@@ -2658,5 +2715,10 @@ export const typeDefs = gql`
     # Superadmin
     adminSetSuperadmin(userId: Int!): Boolean!
     adminRevokeSuperadmin(userId: Int!): Boolean!
+
+    # Agents
+    createAgent(data: CreateAgentInput!): AgentType!
+    updateAgent(where: AgentWhereInput!, data: UpdateAgentInput!): AgentType!
+    deleteAgent(where: AgentWhereInput!): Boolean!
   }
 `;

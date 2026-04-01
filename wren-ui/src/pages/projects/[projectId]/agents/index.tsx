@@ -1,0 +1,261 @@
+import { useMemo, useState } from 'react';
+import {
+  Button,
+  Tag,
+  Table,
+  TableColumnsType,
+  Typography,
+  Modal,
+  Input,
+  Form,
+  Space,
+  message,
+} from 'antd';
+import RobotOutlined from '@ant-design/icons/RobotOutlined';
+import PlusOutlined from '@ant-design/icons/PlusOutlined';
+import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
+import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
+import SiderLayout from '@/components/layouts/SiderLayout';
+import PageLayout from '@/components/layouts/PageLayout';
+import { getCompactTime } from '@/utils/time';
+import {
+  AgentFieldsFragment,
+  useAgentsQuery,
+  useCreateAgentMutation,
+  useDeleteAgentMutation,
+  useUpdateAgentMutation,
+} from '@/apollo/client/graphql/agents.generated';
+
+const { Text } = Typography;
+
+const STATUS_COLORS: Record<string, string> = {
+  CREATING: 'blue',
+  RUNNING: 'green',
+  STOPPED: 'default',
+  FAILED: 'red',
+};
+
+const refetchOptions = {
+  refetchQueries: ['Agents'],
+  awaitRefetchQueries: true,
+};
+
+export default function AgentsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [form] = Form.useForm();
+
+  const { data, loading } = useAgentsQuery({
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const [createAgent, { loading: creating }] =
+    useCreateAgentMutation(refetchOptions);
+  const [deleteAgent] = useDeleteAgentMutation(refetchOptions);
+  const [updateAgent] = useUpdateAgentMutation(refetchOptions);
+
+  const agents = useMemo(() => data?.agents || [], [data]);
+
+  const columns: TableColumnsType<AgentFieldsFragment> = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      render: (name: string) => <Text strong>{name}</Text>,
+    },
+    {
+      title: 'Sandbox',
+      dataIndex: 'sandboxName',
+      key: 'sandboxName',
+      render: (name: string) => <Text code>{name}</Text>,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      width: 120,
+      render: (status: string) => (
+        <Tag color={STATUS_COLORS[status] || 'default'}>
+          {status}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Image',
+      dataIndex: 'image',
+      key: 'image',
+      ellipsis: true,
+      render: (image: string | null) => image || '-',
+    },
+    {
+      title: 'Created',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 180,
+      render: (ts: string) => getCompactTime(ts),
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 100,
+      render: (_: any, record: AgentFieldsFragment) => (
+        <Space>
+          {record.status === 'STOPPED' && (
+            <Button
+              size="small"
+              onClick={() => handleStart(record.id)}
+            >
+              Start
+            </Button>
+          )}
+          {record.status === 'RUNNING' && (
+            <Button
+              size="small"
+              onClick={() => handleStop(record.id)}
+            >
+              Stop
+            </Button>
+          )}
+          <Button
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record)}
+          />
+        </Space>
+      ),
+    },
+  ];
+
+  const handleCreate = async () => {
+    try {
+      const values = await form.validateFields();
+      await createAgent({
+        variables: {
+          data: {
+            name: values.name,
+            sandboxName: values.sandboxName,
+            image: values.image || undefined,
+          },
+        },
+      });
+      message.success(`Agent "${values.name}" created`);
+      form.resetFields();
+      setIsModalOpen(false);
+    } catch (err: any) {
+      if (err?.errorFields) return; // validation error
+      message.error(err?.message || 'Failed to create agent');
+    }
+  };
+
+  const handleStart = async (id: number) => {
+    try {
+      await updateAgent({
+        variables: { where: { id }, data: { status: 'RUNNING' } },
+      });
+      message.success('Agent started');
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to start agent');
+    }
+  };
+
+  const handleStop = async (id: number) => {
+    try {
+      await updateAgent({
+        variables: { where: { id }, data: { status: 'STOPPED' } },
+      });
+      message.success('Agent stopped');
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to stop agent');
+    }
+  };
+
+  const handleDelete = (agent: AgentFieldsFragment) => {
+    Modal.confirm({
+      title: `Delete agent "${agent.name}"?`,
+      icon: <ExclamationCircleOutlined />,
+      content: `This will destroy the sandbox "${agent.sandboxName}" and remove all associated data.`,
+      okText: 'Delete',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await deleteAgent({
+            variables: { where: { id: agent.id } },
+          });
+          message.success(`Agent "${agent.name}" deleted`);
+        } catch (err: any) {
+          message.error(err?.message || 'Failed to delete agent');
+        }
+      },
+    });
+  };
+
+  return (
+    <SiderLayout>
+      <PageLayout
+        title={
+          <Space>
+            <RobotOutlined style={{ fontSize: 20 }} />
+            Agents
+          </Space>
+        }
+        description="Create and manage sandboxed AI agents that connect to your semantic layer via MCP."
+        titleExtra={
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Create Agent
+          </Button>
+        }
+      >
+        <Table
+          dataSource={agents}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          pagination={agents.length > 20 ? { pageSize: 20 } : false}
+          locale={{ emptyText: 'No agents yet. Click "Create Agent" to get started.' }}
+        />
+      </PageLayout>
+
+      <Modal
+        title="Create Agent"
+        open={isModalOpen}
+        onOk={handleCreate}
+        onCancel={() => {
+          form.resetFields();
+          setIsModalOpen(false);
+        }}
+        confirmLoading={creating}
+        okText="Create"
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: 'Agent name is required' }]}
+          >
+            <Input placeholder="e.g. analytics-agent" />
+          </Form.Item>
+          <Form.Item
+            label="Sandbox Name"
+            name="sandboxName"
+            rules={[
+              { required: true, message: 'Sandbox name is required' },
+              {
+                pattern: /^[a-z0-9][a-z0-9-]*[a-z0-9]$/,
+                message: 'Lowercase alphanumeric and hyphens only',
+              },
+            ]}
+          >
+            <Input placeholder="e.g. analytics-sandbox-1" />
+          </Form.Item>
+          <Form.Item label="Image (optional)" name="image">
+            <Input placeholder="e.g. legible-sandbox:latest" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </SiderLayout>
+  );
+}

@@ -20,3 +20,4 @@ export * from './auditLogService';
 export * from './queryMeteringService';
 export * from './emailService';
 export * from './oidcService';
+export * from './agentService';

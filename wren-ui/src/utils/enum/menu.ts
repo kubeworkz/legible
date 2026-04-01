@@ -8,4 +8,5 @@ export enum MENU_KEY {
   API_REFERENCE = 'api-reference',
   ROW_LEVEL_SECURITY = 'row-level-security',
   SESSION_PROPERTY = 'session-property',
+  AGENTS = 'agents',
 }

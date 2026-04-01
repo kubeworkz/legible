@@ -74,6 +74,7 @@ import {
   DashboardCacheBackgroundTracker,
 } from '@server/backgrounds';
 import { ISqlPairService } from '../services/sqlPairService';
+import { IAgentService } from '../services/agentService';
 import { User } from '@server/repositories/userRepository';
 
 export interface IContext {
@@ -124,6 +125,7 @@ export interface IContext {
   stripeService: IStripeService;
   emailService: IEmailService;
   oidcService: IOidcService;
+  agentService: IAgentService;
 
   // repository
   projectRepository: IProjectRepository;

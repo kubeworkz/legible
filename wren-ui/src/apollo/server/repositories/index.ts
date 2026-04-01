@@ -40,3 +40,4 @@ export * from './queryUsageRepository';
 export * from './magicLinkRepository';
 export * from './oidcProviderRepository';
 export * from './userIdentityRepository';
+export * from './agentRepository';

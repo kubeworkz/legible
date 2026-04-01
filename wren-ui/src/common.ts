@@ -85,6 +85,11 @@ import {
   DashboardCacheBackgroundTracker,
 } from './apollo/server/backgrounds';
 import { SqlPairService } from './apollo/server/services/sqlPairService';
+import {
+  AgentRepository,
+  AgentAuditLogRepository,
+} from './apollo/server/repositories/agentRepository';
+import { AgentService } from './apollo/server/services/agentService';
 import { getLogger } from '@server/utils';
 
 export const serverConfig = getConfig();
@@ -144,6 +149,8 @@ export const initComponents = () => {
   const magicLinkRepository = new MagicLinkRepository(knex);
   const oidcProviderRepository = new OidcProviderRepository(knex);
   const userIdentityRepository = new UserIdentityRepository(knex);
+  const agentRepository = new AgentRepository(knex);
+  const agentAuditLogRepository = new AgentAuditLogRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -314,6 +321,11 @@ export const initComponents = () => {
     subscriptionRepository,
   });
 
+  const agentService = new AgentService({
+    agentRepository,
+    agentAuditLogRepository,
+  });
+
   // Wire stripeService into metering (created earlier, avoids circular init)
   queryMeteringService.setStripeService(stripeService);
 
@@ -382,6 +394,8 @@ export const initComponents = () => {
     subscriptionRepository,
     oidcProviderRepository,
     userIdentityRepository,
+    agentRepository,
+    agentAuditLogRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -415,6 +429,7 @@ export const initComponents = () => {
     stripeService,
     emailService,
     oidcService,
+    agentService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,
