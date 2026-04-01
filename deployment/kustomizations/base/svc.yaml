@@ -1,5 +1,5 @@
 # Dependancy https://external-dns.io
-# You may want to add a DNS record for wren-ui.myhost.net host for your k8s Service instead of Ingress. 
+# You may want to add a DNS record for legible-ui.myhost.net host for your k8s Service instead of Ingress. 
 # Note: without authentication, enyone can acess your app, see your data and modify your settings!
 # If this is the case, make sure to comment the ingress-wren_example.yaml manifest in the `kustomization.yaml` file to exclude it
 # And uncomment external-dns in the Service manifest here below:
@@ -7,15 +7,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: wren-ui-svc
+  name: legible-ui-svc
   #annotations:
     ### Dependancy external-dns
     #external-dns.alpha.kubernetes.io/filter: 'include'
     #external-dns.alpha.kubernetes.io/cloudflare-proxied: 'false'
-    #external-dns.alpha.kubernetes.io/target: wren-ui.myhost.net
+    #external-dns.alpha.kubernetes.io/target: legible-ui.myhost.net
 spec:
   selector:
-    app: wren-ui
+    app: legible-ui
   ports:
     - protocol: TCP
       port: 3000

@@ -20,11 +20,11 @@ Please review our [Code of Conduct](https://github.com/Canner/WrenAI/blob/main/C
 1. Visit [How Wren AI works?](https://docs.getwren.ai/oss/overview/how_wrenai_works) to understand the architecture of Wren AI
 1. After you understand the architecture of Wren AI, understand the scope of the services you want to contribute to.
   Check each service's section under [Contribution Guide of Different Services](#love_letter-contribution-guide-of-different-services) to learn how to contribute to each service.
-    1. If you are dealing with UI-related tasks, such as adding a dark mode, you only need to contribute to the [Wren UI Service](#wren-ui-service).
+    1. If you are dealing with UI-related tasks, such as adding a dark mode, you only need to contribute to the [Wren UI Service](#legible-ui-service).
     2. If you are dealing with LLM-related tasks, such as enhancing the prompts used in the LLM pipelines, you only need to contribute to the [Wren AI Service](#wren-ai-service).
     3. If you are working on data-source-related tasks, such as fixing a bug in SQL server connector, you will need to contribute to the [Wren Engine Service](#wren-engine-service).
 1. If you are not sure which service to contribute to, please reach out to us in [Discord](https://discord.gg/canner) or [GitHub Issues](https://github.com/Canner/WrenAI/issues).
-1. It's possible that you need to contribute to multiple services. For example, if you are adding a new data source, you will need to contribute to the [Wren UI Service](#wren-ui-service) and [Wren Engine Service](#wren-engine-service). Follow [Guide for Contributing to Multiple Services](#guide-for-contributing-to-multiple-services) to learn how to contribute to multiple services.
+1. It's possible that you need to contribute to multiple services. For example, if you are adding a new data source, you will need to contribute to the [Wren UI Service](#legible-ui-service) and [Wren Engine Service](#wren-engine-service). Follow [Guide for Contributing to Multiple Services](#guide-for-contributing-to-multiple-services) to learn how to contribute to multiple services.
 
 ## :love_letter: Contribution Guide of Different Services
 
@@ -38,7 +38,7 @@ To contribute to Wren AI Service, please refer to the [Wren AI Service Contribut
 ### Wren UI Service
 
 Wren UI is the client service of WrenAI. It is built with Next.js and TypeScript. 
-To contribute to Wren UI, you can refer to the [WrenAI/wren-ui/README.md](https://github.com/Canner/WrenAI/blob/main/wren-ui/README.md) file for instructions on how to set up the development environment and run the development server.
+To contribute to Wren UI, you can refer to the [WrenAI/legible-ui/README.md](https://github.com/Canner/WrenAI/blob/main/legible-ui/README.md) file for instructions on how to set up the development environment and run the development server.
 
 
 ### Wren Engine Service
@@ -49,17 +49,17 @@ To contribute, please refer to [Wren Engine Contributing Guide](https://github.c
 ## Guide for Contributing to Multiple Services
 We rely on docker-compose to start all services. If you are contributing to multiple services, you could just comment out the services you'd like to start from the source code and change the `env` variables to point to the services you started by yourself.
 
-### Example: Contributing to the [Wren UI Service](#wren-ui-service) and [Wren Engine Service](#wren-engine-service)
-If you are contributing to both the [Wren UI Service](#wren-ui-service) and [Wren Engine Service](#wren-engine-service), you should comment out the `wren-engine` service in the `docker/docker-compose-dev.yml` file (note that the UI service is already excluded from `docker/docker-compose-dev.yml`). Then, adjust the environment variables in your `.env` file to point to the services you have started manually. This will ensure that your local development environment correctly interfaces with the services you are working on.
+### Example: Contributing to the [Wren UI Service](#legible-ui-service) and [Wren Engine Service](#wren-engine-service)
+If you are contributing to both the [Wren UI Service](#legible-ui-service) and [Wren Engine Service](#wren-engine-service), you should comment out the `wren-engine` service in the `docker/docker-compose-dev.yml` file (note that the UI service is already excluded from `docker/docker-compose-dev.yml`). Then, adjust the environment variables in your `.env` file to point to the services you have started manually. This will ensure that your local development environment correctly interfaces with the services you are working on.
 
 1. Prepare your `.env` file: In the `WrenAI/docker` folder, use the `.env.example` file as a template. Copy this file to create a `.env.local` file.
     ```sh
-    # assuming the current directory is wren-ui
+    # assuming the current directory is legible-ui
     cd ../docker
     cp .env.example .env.local
     ```
 2. Modify your `.env.local` file: Fill in the `OPENAI_API_KEY` with your OpenAI API keys before starting.
-3. In the `WrenAI/docker` folder, copy `config.example.yaml` to `config.yaml` for AI service configuration. Also change `http://wren-ui:3000` to `http://host.docker.internal:3000` in `config.yaml`.
+3. In the `WrenAI/docker` folder, copy `config.example.yaml` to `config.yaml` for AI service configuration. Also change `http://legible-ui:3000` to `http://host.docker.internal:3000` in `config.yaml`.
 4. Start the UI and engine services from the source code.
 5. Update the `env` variables in the `.env.local` file to point to the services you started manually.
 6. Start the other services using docker-compose:
@@ -117,20 +117,20 @@ If you prefer to learn by example, you can refer to this Trino [issue](https://g
 
 
 #### Backend
-1. Define the data source in `wren-ui/src/apollo/server/dataSource.ts`
+1. Define the data source in `legible-ui/src/apollo/server/dataSource.ts`
   - define the `toIbisConnectionInfo` and `sensitiveProps` methods
 
-2. Modify the ibis adaptor in `wren-ui/src/apollo/server/adaptors/ibisAdaptor.ts`
+2. Modify the ibis adaptor in `legible-ui/src/apollo/server/adaptors/ibisAdaptor.ts`
   - define an ibis connection info type for the new data source
   - set up the `dataSourceUrlMap` for the new data source
 
-3. Modify the repository in `wren-ui/src/apollo/server/repositories/projectRepository.ts`
+3. Modify the repository in `legible-ui/src/apollo/server/repositories/projectRepository.ts`
   - define the wren ui connection info type for the new data source 
 
-4. Update the graphql schema in `wren-ui/src/apollo/server/schema.ts` so that the new data source can be used in the UI 
+4. Update the graphql schema in `legible-ui/src/apollo/server/schema.ts` so that the new data source can be used in the UI 
   - add the new data source to the `DataSource` enum
 
-5. Update the type definition in `wren-ui/src/apollo/server/types/dataSource.ts`
+5. Update the type definition in `legible-ui/src/apollo/server/types/dataSource.ts`
   - add the new data source to the `DataSourceName` enum
 
 #### Frontend
@@ -144,18 +144,18 @@ If you prefer to learn by example, you can refer to this Trino [issue](https://g
    <img src="./misc/logo_template.jpg" width="120">
 
 2. Create the data source form template:
-   - In `wren-ui/src/components/pages/setup/dataSources`, add a new file named `${dataSource}Properties.tsx`
+   - In `legible-ui/src/components/pages/setup/dataSources`, add a new file named `${dataSource}Properties.tsx`
    - Implement the data source form template in this file
 
 3. Set up the data source template:
-   - Navigate to `wren-ui/src/utils/dataSourceType.ts`
+   - Navigate to `legible-ui/src/utils/dataSourceType.ts`
    - Add new data source image, name, properties
    - Update the necessary files to include the new data source template settings
 
 4. Update the data source list:
-   - Add the new data source to the `DATA_SOURCES` enum in `wren-ui/src/utils/enum/dataSources.ts`
-   - Update relevant files in `wren-ui/src/components/pages/setup/` to include the new data source
-   - Ensure `wren-ui/src/apollo/server/adaptors/ibisAdaptor.ts` handle the new data source
+   - Add the new data source to the `DATA_SOURCES` enum in `legible-ui/src/utils/enum/dataSources.ts`
+   - Update relevant files in `legible-ui/src/components/pages/setup/` to include the new data source
+   - Ensure `legible-ui/src/apollo/server/adaptors/ibisAdaptor.ts` handle the new data source
 
 5. Test the new connector:
    - Ensure the new data source appears in the UI

@@ -31,7 +31,7 @@ kubectl create namespace wren
 # !!!!!!!!!!!!
 # MODIFY secret-wren_example.yaml manifest file FIRST
 # OPENAI_API_KEY is REQUIRED: without a valid key the wren-ai-service-deployment pod will not start
-# You must update PG_URL, otherwise wren-ui will not work
+# You must update PG_URL, otherwise legible-ui will not work
 #vi deployment/kustomizations/examples/secret-wren_example.yaml
 kubectl apply -f deployment/kustomizations/examples/secret-wren_example.yaml -n wren
 
@@ -52,7 +52,7 @@ kubectl get pods -n wren
 - `deployment/kustomizations/patches` folder is empty, feel free to add your own patches & overlays there.
 
 #### Wren-UI Database
-Starting with wren-ui version 0.6.0 by default the postgres database is used for wren-ui in this kubernetes kustomization and will be installed in the same namespace as wren-ai.
+Starting with legible-ui version 0.6.0 by default the postgres database is used for legible-ui in this kubernetes kustomization and will be installed in the same namespace as wren-ai.
 - `postgres`: Database that will be installed in the same namespace as wren-ai. You *must* update `PG_URL` in the Secret manifest `deployment/kustomizations/examples/secret-wren_example.yaml`.
 
 Example: `PG_URL: "postgres://postgres:postgres@wrenai-postgresql:5432/admin_ui"`

@@ -34,7 +34,7 @@ The Docker Compose stack includes:
 
 | Service | Image | Memory Limit | Purpose |
 |---------|-------|-------------|---------|
-| `wren-ui` | `wren-ui:local` | 4 GB | Next.js UI |
+| `legible-ui` | `legible-ui:local` | 4 GB | Next.js UI |
 | `wren-ai-service` | `wren-ai-service:local` | 4 GB | AI pipeline |
 | `ibis-server` | `wren-engine-ibis:local` | — | Query engine + MCP |
 | `wren-engine` | `wren-engine:local` | — | Legacy SQL engine |
@@ -63,9 +63,9 @@ To rebuild and restart a single service:
 ```bash
 cd docker
 
-# Rebuild wren-ui
-DOCKER_BUILDKIT=1 docker build -t wren-ui:local ../wren-ui
-docker compose up -d --no-deps --force-recreate wren-ui
+# Rebuild legible-ui
+DOCKER_BUILDKIT=1 docker build -t legible-ui:local ../legible-ui
+docker compose up -d --no-deps --force-recreate legible-ui
 
 # Rebuild AI service
 docker build -t wren-ai-service:local -f ../wren-ai-service/docker/Dockerfile ../wren-ai-service
@@ -94,7 +94,7 @@ cd docker
 docker compose logs -f
 
 # Specific service
-docker compose logs -f wren-ui
+docker compose logs -f legible-ui
 docker compose logs -f wren-ai-service
 ```
 

@@ -37,7 +37,7 @@ Add any other context about the problem here.
 - Please share `config.yaml` with us, it should be located at `~/.wrenai/config.yaml`.
 - Please share your logs with us with the following command:
     ```bash
-    docker logs wrenai-wren-ui-1 >& wrenai-wren-ui.log && \
+    docker logs wrenai-legible-ui-1 >& wrenai-legible-ui.log && \
     docker logs wrenai-wren-ai-service-1 >& wrenai-wren-ai-service.log && \
     docker logs wrenai-wren-engine-1 >& wrenai-wren-engine.log && \
     docker logs wrenai-ibis-server-1 >& wrenai-ibis-server.log

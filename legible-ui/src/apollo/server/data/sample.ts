@@ -2928,7 +2928,7 @@ ORDER BY price_range`,
         tableName: 'users',
         primaryKey: 'id',
         filePath:
-          'http://wren-ui:3000/sample_data/card_transaction/users.parquet',
+          'http://legible-ui:3000/sample_data/card_transaction/users.parquet',
         properties: {
           displayName: 'users',
           description:
@@ -3058,7 +3058,7 @@ ORDER BY price_range`,
         tableName: 'cards',
         primaryKey: 'id',
         filePath:
-          'http://wren-ui:3000/sample_data/card_transaction/cards.parquet',
+          'http://legible-ui:3000/sample_data/card_transaction/cards.parquet',
         properties: {
           displayName: 'cards',
           description:
@@ -3186,7 +3186,7 @@ ORDER BY price_range`,
         tableName: 'transactions',
         primaryKey: 'id',
         filePath:
-          'http://wren-ui:3000/sample_data/card_transaction/transactions.parquet',
+          'http://legible-ui:3000/sample_data/card_transaction/transactions.parquet',
         properties: {
           displayName: 'transactions',
           description:
@@ -3316,7 +3316,7 @@ ORDER BY price_range`,
         tableName: 'mcc_codes',
         primaryKey: 'mcc_code',
         filePath:
-          'http://wren-ui:3000/sample_data/card_transaction/mcc_codes.parquet',
+          'http://legible-ui:3000/sample_data/card_transaction/mcc_codes.parquet',
         properties: {
           displayName: 'mcc_codes',
           description:
@@ -3348,7 +3348,7 @@ ORDER BY price_range`,
         tableName: 'train_fraud_labels',
         primaryKey: 'transaction_id',
         filePath:
-          'http://wren-ui:3000/sample_data/card_transaction/train_fraud_labels.parquet',
+          'http://legible-ui:3000/sample_data/card_transaction/train_fraud_labels.parquet',
         properties: {
           displayName: 'train_fraud_labels',
           description:
@@ -3815,7 +3815,7 @@ ORDER BY fraud_count DESC`,
         tableName: 'hotels',
         primaryKey: 'hotel_id',
         filePath:
-          'http://wren-ui:3000/sample_data/hotel_rating/hotels.parquet',
+          'http://legible-ui:3000/sample_data/hotel_rating/hotels.parquet',
         properties: {
           displayName: 'hotels',
           description:
@@ -3913,7 +3913,7 @@ ORDER BY fraud_count DESC`,
         tableName: 'users',
         primaryKey: 'user_id',
         filePath:
-          'http://wren-ui:3000/sample_data/hotel_rating/users.parquet',
+          'http://legible-ui:3000/sample_data/hotel_rating/users.parquet',
         properties: {
           displayName: 'users',
           description:
@@ -3968,7 +3968,7 @@ ORDER BY fraud_count DESC`,
         tableName: 'reviews',
         primaryKey: 'review_id',
         filePath:
-          'http://wren-ui:3000/sample_data/hotel_rating/reviews.parquet',
+          'http://legible-ui:3000/sample_data/hotel_rating/reviews.parquet',
         properties: {
           displayName: 'reviews',
           description:
@@ -4418,7 +4418,7 @@ ORDER BY u.join_year, u.traveller_type, h.star_rating`,
         tableName: 'suppliers',
         primaryKey: 'supplier_id',
         filePath:
-          'http://wren-ui:3000/sample_data/supply_chain/suppliers.parquet',
+          'http://legible-ui:3000/sample_data/supply_chain/suppliers.parquet',
         properties: {
           displayName: 'suppliers',
           description:
@@ -4489,7 +4489,7 @@ ORDER BY u.join_year, u.traveller_type, h.star_rating`,
         tableName: 'products',
         primaryKey: 'product_id',
         filePath:
-          'http://wren-ui:3000/sample_data/supply_chain/products.parquet',
+          'http://legible-ui:3000/sample_data/supply_chain/products.parquet',
         properties: {
           displayName: 'products',
           description:
@@ -4560,7 +4560,7 @@ ORDER BY u.join_year, u.traveller_type, h.star_rating`,
         tableName: 'orders',
         primaryKey: 'order_id',
         filePath:
-          'http://wren-ui:3000/sample_data/supply_chain/orders.parquet',
+          'http://legible-ui:3000/sample_data/supply_chain/orders.parquet',
         properties: {
           displayName: 'orders',
           description:
@@ -4639,7 +4639,7 @@ ORDER BY u.join_year, u.traveller_type, h.star_rating`,
         tableName: 'shipments',
         primaryKey: 'shipment_id',
         filePath:
-          'http://wren-ui:3000/sample_data/supply_chain/shipments.parquet',
+          'http://legible-ui:3000/sample_data/supply_chain/shipments.parquet',
         properties: {
           displayName: 'shipments',
           description:

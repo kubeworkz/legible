@@ -9,11 +9,11 @@ on:
         required: true
 
 env:
-  WREN_UI_IMAGE: ghcr.io/canner/wren-ui
+  WREN_UI_IMAGE: ghcr.io/canner/legible-ui
 
 defaults:
   run:
-    working-directory: wren-ui
+    working-directory: legible-ui
 
 jobs:
   build-image:
@@ -46,7 +46,7 @@ jobs:
         with:
           platforms: ${{ matrix.arch.platform }}
           labels: ${{ env.WREN_UI_IMAGE }}
-          context: ./wren-ui
+          context: ./legible-ui
           outputs: type=image,name=${{ env.WREN_UI_IMAGE }},push-by-digest=true,name-canonical=true,push=true
       - name: Export digest
         run: |
@@ -118,7 +118,7 @@ jobs:
           PREVIOUS_VERSION=release/ui/$(jq -r '.version' package.json)
           echo "Previous version: $PREVIOUS_VERSION"
           echo "================ change log ================"
-          CHANGE_LOG=$(git log --pretty=format:"%s" $PREVIOUS_VERSION..HEAD | grep wren-ui)
+          CHANGE_LOG=$(git log --pretty=format:"%s" $PREVIOUS_VERSION..HEAD | grep legible-ui)
           echo "================ change log ================"
 
           # Separate the change log into categories
@@ -144,7 +144,7 @@ jobs:
           version=${{ github.event.inputs.version }}
           sed -i 's/"version": "[^"]*"/"version": "'"$version"'"/' package.json
           git add package.json
-          git commit -m "update wren-ui version to $version"
+          git commit -m "update legible-ui version to $version"
           git push
           git tag -a "release/ui/$version" -m "${{ env.CHANGE_LOG }}"
           git push origin "release/ui/$version"

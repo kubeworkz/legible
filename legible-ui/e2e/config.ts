@@ -13,7 +13,7 @@ const defaultTestConfig = {
   bigQuery: {
     projectId: 'wrenai',
     datasetId: 'wrenai.tpch_sf1',
-    // The credential file should be under "wren-ui" folder
+    // The credential file should be under "legible-ui" folder
     credentialPath: 'bigquery-credential-path',
   },
   duckDb: {

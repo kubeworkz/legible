@@ -437,8 +437,8 @@ func findLegibleUIContainer() (container.Summary, error) {
 	}
 
 	for _, cont := range containers {
-		// return if com.docker.compose.project == wrenai && com.docker.compose.service=wren-ui
-		if cont.Labels["com.docker.compose.project"] == "legible" && cont.Labels["com.docker.compose.service"] == "wren-ui" {
+		// return if com.docker.compose.project == wrenai && com.docker.compose.service=legible-ui
+		if cont.Labels["com.docker.compose.project"] == "legible" && cont.Labels["com.docker.compose.service"] == "legible-ui" {
 			return cont, nil
 		}
 	}

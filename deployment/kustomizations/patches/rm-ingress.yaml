@@ -2,6 +2,6 @@ $patch: delete
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: wren-ui-ingress
+  name: legible-ui-ingress
   annotations:
     external-dns.alpha.kubernetes.io/target: ingress1.myhost.net

@@ -3,7 +3,7 @@
  * Connector Health Check Script
  *
  * Tests each data source connector by sending a saveDataSource GraphQL
- * mutation to the running wren-ui server. This verifies that:
+ * mutation to the running legible-ui server. This verifies that:
  *
  *   1. The GraphQL schema accepts each connector type
  *   2. Form field mapping / property transformation works

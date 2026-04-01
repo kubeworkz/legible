@@ -1,6 +1,6 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Start wren-ui from source code
+## Start legible-ui from source code
 
 Step 1. Make sure your node version is 18
 ```bash
@@ -15,7 +15,7 @@ yarn
 
 Step 3(Optional). Switching database
 
-Wren-ui uses SQLite as our default database. To use Postgres as the database of wren-ui, you need to set the two environment variable below.
+Wren-ui uses SQLite as our default database. To use Postgres as the database of legible-ui, you need to set the two environment variable below.
 
 ```bash
 # windows
@@ -68,16 +68,16 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 
-## Development wren-ui module on local
-There are many modules in Wren AI, to develop wren-ui, you can start other modules(services) via docker-compose.
-In the [Start wren-ui from source code](#Start-wren-ui-from-source-code) section, you've know how to start wren-ui from the source code to develop.
+## Development legible-ui module on local
+There are many modules in Wren AI, to develop legible-ui, you can start other modules(services) via docker-compose.
+In the [Start legible-ui from source code](#Start-legible-ui-from-source-code) section, you've know how to start legible-ui from the source code to develop.
 To start other modules via docker-compose, you can follow the steps below.
 
 Step 1. Prepare you .env file
 In the WrenAI/docker folder, you can find the .env.example file. You can copy this file to .env.local file.
 
 ```bash
-# assume current directory is wren-ui
+# assume current directory is legible-ui
 cd ../docker
 cp .env.example .env.local
 ```
@@ -98,13 +98,13 @@ docker-compose -f docker-compose-dev.yaml --env-file .env.example up -d
 docker-compose -f docker-compose-dev.yaml --env-file .env.example down
 ```
 
-Step 4. Start wren-ui from source code
-refer to [Start wren-ui from source code](#Start-wren-ui-from-source-code) section to start wren-ui from source code.
+Step 4. Start legible-ui from source code
+refer to [Start legible-ui from source code](#Start-legible-ui-from-source-code) section to start legible-ui from source code.
 
-Step 5. (Optional) Develop other modules along with wren-ui
+Step 5. (Optional) Develop other modules along with legible-ui
 
 As mentioned above, you can use docker-compose to start other modules. The same applies when developing other modules.
-From the perspective of wren-ui, if you want to develop other modules at the same time, you can stop the container then spin up the module from the source code.
+From the perspective of legible-ui, if you want to develop other modules at the same time, you can stop the container then spin up the module from the source code.
 
 eg: If you want to develop ai-service module, you can stop the ai-service container then start the ai-service from the source code.
 ```yaml

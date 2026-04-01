@@ -114,9 +114,9 @@ build_images() {
   ok "wren-ai-service:local"
 
   # 5. Wren UI
-  info "Building wren-ui:local ..."
-  docker build -q -t wren-ui:local "$ROOT_DIR/wren-ui" >/dev/null
-  ok "wren-ui:local"
+  info "Building legible-ui:local ..."
+  docker build -q -t legible-ui:local "$ROOT_DIR/legible-ui" >/dev/null
+  ok "legible-ui:local"
 
   # 6. Legible Docs
   info "Building legible-docs:local ..."

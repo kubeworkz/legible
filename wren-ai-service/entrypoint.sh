@@ -37,19 +37,19 @@ if [[ -n "$SHOULD_FORCE_DEPLOY" ]]; then
     done
     echo "wren-ai-service has started."
 
-    # Wait for wren-ui to be responsive
-    echo "Waiting for wren-ui to start..."
+    # Wait for legible-ui to be responsive
+    echo "Waiting for legible-ui to start..."
     current=0
 
-    while ! nc -z wren-ui $WREN_UI_PORT && ! nc -z host.docker.internal $WREN_UI_PORT; do
+    while ! nc -z legible-ui $WREN_UI_PORT && ! nc -z host.docker.internal $WREN_UI_PORT; do
         sleep $INTERVAL
         current=$((current + INTERVAL))
         if [ $current -eq $TIMEOUT ]; then
-            echo "Timeout: wren-ui did not start within $TIMEOUT seconds"
+            echo "Timeout: legible-ui did not start within $TIMEOUT seconds"
             exit 1
         fi
     done
-    echo "wren-ui has started."
+    echo "legible-ui has started."
 
     echo "Forcing deployment..."
     python -m src.force_deploy

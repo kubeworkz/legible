@@ -2,7 +2,7 @@
 
 1. Make sure you have start all Wren AI services. ([How to start](https://github.com/Canner/WrenAI/blob/main/docker/README.md#how-to-start))
 
-2. Create a `e2e.config.json` file under `wren-ui/e2e` folder and replace all data sources needed values in `./config.ts`.
+2. Create a `e2e.config.json` file under `legible-ui/e2e` folder and replace all data sources needed values in `./config.ts`.
 
    ```ts
    // Replace the default test config with your own e2e.config.json
@@ -10,7 +10,7 @@
      bigQuery: {
        projectId: 'wrenai',
        datasetId: 'wrenai.tpch_sf1',
-       // The credential file should be under "wren-ui" folder
+       // The credential file should be under "legible-ui" folder
        // For example: .tmp/credential.json
        credentialPath: 'bigquery-credential-path',
      },

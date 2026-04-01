@@ -52,7 +52,7 @@ kubectl apply -k deployment/kustomizations/
 
 This creates:
 - Namespace: `wren`
-- Deployments: `wren-ui`, `wren-engine`, `wren-ai-service`, `wren-ibis-server`
+- Deployments: `legible-ui`, `wren-engine`, `wren-ai-service`, `wren-ibis-server`
 - Services: ClusterIP for each deployment
 - PostgreSQL and Qdrant via Helm charts
 
@@ -64,7 +64,7 @@ Example ingress configuration (`examples/ingress-wren_example.yaml`):
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: wren-ui-ingress
+  name: legible-ui-ingress
   namespace: wren
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -82,7 +82,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: wren-ui-svc
+                name: legible-ui-svc
                 port:
                   number: 3000
 ```
@@ -91,7 +91,7 @@ spec:
 
 | Service | Internal Port | ClusterIP Service |
 |---------|--------------|-------------------|
-| Wren UI | 3000 | `wren-ui-svc:3000` |
+| Wren UI | 3000 | `legible-ui-svc:3000` |
 | Wren Engine | 8080, 7432 | `wren-engine-svc:8080` |
 | AI Service | 5555 | `wren-ai-service-svc:5555` |
 | Ibis Server | 8000 | `wren-ibis-server-svc:8000` |

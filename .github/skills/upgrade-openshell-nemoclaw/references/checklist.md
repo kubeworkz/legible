@@ -6,8 +6,8 @@ Use this checklist after completing an OpenShell or NemoClaw upgrade. Each item 
 
 - [ ] `cd legible-cli && go build ./...` — no errors
 - [ ] `cd legible-cli && go vet ./...` — no warnings
-- [ ] `cd wren-ui && npx next build` — no TypeScript errors
-- [ ] `cd wren-ui && npx knex migrate:latest` — migrations run cleanly (if changed)
+- [ ] `cd legible-ui && npx next build` — no TypeScript errors
+- [ ] `cd legible-ui && npx knex migrate:latest` — migrations run cleanly (if changed)
 
 ## CLI Smoke Tests
 

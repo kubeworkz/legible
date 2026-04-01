@@ -90,7 +90,7 @@ location: http://qdrant:6333
 ```yaml
 type: engine
 provider: wren_ui
-endpoint: http://wren-ui:3000
+endpoint: http://legible-ui:3000
 ```
 
 ### Pipeline Configuration

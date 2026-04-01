@@ -106,11 +106,11 @@ go run . blueprint recommend POSTGRES
 
 Only needed if the schema changes (new fields on agent/blueprint/registry tables).
 
-**Migration directory:** `wren-ui/migrations/`
+**Migration directory:** `legible-ui/migrations/`
 
 1. Create a new migration file: `npx knex migrate:make <name>`
 2. Add/alter columns as needed
-3. Run migration: `cd wren-ui && npx knex migrate:latest`
+3. Run migration: `cd legible-ui && npx knex migrate:latest`
 
 **Key tables:**
 - `agent` — sandbox agent instances
@@ -122,30 +122,30 @@ Only needed if the schema changes (new fields on agent/blueprint/registry tables
 ### Layer 4: Backend Repositories & Services
 
 **Repositories** (update interfaces and transforms if DB schema changed):
-- `wren-ui/src/apollo/server/repositories/agentRepository.ts`
-- `wren-ui/src/apollo/server/repositories/blueprintRepository.ts`
-- `wren-ui/src/apollo/server/repositories/blueprintRegistryRepository.ts`
-- `wren-ui/src/apollo/server/repositories/autoProvisionConfigRepository.ts`
+- `legible-ui/src/apollo/server/repositories/agentRepository.ts`
+- `legible-ui/src/apollo/server/repositories/blueprintRepository.ts`
+- `legible-ui/src/apollo/server/repositories/blueprintRegistryRepository.ts`
+- `legible-ui/src/apollo/server/repositories/autoProvisionConfigRepository.ts`
 
 **Services** (update business logic):
-- `wren-ui/src/apollo/server/services/agentService.ts`
-- `wren-ui/src/apollo/server/services/blueprintService.ts`
-- `wren-ui/src/apollo/server/services/blueprintRegistryService.ts` — includes `CONNECTOR_BLUEPRINT_MAP`
-- `wren-ui/src/apollo/server/services/autoProvisionService.ts` — includes `CONNECTOR_BLUEPRINT_MAP`
+- `legible-ui/src/apollo/server/services/agentService.ts`
+- `legible-ui/src/apollo/server/services/blueprintService.ts`
+- `legible-ui/src/apollo/server/services/blueprintRegistryService.ts` — includes `CONNECTOR_BLUEPRINT_MAP`
+- `legible-ui/src/apollo/server/services/autoProvisionService.ts` — includes `CONNECTOR_BLUEPRINT_MAP`
 
 **Seed data:**
-- `wren-ui/src/apollo/server/utils/seedRegistry.ts` — update `BUILTIN_ENTRIES` if blueprints changed
+- `legible-ui/src/apollo/server/utils/seedRegistry.ts` — update `BUILTIN_ENTRIES` if blueprints changed
 
 **Resolvers:**
-- `wren-ui/src/apollo/server/resolvers/agentResolver.ts`
-- `wren-ui/src/apollo/server/resolvers/blueprintResolver.ts`
-- `wren-ui/src/apollo/server/resolvers/blueprintRegistryResolver.ts`
+- `legible-ui/src/apollo/server/resolvers/agentResolver.ts`
+- `legible-ui/src/apollo/server/resolvers/blueprintResolver.ts`
+- `legible-ui/src/apollo/server/resolvers/blueprintRegistryResolver.ts`
 
 **Important:** The `CONNECTOR_BLUEPRINT_MAP` is duplicated in two services (`blueprintRegistryService.ts` and `autoProvisionService.ts`). Keep them in sync.
 
 ### Layer 5: GraphQL Schema
 
-**File:** `wren-ui/src/apollo/server/schema.ts`
+**File:** `legible-ui/src/apollo/server/schema.ts`
 
 Update if types, inputs, queries, or mutations change. Key types:
 - `AgentType`, `AgentStatus` enum
@@ -154,32 +154,32 @@ Update if types, inputs, queries, or mutations change. Key types:
 - Input types: `CreateAgentInput`, `CreateBlueprintInput`, `SetAutoProvisionConfigInput`
 
 **Resolver wiring:**
-- `wren-ui/src/apollo/server/resolvers.ts` — query/mutation mappings
-- `wren-ui/src/apollo/server/types/context.ts` — service interfaces
-- `wren-ui/src/common.ts` — service instantiation
-- `wren-ui/src/pages/api/graphql.ts` — context injection
+- `legible-ui/src/apollo/server/resolvers.ts` — query/mutation mappings
+- `legible-ui/src/apollo/server/types/context.ts` — service interfaces
+- `legible-ui/src/common.ts` — service instantiation
+- `legible-ui/src/pages/api/graphql.ts` — context injection
 
 ### Layer 6: Frontend GraphQL & UI
 
 **GraphQL operations:**
-- `wren-ui/src/apollo/client/graphql/agents.ts` — agent queries/mutations
-- `wren-ui/src/apollo/client/graphql/blueprints.ts` — blueprint queries/mutations
-- `wren-ui/src/apollo/client/graphql/registry.ts` — registry & auto-provision operations
+- `legible-ui/src/apollo/client/graphql/agents.ts` — agent queries/mutations
+- `legible-ui/src/apollo/client/graphql/blueprints.ts` — blueprint queries/mutations
+- `legible-ui/src/apollo/client/graphql/registry.ts` — registry & auto-provision operations
 
 **Generated hooks** (update types to match schema changes):
-- `wren-ui/src/apollo/client/graphql/agents.generated.ts`
-- `wren-ui/src/apollo/client/graphql/blueprints.generated.ts`
-- `wren-ui/src/apollo/client/graphql/registry.generated.ts`
+- `legible-ui/src/apollo/client/graphql/agents.generated.ts`
+- `legible-ui/src/apollo/client/graphql/blueprints.generated.ts`
+- `legible-ui/src/apollo/client/graphql/registry.generated.ts`
 
 **Pages:**
-- `wren-ui/src/pages/projects/[projectId]/agents/index.tsx` — agent management + auto-provision button
-- `wren-ui/src/pages/projects/[projectId]/blueprints/index.tsx` — blueprint management
-- `wren-ui/src/pages/projects/[projectId]/blueprints/registry.tsx` — template gallery
+- `legible-ui/src/pages/projects/[projectId]/agents/index.tsx` — agent management + auto-provision button
+- `legible-ui/src/pages/projects/[projectId]/blueprints/index.tsx` — blueprint management
+- `legible-ui/src/pages/projects/[projectId]/blueprints/registry.tsx` — template gallery
 
 **Sidebar:**
-- `wren-ui/src/components/sidebar/Blueprints.tsx`
-- `wren-ui/src/utils/enum/path.ts` — route paths
-- `wren-ui/src/utils/enum/menu.ts` — menu keys
+- `legible-ui/src/components/sidebar/Blueprints.tsx`
+- `legible-ui/src/utils/enum/path.ts` — route paths
+- `legible-ui/src/utils/enum/menu.ts` — menu keys
 
 ### Layer 7: Docker & Deployment
 
@@ -204,7 +204,7 @@ go run . blueprint list
 go run . blueprint recommend POSTGRES
 
 # 2. Frontend build
-cd wren-ui && npx next build
+cd legible-ui && npx next build
 
 # 3. Docker build (if Dockerfile changed)
 cd legible-cli/openshell && docker build -t legible-sandbox:latest .

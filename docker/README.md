@@ -4,7 +4,7 @@
   /example](https://github.com/Canner/wren-engine/tree/main/example)
 - `wren-ai-service`: the AI service.
 - `qdrant`: the vector store ai service is using.
-- `wren-ui`: the UI service.
+- `legible-ui`: the UI service.
 - `bootstrap`: put required files to volume for engine service.
 
 ## Volume

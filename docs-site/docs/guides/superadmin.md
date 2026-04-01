@@ -15,7 +15,7 @@ The first superadmin must be created by directly updating the database. Run this
 
 ```bash
 # Docker Compose deployment
-docker exec -it wrenai-wren-ui-1 sh -c \
+docker exec -it wrenai-legible-ui-1 sh -c \
   "sqlite3 /app/data/db.sqlite3 \"UPDATE user SET is_superadmin = 1 WHERE email = 'admin@yourcompany.com';\""
 ```
 

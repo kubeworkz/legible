@@ -66,7 +66,7 @@ Check all containers are running:
 cd docker && docker compose ps
 ```
 
-You should see 7 services: `bootstrap`, `wren-engine`, `ibis-server`, `wren-ai-service`, `text-embeddings-inference`, `qdrant`, and `wren-ui`.
+You should see 7 services: `bootstrap`, `wren-engine`, `ibis-server`, `wren-ai-service`, `text-embeddings-inference`, `qdrant`, and `legible-ui`.
 
 ## Kubernetes
 

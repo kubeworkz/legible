@@ -62,19 +62,19 @@ node_modules
 .pnp.js
 
 ## testing
-wren-ui/coverage
-wren-ui/test-results
-wren-ui/playwright-report
-wren-ui/e2e/e2e.config.json
+legible-ui/coverage
+legible-ui/test-results
+legible-ui/playwright-report
+legible-ui/e2e/e2e.config.json
 
 ## next.js
-wren-ui/.next
-wren-ui/out
+legible-ui/.next
+legible-ui/out
 
-wren-ui/.yarn/install-state.gz
+legible-ui/.yarn/install-state.gz
 
 ## production
-wren-ui/build
+legible-ui/build
 
 ## debug
 npm-debug.log*
@@ -101,5 +101,5 @@ wren-launcher/main
 .tmp
 
 !wren-ai-service/tools/.env.example
-wren-ui/public/sample_data/
+legible-ui/public/sample_data/
 wren-ai-service/transactions-fraud-datasets.zip

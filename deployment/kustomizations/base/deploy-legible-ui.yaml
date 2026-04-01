@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wren-ui-deployment
+  name: legible-ui-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: wren-ui
+      app: legible-ui
   template:
     metadata:
       labels:
-        app: wren-ui
+        app: legible-ui
     spec:
       containers:
 
-        - name: wren-ui
-          image: ghcr.io/canner/wren-ui:0.5.6
+        - name: legible-ui
+          image: ghcr.io/canner/legible-ui:0.5.6
           env:
             - name: DB_TYPE
               valueFrom:

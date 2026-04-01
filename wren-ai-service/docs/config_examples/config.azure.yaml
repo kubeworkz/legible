@@ -35,7 +35,7 @@ models:
 ---
 type: engine
 provider: wren_ui
-endpoint: http://wren-ui:3000
+endpoint: http://legible-ui:3000
 
 ---
 type: engine

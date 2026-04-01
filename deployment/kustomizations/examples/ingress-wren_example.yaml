@@ -1,10 +1,10 @@
 # Dependancy https://external-dns.io
-# To add a DNS record for wren-ui.myhost.net host
+# To add a DNS record for legible-ui.myhost.net host
 # Note: without authentication, enyone can acess your app, see your data and modify your settings!
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: wren-ui-ingress
+  name: legible-ui-ingress
   annotations:
     ### Dependancy external-dns
     #external-dns.alpha.kubernetes.io/filter: 'include'
@@ -30,18 +30,18 @@ spec:
   #"nginx" or "alb"
   ingressClassName: nginx
   rules:
-    - host: wren-ui.myhost.net
+    - host: legible-ui.myhost.net
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: wren-ui-svc
+                name: legible-ui-svc
                 port:
                   number: 3000
 ### Comment TLS section if you are not going to use https
   tls:
     - hosts:
-      - wren-ui.myhost.net
-      secretName: wren-ui.myhost.net-tls
+      - legible-ui.myhost.net
+      secretName: legible-ui.myhost.net-tls

@@ -48,7 +48,7 @@ services:
       MCP_HOST: 0.0.0.0
       MCP_PORT: "9000"
       WREN_URL: localhost:8000
-      WREN_UI_ENDPOINT: http://wren-ui:3000
+      WREN_UI_ENDPOINT: http://legible-ui:3000
       INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
     volumes:
       - ${LOCAL_STORAGE:-.}:/usr/src/app/data
@@ -116,8 +116,8 @@ services:
     networks:
       - wren
 
-  wren-ui:
-    image: wren-ui:local
+  legible-ui:
+    image: legible-ui:local
     restart: on-failure
     platform: ${PLATFORM}
     deploy:

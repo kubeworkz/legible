@@ -41,8 +41,8 @@ services:
     networks:
       - wren
 
-  wren-ui:
-    image: ghcr.io/canner/wren-ui:${WREN_UI_VERSION}
+  legible-ui:
+    image: ghcr.io/canner/legible-ui:${WREN_UI_VERSION}
     pull_policy: always
     platform: ${PLATFORM}
     environment:
