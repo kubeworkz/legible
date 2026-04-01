@@ -11,6 +11,7 @@ import Modeling, { Props as ModelingSidebarProps } from './Modeling';
 import Knowledge from './Knowledge';
 import Agents from './Agents';
 import Blueprints from './Blueprints';
+import Gateways from './Gateways';
 import APIManagement from './APIManagement';
 import DataSecurity from './DataSecurity';
 import LearningSection from '@/components/learning';
@@ -86,6 +87,10 @@ const DynamicSidebar = (
 
     if (pathname.startsWith(Path.Blueprints)) {
       return <Blueprints />;
+    }
+
+    if (pathname.startsWith(Path.Gateways)) {
+      return <Gateways />;
     }
 
     if (pathname.startsWith(Path.APIManagement)) {

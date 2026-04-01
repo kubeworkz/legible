@@ -43,6 +43,7 @@ export enum Path {
   Agents = '/projects/[projectId]/agents',
   Blueprints = '/projects/[projectId]/blueprints',
   BlueprintRegistry = '/projects/[projectId]/blueprints/registry',
+  Gateways = '/projects/[projectId]/gateways',
 }
 
 /**

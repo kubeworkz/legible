@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
 import {
   Button,
   Tag,
@@ -30,6 +31,8 @@ import {
 import { useBlueprintsQuery } from '@/apollo/client/graphql/blueprints.generated';
 import { useProvisionAgentMutation } from '@/apollo/client/graphql/registry.generated';
 import useProject from '@/hooks/useProject';
+import GatewayStatusBar from '@/components/pages/agents/GatewayStatusBar';
+import { Path, buildPath } from '@/utils/enum';
 
 const { Text } = Typography;
 
@@ -46,6 +49,7 @@ const refetchOptions = {
 };
 
 export default function AgentsPage() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBlueprintId, setSelectedBlueprintId] = useState<
     number | undefined
@@ -92,7 +96,9 @@ export default function AgentsPage() {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      render: (name: string) => <Text strong>{name}</Text>,
+      render: (name: string) => (
+        <Text strong style={{ color: '#1890ff' }}>{name}</Text>
+      ),
     },
     {
       title: 'Sandbox',
@@ -130,7 +136,7 @@ export default function AgentsPage() {
       key: 'actions',
       width: 100,
       render: (_: any, record: AgentFieldsFragment) => (
-        <Space>
+        <Space onClick={(e) => e.stopPropagation()}>
           {record.status === 'STOPPED' && (
             <Button
               size="small"
@@ -274,6 +280,7 @@ export default function AgentsPage() {
           </Space>
         }
       >
+        <GatewayStatusBar />
         <Table
           dataSource={agents}
           columns={columns}
@@ -281,6 +288,13 @@ export default function AgentsPage() {
           loading={loading}
           pagination={agents.length > 20 ? { pageSize: 20 } : false}
           locale={{ emptyText: 'No agents yet. Click "Create Agent" to get started.' }}
+          onRow={(record) => ({
+            onClick: () => {
+              const base = buildPath(Path.Agents, currentProject?.id || '');
+              router.push(`${base}/${record.id}`);
+            },
+            style: { cursor: 'pointer' },
+          })}
         />
       </PageLayout>
 

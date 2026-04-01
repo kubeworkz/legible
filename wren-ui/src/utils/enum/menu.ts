@@ -11,4 +11,5 @@ export enum MENU_KEY {
   AGENTS = 'agents',
   BLUEPRINTS = 'blueprints',
   BLUEPRINT_REGISTRY = 'blueprint-registry',
+  GATEWAYS = 'gateways',
 }
