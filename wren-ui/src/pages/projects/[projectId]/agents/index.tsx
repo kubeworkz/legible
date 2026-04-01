@@ -1,7 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import {
   Button,
+  Col,
+  Input,
+  Row,
+  Select,
   Tag,
   Table,
   TableColumnsType,
@@ -15,6 +19,9 @@ import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import ThunderboltOutlined from '@ant-design/icons/ThunderboltOutlined';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
+import SearchOutlined from '@ant-design/icons/SearchOutlined';
+import PlayCircleOutlined from '@ant-design/icons/PlayCircleOutlined';
+import PauseCircleOutlined from '@ant-design/icons/PauseCircleOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { getCompactTime } from '@/utils/time';
@@ -51,6 +58,11 @@ const refetchOptions = {
 export default function AgentsPage() {
   const router = useRouter();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | undefined>();
+  const [blueprintFilter, setBlueprintFilter] = useState<number | undefined>();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
   const { currentProject } = useProject();
   const connectorType = currentProject?.type || '';
 
@@ -73,6 +85,25 @@ export default function AgentsPage() {
   const [updateAgent] = useUpdateAgentMutation(refetchOptions);
 
   const agents = useMemo(() => data?.agents || [], [data]);
+
+  const filteredAgents = useMemo(() => {
+    let result = agents;
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      result = result.filter(
+        (a) =>
+          a.name.toLowerCase().includes(q) ||
+          a.sandboxName.toLowerCase().includes(q),
+      );
+    }
+    if (statusFilter) {
+      result = result.filter((a) => a.status === statusFilter);
+    }
+    if (blueprintFilter) {
+      result = result.filter((a) => a.blueprintId === blueprintFilter);
+    }
+    return result;
+  }, [agents, searchText, statusFilter, blueprintFilter]);
 
   const columns: TableColumnsType<AgentFieldsFragment> = [
     {
@@ -230,6 +261,88 @@ export default function AgentsPage() {
     }
   };
 
+  // ── Bulk operations ──────────────────────────────────
+  const selectedAgents = useMemo(
+    () => agents.filter((a) => selectedRowKeys.includes(a.id)),
+    [agents, selectedRowKeys],
+  );
+
+  const handleBulkStart = useCallback(async () => {
+    const eligible = selectedAgents.filter((a) => a.status === 'STOPPED');
+    if (!eligible.length) {
+      message.warning('No stopped agents selected');
+      return;
+    }
+    setBulkLoading(true);
+    try {
+      await Promise.all(
+        eligible.map((a) =>
+          updateAgent({
+            variables: { where: { id: a.id }, data: { status: 'RUNNING' } },
+          }),
+        ),
+      );
+      message.success(`Started ${eligible.length} agent(s)`);
+      setSelectedRowKeys([]);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to start some agents');
+    } finally {
+      setBulkLoading(false);
+    }
+  }, [selectedAgents, updateAgent]);
+
+  const handleBulkStop = useCallback(async () => {
+    const eligible = selectedAgents.filter((a) => a.status === 'RUNNING');
+    if (!eligible.length) {
+      message.warning('No running agents selected');
+      return;
+    }
+    setBulkLoading(true);
+    try {
+      await Promise.all(
+        eligible.map((a) =>
+          updateAgent({
+            variables: { where: { id: a.id }, data: { status: 'STOPPED' } },
+          }),
+        ),
+      );
+      message.success(`Stopped ${eligible.length} agent(s)`);
+      setSelectedRowKeys([]);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to stop some agents');
+    } finally {
+      setBulkLoading(false);
+    }
+  }, [selectedAgents, updateAgent]);
+
+  const handleBulkDelete = useCallback(() => {
+    if (!selectedAgents.length) return;
+    Modal.confirm({
+      title: `Delete ${selectedAgents.length} agent(s)?`,
+      icon: <ExclamationCircleOutlined />,
+      content:
+        'This will destroy the sandboxes and remove all associated data for the selected agents.',
+      okText: 'Delete All',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        setBulkLoading(true);
+        try {
+          await Promise.all(
+            selectedAgents.map((a) =>
+              deleteAgent({ variables: { where: { id: a.id } } }),
+            ),
+          );
+          message.success(`Deleted ${selectedAgents.length} agent(s)`);
+          setSelectedRowKeys([]);
+        } catch (err: any) {
+          message.error(err?.message || 'Failed to delete some agents');
+        } finally {
+          setBulkLoading(false);
+        }
+      },
+    });
+  }, [selectedAgents, deleteAgent]);
+
   return (
     <SiderLayout>
       <PageLayout
@@ -262,12 +375,106 @@ export default function AgentsPage() {
         }
       >
         <GatewayStatusBar />
+        <Row gutter={12} style={{ marginBottom: 16 }}>
+          <Col flex="auto">
+            <Input
+              placeholder="Search by name or sandbox…"
+              prefix={<SearchOutlined />}
+              allowClear
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </Col>
+          <Col>
+            <Select
+              placeholder="Status"
+              allowClear
+              style={{ width: 140 }}
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { label: 'Creating', value: 'CREATING' },
+                { label: 'Running', value: 'RUNNING' },
+                { label: 'Stopped', value: 'STOPPED' },
+                { label: 'Failed', value: 'FAILED' },
+              ]}
+            />
+          </Col>
+          <Col>
+            <Select
+              placeholder="Blueprint"
+              allowClear
+              style={{ width: 180 }}
+              value={blueprintFilter}
+              onChange={setBlueprintFilter}
+              options={blueprints.map((bp) => ({
+                label: bp.name,
+                value: bp.id,
+              }))}
+            />
+          </Col>
+        </Row>
+        {selectedRowKeys.length > 0 && (
+          <Row
+            align="middle"
+            style={{
+              marginBottom: 12,
+              padding: '8px 12px',
+              background: '#e6f4ff',
+              borderRadius: 6,
+            }}
+          >
+            <Col flex="auto">
+              <Text strong>{selectedRowKeys.length} agent(s) selected</Text>
+            </Col>
+            <Col>
+              <Space>
+                <Button
+                  size="small"
+                  icon={<PlayCircleOutlined />}
+                  loading={bulkLoading}
+                  onClick={handleBulkStart}
+                >
+                  Start
+                </Button>
+                <Button
+                  size="small"
+                  icon={<PauseCircleOutlined />}
+                  loading={bulkLoading}
+                  onClick={handleBulkStop}
+                >
+                  Stop
+                </Button>
+                <Button
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  loading={bulkLoading}
+                  onClick={handleBulkDelete}
+                >
+                  Delete
+                </Button>
+                <Button
+                  size="small"
+                  type="link"
+                  onClick={() => setSelectedRowKeys([])}
+                >
+                  Clear
+                </Button>
+              </Space>
+            </Col>
+          </Row>
+        )}
         <Table
-          dataSource={agents}
+          dataSource={filteredAgents}
           columns={columns}
           rowKey="id"
           loading={loading}
-          pagination={agents.length > 20 ? { pageSize: 20 } : false}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: setSelectedRowKeys,
+          }}
+          pagination={filteredAgents.length > 20 ? { pageSize: 20 } : false}
           locale={{ emptyText: 'No agents yet. Click "Create Agent" to get started.' }}
           onRow={(record) => ({
             onClick: () => {

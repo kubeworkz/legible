@@ -41,6 +41,7 @@ import {
   useUpdateAgentMutation,
   useDeleteAgentMutation,
 } from '@/apollo/client/graphql/agents.generated';
+import LogViewer from '@/components/pages/agents/LogViewer';
 
 const { Text, Paragraph } = Typography;
 
@@ -402,6 +403,11 @@ export default function AgentDetailPage() {
       key: 'logs',
       label: 'Audit Logs',
       children: <LogsTab agentId={agent.id} />,
+    },
+    {
+      key: 'live-logs',
+      label: 'Live Logs',
+      children: <LogViewer agentId={agent.id} />,
     },
     {
       key: 'policy',

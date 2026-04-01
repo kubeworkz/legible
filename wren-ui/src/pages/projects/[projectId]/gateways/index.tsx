@@ -7,6 +7,7 @@ import {
   Modal,
   Form,
   InputNumber,
+  Input,
   message,
   Row,
   Space,
@@ -24,6 +25,9 @@ import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import CloseCircleOutlined from '@ant-design/icons/CloseCircleOutlined';
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
+import EditOutlined from '@ant-design/icons/EditOutlined';
+import SaveOutlined from '@ant-design/icons/SaveOutlined';
+import CloseOutlined from '@ant-design/icons/CloseOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { getCompactTime } from '@/utils/time';
@@ -32,6 +36,7 @@ import {
   GatewayFieldsFragment,
   useGatewayForOrgQuery,
   useCreateGatewayMutation,
+  useUpdateGatewayMutation,
   useDeleteGatewayMutation,
 } from '@/apollo/client/graphql/gateways.generated';
 
@@ -81,10 +86,39 @@ function SandboxUsageBar({ gateway }: { gateway: GatewayFieldsFragment }) {
 function GatewayDetail({
   gateway,
   onDelete,
+  onScale,
+  scaling,
 }: {
   gateway: GatewayFieldsFragment;
   onDelete: () => void;
+  onScale: (values: { cpus?: string; memory?: string; maxSandboxes?: number }) => Promise<void>;
+  scaling: boolean;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [cpus, setCpus] = useState(gateway.cpus);
+  const [memory, setMemory] = useState(gateway.memory);
+  const [maxSandboxes, setMaxSandboxes] = useState(gateway.maxSandboxes);
+
+  const handleEdit = () => {
+    setCpus(gateway.cpus);
+    setMemory(gateway.memory);
+    setMaxSandboxes(gateway.maxSandboxes);
+    setEditing(true);
+  };
+
+  const handleSave = async () => {
+    const changes: Record<string, any> = {};
+    if (cpus !== gateway.cpus) changes.cpus = cpus;
+    if (memory !== gateway.memory) changes.memory = memory;
+    if (maxSandboxes !== gateway.maxSandboxes) changes.maxSandboxes = maxSandboxes;
+    if (Object.keys(changes).length === 0) {
+      setEditing(false);
+      return;
+    }
+    await onScale(changes);
+    setEditing(false);
+  };
+
   return (
     <Card
       title={
@@ -95,14 +129,25 @@ function GatewayDetail({
         </Space>
       }
       extra={
-        <Button
-          danger
-          size="small"
-          icon={<DeleteOutlined />}
-          onClick={onDelete}
-        >
-          Delete
-        </Button>
+        <Space>
+          {!editing && (
+            <Button
+              size="small"
+              icon={<EditOutlined />}
+              onClick={handleEdit}
+            >
+              Scale
+            </Button>
+          )}
+          <Button
+            danger
+            size="small"
+            icon={<DeleteOutlined />}
+            onClick={onDelete}
+          >
+            Delete
+          </Button>
+        </Space>
       }
     >
       <Row gutter={[24, 24]}>
@@ -136,10 +181,44 @@ function GatewayDetail({
         <Col span={12}>
           <Descriptions column={1} size="small" bordered>
             <Descriptions.Item label="CPU">
-              {gateway.cpus}
+              {editing ? (
+                <Input
+                  size="small"
+                  value={cpus}
+                  onChange={(e) => setCpus(e.target.value)}
+                  style={{ width: 120 }}
+                  placeholder="e.g. 4.0"
+                />
+              ) : (
+                gateway.cpus
+              )}
             </Descriptions.Item>
             <Descriptions.Item label="Memory">
-              {gateway.memory}
+              {editing ? (
+                <Input
+                  size="small"
+                  value={memory}
+                  onChange={(e) => setMemory(e.target.value)}
+                  style={{ width: 120 }}
+                  placeholder="e.g. 16g"
+                />
+              ) : (
+                gateway.memory
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="Max Sandboxes">
+              {editing ? (
+                <InputNumber
+                  size="small"
+                  min={1}
+                  max={100}
+                  value={maxSandboxes}
+                  onChange={(v) => setMaxSandboxes(v ?? gateway.maxSandboxes)}
+                  style={{ width: 120 }}
+                />
+              ) : (
+                gateway.maxSandboxes
+              )}
             </Descriptions.Item>
             <Descriptions.Item label="Sandbox Usage">
               <SandboxUsageBar gateway={gateway} />
@@ -151,6 +230,26 @@ function GatewayDetail({
               {getCompactTime(gateway.updatedAt)}
             </Descriptions.Item>
           </Descriptions>
+          {editing && (
+            <Space style={{ marginTop: 12 }}>
+              <Button
+                type="primary"
+                size="small"
+                icon={<SaveOutlined />}
+                loading={scaling}
+                onClick={handleSave}
+              >
+                Save
+              </Button>
+              <Button
+                size="small"
+                icon={<CloseOutlined />}
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </Button>
+            </Space>
+          )}
         </Col>
       </Row>
       {gateway.errorMessage && (
@@ -190,6 +289,11 @@ export default function GatewaysPage() {
   });
 
   const [deleteGateway] = useDeleteGatewayMutation({
+    refetchQueries: ['GatewayForOrganization'],
+    awaitRefetchQueries: true,
+  });
+
+  const [updateGateway, { loading: scaling }] = useUpdateGatewayMutation({
     refetchQueries: ['GatewayForOrganization'],
     awaitRefetchQueries: true,
   });
@@ -238,6 +342,22 @@ export default function GatewaysPage() {
     });
   };
 
+  const handleScale = async (values: {
+    cpus?: string;
+    memory?: string;
+    maxSandboxes?: number;
+  }) => {
+    if (!gateway) return;
+    try {
+      await updateGateway({
+        variables: { where: { id: gateway.id }, data: values },
+      });
+      message.success('Gateway resources updated');
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to update gateway');
+    }
+  };
+
   return (
     <SiderLayout>
       <PageLayout
@@ -274,7 +394,12 @@ export default function GatewaysPage() {
             <Spin size="large" />
           </div>
         ) : gateway ? (
-          <GatewayDetail gateway={gateway} onDelete={handleDelete} />
+          <GatewayDetail
+            gateway={gateway}
+            onDelete={handleDelete}
+            onScale={handleScale}
+            scaling={scaling}
+          />
         ) : (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}

@@ -2,13 +2,15 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import {
   Button,
+  Col,
+  Input,
+  Row,
+  Select,
   Tag,
   Table,
   TableColumnsType,
   Typography,
   Modal,
-  Input,
-  Form,
   Space,
   message,
 } from 'antd';
@@ -17,6 +19,7 @@ import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
+import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { getCompactTime } from '@/utils/time';
@@ -28,51 +31,14 @@ import {
   useCreateBlueprintMutation,
   useDeleteBlueprintMutation,
 } from '@/apollo/client/graphql/blueprints.generated';
+import {
+  useInstallRegistryEntryMutation,
+} from '@/apollo/client/graphql/registry.generated';
+import BlueprintImportCreateWizard, {
+  CreateBlueprintValues,
+} from '@/components/pages/blueprints/BlueprintImportCreateWizard';
 
 const { Text, Paragraph } = Typography;
-const { TextArea } = Input;
-
-const DEFAULT_BLUEPRINT_YAML = `version: "0.1.0"
-description: |
-  My custom agent blueprint.
-
-components:
-  sandbox:
-    image: "legible-sandbox:latest"
-    name: "my-agent"
-    forward_ports:
-      - 9000
-  inference:
-    profiles:
-      anthropic:
-        provider_type: "anthropic"
-        provider_name: "anthropic-inference"
-        endpoint: "https://api.anthropic.com/v1"
-        model: "claude-sonnet-4-20250514"
-  mcp:
-    servers:
-      legible:
-        transport: "streamable-http"
-        url: "http://host.docker.internal:9000/mcp"
-
-policies:
-  network: "policies/legible-sandbox.yaml"
-  filesystem:
-    read_only:
-      - /usr
-      - /lib
-    read_write:
-      - /home/sandbox
-      - /tmp
-  process:
-    deny_privilege_escalation: true
-
-agent:
-  type: "claude"
-  allowed_types:
-    - claude
-    - codex
-`;
 
 export default function BlueprintsPage() {
   const router = useRouter();
@@ -81,13 +47,45 @@ export default function BlueprintsPage() {
   const [createBlueprint, { loading: creating }] =
     useCreateBlueprintMutation();
   const [deleteBlueprint] = useDeleteBlueprintMutation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [installEntry] = useInstallRegistryEntryMutation();
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [viewYaml, setViewYaml] = useState<string | null>(null);
-  const [form] = Form.useForm();
+  const [searchText, setSearchText] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
+  const [sourceFilter, setSourceFilter] = useState<string | undefined>();
 
   const blueprints = useMemo(() => {
     return data?.blueprints || [];
   }, [data]);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    for (const bp of blueprints) {
+      if (bp.category) set.add(bp.category);
+    }
+    return Array.from(set).sort();
+  }, [blueprints]);
+
+  const filteredBlueprints = useMemo(() => {
+    let result = blueprints;
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      result = result.filter(
+        (bp) =>
+          bp.name.toLowerCase().includes(q) ||
+          (bp.description && bp.description.toLowerCase().includes(q)),
+      );
+    }
+    if (categoryFilter) {
+      result = result.filter((bp) => bp.category === categoryFilter);
+    }
+    if (sourceFilter === 'builtin') {
+      result = result.filter((bp) => bp.isBuiltin);
+    } else if (sourceFilter === 'custom') {
+      result = result.filter((bp) => !bp.isBuiltin);
+    }
+    return result;
+  }, [blueprints, searchText, categoryFilter, sourceFilter]);
 
   const columns: TableColumnsType<BlueprintData> = [
     {
@@ -173,9 +171,8 @@ export default function BlueprintsPage() {
     },
   ];
 
-  const handleCreate = async () => {
+  const handleCreate = async (values: CreateBlueprintValues) => {
     try {
-      const values = await form.validateFields();
       await createBlueprint({
         variables: {
           data: {
@@ -189,13 +186,27 @@ export default function BlueprintsPage() {
         },
       });
       message.success(`Blueprint "${values.name}" created`);
-      form.resetFields();
-      setIsModalOpen(false);
+      setIsWizardOpen(false);
       refetch();
     } catch (err: any) {
       if (err?.message) {
         message.error(err.message);
       }
+    }
+  };
+
+  const handleImport = async (registryEntryId: number) => {
+    try {
+      await installEntry({
+        variables: { registryEntryId },
+        refetchQueries: ['Blueprints'],
+        awaitRefetchQueries: true,
+      });
+      message.success('Blueprint installed from registry');
+      setIsWizardOpen(false);
+      refetch();
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to install blueprint');
     }
   };
 
@@ -231,18 +242,52 @@ export default function BlueprintsPage() {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsWizardOpen(true)}
           >
-            Create Blueprint
+            Add Blueprint
           </Button>
         }
       >
+        <Row gutter={12} style={{ marginBottom: 16 }}>
+          <Col flex="auto">
+            <Input
+              placeholder="Search by name or description…"
+              prefix={<SearchOutlined />}
+              allowClear
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </Col>
+          <Col>
+            <Select
+              placeholder="Category"
+              allowClear
+              style={{ width: 160 }}
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+              options={categories.map((c) => ({ label: c, value: c }))}
+            />
+          </Col>
+          <Col>
+            <Select
+              placeholder="Source"
+              allowClear
+              style={{ width: 140 }}
+              value={sourceFilter}
+              onChange={setSourceFilter}
+              options={[
+                { label: 'Built-in', value: 'builtin' },
+                { label: 'Custom', value: 'custom' },
+              ]}
+            />
+          </Col>
+        </Row>
         <Table
-          dataSource={blueprints}
+          dataSource={filteredBlueprints}
           columns={columns}
           rowKey="id"
           loading={loading}
-          pagination={blueprints.length > 20 ? { pageSize: 20 } : false}
+          pagination={filteredBlueprints.length > 20 ? { pageSize: 20 } : false}
           onRow={(record) => ({
             onClick: () => {
               const base = buildPath(Path.Blueprints, currentProjectId);
@@ -264,50 +309,13 @@ export default function BlueprintsPage() {
         />
       </PageLayout>
 
-      <Modal
-        title="Create Blueprint"
-        open={isModalOpen}
-        onOk={handleCreate}
-        onCancel={() => {
-          form.resetFields();
-          setIsModalOpen(false);
-        }}
-        confirmLoading={creating}
-        width={700}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label="Blueprint Name"
-            rules={[{ required: true, message: 'Name is required' }]}
-          >
-            <Input placeholder="e.g., my-analyst-blueprint" />
-          </Form.Item>
-          <Form.Item name="version" label="Version" initialValue="0.1.0">
-            <Input placeholder="0.1.0" />
-          </Form.Item>
-          <Form.Item name="description" label="Description">
-            <Input placeholder="Short description of this blueprint" />
-          </Form.Item>
-          <Form.Item name="sandboxImage" label="Sandbox Image">
-            <Input placeholder="e.g., legible-sandbox:latest" />
-          </Form.Item>
-          <Form.Item name="defaultAgentType" label="Default Agent Type">
-            <Input placeholder="e.g., claude, codex, opencode" />
-          </Form.Item>
-          <Form.Item
-            name="blueprintYaml"
-            label="Blueprint YAML"
-            rules={[{ required: true, message: 'Blueprint YAML is required' }]}
-            initialValue={DEFAULT_BLUEPRINT_YAML}
-          >
-            <TextArea
-              rows={16}
-              style={{ fontFamily: 'monospace', fontSize: 12 }}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <BlueprintImportCreateWizard
+        open={isWizardOpen}
+        creating={creating}
+        onCancel={() => setIsWizardOpen(false)}
+        onCreate={handleCreate}
+        onImport={handleImport}
+      />
 
       <Modal
         title="Blueprint YAML"

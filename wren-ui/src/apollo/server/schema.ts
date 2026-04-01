@@ -2072,6 +2072,9 @@ export const typeDefs = gql`
     endpoint: String
     port: Int
     pid: Int
+    cpus: String
+    memory: String
+    maxSandboxes: Int
     version: String
     errorMessage: String
     lastHealthCheck: String

@@ -18,6 +18,9 @@ export interface UpdateGatewayInput {
   endpoint?: string;
   port?: number;
   pid?: number;
+  cpus?: string;
+  memory?: string;
+  maxSandboxes?: number;
   version?: string;
   errorMessage?: string;
   lastHealthCheck?: string;
