@@ -41,6 +41,7 @@ export enum Path {
   SettingsUserProfile = '/projects/[projectId]/settings/user/profile',
   SettingsUserDangerZone = '/projects/[projectId]/settings/user/danger-zone',
   Agents = '/projects/[projectId]/agents',
+  AgentHub = '/projects/[projectId]/agent-hub',
   Blueprints = '/projects/[projectId]/blueprints',
   BlueprintRegistry = '/projects/[projectId]/blueprints/registry',
   Gateways = '/projects/[projectId]/gateways',

@@ -9,6 +9,7 @@ export enum MENU_KEY {
   ROW_LEVEL_SECURITY = 'row-level-security',
   SESSION_PROPERTY = 'session-property',
   AGENTS = 'agents',
+  AGENT_HUB = 'agent-hub',
   BLUEPRINTS = 'blueprints',
   BLUEPRINT_REGISTRY = 'blueprint-registry',
   GATEWAYS = 'gateways',

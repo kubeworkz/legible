@@ -10,6 +10,7 @@ export class AgentResolver {
     this.listAgents = this.listAgents.bind(this);
     this.getAgent = this.getAgent.bind(this);
     this.getAgentLogs = this.getAgentLogs.bind(this);
+    this.getAllAgentLogs = this.getAllAgentLogs.bind(this);
     this.createAgent = this.createAgent.bind(this);
     this.updateAgent = this.updateAgent.bind(this);
     this.deleteAgent = this.deleteAgent.bind(this);
@@ -38,6 +39,14 @@ export class AgentResolver {
     ctx: IContext,
   ): Promise<AgentAuditLog[]> {
     return ctx.agentService.getAgentLogs(args.where.id, args.limit);
+  }
+
+  public async getAllAgentLogs(
+    _root: any,
+    args: { limit?: number },
+    ctx: IContext,
+  ): Promise<AgentAuditLog[]> {
+    return ctx.agentService.getAllRecentLogs(args.limit);
   }
 
   public async createAgent(

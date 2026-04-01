@@ -7,6 +7,7 @@ import {
   LIST_AGENTS,
   GET_AGENT,
   GET_AGENT_LOGS,
+  ALL_AGENT_LOGS,
   CREATE_AGENT,
   UPDATE_AGENT,
   DELETE_AGENT,
@@ -58,6 +59,14 @@ export interface AgentLogsQuery {
 
 export interface AgentLogsQueryVariables {
   where: { id: number };
+  limit?: number;
+}
+
+export interface AllAgentLogsQuery {
+  allAgentLogs: AgentAuditLogFieldsFragment[];
+}
+
+export interface AllAgentLogsQueryVariables {
   limit?: number;
 }
 
@@ -126,6 +135,15 @@ export function useAgentLogsQuery(
 ) {
   return Apollo.useQuery<AgentLogsQuery, AgentLogsQueryVariables>(
     GET_AGENT_LOGS,
+    options,
+  );
+}
+
+export function useAllAgentLogsQuery(
+  options?: Apollo.QueryHookOptions<AllAgentLogsQuery, AllAgentLogsQueryVariables>,
+) {
+  return Apollo.useQuery<AllAgentLogsQuery, AllAgentLogsQueryVariables>(
+    ALL_AGENT_LOGS,
     options,
   );
 }

@@ -12,6 +12,7 @@ import Knowledge from './Knowledge';
 import Agents from './Agents';
 import Blueprints from './Blueprints';
 import Gateways from './Gateways';
+import AgentHubSidebar from './AgentHub';
 import APIManagement from './APIManagement';
 import DataSecurity from './DataSecurity';
 import LearningSection from '@/components/learning';
@@ -83,6 +84,10 @@ const DynamicSidebar = (
 
     if (pathname.startsWith(Path.Agents)) {
       return <Agents />;
+    }
+
+    if (pathname.startsWith(Path.AgentHub)) {
+      return <AgentHubSidebar />;
     }
 
     if (pathname.startsWith(Path.Blueprints)) {

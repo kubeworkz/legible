@@ -36,6 +36,7 @@ export interface IAgentRepository extends IBasicRepository<Agent> {
 export interface IAgentAuditLogRepository
   extends IBasicRepository<AgentAuditLog> {
   findByAgentId(agentId: number, limit?: number): Promise<AgentAuditLog[]>;
+  findRecent(limit?: number): Promise<AgentAuditLog[]>;
 }
 
 export class AgentRepository
@@ -103,5 +104,9 @@ export class AgentAuditLogRepository
       order: 'id',
       limit,
     });
+  }
+
+  public async findRecent(limit = 50): Promise<AgentAuditLog[]> {
+    return this.findAll({ order: 'id', limit });
   }
 }

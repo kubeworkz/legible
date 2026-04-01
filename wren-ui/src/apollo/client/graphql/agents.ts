@@ -55,6 +55,15 @@ export const GET_AGENT_LOGS = gql`
   ${AGENT_AUDIT_LOG}
 `;
 
+export const ALL_AGENT_LOGS = gql`
+  query AllAgentLogs($limit: Int) {
+    allAgentLogs(limit: $limit) {
+      ...AgentAuditLogFields
+    }
+  }
+  ${AGENT_AUDIT_LOG}
+`;
+
 export const CREATE_AGENT = gql`
   mutation CreateAgent($data: CreateAgentInput!) {
     createAgent(data: $data) {

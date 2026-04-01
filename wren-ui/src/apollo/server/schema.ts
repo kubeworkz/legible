@@ -2611,6 +2611,7 @@ export const typeDefs = gql`
     agents: [AgentType!]!
     agent(where: AgentWhereInput!): AgentType!
     agentLogs(where: AgentWhereInput!, limit: Int): [AgentAuditLogEntry!]!
+    allAgentLogs(limit: Int): [AgentAuditLogEntry!]!
 
     # Gateways
     gateway(where: GatewayWhereInput!): GatewayType!

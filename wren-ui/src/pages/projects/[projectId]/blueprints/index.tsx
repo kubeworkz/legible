@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
 import {
   Button,
   Tag,
@@ -19,6 +20,8 @@ import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlin
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { getCompactTime } from '@/utils/time';
+import { Path, buildPath } from '@/utils/enum';
+import useProject from '@/hooks/useProject';
 import {
   BlueprintData,
   useBlueprintsQuery,
@@ -72,6 +75,8 @@ agent:
 `;
 
 export default function BlueprintsPage() {
+  const router = useRouter();
+  const { currentProjectId } = useProject();
   const { data, loading, refetch } = useBlueprintsQuery();
   const [createBlueprint, { loading: creating }] =
     useCreateBlueprintMutation();
@@ -91,7 +96,7 @@ export default function BlueprintsPage() {
       key: 'name',
       render: (name: string, record: BlueprintData) => (
         <Space>
-          <Text strong>{name}</Text>
+          <Text strong style={{ color: '#1890ff' }}>{name}</Text>
           {record.isBuiltin && <Tag color="blue">built-in</Tag>}
         </Space>
       ),
@@ -147,7 +152,7 @@ export default function BlueprintsPage() {
       key: 'actions',
       width: 160,
       render: (_: any, record: BlueprintData) => (
-        <Space>
+        <Space onClick={(e) => e.stopPropagation()}>
           <Button
             size="small"
             icon={<EditOutlined />}
@@ -238,6 +243,13 @@ export default function BlueprintsPage() {
           rowKey="id"
           loading={loading}
           pagination={blueprints.length > 20 ? { pageSize: 20 } : false}
+          onRow={(record) => ({
+            onClick: () => {
+              const base = buildPath(Path.Blueprints, currentProjectId);
+              router.push(`${base}/${record.id}`);
+            },
+            style: { cursor: 'pointer' },
+          })}
           expandable={{
             expandedRowRender: (record) => (
               <Paragraph style={{ whiteSpace: 'pre-wrap', margin: 0 }}>

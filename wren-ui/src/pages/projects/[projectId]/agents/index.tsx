@@ -7,10 +7,7 @@ import {
   TableColumnsType,
   Typography,
   Modal,
-  Input,
-  Form,
   Space,
-  Select,
   message,
 } from 'antd';
 import RobotOutlined from '@ant-design/icons/RobotOutlined';
@@ -32,6 +29,9 @@ import { useBlueprintsQuery } from '@/apollo/client/graphql/blueprints.generated
 import { useProvisionAgentMutation } from '@/apollo/client/graphql/registry.generated';
 import useProject from '@/hooks/useProject';
 import GatewayStatusBar from '@/components/pages/agents/GatewayStatusBar';
+import CreateAgentWizard, {
+  CreateAgentWizardValues,
+} from '@/components/pages/agents/CreateAgentWizard';
 import { Path, buildPath } from '@/utils/enum';
 
 const { Text } = Typography;
@@ -50,11 +50,7 @@ const refetchOptions = {
 
 export default function AgentsPage() {
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBlueprintId, setSelectedBlueprintId] = useState<
-    number | undefined
-  >();
-  const [form] = Form.useForm();
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const { currentProject } = useProject();
   const connectorType = currentProject?.type || '';
 
@@ -70,19 +66,6 @@ export default function AgentsPage() {
 
   const [provisionAgent, { loading: provisioning }] =
     useProvisionAgentMutation();
-
-  const selectedBlueprint = useMemo(
-    () => blueprints.find((bp) => bp.id === selectedBlueprintId),
-    [blueprints, selectedBlueprintId],
-  );
-
-  const inferenceProfileOptions = useMemo(() => {
-    if (!selectedBlueprint?.inferenceProfiles) return [];
-    return Object.keys(selectedBlueprint.inferenceProfiles).map((name) => ({
-      label: name,
-      value: name,
-    }));
-  }, [selectedBlueprint]);
 
   const [createAgent, { loading: creating }] =
     useCreateAgentMutation(refetchOptions);
@@ -164,25 +147,23 @@ export default function AgentsPage() {
     },
   ];
 
-  const handleCreate = async () => {
+  const handleCreate = async (values: CreateAgentWizardValues) => {
     try {
-      const values = await form.validateFields();
       await createAgent({
         variables: {
           data: {
             name: values.name,
             sandboxName: values.sandboxName,
-            image: values.image || undefined,
-            blueprintId: values.blueprintId || undefined,
-            inferenceProfile: values.inferenceProfile || undefined,
+            image: values.image,
+            blueprintId: values.blueprintId,
+            inferenceProfile: values.inferenceProfile,
+            policyYaml: values.policyYaml,
           },
         },
       });
       message.success(`Agent "${values.name}" created`);
-      form.resetFields();
-      setIsModalOpen(false);
+      setIsWizardOpen(false);
     } catch (err: any) {
-      if (err?.errorFields) return; // validation error
       message.error(err?.message || 'Failed to create agent');
     }
   };
@@ -273,7 +254,7 @@ export default function AgentsPage() {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsWizardOpen(true)}
             >
               Create Agent
             </Button>
@@ -298,66 +279,13 @@ export default function AgentsPage() {
         />
       </PageLayout>
 
-      <Modal
-        title="Create Agent"
-        open={isModalOpen}
-        onOk={handleCreate}
-        onCancel={() => {
-          form.resetFields();
-          setIsModalOpen(false);
-        }}
-        confirmLoading={creating}
-        okText="Create"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[{ required: true, message: 'Agent name is required' }]}
-          >
-            <Input placeholder="e.g. analytics-agent" />
-          </Form.Item>
-          <Form.Item
-            label="Sandbox Name"
-            name="sandboxName"
-            rules={[
-              { required: true, message: 'Sandbox name is required' },
-              {
-                pattern: /^[a-z0-9][a-z0-9-]*[a-z0-9]$/,
-                message: 'Lowercase alphanumeric and hyphens only',
-              },
-            ]}
-          >
-            <Input placeholder="e.g. analytics-sandbox-1" />
-          </Form.Item>
-          <Form.Item label="Blueprint (optional)" name="blueprintId">
-            <Select
-              allowClear
-              placeholder="Select a blueprint template"
-              onChange={(value) => {
-                setSelectedBlueprintId(value);
-                form.setFieldValue('inferenceProfile', undefined);
-              }}
-              options={blueprints.map((bp) => ({
-                label: `${bp.name} (v${bp.version})`,
-                value: bp.id,
-              }))}
-            />
-          </Form.Item>
-          {inferenceProfileOptions.length > 0 && (
-            <Form.Item label="Inference Profile" name="inferenceProfile">
-              <Select
-                allowClear
-                placeholder="Select inference profile"
-                options={inferenceProfileOptions}
-              />
-            </Form.Item>
-          )}
-          <Form.Item label="Image (optional)" name="image">
-            <Input placeholder="e.g. legible-sandbox:latest" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <CreateAgentWizard
+        open={isWizardOpen}
+        loading={creating}
+        blueprints={blueprints}
+        onCancel={() => setIsWizardOpen(false)}
+        onCreate={handleCreate}
+      />
     </SiderLayout>
   );
 }

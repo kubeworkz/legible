@@ -34,6 +34,7 @@ export interface IAgentService {
   updateAgent(id: number, input: UpdateAgentInput): Promise<Agent>;
   deleteAgent(id: number): Promise<void>;
   getAgentLogs(agentId: number, limit?: number): Promise<AgentAuditLog[]>;
+  getAllRecentLogs(limit?: number): Promise<AgentAuditLog[]>;
   logAction(agentId: number, action: string, detail?: string): Promise<void>;
 }
 
@@ -106,6 +107,10 @@ export class AgentService implements IAgentService {
     limit = 50,
   ): Promise<AgentAuditLog[]> {
     return this.agentAuditLogRepository.findByAgentId(agentId, limit);
+  }
+
+  public async getAllRecentLogs(limit = 50): Promise<AgentAuditLog[]> {
+    return this.agentAuditLogRepository.findRecent(limit);
   }
 
   public async logAction(

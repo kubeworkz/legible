@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import {
   Button,
@@ -20,11 +20,19 @@ import ArrowLeftOutlined from '@ant-design/icons/ArrowLeftOutlined';
 import RobotOutlined from '@ant-design/icons/RobotOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
+import EditOutlined from '@ant-design/icons/EditOutlined';
+import SaveOutlined from '@ant-design/icons/SaveOutlined';
+import CloseOutlined from '@ant-design/icons/CloseOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { Path, buildPath } from '@/utils/enum';
 import { getCompactTime } from '@/utils/time';
 import useProject from '@/hooks/useProject';
+import dynamic from 'next/dynamic';
+
+const AceEditor = dynamic(() => import('@/components/editor/AceEditor'), {
+  ssr: false,
+});
 import {
   AgentFieldsFragment,
   AgentAuditLogFieldsFragment,
@@ -161,29 +169,110 @@ function LogsTab({ agentId }: { agentId: number }) {
 
 // ── Policy Tab ──────────────────────────────────────────────────
 
-function PolicyTab({ agent }: { agent: AgentFieldsFragment }) {
-  if (!agent.policyYaml) {
+const DEFAULT_POLICY = `# NemoClaw Network Policy
+# Defines allowed egress destinations for this agent's sandbox.
+version: "1.0"
+rules:
+  - name: allow-all-http
+    protocol: tcp
+    port: 443
+    destination: "*"
+`;
+
+function PolicyTab({
+  agent,
+  onSave,
+  saving,
+}: {
+  agent: AgentFieldsFragment;
+  onSave: (yaml: string) => Promise<void>;
+  saving: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(agent.policyYaml || '');
+
+  const handleEdit = () => {
+    setDraft(agent.policyYaml || DEFAULT_POLICY);
+    setEditing(true);
+  };
+
+  const handleCancel = () => {
+    setDraft(agent.policyYaml || '');
+    setEditing(false);
+  };
+
+  const handleSave = async () => {
+    await onSave(draft);
+    setEditing(false);
+  };
+
+  if (!editing) {
     return (
-      <Paragraph type="secondary">
-        No network policy YAML is set for this agent.
-      </Paragraph>
+      <div>
+        <div style={{ marginBottom: 12 }}>
+          <Button
+            icon={<EditOutlined />}
+            onClick={handleEdit}
+          >
+            {agent.policyYaml ? 'Edit Policy' : 'Add Policy'}
+          </Button>
+        </div>
+        {agent.policyYaml ? (
+          <Card size="small">
+            <AceEditor
+              mode="yaml"
+              theme="tomorrow"
+              value={agent.policyYaml}
+              width="100%"
+              height="400px"
+              readOnly
+              showPrintMargin={false}
+              tabSize={2}
+              setOptions={{ useWorker: false }}
+            />
+          </Card>
+        ) : (
+          <Paragraph type="secondary">
+            No network policy YAML is set for this agent.
+          </Paragraph>
+        )}
+      </div>
     );
   }
 
   return (
-    <Card size="small">
-      <pre
-        style={{
-          margin: 0,
-          fontSize: 12,
-          lineHeight: 1.6,
-          whiteSpace: 'pre-wrap',
-          fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
-        }}
-      >
-        {agent.policyYaml}
-      </pre>
-    </Card>
+    <div>
+      <Space style={{ marginBottom: 12 }}>
+        <Button
+          type="primary"
+          icon={<SaveOutlined />}
+          loading={saving}
+          onClick={handleSave}
+        >
+          Save
+        </Button>
+        <Button
+          icon={<CloseOutlined />}
+          onClick={handleCancel}
+        >
+          Cancel
+        </Button>
+      </Space>
+      <Card size="small">
+        <AceEditor
+          mode="yaml"
+          theme="tomorrow"
+          value={draft}
+          onChange={setDraft}
+          width="100%"
+          height="400px"
+          showPrintMargin={false}
+          tabSize={2}
+          setOptions={{ useWorker: false }}
+          placeholder="Paste your NemoClaw network policy YAML here..."
+        />
+      </Card>
+    </div>
   );
 }
 
@@ -210,6 +299,8 @@ export default function AgentDetailPage() {
     refetchQueries: ['Agents'],
     awaitRefetchQueries: true,
   });
+
+  const [savingPolicy, setSavingPolicy] = useState(false);
 
   const agent = useMemo(() => data?.agent ?? null, [data]);
 
@@ -263,6 +354,21 @@ export default function AgentDetailPage() {
     });
   };
 
+  const handleSavePolicy = async (yaml: string) => {
+    if (!agent) return;
+    setSavingPolicy(true);
+    try {
+      await updateAgent({
+        variables: { where: { id: agent.id }, data: { policyYaml: yaml } },
+      });
+      message.success('Network policy saved');
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to save policy');
+    } finally {
+      setSavingPolicy(false);
+    }
+  };
+
   if (loading && !agent) {
     return (
       <SiderLayout>
@@ -300,7 +406,7 @@ export default function AgentDetailPage() {
     {
       key: 'policy',
       label: 'Network Policy',
-      children: <PolicyTab agent={agent} />,
+      children: <PolicyTab agent={agent} onSave={handleSavePolicy} saving={savingPolicy} />,
     },
   ];
 

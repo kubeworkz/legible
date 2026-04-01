@@ -206,6 +206,7 @@ const resolvers = {
     agents: agentResolver.listAgents,
     agent: agentResolver.getAgent,
     agentLogs: agentResolver.getAgentLogs,
+    allAgentLogs: agentResolver.getAllAgentLogs,
     gateway: gatewayResolver.getGateway,
     gatewayForOrganization: gatewayResolver.getGatewayForOrganization,
     runningGateways: gatewayResolver.listRunningGateways,

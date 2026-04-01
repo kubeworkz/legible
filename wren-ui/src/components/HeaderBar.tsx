@@ -417,6 +417,14 @@ export default function HeaderBar() {
                 <StyledButton
                   shape="round"
                   size="small"
+                  $isHighlight={pathname.startsWith(Path.AgentHub)}
+                  onClick={() => router.push(bp(Path.AgentHub))}
+                >
+                  Agent Hub
+                </StyledButton>
+                <StyledButton
+                  shape="round"
+                  size="small"
                   $isHighlight={pathname.startsWith(Path.Agents)}
                   onClick={() => router.push(bp(Path.Agents))}
                 >
