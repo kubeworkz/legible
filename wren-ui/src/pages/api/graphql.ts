@@ -135,6 +135,7 @@ const bootstrapServer = async () => {
     emailService,
     oidcService,
     agentService,
+    blueprintService,
     subscriptionRepository,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
@@ -344,6 +345,7 @@ const bootstrapServer = async () => {
         emailService,
         oidcService,
         agentService,
+        blueprintService,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

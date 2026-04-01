@@ -1863,6 +1863,8 @@ export const typeDefs = gql`
     policyYaml: String
     image: String
     metadata: JSON
+    blueprintId: Int
+    inferenceProfile: String
     createdAt: String!
     updatedAt: String!
   }
@@ -1882,6 +1884,8 @@ export const typeDefs = gql`
     policyYaml: String
     image: String
     metadata: JSON
+    blueprintId: Int
+    inferenceProfile: String
   }
 
   input UpdateAgentInput {
@@ -1895,6 +1899,56 @@ export const typeDefs = gql`
   }
 
   # ── End Agent Types ────────────────────────────────────────────
+
+  # ── Blueprint Types ───────────────────────────────────────────
+
+  type BlueprintType {
+    id: Int!
+    projectId: Int!
+    name: String!
+    version: String!
+    description: String
+    blueprintYaml: String!
+    sandboxImage: String
+    defaultAgentType: String
+    inferenceProfiles: JSON
+    policyYaml: String
+    isBuiltin: Boolean!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input CreateBlueprintInput {
+    name: String!
+    blueprintYaml: String!
+    version: String
+    description: String
+    sandboxImage: String
+    defaultAgentType: String
+    inferenceProfiles: JSON
+    policyYaml: String
+    isBuiltin: Boolean
+  }
+
+  input UpdateBlueprintInput {
+    version: String
+    description: String
+    blueprintYaml: String
+    sandboxImage: String
+    defaultAgentType: String
+    inferenceProfiles: JSON
+    policyYaml: String
+  }
+
+  input BlueprintWhereInput {
+    id: Int!
+  }
+
+  input BlueprintWhereByNameInput {
+    name: String!
+  }
+
+  # ── End Blueprint Types ───────────────────────────────────────
 
   # ── Data Security: Session Properties ──────────────────────────
 
@@ -2424,6 +2478,11 @@ export const typeDefs = gql`
     agents: [AgentType!]!
     agent(where: AgentWhereInput!): AgentType!
     agentLogs(where: AgentWhereInput!, limit: Int): [AgentAuditLogEntry!]!
+
+    # Blueprints
+    blueprints: [BlueprintType!]!
+    blueprint(where: BlueprintWhereInput!): BlueprintType!
+    blueprintByName(where: BlueprintWhereByNameInput!): BlueprintType!
   }
 
   type Mutation {
@@ -2720,5 +2779,10 @@ export const typeDefs = gql`
     createAgent(data: CreateAgentInput!): AgentType!
     updateAgent(where: AgentWhereInput!, data: UpdateAgentInput!): AgentType!
     deleteAgent(where: AgentWhereInput!): Boolean!
+
+    # Blueprints
+    createBlueprint(data: CreateBlueprintInput!): BlueprintType!
+    updateBlueprint(where: BlueprintWhereInput!, data: UpdateBlueprintInput!): BlueprintType!
+    deleteBlueprint(where: BlueprintWhereInput!): Boolean!
   }
 `;

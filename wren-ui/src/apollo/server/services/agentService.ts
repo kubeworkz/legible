@@ -16,6 +16,8 @@ export interface CreateAgentInput {
   policyYaml?: string;
   image?: string;
   metadata?: Record<string, any>;
+  blueprintId?: number;
+  inferenceProfile?: string;
 }
 
 export interface UpdateAgentInput {

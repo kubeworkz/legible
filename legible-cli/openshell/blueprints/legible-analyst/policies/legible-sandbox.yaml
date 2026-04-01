@@ -1,0 +1,54 @@
+# Legible Data Analyst Sandbox Network Policy
+#
+# Minimal policy: MCP access only, no package managers, no web access.
+
+version: 1
+
+network_policies:
+  legible_mcp:
+    name: legible_mcp
+    description: "Access to Legible MCP server (semantic layer)"
+    endpoints:
+      - host: host.docker.internal
+        port: 9000
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: GET, path: "/mcp/**" }
+          - allow: { method: POST, path: "/mcp/**" }
+          - allow: { method: GET, path: "/sse" }
+          - allow: { method: POST, path: "/messages" }
+    binaries:
+      - { path: /usr/local/bin/legible }
+
+  legible_ui:
+    name: legible_ui
+    description: "Access to Legible UI API (GraphQL, read-only)"
+    endpoints:
+      - host: host.docker.internal
+        port: 3000
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: POST, path: "/api/graphql" }
+
+filesystem_policy:
+  include_workdir: true
+  read_only:
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /app
+    - /etc
+    - /home/sandbox
+  read_write:
+    - /tmp
+    - /dev/null
+
+landlock:
+  compatibility: best_effort
+
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox

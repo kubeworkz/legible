@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Kubeworkz/legible/legible-cli/internal/agent"
@@ -34,10 +35,14 @@ The agent sandbox includes:
   - MCP client connection to your Legible server
   - Network policy restricting access to Legible endpoints only
 
+Use --blueprint to create from a NemoClaw-compatible blueprint:
+  legible agent create my-analyst --blueprint legible-default
+  legible agent create my-analyst --blueprint legible-analyst --profile anthropic
+
 Examples:
   legible agent create my-analyst
   legible agent create my-analyst --type claude
-  legible agent create my-analyst --type codex --gpu
+  legible agent create my-analyst --blueprint legible-default --profile nvidia
   legible agent create my-analyst --policy ./custom-policy.yaml`,
 	Args: cobra.ExactArgs(1),
 	RunE: runAgentCreate,
@@ -102,6 +107,8 @@ func init() {
 	agentCreateCmd.Flags().String("policy", "", "Custom policy YAML file (default: bundled Legible policy)")
 	agentCreateCmd.Flags().Bool("gpu", false, "Enable GPU passthrough (experimental)")
 	agentCreateCmd.Flags().String("from", "", "Custom sandbox image or directory")
+	agentCreateCmd.Flags().String("blueprint", "", "Blueprint name or path (e.g., legible-default, legible-analyst)")
+	agentCreateCmd.Flags().String("profile", "", "Inference profile from the blueprint (e.g., nvidia, openai, anthropic)")
 
 	// agent policy flags
 	agentPolicyCmd.Flags().String("set", "", "Apply a new policy YAML file")
@@ -124,6 +131,8 @@ func runAgentCreate(cmd *cobra.Command, args []string) error {
 	customPolicy, _ := cmd.Flags().GetString("policy")
 	gpu, _ := cmd.Flags().GetBool("gpu")
 	from, _ := cmd.Flags().GetString("from")
+	blueprintName, _ := cmd.Flags().GetString("blueprint")
+	profileName, _ := cmd.Flags().GetString("profile")
 
 	// Load Legible config for provider injection
 	cfg, err := config.Load()
@@ -135,8 +144,12 @@ func runAgentCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Determine MCP endpoint from Legible endpoint
-	// Default: same host, port 9000
 	mcpEndpoint := deriveMCPEndpoint(cfg.Endpoint)
+
+	// If a blueprint is specified, use it to drive the creation
+	if blueprintName != "" {
+		return runAgentCreateFromBlueprint(cmd, name, blueprintName, profileName, cfg, mcpEndpoint, gpu)
+	}
 
 	fmt.Printf("Creating agent %q (type: %s)...\n", name, agentType)
 
@@ -219,6 +232,173 @@ func runAgentCreate(cmd *cobra.Command, args []string) error {
 	fmt.Printf("  Logs:     legible agent logs %s --tail\n", name)
 	fmt.Printf("  Stop:     legible agent stop %s\n", name)
 	return nil
+}
+
+// runAgentCreateFromBlueprint creates an agent using a NemoClaw-compatible blueprint.
+func runAgentCreateFromBlueprint(cmd *cobra.Command, name, blueprintName, profileName string, cfg *config.Config, mcpEndpoint string, gpu bool) error {
+	// Load blueprint
+	bp, bpDir, err := loadBlueprintWithDir(blueprintName)
+	if err != nil {
+		return fmt.Errorf("loading blueprint %q: %w", blueprintName, err)
+	}
+
+	agentType := bp.Agent.Type
+	fmt.Printf("Creating agent %q from blueprint %q (type: %s)...\n", name, blueprintName, agentType)
+
+	// Resolve inference profile
+	profile, profileLabel, err := resolveInferenceProfile(bp, profileName)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("  Inference profile: %s (%s)\n", profileLabel, profile.Model)
+
+	// Step 1: Create the OpenShell provider with Legible credentials + inference config
+	fmt.Print("  Setting up credentials provider... ")
+	providerName := "legible-" + name
+	providerArgs := []string{
+		"provider", "create",
+		"--name", providerName,
+		"--type", "custom",
+		"--env", "LEGIBLE_ENDPOINT=" + cfg.Endpoint,
+		"--env", "LEGIBLE_API_KEY=" + cfg.APIKey,
+		"--env", "LEGIBLE_PROJECT_ID=" + cfg.ProjectID,
+		"--env", "LEGIBLE_MCP_ENDPOINT=" + mcpEndpoint,
+	}
+	err = agent.RunOpenshell(providerArgs...)
+	if err != nil {
+		fmt.Println("FAILED")
+		return fmt.Errorf("creating provider: %w", err)
+	}
+	fmt.Println("OK")
+
+	// Step 2: Set up inference route if NemoClaw is available
+	if agent.NemoClawAvailable() && profile.ProviderType != "" {
+		fmt.Print("  Configuring inference route... ")
+		err = agent.RunOpenshell("provider", "create",
+			"--name", profile.ProviderName,
+			"--type", profile.ProviderType,
+		)
+		if err != nil {
+			fmt.Println("SKIP (provider may already exist)")
+		} else {
+			fmt.Println("OK")
+		}
+	}
+
+	// Step 3: Build sandbox create args
+	createArgs := []string{"sandbox", "create", "--name", name}
+
+	// Use the blueprint's sandbox image
+	sandboxImage := bp.Components.Sandbox.Image
+	if bp.Components.Sandbox.Build != nil {
+		// Build from the blueprint's Dockerfile
+		dockerfilePath := bp.Components.Sandbox.Build.Dockerfile
+		if !strings.HasPrefix(dockerfilePath, "/") {
+			dockerfilePath = bpDir + "/" + dockerfilePath
+		}
+		createArgs = append(createArgs, "--from", dockerfilePath)
+	} else {
+		createArgs = append(createArgs, "--image", sandboxImage)
+	}
+
+	if gpu {
+		createArgs = append(createArgs, "--gpu")
+	}
+
+	createArgs = append(createArgs, "--provider", providerName)
+	createArgs = append(createArgs, "--", agentType)
+
+	// Step 4: Create the sandbox
+	fmt.Print("  Creating sandbox... ")
+	err = agent.RunOpenshell(createArgs...)
+	if err != nil {
+		fmt.Println("FAILED")
+		return fmt.Errorf("creating sandbox: %w", err)
+	}
+	fmt.Println("OK")
+
+	// Step 5: Apply blueprint network policy
+	policyFile := bp.Policies.Network
+	if !strings.HasPrefix(policyFile, "/") {
+		policyFile = bpDir + "/" + policyFile
+	}
+	fmt.Print("  Applying network policy... ")
+	err = agent.RunOpenshell("policy", "set", name, "--policy", policyFile, "--wait")
+	if err != nil {
+		fmt.Println("FAILED")
+		fmt.Printf("  ⚠ Policy not applied: %v\n", err)
+		fmt.Printf("  Apply manually: openshell policy set %s --policy %s\n", name, policyFile)
+	} else {
+		fmt.Println("OK")
+	}
+
+	fmt.Printf("\nAgent %q created from blueprint %q!\n", name, blueprintName)
+	fmt.Printf("  Type:      %s\n", agentType)
+	fmt.Printf("  Profile:   %s (%s)\n", profileLabel, profile.Model)
+	fmt.Printf("  MCP:       %s\n", mcpEndpoint)
+	fmt.Printf("  Connect:   legible agent connect %s\n", name)
+	fmt.Printf("  Logs:      legible agent logs %s --tail\n", name)
+	fmt.Printf("  Stop:      legible agent stop %s\n", name)
+	return nil
+}
+
+// loadBlueprintWithDir loads a blueprint and returns both the parsed struct and the directory path.
+func loadBlueprintWithDir(nameOrPath string) (*agent.Blueprint, string, error) {
+	// Try as a bundled blueprint name
+	dir, err := agent.BundledBlueprintDir(nameOrPath)
+	if err == nil {
+		bp, err := agent.LoadBlueprintFromDir(dir)
+		return bp, dir, err
+	}
+
+	// Try as a path
+	info, statErr := os.Stat(nameOrPath)
+	if statErr != nil {
+		return nil, "", fmt.Errorf("blueprint %q not found", nameOrPath)
+	}
+
+	if info.IsDir() {
+		bp, err := agent.LoadBlueprintFromDir(nameOrPath)
+		return bp, nameOrPath, err
+	}
+
+	// It's a file path to blueprint.yaml
+	dir = filepath.Dir(nameOrPath)
+	bp, err := agent.LoadBlueprint(nameOrPath)
+	return bp, dir, err
+}
+
+// resolveInferenceProfile selects the inference profile from the blueprint.
+func resolveInferenceProfile(bp *agent.Blueprint, profileName string) (*agent.InferenceProfile, string, error) {
+	if len(bp.Components.Inference.Profiles) == 0 {
+		return &agent.InferenceProfile{}, "none", nil
+	}
+
+	if profileName != "" {
+		p, ok := bp.Components.Inference.Profiles[profileName]
+		if !ok {
+			var available []string
+			for k := range bp.Components.Inference.Profiles {
+				available = append(available, k)
+			}
+			return nil, "", fmt.Errorf("inference profile %q not found in blueprint (available: %s)", profileName, strings.Join(available, ", "))
+		}
+		return &p, profileName, nil
+	}
+
+	// Use the first profile as default (prefer "nvidia" > "anthropic" > "openai" > first)
+	for _, preferred := range []string{"nvidia", "anthropic", "openai", "local"} {
+		if p, ok := bp.Components.Inference.Profiles[preferred]; ok {
+			return &p, preferred, nil
+		}
+	}
+
+	// Fall back to first available
+	for k, p := range bp.Components.Inference.Profiles {
+		return &p, k, nil
+	}
+
+	return &agent.InferenceProfile{}, "none", nil
 }
 
 func runAgentList(cmd *cobra.Command, args []string) error {

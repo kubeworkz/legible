@@ -25,6 +25,7 @@ import { StripeResolver } from './resolvers/stripeResolver';
 import { OidcResolver } from './resolvers/oidcResolver';
 import { SuperadminResolver } from './resolvers/superadminResolver';
 import { AgentResolver } from './resolvers/agentResolver';
+import { BlueprintResolver } from './resolvers/blueprintResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -54,6 +55,7 @@ const stripeResolver = new StripeResolver();
 const oidcResolver = new OidcResolver();
 const superadminResolver = new SuperadminResolver();
 const agentResolver = new AgentResolver();
+const blueprintResolver = new BlueprintResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -196,6 +198,9 @@ const resolvers = {
     agents: agentResolver.listAgents,
     agent: agentResolver.getAgent,
     agentLogs: agentResolver.getAgentLogs,
+    blueprints: blueprintResolver.listBlueprints,
+    blueprint: blueprintResolver.getBlueprint,
+    blueprintByName: blueprintResolver.getBlueprintByName,
   },
   Mutation: {
     // Auth
@@ -425,6 +430,9 @@ const resolvers = {
     createAgent: agentResolver.createAgent,
     updateAgent: agentResolver.updateAgent,
     deleteAgent: agentResolver.deleteAgent,
+    createBlueprint: blueprintResolver.createBlueprint,
+    updateBlueprint: blueprintResolver.updateBlueprint,
+    deleteBlueprint: blueprintResolver.deleteBlueprint,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),

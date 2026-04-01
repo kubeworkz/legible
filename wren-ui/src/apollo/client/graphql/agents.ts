@@ -11,6 +11,8 @@ const AGENT = gql`
     policyYaml
     image
     metadata
+    blueprintId
+    inferenceProfile
     createdAt
     updatedAt
   }

@@ -41,3 +41,4 @@ export * from './magicLinkRepository';
 export * from './oidcProviderRepository';
 export * from './userIdentityRepository';
 export * from './agentRepository';
+export * from './blueprintRepository';

@@ -21,3 +21,4 @@ export * from './queryMeteringService';
 export * from './emailService';
 export * from './oidcService';
 export * from './agentService';
+export * from './blueprintService';

@@ -24,6 +24,8 @@ export interface AgentFieldsFragment {
   policyYaml: string | null;
   image: string | null;
   metadata: Record<string, any> | null;
+  blueprintId: number | null;
+  inferenceProfile: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +71,8 @@ export interface CreateAgentMutationVariables {
     policyYaml?: string;
     image?: string;
     metadata?: Record<string, any>;
+    blueprintId?: number;
+    inferenceProfile?: string;
   };
 }
 

@@ -422,6 +422,14 @@ export default function HeaderBar() {
                 >
                   Agents
                 </StyledButton>
+                <StyledButton
+                  shape="round"
+                  size="small"
+                  $isHighlight={pathname.startsWith(Path.Blueprints)}
+                  onClick={() => router.push(bp(Path.Blueprints))}
+                >
+                  Blueprints
+                </StyledButton>
                 {canAdmin && (
                   <StyledButton
                     shape="round"

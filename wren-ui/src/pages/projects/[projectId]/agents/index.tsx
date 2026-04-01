@@ -9,6 +9,7 @@ import {
   Input,
   Form,
   Space,
+  Select,
   message,
 } from 'antd';
 import RobotOutlined from '@ant-design/icons/RobotOutlined';
@@ -25,6 +26,7 @@ import {
   useDeleteAgentMutation,
   useUpdateAgentMutation,
 } from '@/apollo/client/graphql/agents.generated';
+import { useBlueprintsQuery } from '@/apollo/client/graphql/blueprints.generated';
 
 const { Text } = Typography;
 
@@ -42,11 +44,33 @@ const refetchOptions = {
 
 export default function AgentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBlueprintId, setSelectedBlueprintId] = useState<
+    number | undefined
+  >();
   const [form] = Form.useForm();
 
   const { data, loading } = useAgentsQuery({
     fetchPolicy: 'cache-and-network',
   });
+
+  const { data: blueprintData } = useBlueprintsQuery();
+  const blueprints = useMemo(
+    () => blueprintData?.blueprints || [],
+    [blueprintData],
+  );
+
+  const selectedBlueprint = useMemo(
+    () => blueprints.find((bp) => bp.id === selectedBlueprintId),
+    [blueprints, selectedBlueprintId],
+  );
+
+  const inferenceProfileOptions = useMemo(() => {
+    if (!selectedBlueprint?.inferenceProfiles) return [];
+    return Object.keys(selectedBlueprint.inferenceProfiles).map((name) => ({
+      label: name,
+      value: name,
+    }));
+  }, [selectedBlueprint]);
 
   const [createAgent, { loading: creating }] =
     useCreateAgentMutation(refetchOptions);
@@ -135,6 +159,8 @@ export default function AgentsPage() {
             name: values.name,
             sandboxName: values.sandboxName,
             image: values.image || undefined,
+            blueprintId: values.blueprintId || undefined,
+            inferenceProfile: values.inferenceProfile || undefined,
           },
         },
       });
@@ -251,6 +277,29 @@ export default function AgentsPage() {
           >
             <Input placeholder="e.g. analytics-sandbox-1" />
           </Form.Item>
+          <Form.Item label="Blueprint (optional)" name="blueprintId">
+            <Select
+              allowClear
+              placeholder="Select a blueprint template"
+              onChange={(value) => {
+                setSelectedBlueprintId(value);
+                form.setFieldValue('inferenceProfile', undefined);
+              }}
+              options={blueprints.map((bp) => ({
+                label: `${bp.name} (v${bp.version})`,
+                value: bp.id,
+              }))}
+            />
+          </Form.Item>
+          {inferenceProfileOptions.length > 0 && (
+            <Form.Item label="Inference Profile" name="inferenceProfile">
+              <Select
+                allowClear
+                placeholder="Select inference profile"
+                options={inferenceProfileOptions}
+              />
+            </Form.Item>
+          )}
           <Form.Item label="Image (optional)" name="image">
             <Input placeholder="e.g. legible-sandbox:latest" />
           </Form.Item>

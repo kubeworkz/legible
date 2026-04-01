@@ -75,6 +75,7 @@ import {
 } from '@server/backgrounds';
 import { ISqlPairService } from '../services/sqlPairService';
 import { IAgentService } from '../services/agentService';
+import { IBlueprintService } from '../services/blueprintService';
 import { User } from '@server/repositories/userRepository';
 
 export interface IContext {
@@ -126,6 +127,7 @@ export interface IContext {
   emailService: IEmailService;
   oidcService: IOidcService;
   agentService: IAgentService;
+  blueprintService: IBlueprintService;
 
   // repository
   projectRepository: IProjectRepository;

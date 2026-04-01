@@ -1,0 +1,142 @@
+# Legible Agent Sandbox Network Policy
+#
+# NemoClaw-compatible network policy for Legible agents.
+# Principle: deny by default, allow only what's needed.
+# Network policies are hot-reloadable; filesystem/process rules are locked at creation.
+#
+# Applied via: openshell policy set <sandbox> --policy legible-sandbox.yaml
+
+version: 1
+
+network_policies:
+  # Core Legible platform access
+  legible_mcp:
+    name: legible_mcp
+    description: "Access to Legible MCP server (semantic layer)"
+    endpoints:
+      - host: host.docker.internal
+        port: 9000
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: GET, path: "/mcp/**" }
+          - allow: { method: POST, path: "/mcp/**" }
+          - allow: { method: GET, path: "/sse" }
+          - allow: { method: POST, path: "/messages" }
+    binaries:
+      - { path: /usr/local/bin/legible }
+      - { path: /usr/local/bin/node }
+
+  legible_ui:
+    name: legible_ui
+    description: "Access to Legible UI API (GraphQL)"
+    endpoints:
+      - host: host.docker.internal
+        port: 3000
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: GET, path: "/api/graphql" }
+          - allow: { method: POST, path: "/api/graphql" }
+    binaries:
+      - { path: /usr/local/bin/legible }
+
+  legible_docs:
+    name: legible_docs
+    description: "Access to Legible documentation site"
+    endpoints:
+      - host: host.docker.internal
+        port: 4000
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: GET, path: "/**" }
+
+  # Package managers (read-only, for agent setup)
+  package_managers:
+    name: package_managers
+    description: "Read-only access to package registries"
+    endpoints:
+      - host: "*.github.com"
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        tls: terminate
+        rules:
+          - allow: { method: GET, path: "/**" }
+      - host: "*.npmjs.org"
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        tls: terminate
+        rules:
+          - allow: { method: GET, path: "/**" }
+      - host: "*.pypi.org"
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        tls: terminate
+        rules:
+          - allow: { method: GET, path: "/**" }
+
+  # Inference provider access (routed through OpenShell inference proxy)
+  inference_anthropic:
+    name: inference_anthropic
+    description: "Anthropic API for Claude-based agents"
+    endpoints:
+      - host: api.anthropic.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        tls: terminate
+        rules:
+          - allow: { method: POST, path: "/v1/messages" }
+          - allow: { method: GET, path: "/v1/models" }
+
+  inference_openai:
+    name: inference_openai
+    description: "OpenAI API for GPT-based agents"
+    endpoints:
+      - host: api.openai.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        tls: terminate
+        rules:
+          - allow: { method: POST, path: "/v1/chat/completions" }
+          - allow: { method: GET, path: "/v1/models" }
+
+  inference_nvidia:
+    name: inference_nvidia
+    description: "NVIDIA Endpoints for NIM-based agents"
+    endpoints:
+      - host: integrate.api.nvidia.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        tls: terminate
+        rules:
+          - allow: { method: POST, path: "/v1/**" }
+          - allow: { method: GET, path: "/v1/models" }
+
+filesystem_policy:
+  include_workdir: true
+  read_only:
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /app
+    - /etc
+  read_write:
+    - /home/sandbox
+    - /workspace
+    - /tmp
+    - /dev/null
+
+landlock:
+  compatibility: best_effort
+
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox

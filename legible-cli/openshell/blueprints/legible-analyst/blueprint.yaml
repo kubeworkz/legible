@@ -1,0 +1,63 @@
+# Legible Agent Blueprint — Data Analyst
+#
+# A restricted blueprint for read-only SQL query agents.
+# No write access to external services, no package manager access.
+# Ideal for BI dashboards and scheduled reporting.
+
+version: "0.1.0"
+min_openshell_version: "0.1.0"
+description: |
+  Restricted data analyst agent. Read-only access to the Legible semantic layer.
+  Cannot install packages at runtime. Uses pre-built tools only.
+
+components:
+  sandbox:
+    image: "legible-sandbox:latest"
+    build:
+      dockerfile: "../../Dockerfile"
+    name: "legible-analyst"
+    forward_ports:
+      - 9000
+
+  inference:
+    profiles:
+      nvidia:
+        provider_type: "nvidia"
+        provider_name: "nvidia-inference"
+        endpoint: "https://integrate.api.nvidia.com/v1"
+        model: "nvidia/nemotron-3-super-120b-a12b"
+      anthropic:
+        provider_type: "anthropic"
+        provider_name: "anthropic-inference"
+        endpoint: "https://api.anthropic.com/v1"
+        model: "claude-sonnet-4-20250514"
+
+  mcp:
+    servers:
+      legible:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9000/mcp"
+
+policies:
+  network: "policies/legible-sandbox.yaml"
+  filesystem:
+    read_only:
+      - /usr
+      - /lib
+      - /proc
+      - /app
+      - /etc
+      - /home/sandbox
+    read_write:
+      - /tmp
+  process:
+    deny_privilege_escalation: true
+    run_as_user: sandbox
+    run_as_group: sandbox
+
+agent:
+  type: "claude"
+  allowed_types:
+    - claude
+    - codex
+  entrypoint: "/usr/local/bin/sandbox-entrypoint.sh"
