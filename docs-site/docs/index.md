@@ -18,6 +18,7 @@ Legible connects to your existing data sources (PostgreSQL, BigQuery, DuckDB, Sn
 - **22+ Data Source Connectors** — PostgreSQL, BigQuery, Snowflake, DuckDB, MySQL, ClickHouse, and more
 - **Semantic Modeling (MDL)** — Define models, relationships, and calculated fields for smarter AI queries
 - **MCP Server** — Connect AI agents (Claude, Cursor, Cline) directly to your data via the Model Context Protocol
+- **Sandboxed Agents** — Run AI agents in isolated OpenShell containers with blueprints, network policies, and org-scoped gateways
 - **Self-Hosted** — Full control over your data and infrastructure
 - **Extensible** — Supports custom LLMs, embedding models, and vector stores
 
@@ -27,5 +28,6 @@ Legible connects to your existing data sources (PostgreSQL, BigQuery, DuckDB, Sn
 - [**Architecture**](/architecture/overview) — Understand how the components fit together
 - [**Configuration**](/guides/configuration) — Customize LLMs, embeddings, and more
 - [**MCP Integration**](/guides/mcp-integration) — Connect AI agents to your data
+- [**Sandboxed Agents**](/agents/overview) — Run AI agents in secure OpenShell sandboxes
 - [**Docker Deployment**](/deployment/docker) — Production Docker setup
 - [**Kubernetes Deployment**](/deployment/kubernetes) — K8s with Kustomize
