@@ -24,3 +24,4 @@ export * from './agentService';
 export * from './blueprintService';
 export * from './blueprintRegistryService';
 export * from './autoProvisionService';
+export * from './gatewayService';

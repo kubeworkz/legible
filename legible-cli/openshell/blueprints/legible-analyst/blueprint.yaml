@@ -32,6 +32,10 @@ components:
     name: "legible-analyst"
     forward_ports:
       - 9000
+    resources:
+      cpus: "4.0"
+      memory: "16g"
+      max_sandboxes: 20
 
   inference:
     profiles:

@@ -18,6 +18,7 @@ export interface CreateAgentInput {
   metadata?: Record<string, any>;
   blueprintId?: number;
   inferenceProfile?: string;
+  gatewayId?: number;
 }
 
 export interface UpdateAgentInput {

@@ -50,6 +50,7 @@ export class AgentResolver {
         policyYaml?: string;
         image?: string;
         metadata?: Record<string, any>;
+        gatewayId?: number;
       };
     },
     ctx: IContext,

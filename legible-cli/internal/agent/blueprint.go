@@ -60,6 +60,15 @@ type SandboxComponent struct {
 	Name         string            `yaml:"name" json:"name"`
 	ForwardPorts []int             `yaml:"forward_ports,omitempty" json:"forward_ports,omitempty"`
 	Env          map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
+	Resources    *ResourceSpec     `yaml:"resources,omitempty" json:"resources,omitempty"`
+}
+
+// ResourceSpec defines resource limits for the sandbox and its gateway.
+type ResourceSpec struct {
+	CPUs         string `yaml:"cpus,omitempty" json:"cpus,omitempty"`
+	Memory       string `yaml:"memory,omitempty" json:"memory,omitempty"`
+	Disk         string `yaml:"disk,omitempty" json:"disk,omitempty"`
+	MaxSandboxes int    `yaml:"max_sandboxes,omitempty" json:"max_sandboxes,omitempty"`
 }
 
 // SandboxBuild defines how to build the sandbox image.

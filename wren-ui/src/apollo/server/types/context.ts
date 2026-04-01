@@ -75,6 +75,7 @@ import {
 } from '@server/backgrounds';
 import { ISqlPairService } from '../services/sqlPairService';
 import { IAgentService } from '../services/agentService';
+import { IGatewayService } from '../services/gatewayService';
 import { IBlueprintService } from '../services/blueprintService';
 import { IBlueprintRegistryService } from '../services/blueprintRegistryService';
 import { IAutoProvisionService } from '../services/autoProvisionService';
@@ -129,6 +130,7 @@ export interface IContext {
   emailService: IEmailService;
   oidcService: IOidcService;
   agentService: IAgentService;
+  gatewayService: IGatewayService;
   blueprintService: IBlueprintService;
   blueprintRegistryService: IBlueprintRegistryService;
   autoProvisionService: IAutoProvisionService;

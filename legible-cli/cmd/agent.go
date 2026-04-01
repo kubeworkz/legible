@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/Kubeworkz/legible/legible-cli/internal/agent"
+	"github.com/Kubeworkz/legible/legible-cli/internal/client"
 	"github.com/Kubeworkz/legible/legible-cli/internal/config"
 	"github.com/spf13/cobra"
 )
@@ -109,6 +110,8 @@ func init() {
 	agentCreateCmd.Flags().String("from", "", "Custom sandbox image or directory")
 	agentCreateCmd.Flags().String("blueprint", "", "Blueprint name or path (e.g., legible-default, legible-analyst)")
 	agentCreateCmd.Flags().String("profile", "", "Inference profile from the blueprint (e.g., nvidia, openai, anthropic)")
+	agentCreateCmd.Flags().String("cpus", "", "CPU allocation for sandbox (e.g., 4.0, 8.0)")
+	agentCreateCmd.Flags().String("memory", "", "Memory allocation for sandbox (e.g., 16g, 32g)")
 
 	// agent policy flags
 	agentPolicyCmd.Flags().String("set", "", "Apply a new policy YAML file")
@@ -146,16 +149,41 @@ func runAgentCreate(cmd *cobra.Command, args []string) error {
 	// Determine MCP endpoint from Legible endpoint
 	mcpEndpoint := deriveMCPEndpoint(cfg.Endpoint)
 
-	// If a blueprint is specified, use it to drive the creation
-	if blueprintName != "" {
-		return runAgentCreateFromBlueprint(cmd, name, blueprintName, profileName, cfg, mcpEndpoint, gpu)
+	// Resolve org slug for sandbox name namespacing
+	apiClient, err := client.New(cfg)
+	if err != nil {
+		return fmt.Errorf("creating API client: %w", err)
+	}
+	org, err := apiClient.GetCurrentOrg()
+	if err != nil {
+		return fmt.Errorf("resolving organization: %w", err)
+	}
+	sandboxName := org.Slug + "-" + name
+	if org.Slug == "" {
+		sandboxName = "sandbox-" + name
 	}
 
-	fmt.Printf("Creating agent %q (type: %s)...\n", name, agentType)
+	// Ensure org-scoped gateway exists
+	cpus, _ := cmd.Flags().GetString("cpus")
+	memory, _ := cmd.Flags().GetString("memory")
+	fmt.Print("  Ensuring org gateway... ")
+	gw, err := ensureOrgGateway(apiClient, org.ID, cpus, memory, 0)
+	if err != nil {
+		fmt.Println("FAILED")
+		return fmt.Errorf("ensuring gateway: %w", err)
+	}
+	fmt.Printf("OK (gateway %d)\n", gw.ID)
+
+	// If a blueprint is specified, use it to drive the creation
+	if blueprintName != "" {
+		return runAgentCreateFromBlueprint(cmd, name, sandboxName, blueprintName, profileName, cfg, mcpEndpoint, gpu, gw)
+	}
+
+	fmt.Printf("Creating agent %q (type: %s, sandbox: %s)...\n", name, agentType, sandboxName)
 
 	// Step 1: Create the OpenShell provider with Legible credentials
 	fmt.Print("  Setting up credentials provider... ")
-	providerName := "legible-" + name
+	providerName := "legible-" + sandboxName
 	err = agent.RunOpenshell("provider", "create",
 		"--name", providerName,
 		"--type", "custom",
@@ -171,7 +199,7 @@ func runAgentCreate(cmd *cobra.Command, args []string) error {
 	fmt.Println("OK")
 
 	// Step 2: Build sandbox create args
-	createArgs := []string{"sandbox", "create", "--name", name}
+	createArgs := []string{"sandbox", "create", "--name", sandboxName}
 
 	// Use custom sandbox image or the bundled one
 	if from != "" {
@@ -187,6 +215,14 @@ func runAgentCreate(cmd *cobra.Command, args []string) error {
 
 	if gpu {
 		createArgs = append(createArgs, "--gpu")
+	}
+
+	// Apply resource limits from flags
+	if cpus != "" {
+		createArgs = append(createArgs, "--cpus", cpus)
+	}
+	if memory != "" {
+		createArgs = append(createArgs, "--memory", memory)
 	}
 
 	// Add provider
@@ -215,27 +251,29 @@ func runAgentCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Print("  Applying network policy... ")
-	err = agent.RunOpenshell("policy", "set", name, "--policy", policyFile, "--wait")
+	err = agent.RunOpenshell("policy", "set", sandboxName, "--policy", policyFile, "--wait")
 	if err != nil {
 		fmt.Println("FAILED")
 		fmt.Printf("  ⚠ Policy not applied: %v\n", err)
 		fmt.Println("  The sandbox is running with default (deny-all) policy.")
-		fmt.Printf("  Apply manually: openshell policy set %s --policy %s\n", name, policyFile)
+		fmt.Printf("  Apply manually: openshell policy set %s --policy %s\n", sandboxName, policyFile)
 	} else {
 		fmt.Println("OK")
 	}
 
 	fmt.Printf("\nAgent %q created successfully!\n", name)
+	fmt.Printf("  Sandbox:  %s\n", sandboxName)
 	fmt.Printf("  Type:     %s\n", agentType)
+	fmt.Printf("  Gateway:  %d\n", gw.ID)
 	fmt.Printf("  MCP:      %s\n", mcpEndpoint)
-	fmt.Printf("  Connect:  legible agent connect %s\n", name)
-	fmt.Printf("  Logs:     legible agent logs %s --tail\n", name)
-	fmt.Printf("  Stop:     legible agent stop %s\n", name)
+	fmt.Printf("  Connect:  legible agent connect %s\n", sandboxName)
+	fmt.Printf("  Logs:     legible agent logs %s --tail\n", sandboxName)
+	fmt.Printf("  Stop:     legible agent stop %s\n", sandboxName)
 	return nil
 }
 
 // runAgentCreateFromBlueprint creates an agent using a NemoClaw-compatible blueprint.
-func runAgentCreateFromBlueprint(cmd *cobra.Command, name, blueprintName, profileName string, cfg *config.Config, mcpEndpoint string, gpu bool) error {
+func runAgentCreateFromBlueprint(cmd *cobra.Command, name, sandboxName, blueprintName, profileName string, cfg *config.Config, mcpEndpoint string, gpu bool, gw *client.Gateway) error {
 	// Load blueprint
 	bp, bpDir, err := loadBlueprintWithDir(blueprintName)
 	if err != nil {
@@ -243,7 +281,7 @@ func runAgentCreateFromBlueprint(cmd *cobra.Command, name, blueprintName, profil
 	}
 
 	agentType := bp.Agent.Type
-	fmt.Printf("Creating agent %q from blueprint %q (type: %s)...\n", name, blueprintName, agentType)
+	fmt.Printf("Creating agent %q from blueprint %q (type: %s, sandbox: %s)...\n", name, blueprintName, agentType, sandboxName)
 
 	// Resolve inference profile
 	profile, profileLabel, err := resolveInferenceProfile(bp, profileName)
@@ -254,7 +292,7 @@ func runAgentCreateFromBlueprint(cmd *cobra.Command, name, blueprintName, profil
 
 	// Step 1: Create the OpenShell provider with Legible credentials + inference config
 	fmt.Print("  Setting up credentials provider... ")
-	providerName := "legible-" + name
+	providerName := "legible-" + sandboxName
 	providerArgs := []string{
 		"provider", "create",
 		"--name", providerName,
@@ -286,7 +324,7 @@ func runAgentCreateFromBlueprint(cmd *cobra.Command, name, blueprintName, profil
 	}
 
 	// Step 3: Build sandbox create args
-	createArgs := []string{"sandbox", "create", "--name", name}
+	createArgs := []string{"sandbox", "create", "--name", sandboxName}
 
 	// Use the blueprint's sandbox image
 	sandboxImage := bp.Components.Sandbox.Image
@@ -303,6 +341,16 @@ func runAgentCreateFromBlueprint(cmd *cobra.Command, name, blueprintName, profil
 
 	if gpu {
 		createArgs = append(createArgs, "--gpu")
+	}
+
+	// Apply resource limits from blueprint spec
+	if res := bp.Components.Sandbox.Resources; res != nil {
+		if res.CPUs != "" {
+			createArgs = append(createArgs, "--cpus", res.CPUs)
+		}
+		if res.Memory != "" {
+			createArgs = append(createArgs, "--memory", res.Memory)
+		}
 	}
 
 	createArgs = append(createArgs, "--provider", providerName)
@@ -323,22 +371,24 @@ func runAgentCreateFromBlueprint(cmd *cobra.Command, name, blueprintName, profil
 		policyFile = bpDir + "/" + policyFile
 	}
 	fmt.Print("  Applying network policy... ")
-	err = agent.RunOpenshell("policy", "set", name, "--policy", policyFile, "--wait")
+	err = agent.RunOpenshell("policy", "set", sandboxName, "--policy", policyFile, "--wait")
 	if err != nil {
 		fmt.Println("FAILED")
 		fmt.Printf("  ⚠ Policy not applied: %v\n", err)
-		fmt.Printf("  Apply manually: openshell policy set %s --policy %s\n", name, policyFile)
+		fmt.Printf("  Apply manually: openshell policy set %s --policy %s\n", sandboxName, policyFile)
 	} else {
 		fmt.Println("OK")
 	}
 
 	fmt.Printf("\nAgent %q created from blueprint %q!\n", name, blueprintName)
+	fmt.Printf("  Sandbox:   %s\n", sandboxName)
 	fmt.Printf("  Type:      %s\n", agentType)
 	fmt.Printf("  Profile:   %s (%s)\n", profileLabel, profile.Model)
+	fmt.Printf("  Gateway:   %d\n", gw.ID)
 	fmt.Printf("  MCP:       %s\n", mcpEndpoint)
-	fmt.Printf("  Connect:   legible agent connect %s\n", name)
-	fmt.Printf("  Logs:      legible agent logs %s --tail\n", name)
-	fmt.Printf("  Stop:      legible agent stop %s\n", name)
+	fmt.Printf("  Connect:   legible agent connect %s\n", sandboxName)
+	fmt.Printf("  Logs:      legible agent logs %s --tail\n", sandboxName)
+	fmt.Printf("  Stop:      legible agent stop %s\n", sandboxName)
 	return nil
 }
 
@@ -512,4 +562,23 @@ func printAgentJSON(s agentSummary) {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	enc.Encode(s) //nolint:errcheck
+}
+
+// ensureOrgGateway ensures a gateway exists for the given organization.
+// Returns the gateway (existing or newly created).
+func ensureOrgGateway(apiClient *client.Client, orgID int, cpus, memory string, maxSandboxes int) (*client.Gateway, error) {
+	gw, err := apiClient.GetGatewayForOrganization(orgID)
+	if err != nil {
+		return nil, fmt.Errorf("checking org gateway: %w", err)
+	}
+	if gw != nil {
+		return gw, nil
+	}
+
+	// No gateway for this org — create one
+	gw, err = apiClient.CreateGateway(orgID, cpus, memory, maxSandboxes)
+	if err != nil {
+		return nil, fmt.Errorf("creating org gateway: %w", err)
+	}
+	return gw, nil
 }

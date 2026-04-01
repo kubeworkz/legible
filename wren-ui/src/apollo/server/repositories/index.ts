@@ -44,3 +44,4 @@ export * from './agentRepository';
 export * from './blueprintRepository';
 export * from './blueprintRegistryRepository';
 export * from './autoProvisionConfigRepository';
+export * from './gatewayRepository';

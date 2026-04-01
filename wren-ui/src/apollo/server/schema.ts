@@ -1865,6 +1865,7 @@ export const typeDefs = gql`
     metadata: JSON
     blueprintId: Int
     inferenceProfile: String
+    gatewayId: Int
     autoProvisioned: Boolean!
     createdAt: String!
     updatedAt: String!
@@ -1887,6 +1888,7 @@ export const typeDefs = gql`
     metadata: JSON
     blueprintId: Int
     inferenceProfile: String
+    gatewayId: Int
   }
 
   input UpdateAgentInput {
@@ -2037,6 +2039,49 @@ export const typeDefs = gql`
   }
 
   # ── End Blueprint Types ───────────────────────────────────────
+
+  # ── Gateway Types ─────────────────────────────────────────────
+
+  type GatewayType {
+    id: Int!
+    organizationId: Int!
+    status: String!
+    endpoint: String
+    port: Int
+    pid: Int
+    cpus: String!
+    memory: String!
+    sandboxCount: Int!
+    maxSandboxes: Int!
+    version: String
+    errorMessage: String
+    lastHealthCheck: String
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input CreateGatewayInput {
+    organizationId: Int!
+    cpus: String
+    memory: String
+    maxSandboxes: Int
+  }
+
+  input UpdateGatewayInput {
+    status: String
+    endpoint: String
+    port: Int
+    pid: Int
+    version: String
+    errorMessage: String
+    lastHealthCheck: String
+  }
+
+  input GatewayWhereInput {
+    id: Int!
+  }
+
+  # ── End Gateway Types ─────────────────────────────────────────
 
   # ── Data Security: Session Properties ──────────────────────────
 
@@ -2567,6 +2612,11 @@ export const typeDefs = gql`
     agent(where: AgentWhereInput!): AgentType!
     agentLogs(where: AgentWhereInput!, limit: Int): [AgentAuditLogEntry!]!
 
+    # Gateways
+    gateway(where: GatewayWhereInput!): GatewayType!
+    gatewayForOrganization(organizationId: Int!): GatewayType
+    runningGateways: [GatewayType!]!
+
     # Blueprints
     blueprints: [BlueprintType!]!
     blueprint(where: BlueprintWhereInput!): BlueprintType!
@@ -2879,6 +2929,11 @@ export const typeDefs = gql`
     createAgent(data: CreateAgentInput!): AgentType!
     updateAgent(where: AgentWhereInput!, data: UpdateAgentInput!): AgentType!
     deleteAgent(where: AgentWhereInput!): Boolean!
+
+    # Gateways
+    createGateway(data: CreateGatewayInput!): GatewayType!
+    updateGateway(where: GatewayWhereInput!, data: UpdateGatewayInput!): GatewayType!
+    deleteGateway(where: GatewayWhereInput!): Boolean!
 
     # Blueprints
     createBlueprint(data: CreateBlueprintInput!): BlueprintType!

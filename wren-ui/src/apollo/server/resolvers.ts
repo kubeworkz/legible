@@ -25,6 +25,7 @@ import { StripeResolver } from './resolvers/stripeResolver';
 import { OidcResolver } from './resolvers/oidcResolver';
 import { SuperadminResolver } from './resolvers/superadminResolver';
 import { AgentResolver } from './resolvers/agentResolver';
+import { GatewayResolver } from './resolvers/gatewayResolver';
 import { BlueprintResolver } from './resolvers/blueprintResolver';
 import {
   BlueprintRegistryResolver,
@@ -59,6 +60,7 @@ const stripeResolver = new StripeResolver();
 const oidcResolver = new OidcResolver();
 const superadminResolver = new SuperadminResolver();
 const agentResolver = new AgentResolver();
+const gatewayResolver = new GatewayResolver();
 const blueprintResolver = new BlueprintResolver();
 const blueprintRegistryResolver = new BlueprintRegistryResolver();
 const autoProvisionResolver = new AutoProvisionResolver();
@@ -204,6 +206,9 @@ const resolvers = {
     agents: agentResolver.listAgents,
     agent: agentResolver.getAgent,
     agentLogs: agentResolver.getAgentLogs,
+    gateway: gatewayResolver.getGateway,
+    gatewayForOrganization: gatewayResolver.getGatewayForOrganization,
+    runningGateways: gatewayResolver.listRunningGateways,
     blueprints: blueprintResolver.listBlueprints,
     blueprint: blueprintResolver.getBlueprint,
     blueprintByName: blueprintResolver.getBlueprintByName,
@@ -444,6 +449,9 @@ const resolvers = {
     createAgent: agentResolver.createAgent,
     updateAgent: agentResolver.updateAgent,
     deleteAgent: agentResolver.deleteAgent,
+    createGateway: gatewayResolver.createGateway,
+    updateGateway: gatewayResolver.updateGateway,
+    deleteGateway: gatewayResolver.deleteGateway,
     createBlueprint: blueprintResolver.createBlueprint,
     updateBlueprint: blueprintResolver.updateBlueprint,
     deleteBlueprint: blueprintResolver.deleteBlueprint,

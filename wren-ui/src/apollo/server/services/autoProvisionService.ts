@@ -9,6 +9,9 @@ import {
   IBlueprintRegistryRepository,
 } from '@server/repositories/blueprintRegistryRepository';
 import { IAgentRepository } from '@server/repositories/agentRepository';
+import { IOrganizationRepository } from '@server/repositories/organizationRepository';
+import { IProjectRepository } from '@server/repositories/projectRepository';
+import { IGatewayService } from './gatewayService';
 import { getLogger } from '@server/utils';
 
 const logger = getLogger('AutoProvisionService');
@@ -66,22 +69,34 @@ export class AutoProvisionService implements IAutoProvisionService {
   private readonly blueprintRepository: IBlueprintRepository;
   private readonly registryRepository: IBlueprintRegistryRepository;
   private readonly agentRepository: IAgentRepository;
+  private readonly organizationRepository: IOrganizationRepository;
+  private readonly projectRepository: IProjectRepository;
+  private readonly gatewayService: IGatewayService;
 
   constructor({
     autoProvisionConfigRepository,
     blueprintRepository,
     blueprintRegistryRepository,
     agentRepository,
+    organizationRepository,
+    projectRepository,
+    gatewayService,
   }: {
     autoProvisionConfigRepository: IAutoProvisionConfigRepository;
     blueprintRepository: IBlueprintRepository;
     blueprintRegistryRepository: IBlueprintRegistryRepository;
     agentRepository: IAgentRepository;
+    organizationRepository: IOrganizationRepository;
+    projectRepository: IProjectRepository;
+    gatewayService: IGatewayService;
   }) {
     this.configRepository = autoProvisionConfigRepository;
     this.blueprintRepository = blueprintRepository;
     this.registryRepository = blueprintRegistryRepository;
     this.agentRepository = agentRepository;
+    this.organizationRepository = organizationRepository;
+    this.projectRepository = projectRepository;
+    this.gatewayService = gatewayService;
   }
 
   public async getConfig(
@@ -207,15 +222,38 @@ export class AutoProvisionService implements IAutoProvisionService {
     const agentName = nameTemplate
       .replace('{{connector}}', connectorType.toLowerCase().replace(/_/g, '-'));
 
+    // 3b. Resolve org slug for sandbox name namespacing
+    const project = await this.projectRepository.getCurrentProject(projectId);
+    let sandboxPrefix = 'sandbox';
+    let gatewayId: number | null = null;
+    if (project.organizationId) {
+      const org = await this.organizationRepository.findOneBy({ id: project.organizationId });
+      if (org?.slug) {
+        sandboxPrefix = org.slug;
+      }
+
+      // Ensure org-scoped gateway exists
+      let gateway = await this.gatewayService.getGatewayForOrganization(
+        project.organizationId,
+      );
+      if (!gateway) {
+        gateway = await this.gatewayService.createGateway({
+          organizationId: project.organizationId,
+        });
+      }
+      gatewayId = gateway.id;
+    }
+
     // 4. Create the agent
     const now = new Date().toISOString();
     const agent = await this.agentRepository.createOne({
       projectId,
       name: agentName,
-      sandboxName: `sandbox-${agentName}`,
+      sandboxName: `${sandboxPrefix}-${agentName}`,
       status: 'creating',
       blueprintId,
       inferenceProfile: config?.inferenceProfile || null,
+      gatewayId,
       autoProvisioned: true,
       createdAt: now,
       updatedAt: now,
@@ -224,6 +262,11 @@ export class AutoProvisionService implements IAutoProvisionService {
     logger.info(
       `Auto-provisioned agent ${agent.id} (${agentName}) for ${connectorType} in project ${projectId}`,
     );
+
+    // Increment the gateway's sandbox count
+    if (gatewayId) {
+      await this.gatewayService.incrementSandboxCount(gatewayId);
+    }
 
     return {
       agentId: agent.id,

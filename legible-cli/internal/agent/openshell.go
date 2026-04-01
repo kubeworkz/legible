@@ -82,6 +82,7 @@ func PolicyDir() (string, error) {
 }
 
 // EnsureGateway checks if the openshell gateway is running and starts it if not.
+// This is a local-only check; for org-scoped gateway management, see cmd/agent.go.
 func EnsureGateway() error {
 	// Check if gateway is already running by listing sandboxes (fast no-op if up)
 	_, err := RunOpenshellOutput("sandbox", "list")

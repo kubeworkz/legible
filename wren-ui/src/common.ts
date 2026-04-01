@@ -90,6 +90,8 @@ import {
   AgentAuditLogRepository,
 } from './apollo/server/repositories/agentRepository';
 import { AgentService } from './apollo/server/services/agentService';
+import { GatewayRepository } from './apollo/server/repositories/gatewayRepository';
+import { GatewayService } from './apollo/server/services/gatewayService';
 import { BlueprintRepository } from './apollo/server/repositories/blueprintRepository';
 import { BlueprintService } from './apollo/server/services/blueprintService';
 import { BlueprintRegistryRepository } from './apollo/server/repositories/blueprintRegistryRepository';
@@ -157,6 +159,7 @@ export const initComponents = () => {
   const userIdentityRepository = new UserIdentityRepository(knex);
   const agentRepository = new AgentRepository(knex);
   const agentAuditLogRepository = new AgentAuditLogRepository(knex);
+  const gatewayRepository = new GatewayRepository(knex);
   const blueprintRepository = new BlueprintRepository(knex);
   const blueprintRegistryRepository = new BlueprintRegistryRepository(knex);
   const autoProvisionConfigRepository = new AutoProvisionConfigRepository(knex);
@@ -335,6 +338,10 @@ export const initComponents = () => {
     agentAuditLogRepository,
   });
 
+  const gatewayService = new GatewayService({
+    gatewayRepository,
+  });
+
   const blueprintService = new BlueprintService({
     blueprintRepository,
   });
@@ -349,6 +356,9 @@ export const initComponents = () => {
     blueprintRepository,
     blueprintRegistryRepository,
     agentRepository,
+    organizationRepository,
+    projectRepository,
+    gatewayService,
   });
 
   // Wire stripeService into metering (created earlier, avoids circular init)
@@ -421,6 +431,7 @@ export const initComponents = () => {
     userIdentityRepository,
     agentRepository,
     agentAuditLogRepository,
+    gatewayRepository,
 
     // adaptors
     wrenEngineAdaptor,
@@ -455,6 +466,7 @@ export const initComponents = () => {
     emailService,
     oidcService,
     agentService,
+    gatewayService,
     blueprintService,
     blueprintRegistryService,
     autoProvisionService,
