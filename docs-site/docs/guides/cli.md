@@ -328,6 +328,61 @@ legible project-key list
 | `legible thread show <id>` | Show a thread with all responses |
 | `legible history list` | View API request history |
 
+### Agents
+
+| Command | Description |
+|---------|-------------|
+| `legible agent create <name>` | Create a new sandboxed agent |
+| `legible agent create <name> --blueprint <bp>` | Create from a blueprint template |
+| `legible agent create <name> --from <source>` | Create from a community sandbox, directory, or image |
+| `legible agent create <name> --profile <profile>` | Set inference profile (from blueprint) |
+| `legible agent create <name> --type <type>` | Set agent type (`claude`, `codex`, `opencode`, `copilot`) |
+| `legible agent create <name> --gpu` | Enable GPU passthrough (experimental) |
+| `legible agent create <name> --cpus <n> --memory <n>` | Set resource limits |
+| `legible agent create <name> --policy <file>` | Apply a custom network policy YAML |
+| `legible agent list` | List running agent sandboxes |
+| `legible agent connect <name>` | Open a shell inside an agent sandbox |
+| `legible agent stop <name>` | Stop and remove an agent sandbox |
+| `legible agent policy <name>` | View the agent's active network policy |
+| `legible agent policy <name> --set <file>` | Apply a new policy to a running agent |
+| `legible agent logs <name>` | Stream agent sandbox logs |
+| `legible agent logs <name> --tail <n>` | Show the last N log lines |
+
+The `--from` flag accepts:
+- **Community sandbox names** — e.g. `--from ollama` (from the [NVIDIA OpenShell catalog](/agents/community-sandboxes))
+- **Local directories** — e.g. `--from ./my-sandbox-dir`
+- **Container images** — e.g. `--from my-registry.example.com/my-image:latest`
+
+See [Agents](/agents/overview) for full documentation.
+
+### Blueprints
+
+| Command | Description |
+|---------|-------------|
+| `legible blueprint list` | List available blueprints (built-in + installed) |
+| `legible blueprint show <name>` | Show full blueprint configuration |
+| `legible blueprint validate <path>` | Validate a blueprint YAML file |
+| `legible blueprint install <path> <name>` | Install a custom blueprint to `~/.legible/blueprints/` |
+| `legible blueprint recommend <connector>` | Recommend a blueprint for a data source (e.g. `POSTGRES`) |
+| `legible blueprint for-connector <connector>` | List all blueprints compatible with a connector |
+
+See [Blueprints](/agents/blueprints) for full documentation.
+
+### Gateways
+
+| Command | Description |
+|---------|-------------|
+| `legible gateway status` | Show the gateway for the current organization |
+| `legible gateway list` | List all running gateways |
+| `legible gateway info <id>` | Show detailed gateway information |
+| `legible gateway create` | Create a gateway for the current org |
+| `legible gateway create --cpus <n> --memory <n>` | Create with custom resource limits |
+| `legible gateway create --max-sandboxes <n>` | Set maximum sandbox count (default: 20) |
+| `legible gateway update <id>` | Update gateway status or endpoint |
+| `legible gateway delete <id>` | Delete a stopped gateway |
+
+Aliases: `gateways`, `gw`. See [Gateways](/agents/gateways) for full documentation.
+
 ### Global Flags
 
 | Flag | Description |

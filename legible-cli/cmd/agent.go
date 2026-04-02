@@ -40,11 +40,18 @@ Use --blueprint to create from a NemoClaw-compatible blueprint:
   legible agent create my-analyst --blueprint legible-default
   legible agent create my-analyst --blueprint legible-analyst --profile anthropic
 
+Use --from to create from a community sandbox, local directory, or image:
+  legible agent create my-analyst --from ollama
+  legible agent create my-analyst --from ./my-sandbox-dir
+  legible agent create my-analyst --from my-registry.example.com/my-image:latest
+
 Examples:
   legible agent create my-analyst
   legible agent create my-analyst --type claude
   legible agent create my-analyst --blueprint legible-default --profile nvidia
-  legible agent create my-analyst --policy ./custom-policy.yaml`,
+  legible agent create my-analyst --from ollama
+  legible agent create my-analyst --policy ./custom-policy.yaml
+  legible agent create my-analyst --cpus 8.0 --memory 32g --gpu`,
 	Args: cobra.ExactArgs(1),
 	RunE: runAgentCreate,
 }
