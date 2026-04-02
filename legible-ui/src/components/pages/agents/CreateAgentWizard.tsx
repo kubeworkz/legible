@@ -3,16 +3,24 @@ import dynamic from 'next/dynamic';
 import {
   Alert,
   Card,
+  Col,
   Descriptions,
   Form,
   Input,
   Modal,
+  Radio,
+  Row,
   Select,
   Space,
   Steps,
   Tag,
   Typography,
 } from 'antd';
+import {
+  AppstoreOutlined,
+  CloudServerOutlined,
+  CheckCircleFilled,
+} from '@ant-design/icons';
 import styled from 'styled-components';
 import { BlueprintData } from '@/apollo/client/graphql/blueprints.generated';
 
@@ -34,6 +42,57 @@ const BlueprintCard = styled(Card)`
   }
 `;
 
+const SandboxCard = styled(Card)<{ $selected?: boolean }>`
+  cursor: pointer;
+  border: 2px solid ${({ $selected }) => ($selected ? '#13c2c2' : '#f0f0f0')};
+  transition: border-color 0.2s, box-shadow 0.2s;
+  height: 100%;
+  &:hover {
+    border-color: ${({ $selected }) => ($selected ? '#13c2c2' : '#d9d9d9')};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+  }
+  .ant-card-body {
+    padding: 16px;
+  }
+`;
+
+interface CommunitySandbox {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+}
+
+const COMMUNITY_SANDBOXES: CommunitySandbox[] = [
+  {
+    id: 'base',
+    name: 'Base',
+    description: 'Foundational image with system tools and dev environment',
+    image: 'community://base',
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama',
+    description:
+      'Ollama with cloud and local model support, Claude Code, OpenCode, and Codex pre-installed',
+    image: 'community://ollama',
+  },
+  {
+    id: 'openclaw',
+    name: 'OpenClaw',
+    description: 'Open agent manipulation and control',
+    image: 'community://openclaw',
+  },
+  {
+    id: 'sdg',
+    name: 'SDG',
+    description: 'Synthetic data generation workflows',
+    image: 'community://sdg',
+  },
+];
+
+type ConfigSource = 'blueprint' | 'community';
+
 export interface CreateAgentWizardValues {
   name: string;
   sandboxName: string;
@@ -41,6 +100,7 @@ export interface CreateAgentWizardValues {
   inferenceProfile?: string;
   image?: string;
   policyYaml?: string;
+  communitySandbox?: string;
 }
 
 interface Props {
@@ -53,7 +113,7 @@ interface Props {
 
 const STEPS = [
   { title: 'Basics' },
-  { title: 'Blueprint' },
+  { title: 'Configuration' },
   { title: 'Review & Create' },
 ];
 
@@ -67,6 +127,10 @@ export default function CreateAgentWizard({
   const [step, setStep] = useState(0);
   const [form] = Form.useForm();
   const [policyYaml, setPolicyYaml] = useState('');
+  const [configSource, setConfigSource] = useState<ConfigSource>('blueprint');
+  const [selectedCommunitySandbox, setSelectedCommunitySandbox] = useState<
+    string | undefined
+  >();
   const [selectedBlueprintId, setSelectedBlueprintId] = useState<
     number | undefined
   >();
@@ -98,6 +162,8 @@ export default function CreateAgentWizard({
     if (!open) {
       setStep(0);
       setSelectedBlueprintId(undefined);
+      setSelectedCommunitySandbox(undefined);
+      setConfigSource('blueprint');
       setPolicyYaml('');
       form.resetFields();
     }
@@ -117,10 +183,16 @@ export default function CreateAgentWizard({
     await onCreate({
       name: values.name,
       sandboxName: values.sandboxName,
-      blueprintId: selectedBlueprintId,
-      inferenceProfile: values.inferenceProfile || undefined,
+      blueprintId:
+        configSource === 'blueprint' ? selectedBlueprintId : undefined,
+      inferenceProfile:
+        configSource === 'blueprint'
+          ? values.inferenceProfile || undefined
+          : undefined,
       image: values.image || undefined,
       policyYaml: policyYaml || undefined,
+      communitySandbox:
+        configSource === 'community' ? selectedCommunitySandbox : undefined,
     });
   };
 
@@ -171,9 +243,40 @@ export default function CreateAgentWizard({
             </Form.Item>
           </div>
 
-          {/* ── Step 1: Blueprint & Config ─────────────── */}
+          {/* ── Step 1: Configuration ─────────────────── */}
           <div style={{ display: step === 1 ? 'block' : 'none' }}>
-            <Form.Item label="Blueprint" name="blueprintId">
+            <Form.Item label="Source">
+              <Radio.Group
+                value={configSource}
+                onChange={(e) => {
+                  const source = e.target.value as ConfigSource;
+                  setConfigSource(source);
+                  if (source === 'community') {
+                    setSelectedBlueprintId(undefined);
+                    form.setFieldValue('blueprintId', undefined);
+                    form.setFieldValue('inferenceProfile', undefined);
+                  } else {
+                    setSelectedCommunitySandbox(undefined);
+                    form.setFieldValue('image', undefined);
+                  }
+                  setPolicyYaml('');
+                }}
+                optionType="button"
+                buttonStyle="solid"
+              >
+                <Radio.Button value="blueprint">
+                  <AppstoreOutlined /> Blueprint
+                </Radio.Button>
+                <Radio.Button value="community">
+                  <CloudServerOutlined /> Community Sandbox
+                </Radio.Button>
+              </Radio.Group>
+            </Form.Item>
+
+            {/* ── Blueprint source ──────────────────────── */}
+            {configSource === 'blueprint' && (
+              <>
+                <Form.Item label="Blueprint" name="blueprintId">
               <Select
                 allowClear
                 placeholder="Select a blueprint template"
@@ -250,6 +353,72 @@ export default function CreateAgentWizard({
             >
               <Input placeholder="e.g. legible-sandbox:latest" />
             </Form.Item>
+              </>
+            )}
+
+            {/* ── Community Sandbox source ──────────────── */}
+            {configSource === 'community' && (
+              <>
+                <Text
+                  type="secondary"
+                  style={{ display: 'block', marginBottom: 12 }}
+                >
+                  Select a pre-built sandbox from the{' '}
+                  <a
+                    href="https://github.com/NVIDIA/OpenShell-Community"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    NVIDIA OpenShell Community
+                  </a>{' '}
+                  catalog.
+                </Text>
+                <Row gutter={[12, 12]}>
+                  {COMMUNITY_SANDBOXES.map((sb) => (
+                    <Col span={12} key={sb.id}>
+                      <SandboxCard
+                        $selected={selectedCommunitySandbox === sb.id}
+                        size="small"
+                        onClick={() => {
+                          setSelectedCommunitySandbox(sb.id);
+                          form.setFieldValue('image', sb.image);
+                        }}
+                      >
+                        <Space
+                          direction="vertical"
+                          size={4}
+                          style={{ width: '100%' }}
+                        >
+                          <Space>
+                            <Text strong>{sb.name}</Text>
+                            {selectedCommunitySandbox === sb.id && (
+                              <CheckCircleFilled
+                                style={{ color: '#13c2c2' }}
+                              />
+                            )}
+                          </Space>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {sb.description}
+                          </Text>
+                          <Text code style={{ fontSize: 11 }}>
+                            {sb.image}
+                          </Text>
+                        </Space>
+                      </SandboxCard>
+                    </Col>
+                  ))}
+                </Row>
+
+                <Form.Item
+                  label="Image"
+                  name="image"
+                  style={{ marginTop: 16 }}
+                  extra="Pre-filled from community sandbox. Override if needed."
+                >
+                  <Input placeholder="e.g. community://base" />
+                </Form.Item>
+              </>
+            )}
 
             {policyYaml && (
               <>
@@ -288,11 +457,27 @@ export default function CreateAgentWizard({
                 <Descriptions.Item label="Sandbox">
                   <Text code>{form.getFieldValue('sandboxName')}</Text>
                 </Descriptions.Item>
-                <Descriptions.Item label="Blueprint">
-                  {selectedBlueprint
-                    ? `${selectedBlueprint.name} (v${selectedBlueprint.version})`
-                    : '—'}
+                <Descriptions.Item label="Source">
+                  {configSource === 'community' ? (
+                    <Tag color="cyan">Community Sandbox</Tag>
+                  ) : (
+                    <Tag color="blue">Blueprint</Tag>
+                  )}
                 </Descriptions.Item>
+                {configSource === 'blueprint' && (
+                  <Descriptions.Item label="Blueprint">
+                    {selectedBlueprint
+                      ? `${selectedBlueprint.name} (v${selectedBlueprint.version})`
+                      : '—'}
+                  </Descriptions.Item>
+                )}
+                {configSource === 'community' && selectedCommunitySandbox && (
+                  <Descriptions.Item label="Community Sandbox">
+                    {COMMUNITY_SANDBOXES.find(
+                      (s) => s.id === selectedCommunitySandbox,
+                    )?.name || selectedCommunitySandbox}
+                  </Descriptions.Item>
+                )}
                 {form.getFieldValue('inferenceProfile') && (
                   <Descriptions.Item label="Inference Profile">
                     {form.getFieldValue('inferenceProfile')}

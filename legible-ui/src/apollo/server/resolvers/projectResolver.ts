@@ -144,6 +144,25 @@ export class ProjectResolver {
       detail: { displayName: displayName.trim() },
     });
 
+    // Auto-install all registry blueprints into the new project
+    try {
+      const registryEntries =
+        await ctx.blueprintRegistryService.listRegistryEntries();
+      for (const entry of registryEntries) {
+        await ctx.blueprintRegistryService.installToProject(
+          entry.id,
+          project.id,
+        );
+      }
+      logger.debug(
+        `Auto-installed ${registryEntries.length} registry blueprints into project ${project.id}`,
+      );
+    } catch (err: any) {
+      logger.warn(
+        `Failed to auto-install registry blueprints into project ${project.id}: ${err.message}`,
+      );
+    }
+
     return this.formatProjectInfo(project);
   }
 

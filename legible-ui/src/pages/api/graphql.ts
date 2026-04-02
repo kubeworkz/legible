@@ -168,6 +168,20 @@ const bootstrapServer = async () => {
   // Seed built-in blueprint registry entries (idempotent)
   await seedBuiltinRegistryEntries(blueprintRegistryService);
 
+  // Backfill: auto-install registry blueprints into existing projects that have none
+  try {
+    const allProjects = await projectRepository.listProjects();
+    const registryEntries =
+      await blueprintRegistryService.listRegistryEntries();
+    for (const project of allProjects) {
+      for (const entry of registryEntries) {
+        await blueprintRegistryService.installToProject(entry.id, project.id);
+      }
+    }
+  } catch (err: any) {
+    logger.warn(`Blueprint backfill failed: ${err.message}`);
+  }
+
   const apolloServer: ApolloServer = new ApolloServer({
     typeDefs,
     resolvers,
