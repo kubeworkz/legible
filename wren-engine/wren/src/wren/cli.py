@@ -47,6 +47,19 @@ def _load_manifest(mdl: str) -> str:
     return mdl
 
 
+def _normalize_conn(conn: dict) -> dict:
+    """Flatten the ``{"datasource": ..., "properties": {...}}`` envelope.
+
+    MCP / web connection files wrap connection fields under a ``properties``
+    key.  This normalises both formats into ``{"datasource": ..., **fields}``.
+    """
+    if "properties" in conn and isinstance(conn["properties"], dict):
+        props = conn["properties"]
+        props["datasource"] = conn.get("datasource", props.get("datasource"))
+        return props
+    return conn
+
+
 def _load_conn(
     connection_info: str | None,
     connection_file: str | None,
@@ -70,7 +83,7 @@ def _load_conn(
                 "Error: --connection-info must decode to a JSON object.", err=True
             )
             raise typer.Exit(1)
-        return conn
+        return _normalize_conn(conn)
 
     path_str = connection_file or (
         str(_DEFAULT_CONN) if _DEFAULT_CONN.exists() else None
@@ -88,7 +101,7 @@ def _load_conn(
         if not isinstance(conn, dict):
             typer.echo(f"Error: {path_str} must contain a JSON object.", err=True)
             raise typer.Exit(1)
-        return conn
+        return _normalize_conn(conn)
 
     if required:
         typer.echo(
@@ -99,27 +112,25 @@ def _load_conn(
     return {}
 
 
-def _resolve_datasource(explicit: str | None, conn_dict: dict) -> str:
-    """Return datasource: use explicit --datasource arg first, then pop from conn dict.
+def _resolve_datasource(conn_dict: dict, explicit: str | None = None) -> str:
+    """Return datasource from explicit arg or connection dict.
 
-    Note: mutates conn_dict by removing the 'datasource' key so it is not
-    forwarded as an unknown field to WrenEngine / the connector.
+    Falls back to the 'datasource' key in *conn_dict*.  The explicit arg is
+    only used by ``dry-plan`` which may not have a connection file.
     """
     if explicit:
-        conn_dict.pop("datasource", None)
         return explicit
-    ds = conn_dict.pop("datasource", None)
+    ds = conn_dict.get("datasource")
     if ds:
         return ds
     typer.echo(
-        "Error: --datasource not specified and 'datasource' key not found in connection info.",
+        "Error: 'datasource' key not found in connection info.",
         err=True,
     )
     raise typer.Exit(1)
 
 
 def _build_engine(
-    datasource: str | None,
     mdl: str | None,
     connection_info: str | None,
     connection_file: str | None,
@@ -131,7 +142,7 @@ def _build_engine(
 
     manifest_str = _load_manifest(_require_mdl(mdl))
     conn_dict = _load_conn(connection_info, connection_file, required=conn_required)
-    ds_str = _resolve_datasource(datasource, conn_dict)
+    ds_str = _resolve_datasource(conn_dict)
 
     try:
         ds = DataSource(ds_str.lower())
@@ -146,14 +157,6 @@ def _build_engine(
 
 # ── Shared option types ────────────────────────────────────────────────────
 
-DatasourceOpt = Annotated[
-    Optional[str],
-    typer.Option(
-        "--datasource",
-        "-d",
-        help="Data source (e.g. mysql, postgres). Defaults to 'datasource' field in connection_info.json.",
-    ),
-]
 MdlOpt = Annotated[
     Optional[str],
     typer.Option(
@@ -193,7 +196,6 @@ def main(
             "--sql", "-s", help="SQL query to execute (runs query by default)"
         ),
     ] = None,
-    datasource: DatasourceOpt = None,
     mdl: MdlOpt = None,
     connection_info: ConnInfoOpt = None,
     connection_file: ConnFileOpt = None,
@@ -206,7 +208,10 @@ def main(
     ~/.wren.  Use a subcommand (query / dry-run / dry-plan / validate)
     for explicit control.
 
-    connection_info.json format:
+    The data source is always read from the 'datasource' field in
+    connection_info.json (or the --connection-info / --connection-file value).
+
+    connection_info.json format (flat):
 
     \b
       {
@@ -217,13 +222,21 @@ def main(
         "user": "root",
         "password": "secret"
       }
+
+    MCP/web envelope format is also accepted:
+
+    \b
+      {
+        "datasource": "duckdb",
+        "properties": { "url": "/path/to/dir", "format": "duckdb" }
+      }
     """
     if ctx.invoked_subcommand is not None:
         return
     if sql is None:
         typer.echo(ctx.get_help())
         return
-    with _build_engine(datasource, mdl, connection_info, connection_file) as engine:
+    with _build_engine(mdl, connection_info, connection_file) as engine:
         try:
             result = engine.query(sql, limit=limit)
         except Exception as e:
@@ -238,7 +251,6 @@ def main(
 @app.command()
 def query(
     sql: Annotated[str, typer.Option("--sql", "-s", help="SQL query to execute")],
-    datasource: DatasourceOpt = None,
     mdl: MdlOpt = None,
     connection_info: ConnInfoOpt = None,
     connection_file: ConnFileOpt = None,
@@ -246,7 +258,7 @@ def query(
     output: OutputOpt = "table",
 ):
     """Execute a SQL query through the Wren semantic layer."""
-    with _build_engine(datasource, mdl, connection_info, connection_file) as engine:
+    with _build_engine(mdl, connection_info, connection_file) as engine:
         try:
             result = engine.query(sql, limit=limit)
         except Exception as e:
@@ -258,13 +270,12 @@ def query(
 @app.command(name="dry-run")
 def dry_run(
     sql: Annotated[str, typer.Option("--sql", "-s", help="SQL query to validate")],
-    datasource: DatasourceOpt = None,
     mdl: MdlOpt = None,
     connection_info: ConnInfoOpt = None,
     connection_file: ConnFileOpt = None,
 ):
     """Dry-run a SQL query (parse + validate, no results returned)."""
-    with _build_engine(datasource, mdl, connection_info, connection_file) as engine:
+    with _build_engine(mdl, connection_info, connection_file) as engine:
         try:
             engine.dry_run(sql)
             typer.echo("OK")
@@ -276,7 +287,14 @@ def dry_run(
 @app.command(name="dry-plan")
 def dry_plan(
     sql: Annotated[str, typer.Option("--sql", "-s", help="SQL query to plan")],
-    datasource: DatasourceOpt = None,
+    datasource: Annotated[
+        Optional[str],
+        typer.Option(
+            "--datasource",
+            "-d",
+            help="Data source dialect (e.g. duckdb, postgres). Falls back to connection_info.json.",
+        ),
+    ] = None,
     mdl: MdlOpt = None,
     connection_file: ConnFileOpt = None,
 ):
@@ -285,13 +303,10 @@ def dry_plan(
     from wren.model.data_source import DataSource  # noqa: PLC0415
 
     manifest_str = _load_manifest(_require_mdl(mdl))
-    # Read datasource from connection_info.json only when --datasource is not given
     conn_dict = (
-        _load_conn(None, connection_file, required=False)
-        if connection_file is not None or datasource is None
-        else {}
+        _load_conn(None, connection_file, required=False) if datasource is None else {}
     )
-    ds_str = _resolve_datasource(datasource, conn_dict)
+    ds_str = _resolve_datasource(conn_dict, explicit=datasource)
 
     try:
         ds = DataSource(ds_str.lower())
@@ -313,13 +328,12 @@ def dry_plan(
 @app.command()
 def validate(
     sql: Annotated[str, typer.Option("--sql", "-s", help="SQL query to validate")],
-    datasource: DatasourceOpt = None,
     mdl: MdlOpt = None,
     connection_info: ConnInfoOpt = None,
     connection_file: ConnFileOpt = None,
 ):
     """Validate SQL can be planned and dry-run against the data source."""
-    with _build_engine(datasource, mdl, connection_info, connection_file) as engine:
+    with _build_engine(mdl, connection_info, connection_file) as engine:
         try:
             engine.dry_run(sql)
             typer.echo("Valid")
@@ -357,6 +371,70 @@ def _print_result(table, output: str) -> None:
             typer.echo(df.to_string(index=False))
         except Exception:
             typer.echo(str(table))
+
+
+@app.command()
+def version():
+    """Print the wren-engine version."""
+    from wren import __version__  # noqa: PLC0415
+
+    typer.echo(f"wren-engine {__version__}")
+
+
+# ── Docs subcommand ───────────────────────────────────────────────────────
+
+docs_app = typer.Typer(name="docs", help="Generate documentation for Wren Engine")
+
+
+@docs_app.command(name="connection-info")
+def docs_connection_info(
+    datasource: Annotated[
+        Optional[str],
+        typer.Argument(help="Data source name (e.g. postgres, mysql). Omit for all."),
+    ] = None,
+    format: Annotated[
+        str,
+        typer.Option("--format", "-f", help="Output format: md or json"),
+    ] = "md",
+    envelope: Annotated[
+        bool,
+        typer.Option(
+            "--envelope",
+            help='Wrap JSON output in {"datasource": ..., "properties": ...} format.',
+        ),
+    ] = False,
+):
+    """Show connection info fields for each data source."""
+    from wren.docs import generate_json_schema, generate_markdown  # noqa: PLC0415
+
+    fmt = format.lower()
+    try:
+        if fmt == "md":
+            typer.echo(generate_markdown(datasource))
+        elif fmt == "json":
+            typer.echo(generate_json_schema(datasource, envelope=envelope))
+        else:
+            typer.echo(
+                f"Error: unsupported format '{format}'. Use md or json.", err=True
+            )
+            raise typer.Exit(1)
+    except ValueError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1)
+
+
+app.add_typer(docs_app)
+
+
+try:
+    import lancedb  # noqa: PLC0415, F401
+    import sentence_transformers  # noqa: PLC0415, F401
+
+    from wren.memory.cli import memory_app  # noqa: PLC0415
+
+    app.add_typer(memory_app)
+except ImportError:
+    pass  # wren[memory] not installed
 
 
 if __name__ == "__main__":
