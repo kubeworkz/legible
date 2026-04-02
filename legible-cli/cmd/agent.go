@@ -268,6 +268,31 @@ func runAgentCreate(cmd *cobra.Command, args []string) error {
 		fmt.Println("OK")
 	}
 
+	// Register agent in the server and mark as running
+	fmt.Print("  Registering agent... ")
+	agentInput := map[string]interface{}{
+		"name":         name,
+		"sandboxName":  sandboxName,
+		"providerName": providerName,
+		"gatewayId":    gw.ID,
+	}
+	if from != "" {
+		agentInput["image"] = from
+	}
+	createdAgent, err := apiClient.CreateAgent(agentInput)
+	if err != nil {
+		fmt.Println("FAILED")
+		fmt.Printf("  ⚠ Agent not registered in server: %v\n", err)
+	} else {
+		fmt.Println("OK")
+		_, err = apiClient.UpdateAgent(createdAgent.ID, map[string]interface{}{
+			"status": "RUNNING",
+		})
+		if err != nil {
+			fmt.Printf("  ⚠ Could not update agent status: %v\n", err)
+		}
+	}
+
 	fmt.Printf("\nAgent %q created successfully!\n", name)
 	fmt.Printf("  Sandbox:  %s\n", sandboxName)
 	fmt.Printf("  Type:     %s\n", agentType)
@@ -387,6 +412,36 @@ func runAgentCreateFromBlueprint(cmd *cobra.Command, name, sandboxName, blueprin
 		fmt.Println("OK")
 	}
 
+	// Register agent in the server and mark as running
+	fmt.Print("  Registering agent... ")
+	apiClient, err := client.New(cfg)
+	if err == nil {
+		agentInput := map[string]interface{}{
+			"name":             name,
+			"sandboxName":      sandboxName,
+			"providerName":     providerName,
+			"gatewayId":        gw.ID,
+			"image":            bp.Components.Sandbox.Image,
+			"inferenceProfile": profileLabel,
+		}
+		createdAgent, createErr := apiClient.CreateAgent(agentInput)
+		if createErr != nil {
+			fmt.Println("FAILED")
+			fmt.Printf("  ⚠ Agent not registered in server: %v\n", createErr)
+		} else {
+			fmt.Println("OK")
+			_, updateErr := apiClient.UpdateAgent(createdAgent.ID, map[string]interface{}{
+				"status": "RUNNING",
+			})
+			if updateErr != nil {
+				fmt.Printf("  ⚠ Could not update agent status: %v\n", updateErr)
+			}
+		}
+	} else {
+		fmt.Println("FAILED")
+		fmt.Printf("  ⚠ Could not create API client: %v\n", err)
+	}
+
 	fmt.Printf("\nAgent %q created from blueprint %q!\n", name, blueprintName)
 	fmt.Printf("  Sandbox:   %s\n", sandboxName)
 	fmt.Printf("  Type:      %s\n", agentType)
@@ -489,6 +544,20 @@ func runAgentStop(cmd *cobra.Command, args []string) error {
 	// Clean up the provider
 	providerName := "legible-" + name
 	_ = agent.RunOpenshell("provider", "delete", providerName)
+
+	// Update agent status in the server
+	cfg, cfgErr := config.Load()
+	if cfgErr == nil && cfg.Endpoint != "" && cfg.APIKey != "" {
+		apiClient, clientErr := client.New(cfg)
+		if clientErr == nil {
+			existing, lookupErr := apiClient.GetAgentBySandboxName(name)
+			if lookupErr == nil && existing != nil {
+				_, _ = apiClient.UpdateAgent(existing.ID, map[string]interface{}{
+					"status": "STOPPED",
+				})
+			}
+		}
+	}
 
 	return nil
 }

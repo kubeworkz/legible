@@ -18,6 +18,7 @@ import RobotOutlined from '@ant-design/icons/RobotOutlined';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 import ThunderboltOutlined from '@ant-design/icons/ThunderboltOutlined';
+import CopyOutlined from '@ant-design/icons/CopyOutlined';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
 import PlayCircleOutlined from '@ant-design/icons/PlayCircleOutlined';
@@ -40,6 +41,7 @@ import CreateAgentWizard, {
   CreateAgentWizardValues,
 } from '@/components/pages/agents/CreateAgentWizard';
 import { Path, buildPath } from '@/utils/enum';
+import { buildAgentCliCommand } from '@/utils/agent';
 
 const { Text } = Typography;
 
@@ -192,8 +194,61 @@ export default function AgentsPage() {
           },
         },
       });
-      message.success(`Agent "${values.name}" created`);
       setIsWizardOpen(false);
+
+      // Build the CLI command based on what was selected
+      const blueprintName = values.blueprintId
+        ? blueprints.find((b) => b.id === values.blueprintId)?.name
+        : undefined;
+      const cliCmd = buildAgentCliCommand({
+        name: values.name,
+        communitySandbox: values.communitySandbox,
+        blueprintName,
+        image: values.image,
+        inferenceProfile: values.inferenceProfile,
+      });
+
+      Modal.success({
+        title: `Agent "${values.name}" created`,
+        width: 560,
+        content: (
+          <div style={{ marginTop: 12 }}>
+            <p>
+              The agent record has been saved. To provision the sandbox, run the
+              following command in your terminal:
+            </p>
+            <div
+              style={{
+                background: '#f5f5f5',
+                border: '1px solid #d9d9d9',
+                borderRadius: 6,
+                padding: '12px 16px',
+                fontFamily: 'monospace',
+                fontSize: 13,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+                position: 'relative',
+              }}
+            >
+              {cliCmd}
+              <Button
+                type="text"
+                size="small"
+                icon={<CopyOutlined />}
+                style={{ position: 'absolute', top: 8, right: 8 }}
+                onClick={() => {
+                  navigator.clipboard.writeText(cliCmd);
+                  message.success('Copied to clipboard');
+                }}
+              />
+            </div>
+            <p style={{ marginTop: 12, color: '#888', fontSize: 12 }}>
+              The agent status will update to <b>Running</b> once the CLI
+              provisions the sandbox.
+            </p>
+          </div>
+        ),
+      });
     } catch (err: any) {
       message.error(err?.message || 'Failed to create agent');
     }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -23,9 +24,11 @@ import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlin
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import SaveOutlined from '@ant-design/icons/SaveOutlined';
 import CloseOutlined from '@ant-design/icons/CloseOutlined';
+import CopyOutlined from '@ant-design/icons/CopyOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { Path, buildPath } from '@/utils/enum';
+import { buildAgentCliCommand } from '@/utils/agent';
 import { getCompactTime } from '@/utils/time';
 import useProject from '@/hooks/useProject';
 import dynamic from 'next/dynamic';
@@ -63,14 +66,68 @@ const LOG_ACTION_COLORS: Record<string, string> = {
 
 // ── Overview Tab ────────────────────────────────────────────────
 
+function ProvisionBanner({ agent }: { agent: AgentFieldsFragment }) {
+  const cliCmd = buildAgentCliCommand({
+    name: agent.name,
+    image: agent.image || undefined,
+  });
+
+  return (
+    <Alert
+      type="info"
+      showIcon
+      style={{ marginBottom: 16 }}
+      message="Waiting for sandbox provisioning"
+      description={
+        <div>
+          <p style={{ margin: '4px 0 8px' }}>
+            Run the following command in your terminal to provision this agent's
+            sandbox:
+          </p>
+          <div
+            style={{
+              background: '#f5f5f5',
+              border: '1px solid #d9d9d9',
+              borderRadius: 6,
+              padding: '10px 14px',
+              fontFamily: 'monospace',
+              fontSize: 13,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all',
+              position: 'relative',
+            }}
+          >
+            {cliCmd}
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined />}
+              style={{ position: 'absolute', top: 6, right: 6 }}
+              onClick={() => {
+                navigator.clipboard.writeText(cliCmd);
+                message.success('Copied to clipboard');
+              }}
+            />
+          </div>
+          <p style={{ margin: '8px 0 0', color: '#888', fontSize: 12 }}>
+            The status will update automatically once the CLI finishes.
+          </p>
+        </div>
+      }
+    />
+  );
+}
+
 function OverviewTab({ agent }: { agent: AgentFieldsFragment }) {
   return (
-    <Row gutter={[24, 24]}>
-      <Col span={12}>
-        <Descriptions column={1} size="small" bordered>
-          <Descriptions.Item label="ID">{agent.id}</Descriptions.Item>
-          <Descriptions.Item label="Name">
-            <Text strong>{agent.name}</Text>
+    <>
+      {agent.status === 'CREATING' && <ProvisionBanner agent={agent} />}
+      <Row gutter={[24, 24]}>
+        <Col span={12}>
+          <Descriptions column={1} size="small" bordered>
+            <Descriptions.Item label="ID">{agent.id}</Descriptions.Item>
+            <Descriptions.Item label="Name">
+              <Text strong>{agent.name}</Text>
           </Descriptions.Item>
           <Descriptions.Item label="Sandbox">
             <Text code>{agent.sandboxName}</Text>
@@ -116,6 +173,7 @@ function OverviewTab({ agent }: { agent: AgentFieldsFragment }) {
         )}
       </Col>
     </Row>
+    </>
   );
 }
 
