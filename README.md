@@ -78,6 +78,54 @@ Check [configuration examples here](https://github.com/kubeworkz/legible/tree/ma
 
 Visit [Legible documentation](https://docs.legiblequery.ai) to view the full documentation.
 
+## 🤖 Sandboxed AI Agents
+
+Legible includes a full agent sandbox system powered by [NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell) and [NemoClaw](https://github.com/NVIDIA/NemoClaw). Agents run in isolated containers with policy-enforced access to your semantic layer via MCP.
+
+### OpenShell
+
+[OpenShell](https://github.com/NVIDIA/OpenShell) is NVIDIA's open-source sandbox runtime. It provisions lightweight containers on your local machine, each with its own network policy, credential injection, and resource limits. Legible uses OpenShell to run AI coding agents (Claude Code, Codex, OpenCode, Copilot) that can query your data through the Legible MCP server.
+
+```bash
+# Create an agent sandbox
+legible agent create my-analyst --type claude
+
+# From a community sandbox image
+legible agent create my-analyst --from ollama
+
+# From a blueprint with an inference profile
+legible agent create my-analyst --blueprint legible-default --profile nvidia
+```
+
+### NemoClaw
+
+[NemoClaw](https://github.com/NVIDIA/NemoClaw) provides inference routing and network policy enforcement for agent sandboxes. It controls which endpoints an agent can reach and routes LLM inference requests through configurable provider profiles (NVIDIA, OpenAI, Anthropic, local Ollama, etc.).
+
+### Blueprints
+
+Blueprints are declarative YAML specs that define everything an agent needs: sandbox image, inference profiles, network policies, and resource limits. Legible ships with built-in blueprints and supports custom ones.
+
+```yaml
+# Example blueprint structure
+agent:
+  type: claude
+components:
+  sandbox:
+    image: ghcr.io/nvidia/openshell/sandbox-base:latest
+  inference:
+    profiles:
+      nvidia:
+        model: meta/llama-3.3-70b-instruct
+      anthropic:
+        model: claude-sonnet-4-20250514
+policies:
+  network: policy.yaml
+```
+
+You can also use [Community Sandboxes](https://docs.legiblequery.ai/agents/community-sandboxes) — pre-built environments from the OpenShell Community catalog including base, Ollama, OpenClaw, and SDG images.
+
+For more details, see the [Agents documentation](https://docs.legiblequery.ai/agents/) and the [CLI guide](https://docs.legiblequery.ai/guides/cli).
+
 ## 📪 Keep Posted?
 
 [Subscribe to our blog](https://www.getwren.ai/blog/?utm_source=github&utm_medium=content&utm_campaign=readme) and [Follow our LinkedIn](www.linkedin.com/in/legiblequery)
