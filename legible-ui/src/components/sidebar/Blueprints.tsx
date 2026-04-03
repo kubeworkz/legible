@@ -42,9 +42,14 @@ export default function Blueprints() {
     },
   ];
 
-  const selectedKeys = Object.entries(MENU_KEY_MAP)
-    .filter(([path]) => router.pathname.startsWith(path))
-    .map(([, key]) => key);
+  // Check longer paths first so /blueprints/registry doesn't also match /blueprints
+  const sortedEntries = Object.entries(MENU_KEY_MAP).sort(
+    ([a], [b]) => b.length - a.length,
+  );
+  const match = sortedEntries.find(([path]) =>
+    router.pathname.startsWith(path),
+  );
+  const selectedKeys = match ? [match[1]] : [];
 
   return (
     <Layout>

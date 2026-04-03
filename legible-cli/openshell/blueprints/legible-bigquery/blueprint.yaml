@@ -6,8 +6,8 @@
 # Usage:
 #   legible agent create my-bq-agent --blueprint legible-bigquery
 
-version: "0.1.0"
-min_openshell_version: "0.1.0"
+version: "0.2.0"
+min_openshell_version: "0.0.21"
 description: |
   BigQuery-optimized Legible agent blueprint. Pre-installed with bq CLI
   and gcloud SDK. Network policies allow BigQuery API, OAuth, and

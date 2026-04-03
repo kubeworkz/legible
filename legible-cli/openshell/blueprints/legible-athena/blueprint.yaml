@@ -2,8 +2,8 @@
 #
 # A NemoClaw-compatible blueprint optimized for Amazon Athena.
 
-version: "0.1.0"
-min_openshell_version: "0.1.0"
+version: "0.2.0"
+min_openshell_version: "0.0.21"
 description: |
   Athena-optimized Legible agent blueprint. Pre-installed with AWS CLI
   for Athena query execution. Network policies allow Athena and S3
