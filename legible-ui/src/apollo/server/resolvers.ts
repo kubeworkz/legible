@@ -31,6 +31,7 @@ import {
   BlueprintRegistryResolver,
   AutoProvisionResolver,
 } from './resolvers/blueprintRegistryResolver';
+import { AgentDefinitionResolver } from './resolvers/agentDefinitionResolver';
 import { PromptTemplateResolver } from './resolvers/promptTemplateResolver';
 import { ToolDefinitionResolver } from './resolvers/toolDefinitionResolver';
 import { WorkflowResolver } from './resolvers/workflowResolver';
@@ -68,6 +69,7 @@ const gatewayResolver = new GatewayResolver();
 const blueprintResolver = new BlueprintResolver();
 const blueprintRegistryResolver = new BlueprintRegistryResolver();
 const autoProvisionResolver = new AutoProvisionResolver();
+const agentDefinitionResolver = new AgentDefinitionResolver();
 const promptTemplateResolver = new PromptTemplateResolver();
 const toolDefinitionResolver = new ToolDefinitionResolver();
 const workflowResolver = new WorkflowResolver();
@@ -231,6 +233,9 @@ const resolvers = {
     recommendedBlueprintForConnector: autoProvisionResolver.recommendedBlueprint,
 
     // Agent Builder
+    agentDefinitions: agentDefinitionResolver.listAgentDefinitions,
+    agentDefinition: agentDefinitionResolver.getAgentDefinition,
+    agentDefinitionVersions: agentDefinitionResolver.listAgentDefinitionVersions,
     promptTemplates: promptTemplateResolver.listPromptTemplates,
     promptTemplate: promptTemplateResolver.getPromptTemplate,
     promptTemplateVersions: promptTemplateResolver.listPromptTemplateVersions,
@@ -489,6 +494,12 @@ const resolvers = {
     provisionAgent: autoProvisionResolver.provisionAgent,
 
     // Agent Builder
+    createAgentDefinition: agentDefinitionResolver.createAgentDefinition,
+    updateAgentDefinition: agentDefinitionResolver.updateAgentDefinition,
+    deleteAgentDefinition: agentDefinitionResolver.deleteAgentDefinition,
+    publishAgentDefinition: agentDefinitionResolver.publishAgentDefinition,
+    deployAgentDefinition: agentDefinitionResolver.deployAgentDefinition,
+    archiveAgentDefinition: agentDefinitionResolver.archiveAgentDefinition,
     createPromptTemplate: promptTemplateResolver.createPromptTemplate,
     updatePromptTemplate: promptTemplateResolver.updatePromptTemplate,
     deletePromptTemplate: promptTemplateResolver.deletePromptTemplate,

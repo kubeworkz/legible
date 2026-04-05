@@ -3,6 +3,7 @@ import { Card, Col, Row, Space, Typography } from 'antd';
 import FileTextOutlined from '@ant-design/icons/FileTextOutlined';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import ApartmentOutlined from '@ant-design/icons/ApartmentOutlined';
+import RobotOutlined from '@ant-design/icons/RobotOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { Path, buildPath } from '@/utils/enum';
@@ -31,6 +32,13 @@ const sections = [
     description:
       'Define multi-step agent workflows as directed graphs. Publish, version, and manage lifecycle.',
     path: Path.AgentBuilderWorkflows,
+  },
+  {
+    title: 'Agent Definitions',
+    icon: <RobotOutlined style={{ fontSize: 28 }} />,
+    description:
+      'Bundle a workflow, system prompt, tools, and memory config into a deployable agent unit.',
+    path: Path.AgentBuilderAgents,
   },
 ];
 

@@ -18,4 +18,5 @@ export enum MENU_KEY {
   AGENT_BUILDER_TOOL_REGISTRY = 'agent-builder-tool-registry',
   AGENT_BUILDER_WORKFLOWS = 'agent-builder-workflows',
   AGENT_BUILDER_EXECUTION_HISTORY = 'agent-builder-execution-history',
+  AGENT_BUILDER_AGENTS = 'agent-builder-agents',
 }

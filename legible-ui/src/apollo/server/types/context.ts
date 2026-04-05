@@ -83,6 +83,7 @@ import { IPromptTemplateService } from '../services/promptTemplateService';
 import { IToolDefinitionService } from '../services/toolDefinitionService';
 import { IWorkflowService } from '../services/workflowService';
 import { IWorkflowExecutionService } from '../services/workflow/executionEngine';
+import { IAgentDefinitionService } from '../services/agentDefinitionService';
 import { User } from '@server/repositories/userRepository';
 
 export interface IContext {
@@ -142,6 +143,7 @@ export interface IContext {
   toolDefinitionService: IToolDefinitionService;
   workflowService: IWorkflowService;
   workflowExecutionService: IWorkflowExecutionService;
+  agentDefinitionService: IAgentDefinitionService;
 
   // repository
   projectRepository: IProjectRepository;

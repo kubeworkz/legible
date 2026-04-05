@@ -51,6 +51,7 @@ export enum Path {
   AgentBuilderWorkflows = '/projects/[projectId]/agent-builder/workflows',
   AgentBuilderWorkflowCanvas = '/projects/[projectId]/agent-builder/workflows/[workflowId]',
   AgentBuilderExecutionHistory = '/projects/[projectId]/agent-builder/execution-history',
+  AgentBuilderAgents = '/projects/[projectId]/agent-builder/agents',
 }
 
 /**

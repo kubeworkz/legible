@@ -2086,6 +2086,82 @@ export const typeDefs = gql`
 
   # ── End Gateway Types ─────────────────────────────────────────
 
+  # ── Agent Builder: Agent Definitions ──────────────────────────
+
+  type AgentDefinitionType {
+    id: Int!
+    projectId: Int!
+    name: String!
+    description: String
+    workflowId: Int
+    systemPrompt: String
+    toolIds: [Int!]
+    memoryConfig: JSON
+    model: String
+    temperature: Float
+    maxTokens: Int
+    status: String!
+    currentVersion: Int!
+    deployConfig: JSON
+    deployedAt: String
+    tags: [String!]
+    icon: String
+    createdBy: Int
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type AgentDefinitionVersionType {
+    id: Int!
+    agentDefinitionId: Int!
+    version: Int!
+    workflowId: Int
+    systemPrompt: String
+    toolIds: [Int!]
+    memoryConfig: JSON
+    model: String
+    temperature: Float
+    maxTokens: Int
+    deployConfig: JSON
+    changeNote: String
+    createdBy: Int
+    createdAt: String!
+  }
+
+  input CreateAgentDefinitionInput {
+    name: String!
+    description: String
+    workflowId: Int
+    systemPrompt: String
+    toolIds: [Int!]
+    memoryConfig: JSON
+    model: String
+    temperature: Float
+    maxTokens: Int
+    deployConfig: JSON
+    tags: [String!]
+    icon: String
+  }
+
+  input UpdateAgentDefinitionInput {
+    name: String
+    description: String
+    workflowId: Int
+    systemPrompt: String
+    toolIds: [Int!]
+    memoryConfig: JSON
+    model: String
+    temperature: Float
+    maxTokens: Int
+    deployConfig: JSON
+    tags: [String!]
+    icon: String
+  }
+
+  input AgentDefinitionWhereInput {
+    id: Int!
+  }
+
   # ── Agent Builder: Prompt Templates ───────────────────────────
 
   type PromptTemplateType {
@@ -2885,6 +2961,11 @@ export const typeDefs = gql`
     autoProvisionConfigForConnector(connectorType: String!): AutoProvisionConfigType
     recommendedBlueprintForConnector(connectorType: String!): RecommendedBlueprintType!
 
+    # Agent Builder: Agent Definitions
+    agentDefinitions: [AgentDefinitionType!]!
+    agentDefinition(where: AgentDefinitionWhereInput!): AgentDefinitionType!
+    agentDefinitionVersions(agentDefinitionId: Int!): [AgentDefinitionVersionType!]!
+
     # Agent Builder: Prompt Templates
     promptTemplates: [PromptTemplateType!]!
     promptTemplate(where: PromptTemplateWhereInput!): PromptTemplateType!
@@ -3221,6 +3302,14 @@ export const typeDefs = gql`
     setAutoProvisionConfig(data: SetAutoProvisionConfigInput!): AutoProvisionConfigType!
     deleteAutoProvisionConfig(where: BlueprintWhereInput!): Boolean!
     provisionAgent(connectorType: String!): AutoProvisionResultType!
+
+    # Agent Builder: Agent Definitions
+    createAgentDefinition(data: CreateAgentDefinitionInput!): AgentDefinitionType!
+    updateAgentDefinition(where: AgentDefinitionWhereInput!, data: UpdateAgentDefinitionInput!): AgentDefinitionType!
+    deleteAgentDefinition(where: AgentDefinitionWhereInput!): Boolean!
+    publishAgentDefinition(where: AgentDefinitionWhereInput!, changeNote: String): AgentDefinitionType!
+    deployAgentDefinition(where: AgentDefinitionWhereInput!): AgentDefinitionType!
+    archiveAgentDefinition(where: AgentDefinitionWhereInput!): AgentDefinitionType!
 
     # Agent Builder: Prompt Templates
     createPromptTemplate(data: CreatePromptTemplateInput!): PromptTemplateType!

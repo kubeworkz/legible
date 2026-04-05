@@ -5,6 +5,7 @@ import FileTextOutlined from '@ant-design/icons/FileTextOutlined';
 import ApiOutlined from '@ant-design/icons/ApiOutlined';
 import ApartmentOutlined from '@ant-design/icons/ApartmentOutlined';
 import HistoryOutlined from '@ant-design/icons/HistoryOutlined';
+import RobotOutlined from '@ant-design/icons/RobotOutlined';
 import { Path, buildPath, MENU_KEY } from '@/utils/enum';
 import SidebarMenu from '@/components/sidebar/SidebarMenu';
 import useProject from '@/hooks/useProject';
@@ -27,6 +28,7 @@ const MENU_KEY_MAP_ENTRIES: Array<[string, string]> = (
     [Path.AgentBuilderToolRegistry, MENU_KEY.AGENT_BUILDER_TOOL_REGISTRY],
     [Path.AgentBuilderExecutionHistory, MENU_KEY.AGENT_BUILDER_EXECUTION_HISTORY],
     [Path.AgentBuilderWorkflows, MENU_KEY.AGENT_BUILDER_WORKFLOWS],
+    [Path.AgentBuilderAgents, MENU_KEY.AGENT_BUILDER_AGENTS],
     [Path.AgentBuilder, MENU_KEY.AGENT_BUILDER],
   ] as Array<[string, string]>
 ).sort((a, b) => b[0].length - a[0].length);
@@ -78,6 +80,13 @@ export default function AgentBuilderSidebar() {
       key: MENU_KEY.AGENT_BUILDER_EXECUTION_HISTORY,
       className: 'pl-4',
       onClick: () => router.push(bp(Path.AgentBuilderExecutionHistory)),
+    },
+    {
+      label: 'Agent Definitions',
+      icon: <RobotOutlined />,
+      key: MENU_KEY.AGENT_BUILDER_AGENTS,
+      className: 'pl-4',
+      onClick: () => router.push(bp(Path.AgentBuilderAgents)),
     },
   ];
 
