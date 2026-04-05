@@ -147,70 +147,59 @@ export default function WorkflowCanvasPage() {
 
   return (
     <SiderLayout>
-      <PageLayout title={workflow?.name || 'Workflow Canvas'}>
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 12,
-            }}
-          >
-            <Space>
-              <Button
-                icon={<ArrowLeftOutlined />}
-                size="small"
-                onClick={goBack}
-              />
-              <Title level={4} style={{ margin: 0 }}>
-                {workflow?.name || 'Workflow'}
-              </Title>
-            </Space>
-          </div>
-
-          <Tabs
-            activeKey={activeTab}
-            onChange={setActiveTab}
+      <PageLayout
+        title={workflow?.name || 'Workflow Canvas'}
+        titleExtra={
+          <Button
+            icon={<ArrowLeftOutlined />}
             size="small"
-            items={[
-              {
-                key: 'canvas',
-                label: 'Canvas',
-                children: (
-                  <div style={{ flex: 1, minHeight: 500 }}>
-                    <WorkflowCanvas
-                      initialGraph={initialGraph}
-                      nodeTypeDefs={nodeTypeDefs}
-                      executionSteps={executionSteps}
-                      onSave={handleSave}
-                      onExecute={handleExecute}
-                      saving={saving}
-                      executing={executing}
-                    />
-                  </div>
-                ),
-              },
-              {
-                key: 'history',
-                label: (
-                  <Space>
-                    <HistoryOutlined />
-                    Execution History
-                  </Space>
-                ),
-                children: (
-                  <ExecutionHistoryPanel
-                    executions={executionsData?.workflowExecutions || []}
-                    selected={selectedExecution}
-                    onSelect={setSelectedExecution}
-                    steps={stepsData?.workflowExecutionSteps || []}
+            onClick={goBack}
+          >
+            Back to Workflows
+          </Button>
+        }
+      >
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          size="small"
+          items={[
+            {
+              key: 'canvas',
+              label: 'Canvas',
+              children: (
+                <div style={{ height: 'calc(100vh - 260px)', minHeight: 400 }}>
+                  <WorkflowCanvas
+                    initialGraph={initialGraph}
+                    nodeTypeDefs={nodeTypeDefs}
+                    executionSteps={executionSteps}
+                    onSave={handleSave}
+                    onExecute={handleExecute}
+                    saving={saving}
+                    executing={executing}
                   />
-                ),
-              },
-            ]}
-          />
-        </div>
+                </div>
+              ),
+            },
+            {
+              key: 'history',
+              label: (
+                <Space>
+                  <HistoryOutlined />
+                  Execution History
+                </Space>
+              ),
+              children: (
+                <ExecutionHistoryPanel
+                  executions={executionsData?.workflowExecutions || []}
+                  selected={selectedExecution}
+                  onSelect={setSelectedExecution}
+                  steps={stepsData?.workflowExecutionSteps || []}
+                />
+              ),
+            },
+          ]}
+        />
 
         {/* Input modal for execution */}
         <Modal

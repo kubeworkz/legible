@@ -14,6 +14,8 @@ import {
   IWorkflowRepository,
 } from '@server/repositories/workflowRepository';
 import { IPromptTemplateService } from '@server/services/promptTemplateService';
+import { ILLMService, ChatMessage } from '@server/services/llmService';
+import { IToolExecutionService } from '@server/services/toolExecutionService';
 import { getNodeType, validateWorkflowGraph } from './nodeTypes';
 
 const logger = getLogger('WorkflowEngine');
@@ -73,6 +75,8 @@ export class WorkflowExecutionService implements IWorkflowExecutionService {
   private readonly executionRepo: IWorkflowExecutionRepository;
   private readonly stepRepo: IWorkflowExecutionStepRepository;
   private readonly promptTemplateService: IPromptTemplateService;
+  private readonly llmService: ILLMService;
+  private readonly toolExecutionService: IToolExecutionService;
 
   /** Track running executions for cancellation */
   private readonly runningExecutions = new Map<number, ExecutionContext>();
@@ -82,16 +86,22 @@ export class WorkflowExecutionService implements IWorkflowExecutionService {
     workflowExecutionRepository,
     workflowExecutionStepRepository,
     promptTemplateService,
+    llmService,
+    toolExecutionService,
   }: {
     workflowRepository: IWorkflowRepository;
     workflowExecutionRepository: IWorkflowExecutionRepository;
     workflowExecutionStepRepository: IWorkflowExecutionStepRepository;
     promptTemplateService: IPromptTemplateService;
+    llmService: ILLMService;
+    toolExecutionService: IToolExecutionService;
   }) {
     this.workflowRepo = workflowRepository;
     this.executionRepo = workflowExecutionRepository;
     this.stepRepo = workflowExecutionStepRepository;
     this.promptTemplateService = promptTemplateService;
+    this.llmService = llmService;
+    this.toolExecutionService = toolExecutionService;
   }
 
   // ─── Public API ────────────────────────────────────────────
@@ -398,20 +408,42 @@ export class WorkflowExecutionService implements IWorkflowExecutionService {
       ? this.promptTemplateService.renderPrompt(template.userPrompt, variables)
       : null;
 
-    // In Phase 2 we return the rendered prompt.
-    // Phase 3 will integrate actual LLM API calls.
+    // Build messages array for LLM
+    const messages: ChatMessage[] = [];
+    if (renderedSystem) {
+      messages.push({ role: 'system', content: renderedSystem });
+    }
+    if (renderedUser) {
+      messages.push({ role: 'user', content: renderedUser });
+    }
+    if (messages.length === 0) {
+      throw new Error('LLM node: Both system and user prompts are empty');
+    }
+
+    // Call the real LLM API via the project's BYOK key
+    const llmResponse = await this.llmService.chatCompletion(
+      ctx.execution.projectId,
+      messages,
+      {
+        model: config.model || template.model || undefined,
+        temperature: config.temperature ?? template.temperature ?? undefined,
+        maxTokens: config.maxTokens ?? undefined,
+      },
+    );
+
     return {
       renderedSystemPrompt: renderedSystem,
       renderedUserPrompt: renderedUser,
-      model: config.model || template.model,
+      model: llmResponse.model,
       temperature: config.temperature ?? template.temperature,
-      // TODO Phase 3: Add actual LLM call here
-      response: `[LLM placeholder] Rendered prompt for model ${config.model || template.model || 'default'}`,
+      response: llmResponse.content,
+      usage: llmResponse.usage,
+      finishReason: llmResponse.finishReason,
     };
   }
 
   private async executeTool(
-    _ctx: ExecutionContext,
+    ctx: ExecutionContext,
     node: GraphNode,
     inputData: any,
   ): Promise<any> {
@@ -434,12 +466,14 @@ export class WorkflowExecutionService implements IWorkflowExecutionService {
     const finalParams =
       Object.keys(paramMapping).length === 0 ? inputData : params;
 
-    // TODO Phase 3: Actually invoke the tool (MCP call, HTTP request, etc.)
-    return {
-      toolDefinitionId: toolId,
-      parameters: finalParams,
-      response: `[Tool placeholder] Would invoke tool ${toolId}`,
-    };
+    // Invoke the tool via the ToolExecutionService
+    const result = await this.toolExecutionService.executeTool(
+      ctx.execution.projectId,
+      toolId,
+      finalParams,
+    );
+
+    return result;
   }
 
   private async executeCondition(

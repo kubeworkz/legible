@@ -115,6 +115,8 @@ import {
   WorkflowExecutionStepRepository,
 } from '@server/repositories/workflowExecutionRepository';
 import { WorkflowExecutionService } from '@server/services/workflow/executionEngine';
+import { LLMService } from '@server/services/llmService';
+import { ToolExecutionService } from '@server/services/toolExecutionService';
 import { getLogger } from '@server/utils';
 
 export const serverConfig = getConfig();
@@ -399,11 +401,24 @@ export const initComponents = () => {
     workflowVersionRepository,
   });
 
+  const llmService = new LLMService({
+    projectRepository,
+  });
+
+  const toolExecutionService = new ToolExecutionService({
+    toolDefinitionService,
+    queryService,
+    deployService,
+    projectRepository,
+  });
+
   const workflowExecutionService = new WorkflowExecutionService({
     workflowRepository,
     workflowExecutionRepository,
     workflowExecutionStepRepository,
     promptTemplateService,
+    llmService,
+    toolExecutionService,
   });
 
   // Wire stripeService into metering (created earlier, avoids circular init)

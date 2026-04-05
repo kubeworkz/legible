@@ -39,6 +39,7 @@ import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import PlayCircleOutlined from '@ant-design/icons/PlayCircleOutlined';
 import SaveOutlined from '@ant-design/icons/SaveOutlined';
 import { workflowNodeTypes } from './WorkflowNodes';
+import VariableMapper from './VariableMapper';
 import type { NodeTypeDefinitionFieldsFragment } from '@/apollo/client/graphql/workflowExecutions.generated';
 
 const { Text, Title } = Typography;
@@ -79,11 +80,21 @@ function NodePalette({ nodeTypes, onAddNode }: NodePaletteProps) {
   );
 }
 
+// ─── Mapping field names that should use VariableMapper ────
+
+const MAPPING_FIELDS = new Set([
+  'variableMapping',
+  'parameterMapping',
+  'outputMapping',
+]);
+
 // ─── Node config drawer ────────────────────────────────────
 
 interface NodeConfigDrawerProps {
   node: Node | null;
   nodeTypeDefs: NodeTypeDefinitionFieldsFragment[];
+  nodes: Node[];
+  edges: Edge[];
   onClose: () => void;
   onSave: (nodeId: string, data: Record<string, any>) => void;
   onDelete: (nodeId: string) => void;
@@ -92,6 +103,8 @@ interface NodeConfigDrawerProps {
 function NodeConfigDrawer({
   node,
   nodeTypeDefs,
+  nodes,
+  edges,
   onClose,
   onSave,
   onDelete,
@@ -154,8 +167,24 @@ function NodeConfigDrawer({
             rules={
               field.required ? [{ required: true, message: `${field.label} is required` }] : []
             }
+            {...(MAPPING_FIELDS.has(field.name) ? { valuePropName: 'value', trigger: 'onChange' } : {})}
           >
-            {field.type === 'select' && field.options ? (
+            {MAPPING_FIELDS.has(field.name) ? (
+              <VariableMapper
+                currentNodeId={node.id}
+                nodes={nodes}
+                edges={edges}
+                nodeTypeDefs={nodeTypeDefs}
+                sourceLabel="Source (upstream output)"
+                targetLabel={
+                  field.name === 'variableMapping'
+                    ? 'Template variable'
+                    : field.name === 'parameterMapping'
+                      ? 'Tool parameter'
+                      : 'Output field'
+                }
+              />
+            ) : field.type === 'select' && field.options ? (
               <Select>
                 {field.options.map((opt) => (
                   <Select.Option key={opt.value} value={opt.value}>
@@ -358,6 +387,8 @@ function WorkflowCanvasInner({
       <NodeConfigDrawer
         node={selectedNode}
         nodeTypeDefs={nodeTypeDefs}
+        nodes={nodes}
+        edges={edges}
         onClose={() => setSelectedNode(null)}
         onSave={handleNodeConfigSave}
         onDelete={handleNodeDelete}
