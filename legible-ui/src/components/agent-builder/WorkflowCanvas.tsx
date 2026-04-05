@@ -19,6 +19,7 @@ import {
   Panel,
   ReactFlowProvider,
 } from '@xyflow/react';
+// @ts-ignore - CSS side-effect import
 import '@xyflow/react/dist/style.css';
 import {
   Button,
