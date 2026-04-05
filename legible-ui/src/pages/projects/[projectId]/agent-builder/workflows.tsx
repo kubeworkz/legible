@@ -162,7 +162,7 @@ export default function WorkflowsPage() {
       title: 'Version',
       dataIndex: 'currentVersion',
       key: 'currentVersion',
-      width: 80,
+      width: 100,
       render: (v: number) => `v${v}`,
     },
     {
