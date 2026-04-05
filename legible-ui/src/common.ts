@@ -98,6 +98,23 @@ import { BlueprintRegistryRepository } from './apollo/server/repositories/bluepr
 import { BlueprintRegistryService } from './apollo/server/services/blueprintRegistryService';
 import { AutoProvisionConfigRepository } from './apollo/server/repositories/autoProvisionConfigRepository';
 import { AutoProvisionService } from './apollo/server/services/autoProvisionService';
+import {
+  PromptTemplateRepository,
+  PromptTemplateVersionRepository,
+} from '@server/repositories/promptTemplateRepository';
+import { ToolDefinitionRepository } from '@server/repositories/toolDefinitionRepository';
+import {
+  WorkflowRepository,
+  WorkflowVersionRepository,
+} from '@server/repositories/workflowRepository';
+import { PromptTemplateService } from '@server/services/promptTemplateService';
+import { ToolDefinitionService } from '@server/services/toolDefinitionService';
+import { WorkflowService } from '@server/services/workflowService';
+import {
+  WorkflowExecutionRepository,
+  WorkflowExecutionStepRepository,
+} from '@server/repositories/workflowExecutionRepository';
+import { WorkflowExecutionService } from '@server/services/workflow/executionEngine';
 import { getLogger } from '@server/utils';
 
 export const serverConfig = getConfig();
@@ -163,6 +180,13 @@ export const initComponents = () => {
   const blueprintRepository = new BlueprintRepository(knex);
   const blueprintRegistryRepository = new BlueprintRegistryRepository(knex);
   const autoProvisionConfigRepository = new AutoProvisionConfigRepository(knex);
+  const promptTemplateRepository = new PromptTemplateRepository(knex);
+  const promptTemplateVersionRepository = new PromptTemplateVersionRepository(knex);
+  const toolDefinitionRepository = new ToolDefinitionRepository(knex);
+  const workflowRepository = new WorkflowRepository(knex);
+  const workflowVersionRepository = new WorkflowVersionRepository(knex);
+  const workflowExecutionRepository = new WorkflowExecutionRepository(knex);
+  const workflowExecutionStepRepository = new WorkflowExecutionStepRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -361,6 +385,27 @@ export const initComponents = () => {
     gatewayService,
   });
 
+  const promptTemplateService = new PromptTemplateService({
+    promptTemplateRepository,
+    promptTemplateVersionRepository,
+  });
+
+  const toolDefinitionService = new ToolDefinitionService({
+    toolDefinitionRepository,
+  });
+
+  const workflowService = new WorkflowService({
+    workflowRepository,
+    workflowVersionRepository,
+  });
+
+  const workflowExecutionService = new WorkflowExecutionService({
+    workflowRepository,
+    workflowExecutionRepository,
+    workflowExecutionStepRepository,
+    promptTemplateService,
+  });
+
   // Wire stripeService into metering (created earlier, avoids circular init)
   queryMeteringService.setStripeService(stripeService);
 
@@ -470,6 +515,10 @@ export const initComponents = () => {
     blueprintService,
     blueprintRegistryService,
     autoProvisionService,
+    promptTemplateService,
+    toolDefinitionService,
+    workflowService,
+    workflowExecutionService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

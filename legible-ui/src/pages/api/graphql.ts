@@ -140,6 +140,10 @@ const bootstrapServer = async () => {
     blueprintService,
     blueprintRegistryService,
     autoProvisionService,
+    promptTemplateService,
+    toolDefinitionService,
+    workflowService,
+    workflowExecutionService,
     subscriptionRepository,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
@@ -370,6 +374,10 @@ const bootstrapServer = async () => {
         blueprintService,
         blueprintRegistryService,
         autoProvisionService,
+        promptTemplateService,
+        toolDefinitionService,
+        workflowService,
+        workflowExecutionService,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

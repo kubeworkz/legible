@@ -45,6 +45,12 @@ export enum Path {
   Blueprints = '/projects/[projectId]/blueprints',
   BlueprintRegistry = '/projects/[projectId]/blueprints/registry',
   Gateways = '/projects/[projectId]/gateways',
+  AgentBuilder = '/projects/[projectId]/agent-builder',
+  AgentBuilderPromptTemplates = '/projects/[projectId]/agent-builder/prompt-templates',
+  AgentBuilderToolRegistry = '/projects/[projectId]/agent-builder/tool-registry',
+  AgentBuilderWorkflows = '/projects/[projectId]/agent-builder/workflows',
+  AgentBuilderWorkflowCanvas = '/projects/[projectId]/agent-builder/workflows/[workflowId]',
+  AgentBuilderExecutionHistory = '/projects/[projectId]/agent-builder/execution-history',
 }
 
 /**

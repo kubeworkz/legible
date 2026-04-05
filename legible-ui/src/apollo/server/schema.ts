@@ -2086,6 +2086,253 @@ export const typeDefs = gql`
 
   # ── End Gateway Types ─────────────────────────────────────────
 
+  # ── Agent Builder: Prompt Templates ───────────────────────────
+
+  type PromptTemplateType {
+    id: Int!
+    projectId: Int!
+    name: String!
+    description: String
+    systemPrompt: String
+    userPrompt: String
+    variables: JSON
+    model: String
+    temperature: Float
+    maxTokens: Int
+    tags: [String!]
+    currentVersion: Int!
+    createdBy: Int
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type PromptTemplateVersionType {
+    id: Int!
+    promptTemplateId: Int!
+    version: Int!
+    systemPrompt: String
+    userPrompt: String
+    variables: JSON
+    model: String
+    temperature: Float
+    maxTokens: Int
+    changeNote: String
+    createdBy: Int
+    createdAt: String!
+  }
+
+  input CreatePromptTemplateInput {
+    name: String!
+    description: String
+    systemPrompt: String
+    userPrompt: String
+    variables: JSON
+    model: String
+    temperature: Float
+    maxTokens: Int
+    tags: [String!]
+  }
+
+  input UpdatePromptTemplateInput {
+    description: String
+    systemPrompt: String
+    userPrompt: String
+    variables: JSON
+    model: String
+    temperature: Float
+    maxTokens: Int
+    tags: [String!]
+  }
+
+  input PromptTemplateWhereInput {
+    id: Int!
+  }
+
+  type RenderedPromptResult {
+    systemPrompt: String
+    userPrompt: String
+  }
+
+  # ── Agent Builder: Tool Definitions ───────────────────────────
+
+  type ToolDefinitionType {
+    id: Int!
+    projectId: Int!
+    name: String!
+    description: String
+    source: String!
+    mcpServerName: String
+    method: String
+    endpoint: String
+    inputSchema: JSON
+    outputSchema: JSON
+    headers: JSON
+    authConfig: JSON
+    enabled: Boolean!
+    tags: [String!]
+    lastSyncedAt: String
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input CreateToolDefinitionInput {
+    name: String!
+    description: String
+    source: String!
+    mcpServerName: String
+    method: String
+    endpoint: String
+    inputSchema: JSON
+    outputSchema: JSON
+    headers: JSON
+    authConfig: JSON
+    tags: [String!]
+  }
+
+  input UpdateToolDefinitionInput {
+    description: String
+    method: String
+    endpoint: String
+    inputSchema: JSON
+    outputSchema: JSON
+    headers: JSON
+    authConfig: JSON
+    enabled: Boolean
+    tags: [String!]
+  }
+
+  input ToolDefinitionWhereInput {
+    id: Int!
+  }
+
+  type McpSyncResult {
+    created: Int!
+    updated: Int!
+    removed: Int!
+  }
+
+  # ── Agent Builder: Workflows ──────────────────────────────────
+
+  type WorkflowType {
+    id: Int!
+    projectId: Int!
+    name: String!
+    description: String
+    graph: JSON!
+    variables: JSON
+    status: String!
+    currentVersion: Int!
+    createdBy: Int
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type WorkflowVersionType {
+    id: Int!
+    workflowId: Int!
+    version: Int!
+    graph: JSON!
+    variables: JSON
+    changeNote: String
+    createdBy: Int
+    createdAt: String!
+  }
+
+  input CreateWorkflowInput {
+    name: String!
+    description: String
+    graph: JSON
+    variables: JSON
+  }
+
+  input UpdateWorkflowInput {
+    description: String
+    graph: JSON
+    variables: JSON
+    status: String
+  }
+
+  input WorkflowWhereInput {
+    id: Int!
+  }
+
+  # ── Agent Builder: Workflow Execution Types ─────────────────────
+
+  type WorkflowExecutionType {
+    id: Int!
+    workflowId: Int!
+    projectId: Int!
+    workflowVersion: Int
+    status: String!
+    input: JSON
+    output: JSON
+    error: String
+    durationMs: Int
+    createdBy: Int
+    createdAt: String!
+    startedAt: String
+    completedAt: String
+  }
+
+  type WorkflowExecutionStepType {
+    id: Int!
+    executionId: Int!
+    nodeId: String!
+    nodeType: String!
+    status: String!
+    input: JSON
+    output: JSON
+    error: String
+    durationMs: Int
+    retryCount: Int
+    startedAt: String
+    completedAt: String
+  }
+
+  type NodeTypeDefinitionType {
+    type: String!
+    label: String!
+    description: String!
+    category: String!
+    color: String!
+    icon: String!
+    inputs: [PortDefinitionType!]!
+    outputs: [PortDefinitionType!]!
+    configFields: [ConfigFieldType!]!
+    maxInstances: Int
+  }
+
+  type PortDefinitionType {
+    name: String!
+    type: String!
+    required: Boolean
+  }
+
+  type ConfigFieldType {
+    name: String!
+    type: String!
+    label: String!
+    required: Boolean
+    defaultValue: JSON
+    options: [ConfigFieldOptionType!]
+  }
+
+  type ConfigFieldOptionType {
+    label: String!
+    value: String!
+  }
+
+  input ExecuteWorkflowInput {
+    workflowId: Int!
+    input: JSON
+  }
+
+  input WorkflowExecutionWhereInput {
+    id: Int!
+  }
+
+  # ── End Agent Builder Types ───────────────────────────────────
+
   # ── Data Security: Session Properties ──────────────────────────
 
   type SessionProperty {
@@ -2637,6 +2884,27 @@ export const typeDefs = gql`
     autoProvisionConfig: [AutoProvisionConfigType!]!
     autoProvisionConfigForConnector(connectorType: String!): AutoProvisionConfigType
     recommendedBlueprintForConnector(connectorType: String!): RecommendedBlueprintType!
+
+    # Agent Builder: Prompt Templates
+    promptTemplates: [PromptTemplateType!]!
+    promptTemplate(where: PromptTemplateWhereInput!): PromptTemplateType!
+    promptTemplateVersions(promptTemplateId: Int!): [PromptTemplateVersionType!]!
+
+    # Agent Builder: Tool Definitions
+    toolDefinitions: [ToolDefinitionType!]!
+    toolDefinition(where: ToolDefinitionWhereInput!): ToolDefinitionType!
+    toolDefinitionsBySource(source: String!): [ToolDefinitionType!]!
+
+    # Agent Builder: Workflows
+    workflows: [WorkflowType!]!
+    workflow(where: WorkflowWhereInput!): WorkflowType!
+    workflowVersions(workflowId: Int!): [WorkflowVersionType!]!
+
+    # Agent Builder: Workflow Execution
+    workflowExecutions(workflowId: Int!): [WorkflowExecutionType!]!
+    workflowExecution(where: WorkflowExecutionWhereInput!): WorkflowExecutionType!
+    workflowExecutionSteps(executionId: Int!): [WorkflowExecutionStepType!]!
+    nodeTypeDefinitions: [NodeTypeDefinitionType!]!
   }
 
   type Mutation {
@@ -2953,5 +3221,27 @@ export const typeDefs = gql`
     setAutoProvisionConfig(data: SetAutoProvisionConfigInput!): AutoProvisionConfigType!
     deleteAutoProvisionConfig(where: BlueprintWhereInput!): Boolean!
     provisionAgent(connectorType: String!): AutoProvisionResultType!
+
+    # Agent Builder: Prompt Templates
+    createPromptTemplate(data: CreatePromptTemplateInput!): PromptTemplateType!
+    updatePromptTemplate(where: PromptTemplateWhereInput!, data: UpdatePromptTemplateInput!): PromptTemplateType!
+    deletePromptTemplate(where: PromptTemplateWhereInput!): Boolean!
+
+    # Agent Builder: Tool Definitions
+    createToolDefinition(data: CreateToolDefinitionInput!): ToolDefinitionType!
+    updateToolDefinition(where: ToolDefinitionWhereInput!, data: UpdateToolDefinitionInput!): ToolDefinitionType!
+    deleteToolDefinition(where: ToolDefinitionWhereInput!): Boolean!
+    syncMcpTools(serverName: String!): McpSyncResult!
+
+    # Agent Builder: Workflows
+    createWorkflow(data: CreateWorkflowInput!): WorkflowType!
+    updateWorkflow(where: WorkflowWhereInput!, data: UpdateWorkflowInput!): WorkflowType!
+    deleteWorkflow(where: WorkflowWhereInput!): Boolean!
+    publishWorkflow(where: WorkflowWhereInput!): WorkflowType!
+    archiveWorkflow(where: WorkflowWhereInput!): WorkflowType!
+
+    # Agent Builder: Workflow Execution
+    executeWorkflow(data: ExecuteWorkflowInput!): WorkflowExecutionType!
+    cancelWorkflowExecution(where: WorkflowExecutionWhereInput!): WorkflowExecutionType!
   }
 `;

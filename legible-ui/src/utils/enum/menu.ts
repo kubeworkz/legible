@@ -13,4 +13,9 @@ export enum MENU_KEY {
   BLUEPRINTS = 'blueprints',
   BLUEPRINT_REGISTRY = 'blueprint-registry',
   GATEWAYS = 'gateways',
+  AGENT_BUILDER = 'agent-builder',
+  AGENT_BUILDER_PROMPT_TEMPLATES = 'agent-builder-prompt-templates',
+  AGENT_BUILDER_TOOL_REGISTRY = 'agent-builder-tool-registry',
+  AGENT_BUILDER_WORKFLOWS = 'agent-builder-workflows',
+  AGENT_BUILDER_EXECUTION_HISTORY = 'agent-builder-execution-history',
 }

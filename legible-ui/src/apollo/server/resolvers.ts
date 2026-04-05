@@ -31,6 +31,10 @@ import {
   BlueprintRegistryResolver,
   AutoProvisionResolver,
 } from './resolvers/blueprintRegistryResolver';
+import { PromptTemplateResolver } from './resolvers/promptTemplateResolver';
+import { ToolDefinitionResolver } from './resolvers/toolDefinitionResolver';
+import { WorkflowResolver } from './resolvers/workflowResolver';
+import { WorkflowExecutionResolver } from './resolvers/workflowExecutionResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -64,6 +68,10 @@ const gatewayResolver = new GatewayResolver();
 const blueprintResolver = new BlueprintResolver();
 const blueprintRegistryResolver = new BlueprintRegistryResolver();
 const autoProvisionResolver = new AutoProvisionResolver();
+const promptTemplateResolver = new PromptTemplateResolver();
+const toolDefinitionResolver = new ToolDefinitionResolver();
+const workflowResolver = new WorkflowResolver();
+const workflowExecutionResolver = new WorkflowExecutionResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -221,6 +229,23 @@ const resolvers = {
     autoProvisionConfig: autoProvisionResolver.autoProvisionConfig,
     autoProvisionConfigForConnector: autoProvisionResolver.autoProvisionConfigForConnector,
     recommendedBlueprintForConnector: autoProvisionResolver.recommendedBlueprint,
+
+    // Agent Builder
+    promptTemplates: promptTemplateResolver.listPromptTemplates,
+    promptTemplate: promptTemplateResolver.getPromptTemplate,
+    promptTemplateVersions: promptTemplateResolver.listPromptTemplateVersions,
+    toolDefinitions: toolDefinitionResolver.listToolDefinitions,
+    toolDefinition: toolDefinitionResolver.getToolDefinition,
+    toolDefinitionsBySource: toolDefinitionResolver.listToolDefinitionsBySource,
+    workflows: workflowResolver.listWorkflows,
+    workflow: workflowResolver.getWorkflow,
+    workflowVersions: workflowResolver.listWorkflowVersions,
+
+    // Agent Builder: Workflow Execution
+    workflowExecutions: workflowExecutionResolver.listWorkflowExecutions,
+    workflowExecution: workflowExecutionResolver.getWorkflowExecution,
+    workflowExecutionSteps: workflowExecutionResolver.getWorkflowExecutionSteps,
+    nodeTypeDefinitions: workflowExecutionResolver.getNodeTypeDefinitions,
   },
   Mutation: {
     // Auth
@@ -462,6 +487,24 @@ const resolvers = {
     setAutoProvisionConfig: autoProvisionResolver.setAutoProvisionConfig,
     deleteAutoProvisionConfig: autoProvisionResolver.deleteAutoProvisionConfig,
     provisionAgent: autoProvisionResolver.provisionAgent,
+
+    // Agent Builder
+    createPromptTemplate: promptTemplateResolver.createPromptTemplate,
+    updatePromptTemplate: promptTemplateResolver.updatePromptTemplate,
+    deletePromptTemplate: promptTemplateResolver.deletePromptTemplate,
+    createToolDefinition: toolDefinitionResolver.createToolDefinition,
+    updateToolDefinition: toolDefinitionResolver.updateToolDefinition,
+    deleteToolDefinition: toolDefinitionResolver.deleteToolDefinition,
+    syncMcpTools: toolDefinitionResolver.syncMcpTools,
+    createWorkflow: workflowResolver.createWorkflow,
+    updateWorkflow: workflowResolver.updateWorkflow,
+    deleteWorkflow: workflowResolver.deleteWorkflow,
+    publishWorkflow: workflowResolver.publishWorkflow,
+    archiveWorkflow: workflowResolver.archiveWorkflow,
+
+    // Agent Builder: Workflow Execution
+    executeWorkflow: workflowExecutionResolver.executeWorkflow,
+    cancelWorkflowExecution: workflowExecutionResolver.cancelWorkflowExecution,
   },
   ThreadResponse: askingResolver.getThreadResponseNestedResolver(),
   DetailStep: askingResolver.getDetailStepNestedResolver(),

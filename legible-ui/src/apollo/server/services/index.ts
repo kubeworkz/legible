@@ -25,3 +25,6 @@ export * from './blueprintService';
 export * from './blueprintRegistryService';
 export * from './autoProvisionService';
 export * from './gatewayService';
+export * from './promptTemplateService';
+export * from './toolDefinitionService';
+export * from './workflowService';

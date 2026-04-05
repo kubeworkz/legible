@@ -13,6 +13,7 @@ import Agents from './Agents';
 import Blueprints from './Blueprints';
 import Gateways from './Gateways';
 import AgentHubSidebar from './AgentHub';
+import AgentBuilderSidebar from './AgentBuilder';
 import APIManagement from './APIManagement';
 import DataSecurity from './DataSecurity';
 import LearningSection from '@/components/learning';
@@ -96,6 +97,10 @@ const DynamicSidebar = (
 
     if (pathname.startsWith(Path.Gateways)) {
       return <Gateways />;
+    }
+
+    if (pathname.startsWith(Path.AgentBuilder)) {
+      return <AgentBuilderSidebar />;
     }
 
     if (pathname.startsWith(Path.APIManagement)) {

@@ -79,6 +79,10 @@ import { IGatewayService } from '../services/gatewayService';
 import { IBlueprintService } from '../services/blueprintService';
 import { IBlueprintRegistryService } from '../services/blueprintRegistryService';
 import { IAutoProvisionService } from '../services/autoProvisionService';
+import { IPromptTemplateService } from '../services/promptTemplateService';
+import { IToolDefinitionService } from '../services/toolDefinitionService';
+import { IWorkflowService } from '../services/workflowService';
+import { IWorkflowExecutionService } from '../services/workflow/executionEngine';
 import { User } from '@server/repositories/userRepository';
 
 export interface IContext {
@@ -134,6 +138,10 @@ export interface IContext {
   blueprintService: IBlueprintService;
   blueprintRegistryService: IBlueprintRegistryService;
   autoProvisionService: IAutoProvisionService;
+  promptTemplateService: IPromptTemplateService;
+  toolDefinitionService: IToolDefinitionService;
+  workflowService: IWorkflowService;
+  workflowExecutionService: IWorkflowExecutionService;
 
   // repository
   projectRepository: IProjectRepository;

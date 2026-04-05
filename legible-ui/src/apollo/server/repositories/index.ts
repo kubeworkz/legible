@@ -45,3 +45,6 @@ export * from './blueprintRepository';
 export * from './blueprintRegistryRepository';
 export * from './autoProvisionConfigRepository';
 export * from './gatewayRepository';
+export * from './promptTemplateRepository';
+export * from './toolDefinitionRepository';
+export * from './workflowRepository';
