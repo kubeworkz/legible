@@ -16,7 +16,6 @@ import type { TableColumnsType } from 'antd';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import ApartmentOutlined from '@ant-design/icons/ApartmentOutlined';
 import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
-import EditOutlined from '@ant-design/icons/EditOutlined';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import StopOutlined from '@ant-design/icons/StopOutlined';
 import NodeIndexOutlined from '@ant-design/icons/NodeIndexOutlined';
@@ -31,8 +30,6 @@ import {
   useArchiveWorkflowMutation,
   WorkflowFieldsFragment,
 } from '@/apollo/client/graphql/workflows.generated';
-
-const { TextArea } = Input;
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'default',
@@ -82,14 +79,10 @@ export default function WorkflowsPage() {
     setIsModalOpen(true);
   };
 
-  const openEdit = (record: WorkflowFieldsFragment) => {
-    setEditingWorkflow(record);
-    form.setFieldsValue({
-      name: record.name,
-      description: record.description,
-      graph: record.graph ? JSON.stringify(record.graph, null, 2) : '',
-    });
-    setIsModalOpen(true);
+  const openCanvas = (record: WorkflowFieldsFragment) => {
+    router.push(
+      `/projects/${projectId}/agent-builder/workflows/${record.id}`,
+    );
   };
 
   const handleSubmit = async () => {
@@ -99,24 +92,26 @@ export default function WorkflowsPage() {
         name: values.name,
         description: values.description,
       };
-      if (values.graph) {
-        payload.graph = JSON.parse(values.graph);
-      }
 
       if (editingWorkflow) {
         await updateWorkflow({
           variables: { where: { id: editingWorkflow.id }, data: payload },
         });
         message.success('Workflow updated');
+        setIsModalOpen(false);
       } else {
-        await createWorkflow({ variables: { data: payload } });
-        message.success('Workflow created');
+        const result = await createWorkflow({ variables: { data: payload } });
+        message.success('Workflow created — opening visual editor');
+        setIsModalOpen(false);
+        const newId = (result.data as any)?.createWorkflow?.id;
+        if (newId) {
+          router.push(
+            `/projects/${projectId}/agent-builder/workflows/${newId}`,
+          );
+        }
       }
-      setIsModalOpen(false);
     } catch (err: any) {
-      if (err?.message?.includes('JSON')) {
-        message.error('Invalid JSON in graph field');
-      }
+      message.error(err?.message || 'Failed to save workflow');
     }
   };
 
@@ -188,20 +183,9 @@ export default function WorkflowsPage() {
             icon={<NodeIndexOutlined />}
             onClick={(e) => {
               e.stopPropagation();
-              router.push(
-                `/projects/${projectId}/agent-builder/workflows/${record.id}`,
-              );
+              openCanvas(record);
             }}
-            title="Open Canvas"
-          />
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={(e) => {
-              e.stopPropagation();
-              openEdit(record);
-            }}
+            title="Open Visual Editor"
           />
           {record.status === 'draft' && (
             <Button
@@ -256,7 +240,7 @@ export default function WorkflowsPage() {
             <ApartmentOutlined /> Workflows
           </Space>
         }
-        description="Define multi-step agent workflows. Visual editor coming in Phase 2."
+        description="Define multi-step agent workflows. Click a workflow to open the visual editor."
         titleExtra={
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
             New Workflow
@@ -276,6 +260,10 @@ export default function WorkflowsPage() {
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 20, showSizeChanger: false }}
+          onRow={(record) => ({
+            onClick: () => openCanvas(record),
+            style: { cursor: 'pointer' },
+          })}
         />
 
         <Modal
@@ -297,26 +285,6 @@ export default function WorkflowsPage() {
             </Form.Item>
             <Form.Item name="description" label="Description">
               <Input placeholder="What this workflow does" />
-            </Form.Item>
-            <Form.Item
-              name="graph"
-              label="Graph (JSON)"
-              extra="Define nodes and edges. Visual editor coming in Phase 2."
-            >
-              <TextArea
-                rows={10}
-                placeholder={`{
-  "nodes": [
-    {"id": "start", "type": "trigger", "data": {}},
-    {"id": "llm1", "type": "llm", "data": {"model": "gpt-4o"}},
-    {"id": "end", "type": "output", "data": {}}
-  ],
-  "edges": [
-    {"source": "start", "target": "llm1"},
-    {"source": "llm1", "target": "end"}
-  ]
-}`}
-              />
             </Form.Item>
           </Form>
         </Modal>
