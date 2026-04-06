@@ -17,6 +17,14 @@ import {
 
 // --- Fragment types ---
 
+export interface MemoryConfig {
+  maxMessages?: number;
+  maxTokens?: number;
+  strategy?: 'sliding_window' | 'summarize';
+  ragEnabled?: boolean;
+  ragMaxResults?: number;
+}
+
 export interface AgentDefinitionFieldsFragment {
   id: number;
   projectId: number;
@@ -25,7 +33,7 @@ export interface AgentDefinitionFieldsFragment {
   workflowId: number | null;
   systemPrompt: string | null;
   toolIds: number[] | null;
-  memoryConfig: any | null;
+  memoryConfig: MemoryConfig | null;
   model: string | null;
   temperature: number | null;
   maxTokens: number | null;
@@ -47,7 +55,7 @@ export interface AgentDefinitionVersionFieldsFragment {
   workflowId: number | null;
   systemPrompt: string | null;
   toolIds: number[] | null;
-  memoryConfig: any | null;
+  memoryConfig: MemoryConfig | null;
   model: string | null;
   temperature: number | null;
   maxTokens: number | null;
@@ -87,7 +95,7 @@ export interface CreateAgentDefinitionInput {
   workflowId?: number;
   systemPrompt?: string;
   toolIds?: number[];
-  memoryConfig?: any;
+  memoryConfig?: MemoryConfig;
   model?: string;
   temperature?: number;
   maxTokens?: number;
@@ -110,7 +118,7 @@ export interface UpdateAgentDefinitionInput {
   workflowId?: number;
   systemPrompt?: string;
   toolIds?: number[];
-  memoryConfig?: any;
+  memoryConfig?: MemoryConfig;
   model?: string;
   temperature?: number;
   maxTokens?: number;

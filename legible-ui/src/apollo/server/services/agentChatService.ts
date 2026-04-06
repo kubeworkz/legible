@@ -20,6 +20,11 @@ import {
   ToolDefinition,
 } from '@server/repositories/toolDefinitionRepository';
 import { IToolExecutionService } from '@server/services/toolExecutionService';
+import {
+  IContextWindowManager,
+  MemoryConfig,
+} from '@server/services/contextWindowManager';
+import { IAgentKnowledgeService } from '@server/services/agentKnowledgeService';
 
 const logger = getLogger('AgentChatService');
 
@@ -62,6 +67,8 @@ export class AgentChatService implements IAgentChatService {
   private readonly toolDefRepo: IToolDefinitionRepository;
   private readonly llmService: ILLMService;
   private readonly toolExecutionService: IToolExecutionService;
+  private readonly contextManager: IContextWindowManager;
+  private readonly knowledgeService: IAgentKnowledgeService;
 
   constructor(opts: {
     agentChatSessionRepository: IAgentChatSessionRepository;
@@ -70,6 +77,8 @@ export class AgentChatService implements IAgentChatService {
     toolDefinitionRepository: IToolDefinitionRepository;
     llmService: ILLMService;
     toolExecutionService: IToolExecutionService;
+    contextWindowManager: IContextWindowManager;
+    agentKnowledgeService: IAgentKnowledgeService;
   }) {
     this.sessionRepo = opts.agentChatSessionRepository;
     this.messageRepo = opts.agentChatMessageRepository;
@@ -77,6 +86,8 @@ export class AgentChatService implements IAgentChatService {
     this.toolDefRepo = opts.toolDefinitionRepository;
     this.llmService = opts.llmService;
     this.toolExecutionService = opts.toolExecutionService;
+    this.contextManager = opts.contextWindowManager;
+    this.knowledgeService = opts.agentKnowledgeService;
   }
 
   // ─── Session Management ─────────────────────────────────
@@ -178,9 +189,33 @@ export class AgentChatService implements IAgentChatService {
       },
     }));
 
-    // 3. Build message history for LLM
+    // 3. Build message history with context window management
+    const memoryConfig = (agentDef.memoryConfig as MemoryConfig) || {};
     const allMessages = await this.messageRepo.findBySessionId(sessionId);
-    const llmMessages = this.buildLLMMessages(allMessages);
+    const rawLLMMessages = this.buildLLMMessages(allMessages);
+
+    // 3a. Retrieve relevant knowledge from project KB if enabled
+    let ragContext: string | undefined;
+    if (memoryConfig.ragEnabled !== false) {
+      try {
+        const knowledge = await this.knowledgeService.retrieveKnowledge(
+          projectId,
+          input.content,
+          memoryConfig.ragMaxResults,
+        );
+        const formatted = this.knowledgeService.formatAsContext(knowledge);
+        if (formatted) ragContext = formatted;
+      } catch (err: any) {
+        logger.warn(`Knowledge retrieval failed: ${err.message}`);
+      }
+    }
+
+    // 3b. Apply context window management (token budgeting, truncation)
+    const { messages: llmMessages } = this.contextManager.fitToWindow(
+      rawLLMMessages,
+      memoryConfig,
+      ragContext,
+    );
 
     // 4. Agentic loop: call LLM → if tool_calls → execute → call LLM again
     const newMessages: AgentChatMessage[] = [userMsg];
@@ -302,7 +337,13 @@ export class AgentChatService implements IAgentChatService {
           // Rebuild message history with tool results and loop
           const updatedMessages =
             await this.messageRepo.findBySessionId(sessionId);
-          currentMessages = this.buildLLMMessages(updatedMessages);
+          const updatedRaw = this.buildLLMMessages(updatedMessages);
+          const { messages: updatedLLM } = this.contextManager.fitToWindow(
+            updatedRaw,
+            memoryConfig,
+            ragContext,
+          );
+          currentMessages = updatedLLM;
           continue; // Next round of the agentic loop
         }
 

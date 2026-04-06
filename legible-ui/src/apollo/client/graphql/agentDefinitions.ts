@@ -9,7 +9,13 @@ const AGENT_DEFINITION = gql`
     workflowId
     systemPrompt
     toolIds
-    memoryConfig
+    memoryConfig {
+      maxMessages
+      maxTokens
+      strategy
+      ragEnabled
+      ragMaxResults
+    }
     model
     temperature
     maxTokens
@@ -33,7 +39,13 @@ const AGENT_DEFINITION_VERSION = gql`
     workflowId
     systemPrompt
     toolIds
-    memoryConfig
+    memoryConfig {
+      maxMessages
+      maxTokens
+      strategy
+      ragEnabled
+      ragMaxResults
+    }
     model
     temperature
     maxTokens

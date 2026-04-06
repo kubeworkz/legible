@@ -16,6 +16,8 @@ import {
   Tabs,
   Descriptions,
   Timeline,
+  Switch,
+  Divider,
 } from 'antd';
 import type { TableColumnsType } from 'antd';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
@@ -128,6 +130,7 @@ export default function AgentDefinitionsPage() {
 
   const openEdit = (record: AgentDefinitionFieldsFragment) => {
     setEditingAgent(record);
+    const mc = record.memoryConfig as any;
     form.setFieldsValue({
       name: record.name,
       description: record.description,
@@ -138,6 +141,11 @@ export default function AgentDefinitionsPage() {
       temperature: record.temperature,
       maxTokens: record.maxTokens,
       tags: record.tags || [],
+      memoryStrategy: mc?.strategy || 'sliding_window',
+      memoryMaxMessages: mc?.maxMessages,
+      memoryMaxTokens: mc?.maxTokens,
+      memoryRagEnabled: mc?.ragEnabled !== false,
+      memoryRagMaxResults: mc?.ragMaxResults,
     });
     setIsModalOpen(true);
   };
@@ -150,6 +158,13 @@ export default function AgentDefinitionsPage() {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      const memoryConfig = {
+        strategy: values.memoryStrategy || 'sliding_window',
+        maxMessages: values.memoryMaxMessages || undefined,
+        maxTokens: values.memoryMaxTokens || undefined,
+        ragEnabled: values.memoryRagEnabled !== false,
+        ragMaxResults: values.memoryRagMaxResults || undefined,
+      };
       const payload = {
         name: values.name,
         description: values.description || undefined,
@@ -160,6 +175,7 @@ export default function AgentDefinitionsPage() {
         temperature: values.temperature ?? undefined,
         maxTokens: values.maxTokens || undefined,
         tags: values.tags?.length ? values.tags : undefined,
+        memoryConfig,
       };
 
       if (editingAgent) {
@@ -467,6 +483,51 @@ export default function AgentDefinitionsPage() {
                 style={{ width: '100%' }}
               />
             </Form.Item>
+
+            <Divider orientation="left" plain>
+              Memory &amp; Context
+            </Divider>
+
+            <Space size="large">
+              <Form.Item
+                name="memoryStrategy"
+                label="Strategy"
+                initialValue="sliding_window"
+              >
+                <Select style={{ width: 180 }}>
+                  <Select.Option value="sliding_window">
+                    Sliding Window
+                  </Select.Option>
+                  <Select.Option value="summarize">
+                    Summarize
+                  </Select.Option>
+                </Select>
+              </Form.Item>
+              <Form.Item name="memoryMaxMessages" label="Max Messages">
+                <InputNumber min={0} placeholder="50" style={{ width: 120 }} />
+              </Form.Item>
+              <Form.Item name="memoryMaxTokens" label="Token Budget">
+                <InputNumber
+                  min={0}
+                  step={1000}
+                  placeholder="8000"
+                  style={{ width: 140 }}
+                />
+              </Form.Item>
+            </Space>
+            <Space size="large">
+              <Form.Item
+                name="memoryRagEnabled"
+                label="Knowledge Base RAG"
+                valuePropName="checked"
+                initialValue={true}
+              >
+                <Switch />
+              </Form.Item>
+              <Form.Item name="memoryRagMaxResults" label="RAG Max Results">
+                <InputNumber min={1} max={20} placeholder="5" style={{ width: 120 }} />
+              </Form.Item>
+            </Space>
           </Form>
         </Modal>
 
@@ -558,6 +619,20 @@ export default function AgentDefinitionsPage() {
                         {detailAgent.tags?.map((t) => (
                           <Tag key={t}>{t}</Tag>
                         )) || '—'}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Memory Strategy">
+                        {(detailAgent.memoryConfig as any)?.strategy || 'sliding_window'}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="RAG Enabled">
+                        {(detailAgent.memoryConfig as any)?.ragEnabled !== false
+                          ? 'Yes'
+                          : 'No'}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Max Messages">
+                        {(detailAgent.memoryConfig as any)?.maxMessages ?? '50 (default)'}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Token Budget">
+                        {(detailAgent.memoryConfig as any)?.maxTokens ?? '8000 (default)'}
                       </Descriptions.Item>
                       <Descriptions.Item label="Created">
                         {new Date(detailAgent.createdAt).toLocaleString()}

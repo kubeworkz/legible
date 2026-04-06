@@ -2090,6 +2090,28 @@ export const typeDefs = gql`
 
   # ── Agent Builder: Agent Definitions ──────────────────────────
 
+  """Memory & context configuration for an agent"""
+  input MemoryConfigInput {
+    """Maximum number of messages to retain (0 = unlimited)"""
+    maxMessages: Int
+    """Maximum input token budget for the context window"""
+    maxTokens: Int
+    """Strategy for managing long histories: sliding_window or summarize"""
+    strategy: String
+    """Whether to inject RAG context from the project knowledge base"""
+    ragEnabled: Boolean
+    """Maximum number of RAG results to include"""
+    ragMaxResults: Int
+  }
+
+  type MemoryConfigType {
+    maxMessages: Int
+    maxTokens: Int
+    strategy: String
+    ragEnabled: Boolean
+    ragMaxResults: Int
+  }
+
   type AgentDefinitionType {
     id: Int!
     projectId: Int!
@@ -2098,7 +2120,7 @@ export const typeDefs = gql`
     workflowId: Int
     systemPrompt: String
     toolIds: [Int!]
-    memoryConfig: JSON
+    memoryConfig: MemoryConfigType
     model: String
     temperature: Float
     maxTokens: Int
@@ -2120,7 +2142,7 @@ export const typeDefs = gql`
     workflowId: Int
     systemPrompt: String
     toolIds: [Int!]
-    memoryConfig: JSON
+    memoryConfig: MemoryConfigType
     model: String
     temperature: Float
     maxTokens: Int
@@ -2136,7 +2158,7 @@ export const typeDefs = gql`
     workflowId: Int
     systemPrompt: String
     toolIds: [Int!]
-    memoryConfig: JSON
+    memoryConfig: MemoryConfigInput
     model: String
     temperature: Float
     maxTokens: Int
@@ -2151,7 +2173,7 @@ export const typeDefs = gql`
     workflowId: Int
     systemPrompt: String
     toolIds: [Int!]
-    memoryConfig: JSON
+    memoryConfig: MemoryConfigInput
     model: String
     temperature: Float
     maxTokens: Int

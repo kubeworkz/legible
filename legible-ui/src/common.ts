@@ -127,6 +127,8 @@ import {
   AgentChatMessageRepository,
 } from '@server/repositories/agentChatRepository';
 import { AgentChatService } from '@server/services/agentChatService';
+import { ContextWindowManager } from '@server/services/contextWindowManager';
+import { AgentKnowledgeService } from '@server/services/agentKnowledgeService';
 import { getLogger } from '@server/utils';
 
 export const serverConfig = getConfig();
@@ -440,6 +442,13 @@ export const initComponents = () => {
     agentDefinitionVersionRepository,
   });
 
+  const contextWindowManager = new ContextWindowManager();
+
+  const agentKnowledgeService = new AgentKnowledgeService({
+    instructionRepository,
+    sqlPairRepository,
+  });
+
   const agentChatService = new AgentChatService({
     agentChatSessionRepository,
     agentChatMessageRepository,
@@ -447,6 +456,8 @@ export const initComponents = () => {
     toolDefinitionRepository,
     llmService,
     toolExecutionService,
+    contextWindowManager,
+    agentKnowledgeService,
   });
 
   // Wire stripeService into metering (created earlier, avoids circular init)
