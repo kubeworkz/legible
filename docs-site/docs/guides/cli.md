@@ -383,6 +383,27 @@ See [Blueprints](/agents/blueprints) for full documentation.
 
 Aliases: `gateways`, `gw`. See [Gateways](/agents/gateways) for full documentation.
 
+### Agent Builder
+
+| Command | Description |
+|---------|-------------|
+| `legible agent-builder list` | List all agent definitions |
+| `legible agent-builder show <id>` | Show agent definition details |
+| `legible agent-builder create --name <name>` | Create a new agent definition |
+| `legible agent-builder create --name <name> --model <model>` | Create with a specific LLM model |
+| `legible agent-builder create --name <name> --system-prompt <prompt>` | Create with a system prompt |
+| `legible agent-builder create --name <name> --temperature <n>` | Set temperature (0.0–2.0) |
+| `legible agent-builder create --name <name> --max-tokens <n>` | Set max output tokens |
+| `legible agent-builder create --name <name> --tags <a>,<b>` | Set comma-separated tags |
+| `legible agent-builder publish <id>` | Publish a new version |
+| `legible agent-builder publish <id> --note <text>` | Publish with a change note |
+| `legible agent-builder deploy <id>` | Deploy for API access |
+| `legible agent-builder archive <id>` | Archive an agent definition |
+| `legible agent-builder versions <id>` | Show version history |
+| `legible agent-builder chat <id>` | Interactive chat with a deployed agent |
+
+Aliases: `ab`. See [Agent Builder](/agents/agent-builder) for full documentation.
+
 ### Global Flags
 
 | Flag | Description |
