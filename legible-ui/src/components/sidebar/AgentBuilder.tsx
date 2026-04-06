@@ -28,6 +28,7 @@ const MENU_KEY_MAP_ENTRIES: Array<[string, string]> = (
     [Path.AgentBuilderToolRegistry, MENU_KEY.AGENT_BUILDER_TOOL_REGISTRY],
     [Path.AgentBuilderExecutionHistory, MENU_KEY.AGENT_BUILDER_EXECUTION_HISTORY],
     [Path.AgentBuilderWorkflows, MENU_KEY.AGENT_BUILDER_WORKFLOWS],
+    [Path.AgentBuilderAgentChat, MENU_KEY.AGENT_BUILDER_AGENTS],
     [Path.AgentBuilderAgents, MENU_KEY.AGENT_BUILDER_AGENTS],
     [Path.AgentBuilder, MENU_KEY.AGENT_BUILDER],
   ] as Array<[string, string]>

@@ -122,6 +122,11 @@ import {
   AgentDefinitionVersionRepository,
 } from '@server/repositories/agentDefinitionRepository';
 import { AgentDefinitionService } from '@server/services/agentDefinitionService';
+import {
+  AgentChatSessionRepository,
+  AgentChatMessageRepository,
+} from '@server/repositories/agentChatRepository';
+import { AgentChatService } from '@server/services/agentChatService';
 import { getLogger } from '@server/utils';
 
 export const serverConfig = getConfig();
@@ -196,6 +201,8 @@ export const initComponents = () => {
   const workflowExecutionStepRepository = new WorkflowExecutionStepRepository(knex);
   const agentDefinitionRepository = new AgentDefinitionRepository(knex);
   const agentDefinitionVersionRepository = new AgentDefinitionVersionRepository(knex);
+  const agentChatSessionRepository = new AgentChatSessionRepository(knex);
+  const agentChatMessageRepository = new AgentChatMessageRepository(knex);
 
   // adaptors
   const wrenEngineAdaptor = new WrenEngineAdaptor({
@@ -433,6 +440,15 @@ export const initComponents = () => {
     agentDefinitionVersionRepository,
   });
 
+  const agentChatService = new AgentChatService({
+    agentChatSessionRepository,
+    agentChatMessageRepository,
+    agentDefinitionRepository,
+    toolDefinitionRepository,
+    llmService,
+    toolExecutionService,
+  });
+
   // Wire stripeService into metering (created earlier, avoids circular init)
   queryMeteringService.setStripeService(stripeService);
 
@@ -547,6 +563,7 @@ export const initComponents = () => {
     workflowService,
     workflowExecutionService,
     agentDefinitionService,
+    agentChatService,
 
     // background trackers
     projectRecommendQuestionBackgroundTracker,

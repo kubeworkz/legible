@@ -145,6 +145,7 @@ const bootstrapServer = async () => {
     workflowService,
     workflowExecutionService,
     agentDefinitionService,
+    agentChatService,
     subscriptionRepository,
     // background trackers
     projectRecommendQuestionBackgroundTracker,
@@ -380,6 +381,7 @@ const bootstrapServer = async () => {
         workflowService,
         workflowExecutionService,
         agentDefinitionService,
+        agentChatService,
         // background trackers
         projectRecommendQuestionBackgroundTracker,
         threadRecommendQuestionBackgroundTracker,

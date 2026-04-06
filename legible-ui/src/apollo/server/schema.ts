@@ -2162,6 +2162,52 @@ export const typeDefs = gql`
     id: Int!
   }
 
+  # ── Agent Builder: Agent Chat ─────────────────────────────────
+
+  type AgentChatSessionType {
+    id: Int!
+    projectId: Int!
+    agentDefinitionId: Int!
+    title: String
+    status: String!
+    createdBy: Int
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type ReasoningStepType {
+    type: String!
+    content: String!
+    toolName: String
+    toolInput: JSON
+    toolOutput: JSON
+    durationMs: Int
+    timestamp: String
+  }
+
+  type ChatMessageMetadataType {
+    model: String
+    usage: JSON
+    finishReason: String
+    durationMs: Int
+  }
+
+  type AgentChatMessageType {
+    id: Int!
+    sessionId: Int!
+    role: String!
+    content: String
+    toolCallId: String
+    toolName: String
+    toolInput: JSON
+    toolOutput: JSON
+    reasoningSteps: [ReasoningStepType!]
+    metadata: ChatMessageMetadataType
+    status: String!
+    error: String
+    createdAt: String!
+  }
+
   # ── Agent Builder: Prompt Templates ───────────────────────────
 
   type PromptTemplateType {
@@ -2966,6 +3012,11 @@ export const typeDefs = gql`
     agentDefinition(where: AgentDefinitionWhereInput!): AgentDefinitionType!
     agentDefinitionVersions(agentDefinitionId: Int!): [AgentDefinitionVersionType!]!
 
+    # Agent Builder: Agent Chat
+    agentChatSessions(agentDefinitionId: Int!): [AgentChatSessionType!]!
+    agentChatSession(sessionId: Int!): AgentChatSessionType!
+    agentChatMessages(sessionId: Int!): [AgentChatMessageType!]!
+
     # Agent Builder: Prompt Templates
     promptTemplates: [PromptTemplateType!]!
     promptTemplate(where: PromptTemplateWhereInput!): PromptTemplateType!
@@ -3310,6 +3361,11 @@ export const typeDefs = gql`
     publishAgentDefinition(where: AgentDefinitionWhereInput!, changeNote: String): AgentDefinitionType!
     deployAgentDefinition(where: AgentDefinitionWhereInput!): AgentDefinitionType!
     archiveAgentDefinition(where: AgentDefinitionWhereInput!): AgentDefinitionType!
+
+    # Agent Builder: Agent Chat
+    createChatSession(agentDefinitionId: Int!): AgentChatSessionType!
+    deleteChatSession(sessionId: Int!): Boolean!
+    sendChatMessage(sessionId: Int!, content: String!): [AgentChatMessageType!]!
 
     # Agent Builder: Prompt Templates
     createPromptTemplate(data: CreatePromptTemplateInput!): PromptTemplateType!

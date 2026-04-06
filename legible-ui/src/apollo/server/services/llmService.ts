@@ -27,6 +27,26 @@ export interface LLMCallOptions {
   stop?: string[];
 }
 
+export interface ToolCallFunction {
+  name: string;
+  arguments: Record<string, any>;
+}
+
+export interface ToolCall {
+  id: string;
+  type: 'function';
+  function: ToolCallFunction;
+}
+
+export interface ToolSchema {
+  type: 'function';
+  function: {
+    name: string;
+    description: string;
+    parameters: Record<string, any>;
+  };
+}
+
 export interface LLMResponse {
   content: string;
   model: string;
@@ -36,6 +56,7 @@ export interface LLMResponse {
     totalTokens: number;
   };
   finishReason: string;
+  toolCalls?: ToolCall[];
 }
 
 // ─── Provider base URLs ────────────────────────────────
@@ -62,6 +83,7 @@ export interface ILLMService {
     projectId: number,
     messages: ChatMessage[],
     options?: LLMCallOptions,
+    tools?: ToolSchema[],
   ): Promise<LLMResponse>;
 }
 
@@ -85,6 +107,7 @@ export class LLMService implements ILLMService {
     projectId: number,
     messages: ChatMessage[],
     options: LLMCallOptions = {},
+    tools?: ToolSchema[],
   ): Promise<LLMResponse> {
     // Get the project's BYOK config
     const project = await this.projectRepository.findOneBy({ id: projectId });
@@ -108,11 +131,11 @@ export class LLMService implements ILLMService {
     );
 
     if (provider === 'anthropic') {
-      return this.callAnthropic(apiKey, model, messages, options);
+      return this.callAnthropic(apiKey, model, messages, options, tools);
     }
 
     // OpenAI-compatible providers
-    return this.callOpenAICompatible(apiKey, provider, model, messages, options);
+    return this.callOpenAICompatible(apiKey, provider, model, messages, options, tools);
   }
 
   // ─── OpenAI-compatible ───────────────────────────────
@@ -123,6 +146,7 @@ export class LLMService implements ILLMService {
     model: string,
     messages: ChatMessage[],
     options: LLMCallOptions,
+    tools?: ToolSchema[],
   ): Promise<LLMResponse> {
     const baseUrl = PROVIDER_BASE_URLS[provider] || PROVIDER_BASE_URLS.openai;
     const url = `${baseUrl}/chat/completions`;
@@ -132,6 +156,7 @@ export class LLMService implements ILLMService {
       messages,
     };
 
+    if (tools && tools.length > 0) body.tools = tools;
     if (options.temperature != null) body.temperature = options.temperature;
     if (options.maxTokens != null) body.max_tokens = options.maxTokens;
     if (options.topP != null) body.top_p = options.topP;
@@ -149,6 +174,22 @@ export class LLMService implements ILLMService {
       const data = response.data;
       const choice = data.choices?.[0];
 
+      // Parse tool calls if present
+      let toolCalls: ToolCall[] | undefined;
+      if (choice?.message?.tool_calls?.length) {
+        toolCalls = choice.message.tool_calls.map((tc: any) => ({
+          id: tc.id,
+          type: 'function' as const,
+          function: {
+            name: tc.function.name,
+            arguments:
+              typeof tc.function.arguments === 'string'
+                ? JSON.parse(tc.function.arguments)
+                : tc.function.arguments,
+          },
+        }));
+      }
+
       return {
         content: choice?.message?.content || '',
         model: data.model || model,
@@ -158,6 +199,7 @@ export class LLMService implements ILLMService {
           totalTokens: data.usage?.total_tokens || 0,
         },
         finishReason: choice?.finish_reason || 'stop',
+        toolCalls,
       };
     } catch (err: any) {
       const detail =
@@ -174,6 +216,7 @@ export class LLMService implements ILLMService {
     model: string,
     messages: ChatMessage[],
     options: LLMCallOptions,
+    tools?: ToolSchema[],
   ): Promise<LLMResponse> {
     const url = `${PROVIDER_BASE_URLS.anthropic}/v1/messages`;
 
@@ -193,6 +236,13 @@ export class LLMService implements ILLMService {
     };
 
     if (systemPrompt) body.system = systemPrompt;
+    if (tools && tools.length > 0) {
+      body.tools = tools.map((t) => ({
+        name: t.function.name,
+        description: t.function.description,
+        input_schema: t.function.parameters,
+      }));
+    }
     if (options.temperature != null) body.temperature = options.temperature;
     if (options.topP != null) body.top_p = options.topP;
     if (options.stop) body.stop_sequences = options.stop;
@@ -214,6 +264,22 @@ export class LLMService implements ILLMService {
           .map((c: any) => c.text)
           .join('') || '';
 
+      // Parse Anthropic tool_use blocks
+      let toolCalls: ToolCall[] | undefined;
+      const toolUseBlocks = data.content?.filter(
+        (c: any) => c.type === 'tool_use',
+      );
+      if (toolUseBlocks?.length) {
+        toolCalls = toolUseBlocks.map((tc: any) => ({
+          id: tc.id,
+          type: 'function' as const,
+          function: {
+            name: tc.name,
+            arguments: tc.input || {},
+          },
+        }));
+      }
+
       return {
         content: text,
         model: data.model || model,
@@ -225,6 +291,7 @@ export class LLMService implements ILLMService {
             (data.usage?.output_tokens || 0),
         },
         finishReason: data.stop_reason || 'end_turn',
+        toolCalls,
       };
     } catch (err: any) {
       const detail =

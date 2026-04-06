@@ -84,6 +84,7 @@ import { IToolDefinitionService } from '../services/toolDefinitionService';
 import { IWorkflowService } from '../services/workflowService';
 import { IWorkflowExecutionService } from '../services/workflow/executionEngine';
 import { IAgentDefinitionService } from '../services/agentDefinitionService';
+import { IAgentChatService } from '../services/agentChatService';
 import { User } from '@server/repositories/userRepository';
 
 export interface IContext {
@@ -144,6 +145,7 @@ export interface IContext {
   workflowService: IWorkflowService;
   workflowExecutionService: IWorkflowExecutionService;
   agentDefinitionService: IAgentDefinitionService;
+  agentChatService: IAgentChatService;
 
   // repository
   projectRepository: IProjectRepository;

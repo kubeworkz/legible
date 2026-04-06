@@ -36,6 +36,7 @@ import { PromptTemplateResolver } from './resolvers/promptTemplateResolver';
 import { ToolDefinitionResolver } from './resolvers/toolDefinitionResolver';
 import { WorkflowResolver } from './resolvers/workflowResolver';
 import { WorkflowExecutionResolver } from './resolvers/workflowExecutionResolver';
+import { AgentChatResolver } from './resolvers/agentChatResolver';
 import { convertColumnType } from '@server/utils';
 import { DialectSQLScalar } from './scalars';
 
@@ -74,6 +75,7 @@ const promptTemplateResolver = new PromptTemplateResolver();
 const toolDefinitionResolver = new ToolDefinitionResolver();
 const workflowResolver = new WorkflowResolver();
 const workflowExecutionResolver = new WorkflowExecutionResolver();
+const agentChatResolver = new AgentChatResolver();
 const resolvers = {
   JSON: GraphQLJSON,
   DialectSQL: DialectSQLScalar,
@@ -236,6 +238,12 @@ const resolvers = {
     agentDefinitions: agentDefinitionResolver.listAgentDefinitions,
     agentDefinition: agentDefinitionResolver.getAgentDefinition,
     agentDefinitionVersions: agentDefinitionResolver.listAgentDefinitionVersions,
+
+    // Agent Builder: Agent Chat
+    agentChatSessions: agentChatResolver.listChatSessions,
+    agentChatSession: agentChatResolver.getChatSession,
+    agentChatMessages: agentChatResolver.getChatMessages,
+
     promptTemplates: promptTemplateResolver.listPromptTemplates,
     promptTemplate: promptTemplateResolver.getPromptTemplate,
     promptTemplateVersions: promptTemplateResolver.listPromptTemplateVersions,
@@ -500,6 +508,12 @@ const resolvers = {
     publishAgentDefinition: agentDefinitionResolver.publishAgentDefinition,
     deployAgentDefinition: agentDefinitionResolver.deployAgentDefinition,
     archiveAgentDefinition: agentDefinitionResolver.archiveAgentDefinition,
+
+    // Agent Builder: Agent Chat
+    createChatSession: agentChatResolver.createChatSession,
+    deleteChatSession: agentChatResolver.deleteChatSession,
+    sendChatMessage: agentChatResolver.sendChatMessage,
+
     createPromptTemplate: promptTemplateResolver.createPromptTemplate,
     updatePromptTemplate: promptTemplateResolver.updatePromptTemplate,
     deletePromptTemplate: promptTemplateResolver.deletePromptTemplate,

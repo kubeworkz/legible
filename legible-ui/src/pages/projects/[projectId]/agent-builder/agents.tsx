@@ -26,6 +26,7 @@ import CloudUploadOutlined from '@ant-design/icons/CloudUploadOutlined';
 import StopOutlined from '@ant-design/icons/StopOutlined';
 import EditOutlined from '@ant-design/icons/EditOutlined';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
+import MessageOutlined from '@ant-design/icons/MessageOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import {
@@ -42,6 +43,7 @@ import {
 } from '@/apollo/client/graphql/agentDefinitions.generated';
 import { useWorkflowsQuery } from '@/apollo/client/graphql/workflows.generated';
 import { useToolDefinitionsQuery } from '@/apollo/client/graphql/toolDefinitions.generated';
+import { Path, buildPath } from '@/utils/enum';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'default',
@@ -258,9 +260,24 @@ export default function AgentDefinitionsPage() {
     {
       title: '',
       key: 'actions',
-      width: 220,
+      width: 260,
       render: (_: any, record: AgentDefinitionFieldsFragment) => (
         <Space>
+          <Button
+            type="text"
+            size="small"
+            icon={<MessageOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(
+                buildPath(Path.AgentBuilderAgentChat, projectId).replace(
+                  '[agentId]',
+                  String(record.id),
+                ),
+              );
+            }}
+            title="Chat"
+          />
           <Button
             type="text"
             size="small"
