@@ -25,6 +25,8 @@ export enum ApiType {
   GET_MODELS = 'GET_MODELS',
   STREAM_ASK = 'STREAM_ASK',
   STREAM_GENERATE_SQL = 'STREAM_GENERATE_SQL',
+  AGENT_CHAT = 'AGENT_CHAT',
+  AGENT_LIST = 'AGENT_LIST',
 }
 
 export interface ApiHistory {

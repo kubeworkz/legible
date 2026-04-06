@@ -553,6 +553,8 @@ export const typeDefs = gql`
     GET_MODELS
     STREAM_ASK
     STREAM_GENERATE_SQL
+    AGENT_CHAT
+    AGENT_LIST
   }
 
   input ApiHistoryFilterInput {

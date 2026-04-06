@@ -199,8 +199,17 @@ export class AgentDefinitionService implements IAgentDefinitionService {
 
     logger.info(`Deploying agent definition ${id} (${def.name})`);
 
+    // Build deploy config with API endpoint info
+    const deployConfig = {
+      ...(def.deployConfig || {}),
+      apiEnabled: true,
+      apiEndpoint: `/api/v1/agents/${id}/sessions`,
+      deployedVersion: def.currentVersion,
+    };
+
     return this.agentDefRepo.updateOne(id, {
       status: 'deployed',
+      deployConfig,
       deployedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });

@@ -598,6 +598,104 @@ export default function AgentDefinitionsPage() {
                     />
                   ),
                 },
+                ...(detailAgent.status === 'deployed'
+                  ? [
+                      {
+                        key: 'api',
+                        label: 'API Endpoint',
+                        children: (() => {
+                          const host =
+                            typeof window !== 'undefined'
+                              ? window.location.origin
+                              : 'http://localhost:3000';
+                          const base = `${host}/api/v1/agents/${detailAgent.id}`;
+                          return (
+                            <div>
+                              <Descriptions
+                                column={1}
+                                bordered
+                                size="small"
+                                style={{ marginBottom: 16 }}
+                              >
+                                <Descriptions.Item label="Status">
+                                  <Tag color="green">Live</Tag>
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Deployed At">
+                                  {detailAgent.deployedAt
+                                    ? new Date(
+                                        detailAgent.deployedAt,
+                                      ).toLocaleString()
+                                    : '—'}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Base URL">
+                                  <Typography.Text code copyable>
+                                    {base}
+                                  </Typography.Text>
+                                </Descriptions.Item>
+                              </Descriptions>
+
+                              <Typography.Title level={5}>
+                                Quick Start
+                              </Typography.Title>
+                              <Typography.Paragraph type="secondary">
+                                Use any Project API Key (
+                                <code>psk-...</code>) as the Bearer token.
+                              </Typography.Paragraph>
+
+                              <Typography.Text strong>
+                                1. Create a session
+                              </Typography.Text>
+                              <pre
+                                style={{
+                                  background: 'var(--gray-2)',
+                                  padding: 12,
+                                  borderRadius: 6,
+                                  fontSize: 12,
+                                  overflow: 'auto',
+                                  marginBottom: 12,
+                                }}
+                              >{`curl -X POST ${base}/sessions \\
+  -H "Authorization: Bearer YOUR_PROJECT_API_KEY" \\
+  -H "X-Project-Id: ${detailAgent.projectId}"`}</pre>
+
+                              <Typography.Text strong>
+                                2. Send a message
+                              </Typography.Text>
+                              <pre
+                                style={{
+                                  background: 'var(--gray-2)',
+                                  padding: 12,
+                                  borderRadius: 6,
+                                  fontSize: 12,
+                                  overflow: 'auto',
+                                  marginBottom: 12,
+                                }}
+                              >{`curl -X POST ${base}/sessions/SESSION_ID/messages \\
+  -H "Authorization: Bearer YOUR_PROJECT_API_KEY" \\
+  -H "X-Project-Id: ${detailAgent.projectId}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"message": "Hello, agent!"}'`}</pre>
+
+                              <Typography.Text strong>
+                                3. List messages
+                              </Typography.Text>
+                              <pre
+                                style={{
+                                  background: 'var(--gray-2)',
+                                  padding: 12,
+                                  borderRadius: 6,
+                                  fontSize: 12,
+                                  overflow: 'auto',
+                                }}
+                              >{`curl ${base}/sessions/SESSION_ID/messages \\
+  -H "Authorization: Bearer YOUR_PROJECT_API_KEY" \\
+  -H "X-Project-Id: ${detailAgent.projectId}"`}</pre>
+                            </div>
+                          );
+                        })(),
+                      },
+                    ]
+                  : []),
               ]}
             />
           )}
