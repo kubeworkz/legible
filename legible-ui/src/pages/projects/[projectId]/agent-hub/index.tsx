@@ -21,6 +21,7 @@ import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import CloseCircleOutlined from '@ant-design/icons/CloseCircleOutlined';
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
 import HistoryOutlined from '@ant-design/icons/HistoryOutlined';
+import ThunderboltOutlined from '@ant-design/icons/ThunderboltOutlined';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import PageLayout from '@/components/layouts/PageLayout';
 import { Path, buildPath } from '@/utils/enum';
@@ -32,6 +33,10 @@ import {
   AgentFieldsFragment,
   useAgentsQuery,
 } from '@/apollo/client/graphql/agents.generated';
+import {
+  AgentDefinitionFieldsFragment,
+  useAgentDefinitionsQuery,
+} from '@/apollo/client/graphql/agentDefinitions.generated';
 import { useBlueprintsQuery } from '@/apollo/client/graphql/blueprints.generated';
 import { useGatewayForOrgQuery } from '@/apollo/client/graphql/gateways.generated';
 
@@ -54,6 +59,13 @@ const STATUS_COLORS: Record<string, string> = {
   FAILED: 'red',
 };
 
+const DEF_STATUS_COLORS: Record<string, string> = {
+  draft: 'default',
+  published: 'blue',
+  deployed: 'green',
+  archived: 'red',
+};
+
 const GATEWAY_STATUS_ICON: Record<string, React.ReactNode> = {
   RUNNING: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
   STARTING: <LoadingOutlined style={{ color: '#1890ff' }} />,
@@ -69,6 +81,10 @@ export default function AgentHubPage() {
   const { data: agentsData, loading: agentsLoading } = useAgentsQuery({
     fetchPolicy: 'cache-and-network',
   });
+  const { data: agentDefsData, loading: defsLoading } =
+    useAgentDefinitionsQuery({
+      fetchPolicy: 'cache-and-network',
+    });
   const { data: blueprintsData } = useBlueprintsQuery();
   const { data: gatewayData } = useGatewayForOrgQuery({
     variables: { organizationId: currentOrgId! },
@@ -78,6 +94,10 @@ export default function AgentHubPage() {
   });
 
   const agents = useMemo(() => agentsData?.agents || [], [agentsData]);
+  const agentDefs = useMemo(
+    () => agentDefsData?.agentDefinitions || [],
+    [agentDefsData],
+  );
   const blueprints = useMemo(
     () => blueprintsData?.blueprints || [],
     [blueprintsData],
@@ -91,6 +111,10 @@ export default function AgentHubPage() {
   const stopped = agents.filter((a) => a.status === 'STOPPED').length;
   const failed = agents.filter((a) => a.status === 'FAILED').length;
   const creating = agents.filter((a) => a.status === 'CREATING').length;
+
+  const deployedDefs = agentDefs.filter((d) => d.status === 'deployed').length;
+  const publishedDefs = agentDefs.filter((d) => d.status === 'published').length;
+  const draftDefs = agentDefs.filter((d) => d.status === 'draft').length;
 
   const bp = (path: Path) => buildPath(path, currentProjectId);
 
@@ -152,6 +176,66 @@ export default function AgentHubPage() {
     },
   ];
 
+  // Built agent definition columns
+  const defColumns: TableColumnsType<AgentDefinitionFieldsFragment> = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      render: (name: string, record) => (
+        <Space>
+          <Text strong style={{ color: '#1890ff' }}>{name}</Text>
+          {record.tags?.map((tag) => (
+            <Tag key={tag} style={{ fontSize: 11 }}>{tag}</Tag>
+          ))}
+        </Space>
+      ),
+    },
+    {
+      title: 'Model',
+      dataIndex: 'model',
+      key: 'model',
+      width: 140,
+      render: (m: string | null) => m || <Text type="secondary">—</Text>,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      width: 110,
+      render: (status: string) => (
+        <Tag color={DEF_STATUS_COLORS[status] || 'default'}>{status}</Tag>
+      ),
+    },
+    {
+      title: 'Version',
+      dataIndex: 'currentVersion',
+      key: 'currentVersion',
+      width: 80,
+      render: (v: number) => `v${v}`,
+    },
+    {
+      title: 'Updated',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      width: 160,
+      render: (ts: string) => getCompactTime(ts),
+    },
+  ];
+
+  // Recent built agents (sorted by updatedAt descending, top 10)
+  const recentDefs = useMemo(
+    () =>
+      [...agentDefs]
+        .sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() -
+            new Date(a.updatedAt).getTime(),
+        )
+        .slice(0, 10),
+    [agentDefs],
+  );
+
   // Gateway sandbox usage
   const sandboxPercent = gateway?.maxSandboxes
     ? Math.round(
@@ -178,17 +262,37 @@ export default function AgentHubPage() {
       >
         {/* ── Stats Row ──────────────────────────────────── */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col span={6}>
+          <Col xs={12} md={6} xl={5}>
             <StatCard hoverable onClick={() => router.push(bp(Path.Agents))}>
               <Statistic
-                title="Total Agents"
+                title="Sandbox Agents"
                 value={agents.length}
                 prefix={<RobotOutlined />}
                 loading={agentsLoading}
               />
             </StatCard>
           </Col>
-          <Col span={6}>
+          <Col xs={12} md={6} xl={5}>
+            <StatCard
+              hoverable
+              onClick={() => router.push(bp(Path.AgentBuilderAgents))}
+            >
+              <Statistic
+                title="Built Agents"
+                value={agentDefs.length}
+                prefix={<ThunderboltOutlined />}
+                loading={defsLoading}
+                suffix={
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    {deployedDefs > 0 && ` · ${deployedDefs} deployed`}
+                    {publishedDefs > 0 && ` · ${publishedDefs} published`}
+                    {draftDefs > 0 && ` · ${draftDefs} draft`}
+                  </Text>
+                }
+              />
+            </StatCard>
+          </Col>
+          <Col xs={12} md={6} xl={5}>
             <StatCard>
               <Statistic
                 title="Running"
@@ -204,7 +308,7 @@ export default function AgentHubPage() {
               />
             </StatCard>
           </Col>
-          <Col span={6}>
+          <Col xs={12} md={6} xl={5}>
             <StatCard
               hoverable
               onClick={() => router.push(bp(Path.Blueprints))}
@@ -216,7 +320,7 @@ export default function AgentHubPage() {
               />
             </StatCard>
           </Col>
-          <Col span={6}>
+          <Col xs={24} md={6} xl={4}>
             <StatCard
               hoverable
               onClick={() => router.push(bp(Path.Gateways))}
@@ -278,9 +382,14 @@ export default function AgentHubPage() {
           </Card>
         )}
 
-        {/* ── Recent Agents ─────────────────────────────── */}
+        {/* ── Recent Sandbox Agents ──────────────────────── */}
         <Card
-          title="Recent Agents"
+          title={
+            <Space>
+              <RobotOutlined />
+              Recent Sandbox Agents
+            </Space>
+          }
           size="small"
           extra={
             <a onClick={() => router.push(bp(Path.Agents))}>
@@ -295,12 +404,43 @@ export default function AgentHubPage() {
             loading={agentsLoading}
             pagination={false}
             size="small"
-            locale={{ emptyText: 'No agents yet.' }}
+            locale={{ emptyText: 'No sandbox agents yet.' }}
             onRow={(record) => ({
               onClick: () => {
                 const base = buildPath(Path.Agents, currentProjectId);
                 router.push(`${base}/${record.id}`);
               },
+              style: { cursor: 'pointer' },
+            })}
+          />
+        </Card>
+
+        {/* ── Built Agents (Agent Definitions) ────────── */}
+        <Card
+          title={
+            <Space>
+              <ThunderboltOutlined />
+              Built Agents
+            </Space>
+          }
+          size="small"
+          style={{ marginTop: 24 }}
+          extra={
+            <a onClick={() => router.push(bp(Path.AgentBuilderAgents))}>
+              View all →
+            </a>
+          }
+        >
+          <Table
+            dataSource={recentDefs}
+            columns={defColumns}
+            rowKey="id"
+            loading={defsLoading}
+            pagination={false}
+            size="small"
+            locale={{ emptyText: 'No built agents yet. Create one in Agent Builder.' }}
+            onRow={(record) => ({
+              onClick: () => router.push(bp(Path.AgentBuilderAgents)),
               style: { cursor: 'pointer' },
             })}
           />

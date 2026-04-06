@@ -1,6 +1,8 @@
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import DashboardOutlined from '@ant-design/icons/DashboardOutlined';
+import RobotOutlined from '@ant-design/icons/RobotOutlined';
+import ThunderboltOutlined from '@ant-design/icons/ThunderboltOutlined';
 import { Path, buildPath, MENU_KEY } from '@/utils/enum';
 import SidebarMenu from '@/components/sidebar/SidebarMenu';
 import useProject from '@/hooks/useProject';
@@ -18,6 +20,8 @@ const Layout = styled.div`
 
 const MENU_KEY_MAP = {
   [Path.AgentHub]: MENU_KEY.AGENT_HUB,
+  [Path.Agents]: MENU_KEY.AGENTS,
+  [Path.AgentBuilderAgents]: MENU_KEY.AGENT_BUILDER_AGENTS,
 };
 
 export default function AgentHubSidebar() {
@@ -32,6 +36,20 @@ export default function AgentHubSidebar() {
       key: MENU_KEY.AGENT_HUB,
       className: 'pl-4',
       onClick: () => router.push(bp(Path.AgentHub)),
+    },
+    {
+      label: 'Sandbox Agents',
+      icon: <RobotOutlined />,
+      key: MENU_KEY.AGENTS,
+      className: 'pl-4',
+      onClick: () => router.push(bp(Path.Agents)),
+    },
+    {
+      label: 'Built Agents',
+      icon: <ThunderboltOutlined />,
+      key: MENU_KEY.AGENT_BUILDER_AGENTS,
+      className: 'pl-4',
+      onClick: () => router.push(bp(Path.AgentBuilderAgents)),
     },
   ];
 
