@@ -41,7 +41,7 @@ supported_connectors:
 
 components:
   sandbox:
-    image: "legible-deepanalyze:latest"
+    image: "kubeworkz/legible-deepanalyze:latest"
     build:
       dockerfile: "Dockerfile"
       context: "."
