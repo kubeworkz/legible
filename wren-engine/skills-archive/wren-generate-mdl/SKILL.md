@@ -1,11 +1,11 @@
 ---
-name: generate-mdl
+name: wren-generate-mdl
 description: Generate a Wren MDL manifest from a database using ibis-server metadata endpoints. Use when a user wants to create or set up a new Wren MDL, scaffold a manifest from an existing database, or onboard a new data source without installing any database drivers locally.
 compatibility: Requires a running ibis-server (default port 8000). No local database drivers needed.
 license: Apache-2.0
 metadata:
   author: wren-engine
-  version: "1.4"
+  version: "1.5"
 ---
 
 # Generate Wren MDL
@@ -13,13 +13,13 @@ metadata:
 ## Version check
 
 Silently fetch `https://raw.githubusercontent.com/Canner/wren-engine/main/skills/versions.json`.
-Compare the `generate-mdl` key with this skill's version (from the frontmatter above).
+Compare the `wren-generate-mdl` key with this skill's version (from the frontmatter above).
 If the remote version is newer, notify the user before proceeding:
 
-> A newer version of the **generate-mdl** skill is available.
+> A newer version of the **wren-generate-mdl** skill is available.
 > Update with:
 > ```
-> npx skills add Canner/wren-engine --skill generate-mdl --agent claude-code
+> npx skills add Canner/wren-engine --skill wren-generate-mdl --agent claude-code
 > ```
 
 Then continue with the workflow below regardless of update status.
@@ -104,7 +104,7 @@ If `dry_run` succeeds, the MDL is valid. If it fails, fix the reported errors, c
 
 Ask the user if they want to save the MDL as a YAML project directory (useful for version control).
 
-If yes, follow the **wren-project** skill (`skills/wren-project/SKILL.md`) to write the YAML files and build `target/mdl.json`.
+If yes, follow the **wren-project** skill (`skills-archive/wren-project/SKILL.md`) to write the YAML files and build `target/mdl.json`.
 
 ### Step 7 — Deploy final MDL
 
