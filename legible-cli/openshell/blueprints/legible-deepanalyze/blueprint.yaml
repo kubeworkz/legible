@@ -1,0 +1,142 @@
+# Legible Agent Blueprint — DeepAnalyze
+#
+# An OpenShell community sandbox for DeepAnalyze, the first agentic LLM
+# for autonomous data science. Bundles the WebUI v2 interface with support
+# for local vLLM model serving, HeyWhale API, or any OpenAI-compatible endpoint.
+#
+# DeepAnalyze can autonomously perform data preparation, analysis, modeling,
+# visualization, and report generation on structured, semi-structured, and
+# unstructured data sources.
+#
+# Source: https://github.com/ruc-datalab/DeepAnalyze
+# Model:  https://huggingface.co/RUC-DataLab/DeepAnalyze-8B (8B params, Qwen3-8B base)
+#
+# Usage:
+#   legible agent create my-analyst --blueprint legible-deepanalyze --gpu
+#   legible agent create my-analyst --blueprint legible-deepanalyze --profile openai
+
+version: "0.2.0"
+min_openshell_version: "0.0.21"
+description: |
+  DeepAnalyze — autonomous data science agent. Upload CSV, Excel, JSON,
+  or database exports, and DeepAnalyze will analyze, model, visualize,
+  and generate analyst-grade research reports without human intervention.
+
+  Includes the WebUI v2 interface with:
+  - Streamlined chat UI with file upload and workspace preview
+  - Docker-based sandboxed code execution
+  - PDF/Markdown report export
+  - Support for local (vLLM), HeyWhale API, or custom OpenAI-compatible models
+
+  GPU recommended for local model serving (16GB+ VRAM with quantization).
+  Can also run CPU-only when using an external API endpoint.
+
+supported_connectors:
+  - POSTGRES
+  - BIG_QUERY
+  - SNOWFLAKE
+  - MYSQL
+  - DUCKDB
+  - CLICK_HOUSE
+
+components:
+  sandbox:
+    image: "legible-deepanalyze:latest"
+    build:
+      dockerfile: "Dockerfile"
+      context: "."
+    name: "legible-deepanalyze"
+    forward_ports:
+      - 4000    # WebUI v2 frontend (Next.js)
+      - 8200    # Backend API (FastAPI)
+      - 8100    # File service
+      - 8000    # vLLM model server (when running locally)
+      - 9000    # MCP server
+    env:
+      DEEPANALYZE_EXECUTION_MODE: "local"
+      DEEPANALYZE_EXECUTION_TIMEOUT_SEC: "120"
+      DEEPANALYZE_DOCKER_IMAGE: "deepanalyze-chat-exec:latest"
+      DEEPANALYZE_DOCKER_WORKSPACE_DIR: "/workspace"
+      DEEPANALYZE_PDF_AUTO_DOWNLOAD_PANDOC: "true"
+    resources:
+      cpus: "8.0"
+      memory: "32g"
+      disk: "100g"
+      max_sandboxes: 5
+
+  inference:
+    profiles:
+      local:
+        provider_type: "vllm"
+        provider_name: "deepanalyze-local"
+        endpoint: "http://localhost:8000/v1"
+        model: "DeepAnalyze-8B"
+        description: "Local vLLM serving (requires GPU with 16GB+ VRAM)"
+      nvidia:
+        provider_type: "nvidia"
+        provider_name: "nvidia-inference"
+        endpoint: "https://integrate.api.nvidia.com/v1"
+        model: "nvidia/nemotron-3-super-120b-a12b"
+      openai:
+        provider_type: "openai"
+        provider_name: "openai-inference"
+        endpoint: "https://api.openai.com/v1"
+        model: "gpt-4o"
+      anthropic:
+        provider_type: "anthropic"
+        provider_name: "anthropic-inference"
+        endpoint: "https://api.anthropic.com/v1"
+        model: "claude-sonnet-4-20250514"
+      heywhale:
+        provider_type: "openai"
+        provider_name: "heywhale-api"
+        endpoint: "https://api.heywhale.com/v1"
+        model: "DeepAnalyze-8B"
+        description: "HeyWhale hosted API (requires API key from https://forms.gle/YxVkCzczqq8jeciw9)"
+
+  mcp:
+    servers:
+      legible:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9000/mcp"
+
+  tools:
+    install:
+      - python3-dev
+      - nodejs
+      - npm
+      - pandoc
+      - texlive-xetex
+    scripts:
+      - name: "start-webui"
+        command: "/opt/deepanalyze/start-webui.sh"
+        description: "Start the DeepAnalyze WebUI v2 (frontend + backend)"
+      - name: "start-vllm"
+        command: "/opt/deepanalyze/start-vllm.sh"
+        description: "Start local vLLM model server (requires GPU + model weights)"
+      - name: "healthcheck"
+        command: "curl -sf http://localhost:4000 && curl -sf http://localhost:8200/docs"
+        description: "Check that WebUI frontend and backend are responding"
+
+policies:
+  network: "policies/legible-deepanalyze.yaml"
+  filesystem:
+    read_only:
+      - /usr
+      - /lib
+      - /proc
+      - /opt/deepanalyze
+    read_write:
+      - /home/sandbox
+      - /workspace
+      - /tmp
+      - /models
+  process:
+    deny_privilege_escalation: true
+    run_as_user: sandbox
+    run_as_group: sandbox
+
+agent:
+  type: "claude"
+  allowed_types: [claude, codex, opencode, copilot]
+  entrypoint: "/opt/deepanalyze/entrypoint.sh"

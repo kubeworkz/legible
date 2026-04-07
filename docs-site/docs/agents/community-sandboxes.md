@@ -24,6 +24,34 @@ The following community sandboxes are available from the NVIDIA OpenShell catalo
 | `openclaw` | Open agent manipulation and control |
 | `sdg` | Synthetic data generation workflows |
 
+### Legible Community Sandboxes
+
+These sandboxes are bundled with the Legible CLI and optimized for data science and analytics workflows:
+
+| Sandbox | Description |
+|---------|-------------|
+| `legible-deepanalyze` | [DeepAnalyze](https://github.com/ruc-datalab/DeepAnalyze) — autonomous data science agent (8B LLM). Upload data files and get analyst-grade research reports, visualizations, and models. Includes WebUI v2 with local vLLM, HeyWhale, or any OpenAI-compatible API. GPU recommended. |
+
+#### DeepAnalyze Quick Start
+
+```bash
+# With GPU — runs the 8B model locally via vLLM
+legible agent create data-analyst --blueprint legible-deepanalyze --gpu
+
+# Without GPU — uses an external OpenAI-compatible API
+legible agent create data-analyst --blueprint legible-deepanalyze --profile openai
+```
+
+Once running, connect to the sandbox and start the WebUI:
+
+```bash
+legible agent connect data-analyst
+# Inside the sandbox:
+/opt/deepanalyze/start-webui.sh
+```
+
+The WebUI is available at `http://localhost:4000`. Upload CSV, Excel, JSON, or database exports and DeepAnalyze will autonomously analyze, model, and generate reports.
+
 :::tip
 The community catalog is designed to grow. Check the [OpenShell Community repository](https://github.com/NVIDIA/OpenShell-Community) for the latest additions.
 :::
