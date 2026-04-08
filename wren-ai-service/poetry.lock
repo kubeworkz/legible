@@ -525,18 +525,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.42.80"
+version = "1.42.85"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.80-py3-none-any.whl", hash = "sha256:293cbdeaec7eda2a0b08e6a9c2bf1a51c54453863137d45a6431058a9280fdda"},
-    {file = "boto3-1.42.80.tar.gz", hash = "sha256:797cec65f8a36dde38d2397119a114ab0d807cf92c43fb44b72b0522558acc0a"},
+    {file = "boto3-1.42.85-py3-none-any.whl", hash = "sha256:4f6ac066e41d18ec33f532253fac0f35e0fdca373724458f983ce3d531340b7a"},
+    {file = "boto3-1.42.85.tar.gz", hash = "sha256:1cd3dcbfaba85c6071ba9397c1804b6a94a1a97031b8f1993fdba27c0c5d6eba"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.80,<1.43.0"
+botocore = ">=1.42.85,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -545,14 +545,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.80"
+version = "1.42.85"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.80-py3-none-any.whl", hash = "sha256:7291632b2ede71b7c69e6e366480bb6e2a5d2fae8f7d2d2eb49215e32b7c7a12"},
-    {file = "botocore-1.42.80.tar.gz", hash = "sha256:fe32af53dc87f5f4d61879bc231e2ca2cc0719b19b8f6d268e82a34f713a8a09"},
+    {file = "botocore-1.42.85-py3-none-any.whl", hash = "sha256:828b67722caeb7e240eefedee74050e803d1fa102958ead9c4009101eefd5381"},
+    {file = "botocore-1.42.85.tar.gz", hash = "sha256:2ee61f80b7724a143e16d0a85408ef5fa20b99dce7a3c8ec5d25cc8dced164c1"},
 ]
 
 [package.dependencies]
@@ -1388,14 +1388,14 @@ files = [
 
 [[package]]
 name = "deepeval"
-version = "3.9.5"
+version = "3.9.6"
 description = "The LLM Evaluation Framework"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["dev"]
 files = [
-    {file = "deepeval-3.9.5-py3-none-any.whl", hash = "sha256:e896252118902f7bb570e8a14b75c9c188b314fac9c83595c1fec92398068f83"},
-    {file = "deepeval-3.9.5.tar.gz", hash = "sha256:f7d9e181d384246d8bc8c989b297e866a28ea49a09f9c67e4829d77540049ac6"},
+    {file = "deepeval-3.9.6-py3-none-any.whl", hash = "sha256:6a368cdd7fda7bf94ef1bcb65b40914271096dbdc54aa8988aa62bda41c68f94"},
+    {file = "deepeval-3.9.6.tar.gz", hash = "sha256:07eaad40f17a21b809bd6719f9f4ae61d8880753edddaee2abbcd4a27cfb225d"},
 ]
 
 [package.dependencies]
@@ -3324,14 +3324,14 @@ files = [
 
 [[package]]
 name = "langfuse"
-version = "4.0.5"
+version = "4.0.6"
 description = "A client library for accessing langfuse"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "langfuse-4.0.5-py3-none-any.whl", hash = "sha256:48ef89fec839b40f0f0e68b26c160e7bc0178cf10c8e53932895f4aed428b4df"},
-    {file = "langfuse-4.0.5.tar.gz", hash = "sha256:f07fc88526d0699b3696df6ff606bc3c509c86419b5f551dea3d95ed31b4b7f8"},
+    {file = "langfuse-4.0.6-py3-none-any.whl", hash = "sha256:0562b1dcf83247f9d8349f0f755eaed9a7f952fee67e66580970f0738bf3adbf"},
+    {file = "langfuse-4.0.6.tar.gz", hash = "sha256:83a6f8cc8f1431fa2958c91e2673bc4179f993297e9b1acd1dbf001785e6cf83"},
 ]
 
 [package.dependencies]
@@ -3399,14 +3399,14 @@ utils = ["numpydoc"]
 
 [[package]]
 name = "locust"
-version = "2.43.3"
+version = "2.43.4"
 description = "Developer-friendly load testing framework"
 optional = false
 python-versions = ">=3.10"
 groups = ["test"]
 files = [
-    {file = "locust-2.43.3-py3-none-any.whl", hash = "sha256:e032c119b54a9d984cb74a936ee83cfd7d68b3c76c8f308af63d04f11396b553"},
-    {file = "locust-2.43.3.tar.gz", hash = "sha256:b5d2c48f8f7d443e3abdfdd6ec2f7aebff5cd74fab986bcf1e95b375b5c5a54b"},
+    {file = "locust-2.43.4-py3-none-any.whl", hash = "sha256:a4f40403e9f665e0dcb94991d9a8f19317d0d36afe88400833c5fab99ba942ed"},
+    {file = "locust-2.43.4.tar.gz", hash = "sha256:4ace60f07f5fa9bf08d1b64da25915707befca19a790897eed6372656824deee"},
 ]
 
 [package.dependencies]
@@ -3431,6 +3431,7 @@ dns = ["dnspython (>=2.8.0)"]
 milvus = ["pymilvus (>=2.5.0)"]
 mqtt = ["paho-mqtt (>=2.1.0)"]
 otel = ["opentelemetry-exporter-otlp-proto-grpc (>=1.38.0)", "opentelemetry-exporter-otlp-proto-http (>=1.38.0)", "opentelemetry-instrumentation-requests (>=0.59b0)", "opentelemetry-instrumentation-urllib3 (>=0.59b0)", "opentelemetry-sdk (>=1.38.0)"]
+qdrant = ["qdrant-client (>=1.16.2)"]
 
 [[package]]
 name = "mako"
@@ -3577,20 +3578,15 @@ files = [
 
 [[package]]
 name = "marshmallow"
-version = "4.2.3"
+version = "4.3.0"
 description = "A lightweight library for converting complex datatypes to and from native Python datatypes."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "marshmallow-4.2.3-py3-none-any.whl", hash = "sha256:c84fd89817ecea690bde1eb925036070e5e9883148217585adc56d5cfbc082b8"},
-    {file = "marshmallow-4.2.3.tar.gz", hash = "sha256:3e3fef6b3603721a25a723b8caedfa488369bddaf9bc03b40b9442c90aebd22b"},
+    {file = "marshmallow-4.3.0-py3-none-any.whl", hash = "sha256:46c4fe6984707e3cbd485dfebbf0a59874f58d695aad05c1668d15e8c6e13b46"},
+    {file = "marshmallow-4.3.0.tar.gz", hash = "sha256:fb43c53b3fe240b8f6af37223d6ef1636f927ad9bea8ab323afad95dff090880"},
 ]
-
-[package.extras]
-dev = ["marshmallow[tests]", "pre-commit (>=3.5,<5.0)", "tox"]
-docs = ["autodocsumm (==0.2.14)", "furo (==2025.12.19)", "sphinx (==8.2.3)", "sphinx-copybutton (==0.5.2)", "sphinx-issues (==6.0.0)", "sphinxext-opengraph (==0.13.0)"]
-tests = ["pytest", "simplejson"]
 
 [[package]]
 name = "matplotlib"
@@ -5498,14 +5494,14 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "9.0.2"
+version = "9.0.3"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev", "test"]
 files = [
-    {file = "pytest-9.0.2-py3-none-any.whl", hash = "sha256:711ffd45bf766d5264d487b917733b453d917afd2b0ad65223959f59089f875b"},
-    {file = "pytest-9.0.2.tar.gz", hash = "sha256:75186651a92bd89611d1d9fc20f0b4345fd827c41ccd5c299a868a05d70edf11"},
+    {file = "pytest-9.0.3-py3-none-any.whl", hash = "sha256:2c5efc453d45394fdd706ade797c0a81091eccd1d6e4bccfcd476e2b8e0ab5d9"},
+    {file = "pytest-9.0.3.tar.gz", hash = "sha256:b86ada508af81d19edeb213c681b1d48246c1a91d304c6c81a427674c17eb91c"},
 ]
 
 [package.dependencies]
@@ -7047,14 +7043,14 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
 name = "uvicorn"
-version = "0.42.0"
+version = "0.44.0"
 description = "The lightning-fast ASGI server."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "uvicorn-0.42.0-py3-none-any.whl", hash = "sha256:96c30f5c7abe6f74ae8900a70e92b85ad6613b745d4879eb9b16ccad15645359"},
-    {file = "uvicorn-0.42.0.tar.gz", hash = "sha256:9b1f190ce15a2dd22e7758651d9b6d12df09a13d51ba5bf4fc33c383a48e1775"},
+    {file = "uvicorn-0.44.0-py3-none-any.whl", hash = "sha256:ce937c99a2cc70279556967274414c087888e8cec9f9c94644dfca11bd3ced89"},
+    {file = "uvicorn-0.44.0.tar.gz", hash = "sha256:6c942071b68f07e178264b9152f1f16dfac5da85880c4ce06366a96d70d4f31e"},
 ]
 
 [package.dependencies]
@@ -7432,14 +7428,14 @@ files = [
 
 [[package]]
 name = "werkzeug"
-version = "3.1.7"
+version = "3.1.8"
 description = "The comprehensive WSGI web application library."
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "test"]
 files = [
-    {file = "werkzeug-3.1.7-py3-none-any.whl", hash = "sha256:4b314d81163a3e1a169b6a0be2a000a0e204e8873c5de6586f453c55688d422f"},
-    {file = "werkzeug-3.1.7.tar.gz", hash = "sha256:fb8c01fe6ab13b9b7cdb46892b99b1d66754e1d7ab8e542e865ec13f526b5351"},
+    {file = "werkzeug-3.1.8-py3-none-any.whl", hash = "sha256:63a77fb8892bf28ebc3178683445222aa500e48ebad5ec77b0ad80f8726b1f50"},
+    {file = "werkzeug-3.1.8.tar.gz", hash = "sha256:9bad61a4268dac112f1c5cd4630a56ede601b6ed420300677a869083d70a4c44"},
 ]
 
 [package.dependencies]
@@ -7947,4 +7943,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12.*, <3.13"
-content-hash = "2ae7133806e5b7940b4eb1e121b3abf0c116229fc01d67692757bf06f58af2e2"
+content-hash = "508d8656d46c67d8a0242597c5d43c643bd935e0774a5e14d05efd41a5982355"
