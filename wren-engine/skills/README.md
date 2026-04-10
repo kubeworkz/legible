@@ -21,12 +21,12 @@ Skills are namespaced as `/wren:<skill>` (e.g., `/wren:wren-generate-mdl`, `/wre
 
 ### Option 2 — npx skills
 
-Install all skills for Claude Code:
+Install all skills:
 ```bash
-npx skills add Canner/wren-engine --skill '*' --agent claude-code
+npx skills add Canner/wren-engine --skill '*'
 ```
 
-`npx skills` also supports Cursor, Windsurf, and 30+ other agent tools — replace `--agent claude-code` with your agent of choice.
+The CLI auto-detects your installed agent. To target a specific one, add `--agent <name>` (e.g., `claude-code`, `cursor`, `windsurf`, `cline`).
 
 ### Option 3 — install script (from a local clone)
 
@@ -57,6 +57,7 @@ Once installed, invoke a skill by name in your conversation:
 |-------|-------------|
 | [wren-usage](wren-usage/SKILL.md) | **Primary skill** — CLI workflow guide: query data via `wren --sql`, gather schema context with `wren memory`, store/recall queries, handle errors |
 | [wren-generate-mdl](wren-generate-mdl/SKILL.md) | Generate a Wren MDL project from a live database — schema discovery, type normalization, YAML generation |
+| [wren-dlt-connector](wren-dlt-connector/SKILL.md) | Connect SaaS data (HubSpot, Stripe, Salesforce, etc.) via dlt pipelines into DuckDB, then auto-generate a Wren project |
 
 ### wren-usage reference files
 
@@ -71,7 +72,7 @@ Each skill automatically checks for updates when invoked. To update manually:
 
 ```bash
 # Re-add to reinstall the latest version
-npx skills add Canner/wren-engine --skill '*' --agent claude-code
+npx skills add Canner/wren-engine --skill '*'
 
 # Or reinstall from a local clone
 bash skills/install.sh --force

@@ -1,4 +1,5 @@
 {
-  "wren-generate-mdl": "2.0",
-  "wren-usage": "2.0"
+  "wren-dlt-connector": "1.0",
+  "wren-generate-mdl": "2.2",
+  "wren-usage": "2.2"
 }

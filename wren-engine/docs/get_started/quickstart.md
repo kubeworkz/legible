@@ -61,15 +61,14 @@ pwd
 Install `wren-engine` with UI support and memory system:
 
 ```bash
-pip install "wren-engine[ui,memory]"
+pip install "wren-engine[main]"
 ```
 
-DuckDB is included by default — no extra needed. For other data sources, install the corresponding extra (e.g. `pip install "wren-engine[postgres,ui,memory]"`).
+DuckDB is included by default — no extra needed. For other data sources, install the corresponding extra (e.g. `pip install "wren-engine[postgres,main]"`).
 
 > **Available extras:**
 > - `postgres`, `mysql`, `bigquery`, `snowflake`, `clickhouse`, `trino`, `mssql`, `databricks`, `redshift`, `athena`, `oracle`, `spark` — data source connectors
-> - `ui` — browser-based profile configuration UI
-> - `memory` — LanceDB-backed memory system for context retrieval and NL-SQL recall
+> - `main` — memory + interactive prompts + browser-based profile UI
 
 Verify the installation:
 
@@ -81,13 +80,15 @@ wren version
 
 ## Step 3 — Install CLI skills
 
-Skills are workflow guides that tell Claude Code how to use the Wren CLI effectively. Install both skills:
+Skills are workflow guides that tell your AI coding agent how to use the Wren CLI effectively. Install both skills:
 
 ```bash
-npx skills add Canner/wren-engine --skill '*' --agent claude-code
+npx skills add Canner/wren-engine --skill '*'
 # or:
 curl -fsSL https://raw.githubusercontent.com/Canner/wren-engine/main/skills/install.sh | bash
 ```
+
+The CLI auto-detects your installed agent. To target a specific one, add `--agent <name>` (e.g., `claude-code`, `cursor`, `windsurf`, `cline`).
 
 This installs two skills:
 

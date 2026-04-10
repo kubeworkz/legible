@@ -1,4 +1,4 @@
-# CLI reference
+# CLI Reference
 
 ## Default command — query
 
@@ -72,9 +72,23 @@ Both flat and MCP/web envelope formats are accepted:
 
 ---
 
+## `wren docs` — Connection Info Reference
+
+Print the required and optional connection fields for a data source.
+
+```bash
+wren docs connection-info --datasource postgres
+wren docs connection-info --datasource bigquery
+wren docs connection-info --datasource snowflake
+```
+
+Use this to check which fields are needed before creating a profile.
+
+---
+
 ## `wren memory` — Schema & Query Memory
 
-LanceDB-backed semantic memory for MDL schema search and NL→SQL retrieval. Install with the `main` extra bundle (includes `memory`, `interactive`, `ui`):
+LanceDB-backed semantic memory for MDL schema search and NL-SQL retrieval. Install with the `main` extra bundle (includes `memory`, `interactive`, `ui`):
 
 ```bash
 pip install 'wren-engine[main]'   # includes memory, interactive, ui
@@ -86,7 +100,7 @@ All `memory` subcommands accept `--path DIR` to override the default storage loc
 
 When providing schema context to an LLM, there is a trade-off:
 
-- **Small schemas** — the full plain-text description fits easily in the LLM context window and gives better results because the LLM sees the complete structure (model→column relationships, join paths, primary keys) rather than isolated fragments from a vector search.
+- **Small schemas** — the full plain-text description fits easily in the LLM context window and gives better results because the LLM sees the complete structure (model-column relationships, join paths, primary keys) rather than isolated fragments from a vector search.
 - **Large schemas** — the full text exceeds what is practical to send in a single prompt, so embedding search is needed to retrieve only the relevant fragments.
 
 `wren memory fetch` automatically picks the right strategy based on the **character length** of the generated plain-text description:
@@ -153,7 +167,7 @@ wren memory store \
 
 ### `wren memory recall`
 
-Search stored NL→SQL pairs by semantic similarity to a query.
+Search stored NL-SQL pairs by semantic similarity to a query.
 
 ```bash
 wren memory recall -q "best customers"

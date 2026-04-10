@@ -79,9 +79,13 @@ def init(
 
     # ── Scaffold empty project (existing behavior) ────────────
     project_file = project_path / "wren_project.yml"
-    if project_file.exists() and not force:
+    agents_file = project_path / "AGENTS.md"
+    queries_file = project_path / "queries.yml"
+    conflicts = [f for f in (project_file, agents_file, queries_file) if f.exists()]
+    if conflicts and not force:
+        names = ", ".join(f"'{c.name}'" for c in conflicts)
         typer.echo(
-            f"Error: '{project_file}' already exists. This is already a Wren project.",
+            f"Error: {names} already exists. Use --force to overwrite.",
             err=True,
         )
         raise typer.Exit(1)
@@ -167,12 +171,29 @@ def init(
         "Add custom rules or guidelines for LLM-based query generation here.\n"
     )
 
+    # ── AGENTS.md ──
+    from wren.context import _AGENTS_MD_TEMPLATE  # noqa: PLC0415
+
+    (project_path / "AGENTS.md").write_text(_AGENTS_MD_TEMPLATE)
+
+    # Curated NL-SQL pairs (auto-loaded by `wren memory index`)
+    (project_path / "queries.yml").write_text(
+        "# Curated NL-SQL pairs for this project.\n"
+        "# These are auto-loaded into memory on `wren memory index`.\n"
+        "# Use `wren memory dump` to export pairs from memory to this file.\n"
+        "# Format: same as `wren memory dump` output.\n"
+        "version: 1\n"
+        "pairs: []\n"
+    )
+
     typer.echo(f"Wren project initialized: {project_path}")
     typer.echo("  wren_project.yml            — project metadata (edit data_source)")
     typer.echo("  models/example/             — example model (metadata.yml)")
     typer.echo("  views/example_view/         — example view (metadata.yml + sql.yml)")
     typer.echo("  relationships.yml           — define joins between models")
     typer.echo("  instructions.md             — LLM instructions")
+    typer.echo("  AGENTS.md                   — AI agent workflow guidance")
+    typer.echo("  queries.yml                 — curated NL-SQL pairs for memory")
     typer.echo("\nNext: edit your models, then run `wren context build`.")
 
 
