@@ -13,7 +13,7 @@ const logger = getLogger('SeedRegistry');
 const BUILTIN_ENTRIES: CreateRegistryEntryInput[] = [
   {
     name: 'legible-default',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'Universal agent blueprint with broad data source support. Provides a generic sandbox with MCP connectivity and configurable inference profiles.',
     supportedConnectors: [
@@ -24,7 +24,7 @@ const BUILTIN_ENTRIES: CreateRegistryEntryInput[] = [
     tags: ['universal', 'default'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: Universal default agent blueprint.
 components:
   sandbox:
@@ -48,7 +48,7 @@ agent:
   },
   {
     name: 'legible-analyst',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'Analysis-focused agent with extended tooling for data exploration, charting, and reporting.',
     supportedConnectors: [
@@ -59,7 +59,7 @@ agent:
     tags: ['analyst', 'charting', 'reporting'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: Analysis agent with data exploration and charting.
 components:
   sandbox:
@@ -83,7 +83,7 @@ agent:
   },
   {
     name: 'legible-postgres',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'PostgreSQL-optimized agent with psql/pgcli CLI tools and PostgreSQL-specific network policies.',
     supportedConnectors: ['POSTGRES'],
@@ -91,7 +91,7 @@ agent:
     tags: ['postgresql', 'psql', 'relational'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: PostgreSQL-optimized agent blueprint.
 components:
   sandbox:
@@ -117,7 +117,7 @@ agent:
   },
   {
     name: 'legible-bigquery',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'BigQuery-optimized agent with bq CLI and Google Cloud network policies.',
     supportedConnectors: ['BIG_QUERY'],
@@ -125,7 +125,7 @@ agent:
     tags: ['bigquery', 'google-cloud', 'warehouse'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: BigQuery-optimized agent blueprint.
 components:
   sandbox:
@@ -151,7 +151,7 @@ agent:
   },
   {
     name: 'legible-snowflake',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'Snowflake-optimized agent with SnowSQL CLI and Snowflake-specific network policies.',
     supportedConnectors: ['SNOWFLAKE'],
@@ -159,7 +159,7 @@ agent:
     tags: ['snowflake', 'warehouse'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: Snowflake-optimized agent blueprint.
 components:
   sandbox:
@@ -185,7 +185,7 @@ agent:
   },
   {
     name: 'legible-mysql',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'MySQL-optimized agent with mysql-client/mycli tools and MySQL network policies.',
     supportedConnectors: ['MYSQL'],
@@ -193,7 +193,7 @@ agent:
     tags: ['mysql', 'relational'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: MySQL-optimized agent blueprint.
 components:
   sandbox:
@@ -219,7 +219,7 @@ agent:
   },
   {
     name: 'legible-clickhouse',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'ClickHouse-optimized agent with clickhouse-client and ClickHouse network policies.',
     supportedConnectors: ['CLICK_HOUSE'],
@@ -227,7 +227,7 @@ agent:
     tags: ['clickhouse', 'columnar', 'analytics'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: ClickHouse-optimized agent blueprint.
 components:
   sandbox:
@@ -253,7 +253,7 @@ agent:
   },
   {
     name: 'legible-duckdb',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'DuckDB-optimized agent with embedded DuckDB CLI. Minimal network policies for local-first analytics.',
     supportedConnectors: ['DUCKDB'],
@@ -261,7 +261,7 @@ agent:
     tags: ['duckdb', 'embedded', 'analytics'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: DuckDB-optimized agent blueprint.
 components:
   sandbox:
@@ -287,7 +287,7 @@ agent:
   },
   {
     name: 'legible-mssql',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'SQL Server agent with mssql-tools18 and TDS/Azure SQL network policies.',
     supportedConnectors: ['MSSQL'],
@@ -295,7 +295,7 @@ agent:
     tags: ['mssql', 'sql-server', 'azure-sql', 'relational'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: SQL Server agent blueprint.
 components:
   sandbox:
@@ -321,7 +321,7 @@ agent:
   },
   {
     name: 'legible-oracle',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'Oracle Database agent with Instant Client sqlplus and Oracle Net network policies.',
     supportedConnectors: ['ORACLE'],
@@ -329,7 +329,7 @@ agent:
     tags: ['oracle', 'relational'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: Oracle Database agent blueprint.
 components:
   sandbox:
@@ -355,7 +355,7 @@ agent:
   },
   {
     name: 'legible-trino',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'Trino agent with trino-cli and HTTP-based Trino network policies.',
     supportedConnectors: ['TRINO'],
@@ -363,7 +363,7 @@ agent:
     tags: ['trino', 'distributed-sql'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: Trino agent blueprint.
 components:
   sandbox:
@@ -389,7 +389,7 @@ agent:
   },
   {
     name: 'legible-redshift',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'Amazon Redshift agent with psql and AWS CLI. Network policies for Redshift clusters and STS auth.',
     supportedConnectors: ['REDSHIFT'],
@@ -397,7 +397,7 @@ agent:
     tags: ['redshift', 'aws', 'warehouse'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: Amazon Redshift agent blueprint.
 components:
   sandbox:
@@ -423,7 +423,7 @@ agent:
   },
   {
     name: 'legible-databricks',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'Databricks agent with Databricks CLI. Network policies for workspace API and SQL warehouse.',
     supportedConnectors: ['DATABRICKS'],
@@ -431,7 +431,7 @@ agent:
     tags: ['databricks', 'lakehouse', 'spark'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: Databricks agent blueprint.
 components:
   sandbox:
@@ -457,7 +457,7 @@ agent:
   },
   {
     name: 'legible-athena',
-    version: '0.2.0',
+    version: '0.3.0',
     description:
       'Amazon Athena agent with AWS CLI. Network policies for Athena API, S3 results, and STS auth.',
     supportedConnectors: ['ATHENA'],
@@ -465,7 +465,7 @@ agent:
     tags: ['athena', 'aws', 'serverless'],
     sandboxImage: 'legible-sandbox:latest',
     defaultAgentType: 'claude',
-    blueprintYaml: `version: "0.2.0"
+    blueprintYaml: `version: "0.3.0"
 description: Amazon Athena agent blueprint.
 components:
   sandbox:

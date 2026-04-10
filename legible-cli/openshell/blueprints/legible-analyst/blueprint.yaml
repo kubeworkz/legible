@@ -4,8 +4,8 @@
 # No write access to external services, no package manager access.
 # Ideal for BI dashboards and scheduled reporting.
 
-version: "0.2.0"
-min_openshell_version: "0.0.21"
+version: "0.3.0"
+min_openshell_version: "0.0.26"
 description: |
   Restricted data analyst agent. Read-only access to the Legible semantic layer.
   Cannot install packages at runtime. Uses pre-built tools only.

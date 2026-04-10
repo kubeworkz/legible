@@ -3,8 +3,8 @@
 # A NemoClaw-compatible blueprint optimized for MSSQL.
 # Includes sqlcmd CLI and tailored network policies.
 
-version: "0.2.0"
-min_openshell_version: "0.0.21"
+version: "0.3.0"
+min_openshell_version: "0.0.26"
 description: |
   MSSQL-optimized Legible agent blueprint. Pre-installed with sqlcmd
   and mssql-tools. Network policies allow TDS protocol and Legible

@@ -2,8 +2,8 @@
 #
 # A NemoClaw-compatible blueprint optimized for Trino (formerly Presto).
 
-version: "0.2.0"
-min_openshell_version: "0.0.21"
+version: "0.3.0"
+min_openshell_version: "0.0.26"
 description: |
   Trino-optimized Legible agent blueprint. Pre-installed with Trino CLI.
   Network policies allow Trino HTTP protocol and Legible MCP/UI access.

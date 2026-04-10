@@ -15,8 +15,8 @@
 #   legible agent create my-analyst --blueprint legible-deepanalyze --gpu
 #   legible agent create my-analyst --blueprint legible-deepanalyze --profile openai
 
-version: "0.2.0"
-min_openshell_version: "0.0.21"
+version: "0.3.0"
+min_openshell_version: "0.0.26"
 description: |
   DeepAnalyze — autonomous data science agent. Upload CSV, Excel, JSON,
   or database exports, and DeepAnalyze will analyze, model, visualize,
