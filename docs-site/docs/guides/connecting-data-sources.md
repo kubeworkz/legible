@@ -25,6 +25,7 @@ Legible supports 22+ data source connectors. This guide walks you through connec
 | Apache Spark | ✅ Fully supported |
 | Apache Doris | ✅ Fully supported |
 | Redshift | ✅ Fully supported |
+| DB2 for i (AS/400) | ✅ Via MCP server |
 | Local Files (CSV, Parquet) | ✅ Fully supported |
 | S3 Files | ✅ Fully supported |
 | GCS Files | ✅ Fully supported |
@@ -120,7 +121,7 @@ Your MDL manifest must include a `dataSource` field matching your connection typ
 }
 ```
 
-Valid `dataSource` values: `postgres`, `mysql`, `bigquery`, `snowflake`, `duckdb`, `clickhouse`, `mssql`, `trino`, `oracle`, `athena`, `databricks`, `spark`, `doris`, `redshift`.
+Valid `dataSource` values: `postgres`, `mysql`, `bigquery`, `snowflake`, `duckdb`, `clickhouse`, `mssql`, `trino`, `oracle`, `athena`, `databricks`, `spark`, `doris`, `redshift`, `db2i`.
 
 ## Connector-Specific Notes
 
@@ -155,6 +156,10 @@ Connection is similar to PostgreSQL. Use port `5439` (default Redshift port) and
 ### Databricks
 
 Requires a workspace URL, HTTP path, and personal access token.
+
+### DB2 for i
+
+DB2 for i is connected via a dedicated MCP server rather than the built-in Ibis connector. See the [DB2 for i Integration](./db2i-integration.md) guide for setup instructions. Uses the JT400 JDBC driver on port 446 (default).
 
 ## Troubleshooting
 

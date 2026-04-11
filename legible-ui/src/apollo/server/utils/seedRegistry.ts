@@ -18,7 +18,7 @@ const BUILTIN_ENTRIES: CreateRegistryEntryInput[] = [
       'Universal agent blueprint with broad data source support. Provides a generic sandbox with MCP connectivity and configurable inference profiles.',
     supportedConnectors: [
       'POSTGRES', 'BIG_QUERY', 'SNOWFLAKE', 'MYSQL', 'ORACLE', 'MSSQL',
-      'CLICK_HOUSE', 'TRINO', 'DUCKDB', 'ATHENA', 'REDSHIFT', 'DATABRICKS',
+      'CLICK_HOUSE', 'TRINO', 'DUCKDB', 'ATHENA', 'REDSHIFT', 'DATABRICKS', 'DB2I',
     ],
     category: 'general',
     tags: ['universal', 'default'],
@@ -53,7 +53,7 @@ agent:
       'Analysis-focused agent with extended tooling for data exploration, charting, and reporting.',
     supportedConnectors: [
       'POSTGRES', 'BIG_QUERY', 'SNOWFLAKE', 'MYSQL', 'ORACLE', 'MSSQL',
-      'CLICK_HOUSE', 'TRINO', 'DUCKDB', 'ATHENA', 'REDSHIFT', 'DATABRICKS',
+      'CLICK_HOUSE', 'TRINO', 'DUCKDB', 'ATHENA', 'REDSHIFT', 'DATABRICKS', 'DB2I',
     ],
     category: 'analysis',
     tags: ['analyst', 'charting', 'reporting'],

@@ -40,7 +40,7 @@ Legible ships blueprints optimized for different data sources:
 | `legible-redshift` | Redshift | Optimized for Amazon Redshift |
 | `legible-databricks` | Databricks | Optimized for Databricks lakehouse |
 | `legible-athena` | Athena | Optimized for Amazon Athena |
-| `legible-db2i` | DB2 for i | IBM DB2 for i with read-only MCP access |
+| `legible-db2i` | DB2 for i | IBM DB2 for i with read-only MCP access via [mcp-server-db2i](https://github.com/Strom-Capital/mcp-server-db2i) |
 | `legible-analyst` | All connectors | Analysis-focused with additional tools |
 
 Blueprints are stored in `~/.legible/blueprints/` or bundled with the CLI binary.

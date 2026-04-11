@@ -23,6 +23,7 @@ supported_connectors:
   - ATHENA
   - REDSHIFT
   - DATABRICKS
+  - DB2I
 
 components:
   sandbox:
