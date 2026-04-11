@@ -40,3 +40,29 @@ that we created on the previous step. After modifying the file, you can restart 
 
 For detailed information on how to modify the configuration for different LLM providers and models, please refer to the [AI Service Configuration](../wren-ai-service/docs/configuration.md).
 This guide provides comprehensive instructions on setting up various LLM providers, embedders, and other components of the AI service.
+
+## How to enable the DB2 for i MCP server
+
+The `mcp-server-db2i` service provides AI agents with direct read-only access to IBM DB2 for i databases.
+
+1. Uncomment the `mcp-server-db2i` service block in `docker-compose.yaml`.
+2. Set the required environment variables in your `.env` file:
+
+   ```bash
+   # Required
+   DB2I_HOSTNAME=your-ibm-i-host.com
+   DB2I_USERNAME=your-username
+   DB2I_PASSWORD=your-password
+
+   # Optional
+   DB2I_SCHEMA=your-default-schema
+   DB2I_PORT=446
+   DB2I_DATABASE=*LOCAL
+   DB2I_MCP_PORT=9002
+   DB2I_MCP_AUTH_MODE=token
+   DB2I_MCP_AUTH_TOKEN=<generate with: openssl rand -hex 32>
+   ```
+
+3. Start the service: `docker-compose --env-file .env up -d mcp-server-db2i`.
+
+The server exposes an HTTP MCP endpoint at `http://localhost:9002/mcp`. It only allows read-only SELECT queries. See the [mcp-server-db2i documentation](https://github.com/Strom-Capital/mcp-server-db2i) for full configuration options.

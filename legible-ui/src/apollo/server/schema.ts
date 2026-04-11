@@ -656,6 +656,7 @@ export const typeDefs = gql`
   enum DataSourceName {
     ATHENA
     BIG_QUERY
+    DB2I
     DUCKDB
     POSTGRES
     MYSQL

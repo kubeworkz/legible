@@ -1,5 +1,6 @@
 export enum DataSourceName {
   BIG_QUERY = 'BIG_QUERY',
+  DB2I = 'DB2I',
   DUCKDB = 'DUCKDB',
   POSTGRES = 'POSTGRES',
   MYSQL = 'MYSQL',

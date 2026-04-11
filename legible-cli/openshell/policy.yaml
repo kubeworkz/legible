@@ -21,6 +21,14 @@ network:
       paths:
         - "/api/graphql"
 
+    # Allow access to the DB2 for i MCP server (optional, uncomment to enable)
+    # - destination: "${DB2I_MCP_HOST:-host.docker.internal}:${DB2I_MCP_PORT:-9002}"
+    #   methods: ["GET", "POST"]
+    #   paths:
+    #     - "/mcp/*"
+    #     - "/sse"
+    #     - "/messages"
+
     # Allow access to the Legible docs site
     - destination: "${LEGIBLE_DOCS_HOST:-host.docker.internal}:${LEGIBLE_DOCS_PORT:-4000}"
       methods: ["GET"]

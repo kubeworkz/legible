@@ -74,7 +74,7 @@ var blueprintRecommendCmd = &cobra.Command{
 
 Supported connector types:
   POSTGRES, BIG_QUERY, SNOWFLAKE, MYSQL, CLICK_HOUSE, DUCKDB,
-  MSSQL, ORACLE, TRINO, REDSHIFT, DATABRICKS, ATHENA
+  MSSQL, ORACLE, TRINO, REDSHIFT, DATABRICKS, ATHENA, DB2I
 
 Examples:
   legible blueprint recommend POSTGRES

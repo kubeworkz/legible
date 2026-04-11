@@ -1,0 +1,90 @@
+# Legible Agent Blueprint — IBM DB2 for i
+#
+# A NemoClaw-compatible blueprint for IBM DB2 for i (AS/400) data sources.
+# Includes the db2i MCP server for direct read-only database access
+# alongside the Legible semantic layer MCP server.
+#
+# Usage:
+#   legible agent create my-db2i-agent --blueprint legible-db2i
+
+version: "0.3.0"
+min_openshell_version: "0.0.26"
+description: |
+  IBM DB2 for i agent blueprint. Connects to DB2i databases via the
+  mcp-server-db2i MCP server (read-only SQL, schema inspection, table
+  metadata). Also includes the Legible semantic layer MCP server.
+
+supported_connectors:
+  - DB2I
+
+components:
+  sandbox:
+    image: "legible-sandbox:latest"
+    build:
+      dockerfile: "../../Dockerfile"
+    name: "legible-db2i-agent"
+    forward_ports:
+      - 9000
+    resources:
+      cpus: "4.0"
+      memory: "16g"
+      max_sandboxes: 20
+
+  inference:
+    profiles:
+      nvidia:
+        provider_type: "nvidia"
+        provider_name: "nvidia-inference"
+        endpoint: "https://integrate.api.nvidia.com/v1"
+        model: "nvidia/nemotron-3-super-120b-a12b"
+      openai:
+        provider_type: "openai"
+        provider_name: "openai-inference"
+        endpoint: "https://api.openai.com/v1"
+        model: "gpt-4o"
+      anthropic:
+        provider_type: "anthropic"
+        provider_name: "anthropic-inference"
+        endpoint: "https://api.anthropic.com/v1"
+        model: "claude-sonnet-4-20250514"
+      local:
+        provider_type: "ollama"
+        provider_name: "local-inference"
+        endpoint: "http://host.docker.internal:11434/v1"
+        model: "llama3.1:8b"
+
+  mcp:
+    servers:
+      legible:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9000/mcp"
+      db2i:
+        transport: "streamable-http"
+        url: "http://host.docker.internal:9002/mcp"
+
+policies:
+  network: "policies/legible-db2i.yaml"
+  filesystem:
+    read_only:
+      - /usr
+      - /lib
+      - /proc
+      - /app
+      - /etc
+    read_write:
+      - /home/sandbox
+      - /workspace
+      - /tmp
+  process:
+    deny_privilege_escalation: true
+    run_as_user: sandbox
+    run_as_group: sandbox
+
+agent:
+  type: "claude"
+  allowed_types:
+    - claude
+    - codex
+    - opencode
+    - copilot
+  entrypoint: "/usr/local/bin/sandbox-entrypoint.sh"

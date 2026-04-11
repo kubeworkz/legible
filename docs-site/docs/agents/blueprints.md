@@ -40,6 +40,7 @@ Legible ships blueprints optimized for different data sources:
 | `legible-redshift` | Redshift | Optimized for Amazon Redshift |
 | `legible-databricks` | Databricks | Optimized for Databricks lakehouse |
 | `legible-athena` | Athena | Optimized for Amazon Athena |
+| `legible-db2i` | DB2 for i | IBM DB2 for i with read-only MCP access |
 | `legible-analyst` | All connectors | Analysis-focused with additional tools |
 
 Blueprints are stored in `~/.legible/blueprints/` or bundled with the CLI binary.
@@ -287,6 +288,7 @@ When auto-provisioning is enabled, Legible automatically selects the best bluepr
 | MySQL | `legible-mysql` |
 | ClickHouse | `legible-clickhouse` |
 | DuckDB | `legible-duckdb` |
+| DB2 for i | `legible-db2i` |
 | Others | `legible-default` |
 
 If a connector-specific blueprint isn't found, `legible-default` is used as a fallback.

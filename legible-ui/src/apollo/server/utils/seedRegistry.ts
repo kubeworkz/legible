@@ -489,6 +489,41 @@ agent:
 `,
     isOfficial: true,
   },
+  {
+    name: 'legible-db2i',
+    version: '0.3.0',
+    description:
+      'IBM DB2 for i agent with mcp-server-db2i. Read-only SQL queries, schema inspection, and table metadata via JT400 JDBC.',
+    supportedConnectors: ['DB2I'],
+    category: 'connector',
+    tags: ['db2i', 'ibm', 'as400', 'iseries'],
+    sandboxImage: 'legible-sandbox:latest',
+    defaultAgentType: 'claude',
+    blueprintYaml: `version: "0.3.0"
+description: IBM DB2 for i agent blueprint.
+components:
+  sandbox:
+    image: "legible-sandbox:latest"
+    name: "legible-db2i-agent"
+  inference:
+    profiles:
+      anthropic:
+        provider_type: anthropic
+        model: claude-sonnet-4-20250514
+  mcp:
+    servers:
+      legible:
+        transport: streamable-http
+        url: "http://host.docker.internal:9000/mcp"
+      db2i:
+        transport: streamable-http
+        url: "http://host.docker.internal:9002/mcp"
+agent:
+  type: claude
+  allowed_types: [claude, codex, opencode, copilot]
+`,
+    isOfficial: true,
+  },
 ];
 
 /**

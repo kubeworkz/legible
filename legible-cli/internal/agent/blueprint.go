@@ -235,6 +235,7 @@ var connectorBlueprintMap = map[string]string{
 	"REDSHIFT":    "legible-redshift",
 	"DATABRICKS":  "legible-databricks",
 	"ATHENA":      "legible-athena",
+	"DB2I":        "legible-db2i",
 }
 
 // RecommendedBlueprintForConnector returns the recommended blueprint name

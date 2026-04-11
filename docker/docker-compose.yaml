@@ -178,6 +178,34 @@ services:
       - wren-ai-service
       - wren-engine
 
+  # Optional: IBM DB2 for i MCP server
+  # Uncomment to enable direct DB2i database access for AI agents.
+  # Requires DB2I_HOSTNAME, DB2I_USERNAME, and DB2I_PASSWORD env vars.
+  # mcp-server-db2i:
+  #   image: ghcr.io/strom-capital/mcp-server-db2i:latest
+  #   restart: on-failure
+  #   ports:
+  #     - 127.0.0.1:${DB2I_MCP_PORT:-9002}:3000
+  #   environment:
+  #     DB2I_HOSTNAME: ${DB2I_HOSTNAME}
+  #     DB2I_PORT: ${DB2I_PORT:-446}
+  #     DB2I_USERNAME: ${DB2I_USERNAME}
+  #     DB2I_PASSWORD: ${DB2I_PASSWORD}
+  #     DB2I_DATABASE: ${DB2I_DATABASE:-*LOCAL}
+  #     DB2I_SCHEMA: ${DB2I_SCHEMA:-}
+  #     DB2I_JDBC_OPTIONS: ${DB2I_JDBC_OPTIONS:-naming=sql;date format=iso}
+  #     MCP_TRANSPORT: http
+  #     MCP_HTTP_PORT: "3000"
+  #     MCP_HTTP_HOST: 0.0.0.0
+  #     MCP_AUTH_MODE: ${DB2I_MCP_AUTH_MODE:-token}
+  #     MCP_AUTH_TOKEN: ${DB2I_MCP_AUTH_TOKEN:-}
+  #     MCP_SESSION_MODE: stateless
+  #     LOG_LEVEL: ${DB2I_LOG_LEVEL:-info}
+  #     QUERY_DEFAULT_LIMIT: ${DB2I_QUERY_DEFAULT_LIMIT:-1000}
+  #     QUERY_MAX_LIMIT: ${DB2I_QUERY_MAX_LIMIT:-10000}
+  #   networks:
+  #     - wren
+
   legible-docs:
     image: legible-docs:local
     restart: on-failure

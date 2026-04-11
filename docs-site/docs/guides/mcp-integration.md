@@ -138,3 +138,24 @@ MCP requests can be rate-limited per API key:
 - **RPD** (Requests Per Day) — Sliding window
 
 When rate limited, the server returns HTTP 429 with a `Retry-After` header.
+
+## Multiple MCP Servers
+
+Legible supports running additional MCP servers alongside the built-in semantic layer server. For example, the [DB2 for i integration](./db2i-integration.md) adds a second MCP server on port 9002 for direct IBM i database access.
+
+When using multiple MCP servers, configure each in your agent's MCP config:
+
+```json
+{
+  "mcpServers": {
+    "legible": {
+      "url": "http://localhost:9000/mcp"
+    },
+    "db2i": {
+      "url": "http://localhost:9002/mcp"
+    }
+  }
+}
+```
+
+Blueprint-based agents handle this automatically — the `legible-db2i` blueprint pre-configures both servers.
