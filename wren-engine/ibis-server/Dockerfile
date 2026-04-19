@@ -23,7 +23,7 @@ RUN --mount=type=cache,target=/root/.cargo/registry \
     --mount=type=cache,target=/root/.cargo/git \
     --mount=type=cache,target=/wren-core-py/target \
     maturin build --release && \
-    mkdir /wheel && cp "$(ls -t target/wheels/wren_core_py-*.whl | head -1)" /wheel/
+    mkdir /wheel && cp target/wheels/wren_core_py-*.whl /wheel/
 
 
 # ── Option B: Use locally cross-compiled Linux wheel ─────────────────────────

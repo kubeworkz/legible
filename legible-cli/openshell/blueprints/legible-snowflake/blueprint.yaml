@@ -7,7 +7,7 @@
 #   legible agent create my-sf-agent --blueprint legible-snowflake
 
 version: "0.3.0"
-min_openshell_version: "0.0.26"
+min_openshell_version: "0.0.32"
 description: |
   Snowflake-optimized Legible agent blueprint. Pre-installed with SnowSQL
   CLI. Network policies allow Snowflake account endpoints and Legible

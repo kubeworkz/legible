@@ -3,7 +3,7 @@
 # A NemoClaw-compatible blueprint optimized for Oracle Database.
 
 version: "0.3.0"
-min_openshell_version: "0.0.26"
+min_openshell_version: "0.0.32"
 description: |
   Oracle-optimized Legible agent blueprint. Pre-installed with Oracle
   Instant Client and sqlplus. Network policies allow Oracle Net

@@ -7,7 +7,7 @@
 #   legible agent create my-ch-agent --blueprint legible-clickhouse
 
 version: "0.3.0"
-min_openshell_version: "0.0.26"
+min_openshell_version: "0.0.32"
 description: |
   ClickHouse-optimized Legible agent blueprint. Pre-installed with
   clickhouse-client. Network policies allow ClickHouse native and

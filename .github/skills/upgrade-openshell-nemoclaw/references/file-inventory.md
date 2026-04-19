@@ -127,6 +127,6 @@ Blueprints live in `legible-cli/openshell/blueprints/`. Each has a `blueprint.ya
 |-----------|----------|---------|
 | OpenShell install script | `openshell.go` | `https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh` |
 | NemoClaw install script | `nemoclaw.go` | `https://www.nvidia.com/nemoclaw.sh` |
-| Blueprint spec version | All `blueprint.yaml` | `0.1.0` |
-| Min OpenShell version | All `blueprint.yaml` | `0.1.0` |
+| Blueprint spec version | All `blueprint.yaml` | `0.3.0` |
+| Min OpenShell version | All `blueprint.yaml` | `0.0.32` |
 | Sandbox base image | `Dockerfile` | `python:3.11-slim` |

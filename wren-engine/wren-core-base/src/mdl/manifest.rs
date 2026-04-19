@@ -101,6 +101,39 @@ mod manifest_impl {
 
 pub use crate::mdl::manifest::manifest_impl::*;
 
+pub const MAX_SUPPORTED_LAYOUT_VERSION: u32 = 2;
+
+impl Manifest {
+    pub fn validate_layout_version(&self) -> Result<(), LayoutVersionError> {
+        if self.layout_version > MAX_SUPPORTED_LAYOUT_VERSION {
+            Err(LayoutVersionError {
+                manifest_version: self.layout_version,
+                max_supported: MAX_SUPPORTED_LAYOUT_VERSION,
+            })
+        } else {
+            Ok(())
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LayoutVersionError {
+    pub manifest_version: u32,
+    pub max_supported: u32,
+}
+
+impl Display for LayoutVersionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "This manifest requires layout version {}, but this engine only supports up to {}",
+            self.manifest_version, self.max_supported
+        )
+    }
+}
+
+impl Error for LayoutVersionError {}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParsedDataSourceError {
     pub message: String,
@@ -358,13 +391,42 @@ impl Model {
     }
 
     /// Return the table reference of the model
-    pub fn table_reference(&self) -> &str {
-        self.table_reference.as_deref().unwrap_or("")
+    pub fn table_reference(&self) -> Option<&str> {
+        self.table_reference.as_deref()
+    }
+
+    /// Return the ref_sql of the model
+    pub fn ref_sql(&self) -> Option<&str> {
+        self.ref_sql.as_deref()
+    }
+
+    /// Determine the source type of this model
+    pub fn source(&self) -> ModelSource {
+        match (
+            self.table_reference.is_some(),
+            self.ref_sql.is_some(),
+        ) {
+            (true, false) => ModelSource::TableReference,
+            (false, true) => ModelSource::RefSql,
+            (true, true) => ModelSource::Invalid(
+                "Both table_reference and ref_sql are defined".to_string(),
+            ),
+            (false, false) => ModelSource::Invalid(
+                "No source defined: must have either table_reference or ref_sql".to_string(),
+            ),
+        }
     }
 
     pub fn row_level_access_controls(&self) -> &[Arc<RowLevelAccessControl>] {
         &self.row_level_access_controls
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum ModelSource {
+    TableReference,
+    RefSql,
+    Invalid(String),
 }
 
 impl PartialOrd for Model {
@@ -419,7 +481,9 @@ impl SessionProperty {
 
 #[cfg(test)]
 mod tests {
+    use crate::mdl::builder::ModelBuilder;
     use crate::mdl::manifest::table_reference;
+    use crate::mdl::manifest::ModelSource;
     use serde_json::Serializer;
 
     #[test]
@@ -457,5 +521,35 @@ mod tests {
             serialized,
             r#"{"catalog":"Catalog","schema":"Schema","table":"Table"}"#
         );
+    }
+
+    #[test]
+    fn test_model_source() {
+        // table_reference only → TableReference
+        let model = ModelBuilder::new("tref_model")
+            .table_reference("schema.orders")
+            .build();
+        assert!(matches!(model.source(), ModelSource::TableReference));
+        assert_eq!(model.table_reference(), Some("schema.orders"));
+        assert_eq!(model.ref_sql(), None);
+
+        // ref_sql only → RefSql
+        let model = ModelBuilder::new("sql_model")
+            .ref_sql("SELECT 1")
+            .build();
+        assert!(matches!(model.source(), ModelSource::RefSql));
+        assert_eq!(model.table_reference(), None);
+        assert_eq!(model.ref_sql(), Some("SELECT 1"));
+
+        // both defined → Invalid
+        let mut model = ModelBuilder::new("both_model")
+            .table_reference("schema.orders")
+            .ref_sql("SELECT 1")
+            .build();
+        assert!(matches!(model.source(), ModelSource::Invalid(_)));
+
+        // neither defined → Invalid
+        model = ModelBuilder::new("empty_model").build();
+        assert!(matches!(model.source(), ModelSource::Invalid(_)));
     }
 }

@@ -7,7 +7,7 @@
 #   legible agent create my-duck-agent --blueprint legible-duckdb
 
 version: "0.3.0"
-min_openshell_version: "0.0.26"
+min_openshell_version: "0.0.32"
 description: |
   DuckDB-optimized Legible agent blueprint. Pre-installed with duckdb
   CLI for local/embedded analytics. Minimal network policies since
