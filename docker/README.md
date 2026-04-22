@@ -33,6 +33,122 @@ Path structure as following:
 
 - If your port 3000 is occupied, you can modify the `HOST_PORT` in `.env`.
 
+### Optional: ISM Postgres Database
+
+An optional `ism-postgres` service is available in `docker-compose-dev.yaml` for building the ISM dataset from local CSV files.
+
+1. Start only ISM Postgres:
+
+```bash
+docker compose --env-file .env -f docker-compose-dev.yaml up -d ism-postgres
+```
+
+2. From the repository root, load all CSV files into the `raw` schema:
+
+```bash
+./ism-data/postgres/scripts/load_raw_csv.sh
+```
+
+3. Profile loaded tables and audit history:
+
+```bash
+./ism-data/postgres/scripts/profile_raw.sh
+```
+
+4. Build initial core tables:
+
+```bash
+./ism-data/postgres/scripts/build_core.sh
+```
+
+5. Run candidate-key profiling:
+
+```bash
+./ism-data/postgres/scripts/profile_keys.sh
+```
+
+6. Build security bridge and registry:
+
+```bash
+./ism-data/postgres/scripts/build_security_bridge.sh
+```
+
+7. Apply safe core hardening constraints:
+
+```bash
+./ism-data/postgres/scripts/harden_core.sh
+```
+
+8. Profile composite key candidates:
+
+```bash
+./ism-data/postgres/scripts/profile_composite_keys.sh
+```
+
+9. Build first synthetic tables:
+
+```bash
+./ism-data/postgres/scripts/build_synth.sh
+```
+
+10. Generate bridge fallback quality diagnostics:
+
+```bash
+./ism-data/postgres/scripts/bridge_quality_report.sh
+```
+
+11. Build curated security dimension:
+
+```bash
+./ism-data/postgres/scripts/build_curated_security_dim.sh
+```
+
+12. Build synthetic account and client scaffolding:
+
+```bash
+./ism-data/postgres/scripts/build_synth_accounts_clients.sh
+```
+
+13. Build bridge remediation candidates:
+
+```bash
+./ism-data/postgres/scripts/build_bridge_remediation_candidates.sh
+```
+
+14. Build curated trade/booking fact views:
+
+```bash
+./ism-data/postgres/scripts/build_curated_fact_views.sh
+```
+
+15. Apply reviewed remediation candidates:
+
+```bash
+./ism-data/postgres/scripts/apply_reviewed_remediations.sh
+```
+
+16. Rebuild all downstream layers after remediation:
+
+```bash
+./ism-data/postgres/scripts/rebuild_after_remediation.sh
+```
+
+17. Build deduped latest remediation queue view:
+
+```bash
+./ism-data/postgres/scripts/build_bridge_candidates_latest_view.sh
+```
+
+18. Dry-run or batch-approve latest candidates:
+
+```bash
+./ism-data/postgres/scripts/approve_latest_candidates.sh
+./ism-data/postgres/scripts/approve_latest_candidates.sh --limit 25 --reason-like self_code% --apply
+./ism-data/postgres/scripts/approve_latest_candidates.sh --limit 25 --reason-like self_code% --min-occurrence 10 --exclude-code-like 0000% --apply
+```
+
+Details are documented in `../ism-data/postgres/README.md`.
+
 ## How to start with custom LLM
 
 To start with a custom LLM, the process is similar to starting with OpenAI. The main difference is that you need to modify the `config.yaml` file

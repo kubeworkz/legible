@@ -1,8 +1,9 @@
 volumes:
   data:
+  ism_pg_data:
 
 networks:
-  wren:
+  legible:
     driver: bridge
 
 services:
@@ -27,7 +28,7 @@ services:
     volumes:
       - data:/usr/src/app/etc
     networks:
-      - wren
+      - legible
     depends_on:
       - bootstrap
 
@@ -49,7 +50,7 @@ services:
       - ${PROJECT_DIR}/config.yaml:/app/config.yaml:ro
       - ${PROJECT_DIR}/data:/app/data:ro
     networks:
-      - wren
+      - legible
     depends_on:
       - qdrant
 
@@ -65,7 +66,7 @@ services:
       WREN_ENGINE_ENDPOINT: http://wren-engine:${WREN_ENGINE_PORT}
       LOG_LEVEL: DEBUG
     networks:
-      - wren
+      - legible
 
   qdrant:
     image: qdrant/qdrant:v1.11.0
@@ -74,20 +75,22 @@ services:
       - 6333:6333
       - 6334:6334
     networks:
-      - wren
+      - legible
 
-  # If you want to use postgres for testing purpose, uncomment the following block
-  # postgres:
-  #   image: postgres:14-alpine
-  #   platform: ${PLATFORM}
-  #   ports:
-  #     - 9432:5432
-  #   volumes:
-  #     - data:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_PASSWORD=secret
-  #     - POSTGRES_USER=test
-  #     - POSTGRES_DB=test
-  #     - PGDATA=/var/lib/postgresql/data/pgdata
-  #   networks:
-  #     - wren
+  # Optional local database for ISM raw/core/curated/synthetic buildout.
+  ism-postgres:
+    image: postgres:14-alpine
+    platform: ${PLATFORM}
+    ports:
+      - 9432:5432
+    volumes:
+      - ism_pg_data:/var/lib/postgresql/data
+      - ../ism-data:/ism-data:ro
+      - ../ism-data/postgres/init:/docker-entrypoint-initdb.d:ro
+    environment:
+      - POSTGRES_PASSWORD=ism_secret
+      - POSTGRES_USER=ism_admin
+      - POSTGRES_DB=ISM
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    networks:
+      - legible

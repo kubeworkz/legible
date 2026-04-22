@@ -3,7 +3,7 @@ volumes:
   tei-models:
 
 networks:
-  wren:
+  legible:
     driver: bridge
 
 services:
@@ -28,7 +28,7 @@ services:
       - data:/usr/src/app/etc
       - ${PROJECT_DIR}/data:/usr/src/app/data
     networks:
-      - wren
+      - legible
     depends_on:
       - bootstrap
 
@@ -53,7 +53,7 @@ services:
     volumes:
       - ${LOCAL_STORAGE:-.}:/usr/src/app/data
     networks:
-      - wren
+      - legible
 
   wren-ai-service:
     image: wren-ai-service:local
@@ -79,7 +79,7 @@ services:
       - ${PROJECT_DIR}/config.yaml:/app/config.yaml:ro
       - ${PROJECT_DIR}/data:/app/data:ro
     networks:
-      - wren
+      - legible
     depends_on:
       - qdrant
       - text-embeddings-inference
@@ -99,7 +99,7 @@ services:
         limits:
           memory: 2g
     networks:
-      - wren
+      - legible
 
   qdrant:
     image: qdrant/qdrant:v1.17.0
@@ -114,7 +114,7 @@ services:
         limits:
           memory: 2g
     networks:
-      - wren
+      - legible
 
   legible-ui:
     image: legible-ui:local
@@ -173,7 +173,7 @@ services:
     volumes:
       - data:/app/data
     networks:
-      - wren
+      - legible
     depends_on:
       - wren-ai-service
       - wren-engine
@@ -204,7 +204,7 @@ services:
   #     QUERY_DEFAULT_LIMIT: ${DB2I_QUERY_DEFAULT_LIMIT:-1000}
   #     QUERY_MAX_LIMIT: ${DB2I_QUERY_MAX_LIMIT:-10000}
   #   networks:
-  #     - wren
+  #     - legible
 
   legible-docs:
     image: legible-docs:local
@@ -212,4 +212,4 @@ services:
     ports:
       - 127.0.0.1:${DOCS_PORT:-4000}:4000
     networks:
-      - wren
+      - legible

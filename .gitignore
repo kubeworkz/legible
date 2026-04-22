@@ -103,3 +103,5 @@ wren-launcher/main
 !wren-ai-service/tools/.env.example
 legible-ui/public/sample_data/
 wren-ai-service/transactions-fraud-datasets.zip
+
+ism-data
