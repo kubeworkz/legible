@@ -16,7 +16,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  background: url('/images/login-bg.svg') center / cover no-repeat;
 `;
 
 const Card = styled.div`
