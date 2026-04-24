@@ -35,7 +35,7 @@ docker compose -f "${COMPOSE_FILE}" exec -T "${PG_SERVICE}" \
   psql -U "${PG_USER}" -d "${PG_DB}" -c "
 SELECT 'curated.fact_trades' AS view_name, count(*) AS rows FROM curated.fact_trades
 UNION ALL
-SELECT 'curated.fact_bookings', count(*) FROM curated.fact_bookings
+SELECT 'curated.fact_bookkeeping', count(*) FROM curated.fact_bookkeeping
 ORDER BY view_name;
 "
 

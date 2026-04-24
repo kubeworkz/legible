@@ -25,7 +25,7 @@ done
 docker compose -f "${COMPOSE_FILE}" exec -T "${PG_SERVICE}" \
   psql -v ON_ERROR_STOP=1 -U "${PG_USER}" -d "${PG_DB}" -c "
 DROP VIEW IF EXISTS curated.fact_trades;
-DROP VIEW IF EXISTS curated.fact_bookings;
+DROP VIEW IF EXISTS curated.fact_bookkeeping;
 "
 
 echo "Curated fact views dropped."

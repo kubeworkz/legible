@@ -1,13 +1,13 @@
 -- Phase 5: Expand synthetic data
--- Inserts 10 000 new trades and 20 000 new bookings spanning 2020-2025.
+-- Inserts 10 000 new trades and 20 000 new bookkeeping entries spanning 2020-2025.
 -- Edge cases included:
 --   * Zero-quantity trades  (~2%, every 50th row)
 --   * Cancelled trades      (~5%, every 20th row)
---   * Multi-currency bookings (CAD/USD/AUD/EUR/GBP)
+--   * Multi-currency bookkeeping entries (CAD/USD/AUD/EUR/GBP)
 --   * Multiple major_type_code values (10/20/30/40/50/60)
 -- New IDs start well above the original range to avoid collision.
 --   Trades  : T0000010001 – T0000020000
---   Bookings: R0000100001 – R0000120000
+--   Bookkeeping: R0000100001 – R0000120000
 
 BEGIN;
 
@@ -114,8 +114,8 @@ JOIN secs  s ON s.rn = mod(gs.n * 13 + 3, (SELECT n FROM sec_cnt))
 JOIN brks  b ON b.rn = mod(gs.n, 2);
 
 
--- ─── 20 000 new bookings ─────────────────────────────────────────────────────
-INSERT INTO synth.bookings (
+-- ─── 20 000 new bookkeeping entries ─────────────────────────────────────────
+INSERT INTO synth.bookkeeping (
     broker_no,
     account_no,
     major_type_code,
@@ -181,7 +181,7 @@ SELECT
     'R' || lpad((100000 + gs.n)::text, 10, '0')             AS txn_ref_id,
     mod(gs.n, 3) + 1                                        AS txn_subseq,
 
-    -- security_no: null for ~10% (cash-only bookings like fees/transfers)
+    -- security_no: null for ~10% (cash-only bookkeeping entries like fees/transfers)
     CASE WHEN mod(gs.n, 10) = 0
          THEN NULL
          ELSE s.security_no

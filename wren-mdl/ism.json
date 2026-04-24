@@ -241,32 +241,32 @@
       ]
     },
     {
-      "name": "Bookings",
+      "name": "Bookkeeping",
       "tableReference": {
         "catalog": "ISM",
         "schema": "curated",
-        "table": "fact_bookings"
+        "table": "fact_bookkeeping"
       },
       "primaryKey": "txn_ref_id",
       "properties": {
-        "description": "Financial transaction booking records from the settlement system. Each row is one booking line (a debit or credit entry against an account). Related to trades but also includes dividends, interest, fees, and cash transfers. Key columns: major_type_code (transaction type), detail_amount (the booked dollar value), txn_subseq (sub-sequence within a multi-leg transaction)."
+        "description": "Financial transaction bookkeeping records from the settlement system. Each row is one bookkeeping line (a debit or credit entry against an account). Related to trades but also includes dividends, interest, fees, and cash transfers. Key columns: major_type_code (transaction type), detail_amount (the booked dollar value), txn_subseq (sub-sequence within a multi-leg transaction)."
       },
       "columns": [
         {
           "name": "txn_ref_id",
           "type": "varchar",
           "notNull": true,
-          "properties": { "description": "Unique booking transaction reference. Primary key. Synthetic format: R0000000001." }
+          "properties": { "description": "Unique bookkeeping transaction reference. Primary key. Synthetic format: R0000000001." }
         },
         {
           "name": "broker_no",
           "type": "varchar",
-          "properties": { "description": "Broker associated with the booking. Synthetic format: BXXXXXX." }
+          "properties": { "description": "Broker associated with the bookkeeping entry. Synthetic format: BXXXXXX." }
         },
         {
           "name": "account_no",
           "type": "varchar",
-          "properties": { "description": "Client account identifier for this booking. Synthetic format: AXXXXXXXXXX." }
+          "properties": { "description": "Client account identifier for this bookkeeping entry. Synthetic format: AXXXXXXXXXX." }
         },
         {
           "name": "client_no",
@@ -276,7 +276,7 @@
         {
           "name": "security_no",
           "type": "varchar",
-          "properties": { "description": "Security referenced by this booking — foreign key to DimSecurity. May be null for cash-only bookings." }
+          "properties": { "description": "Security referenced by this bookkeeping entry — foreign key to DimSecurity. May be null for cash-only entries." }
         },
         {
           "name": "security_symbol",
@@ -311,7 +311,7 @@
         {
           "name": "major_type_code",
           "type": "varchar",
-          "properties": { "description": "Transaction type from the booking system (e.g. BUY, SEL, DIV = dividend, INT = interest, FEE, TRF = transfer). Classifies the economic nature of the booking." }
+          "properties": { "description": "Transaction type from the bookkeeping system (e.g. BUY, SEL, DIV = dividend, INT = interest, FEE, TRF = transfer). Classifies the economic nature of the bookkeeping entry." }
         },
         {
           "name": "txn_subseq",
@@ -321,12 +321,12 @@
         {
           "name": "process_date",
           "type": "date",
-          "properties": { "description": "Date the booking was processed by the back office." }
+          "properties": { "description": "Date the bookkeeping entry was processed by the back office." }
         },
         {
           "name": "trade_date",
           "type": "date",
-          "properties": { "description": "Trade execution date associated with this booking." }
+          "properties": { "description": "Trade execution date associated with this bookkeeping entry." }
         },
         {
           "name": "value_date",
@@ -336,7 +336,7 @@
         {
           "name": "detail_amount",
           "type": "double",
-          "properties": { "description": "Dollar value of this booking line in the account's fund currency. Positive = credit to account, negative = debit. Use for dollar-value aggregations." }
+          "properties": { "description": "Dollar value of this bookkeeping line in the account's fund currency. Positive = credit to account, negative = debit. Use for dollar-value aggregations." }
         },
         {
           "name": "detail_amount_funds",
@@ -371,7 +371,7 @@
         {
           "name": "security",
           "type": "DimSecurity",
-          "relationship": "BookingsDimSecurity",
+          "relationship": "BookkeepingDimSecurity",
           "properties": { "description": "Related security dimension record (join via security_no)." }
         }
       ]
@@ -385,10 +385,10 @@
       "condition": "Trades.security_no = DimSecurity.security_no"
     },
     {
-      "name": "BookingsDimSecurity",
-      "models": ["Bookings", "DimSecurity"],
+      "name": "BookkeepingDimSecurity",
+      "models": ["Bookkeeping", "DimSecurity"],
       "joinType": "MANY_TO_ONE",
-      "condition": "Bookings.security_no = DimSecurity.security_no"
+      "condition": "Bookkeeping.security_no = DimSecurity.security_no"
     }
   ],
   "views": [
@@ -400,10 +400,10 @@
       }
     },
     {
-      "name": "BookingsByMajorType",
-      "statement": "SELECT major_type_code, COUNT(*) AS booking_count, SUM(detail_amount) AS total_amount FROM ism.curated.Bookings GROUP BY major_type_code",
+      "name": "BookkeepingByMajorType",
+      "statement": "SELECT major_type_code, COUNT(*) AS bookkeeping_count, SUM(detail_amount) AS total_amount FROM ism.curated.Bookkeeping GROUP BY major_type_code",
       "properties": {
-        "description": "Summary of booking activity grouped by transaction type code (e.g. BUY, SEL, DIV, FEE)."
+        "description": "Summary of bookkeeping activity grouped by transaction type code (e.g. BUY, SEL, DIV, FEE)."
       }
     },
     {

@@ -125,8 +125,8 @@ LEFT JOIN synth.security_map sm ON sm.source_security_no = sb.mapped_security_no
 CREATE INDEX IF NOT EXISTS idx_synth_trades_account_no ON synth.trades (account_no);
 CREATE INDEX IF NOT EXISTS idx_synth_trades_security_no ON synth.trades (security_no);
 
-DROP TABLE IF EXISTS synth.bookings;
-CREATE TABLE synth.bookings AS
+DROP TABLE IF EXISTS synth.bookkeeping;
+CREATE TABLE synth.bookkeeping AS
 SELECT
     bm.synthetic_broker_no AS broker_no,
     am.synthetic_account_no AS account_no,
@@ -163,7 +163,7 @@ LEFT JOIN synth.broker_map bm ON bm.source_broker_no = b.broker_no
 LEFT JOIN core.security_bridge sb ON sb.security_code = COALESCE(NULLIF(btrim(b.security_code), ''), '__UNKNOWN__')
 LEFT JOIN synth.security_map sm ON sm.source_security_no = sb.mapped_security_no;
 
-CREATE INDEX IF NOT EXISTS idx_synth_bookings_account_no ON synth.bookings (account_no);
-CREATE INDEX IF NOT EXISTS idx_synth_bookings_security_no ON synth.bookings (security_no);
+CREATE INDEX IF NOT EXISTS idx_synth_bookkeeping_account_no ON synth.bookkeeping (account_no);
+CREATE INDEX IF NOT EXISTS idx_synth_bookkeeping_security_no ON synth.bookkeeping (security_no);
 
 COMMIT;

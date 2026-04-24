@@ -2,6 +2,8 @@ BEGIN;
 
 CREATE SCHEMA IF NOT EXISTS curated;
 
+-- Drop in dependency order: fact_positions depends on fact_trades
+DROP VIEW IF EXISTS curated.fact_positions;
 DROP VIEW IF EXISTS curated.fact_trades;
 CREATE VIEW curated.fact_trades AS
 SELECT
@@ -35,8 +37,8 @@ LEFT JOIN synth.client_account_links l ON l.account_no = t.account_no
 LEFT JOIN synth.accounts a ON a.account_no = t.account_no
 LEFT JOIN synth.clients c ON c.client_no = l.client_no;
 
-DROP VIEW IF EXISTS curated.fact_bookings;
-CREATE VIEW curated.fact_bookings AS
+DROP VIEW IF EXISTS curated.fact_bookkeeping;
+CREATE VIEW curated.fact_bookkeeping AS
 SELECT
     b.txn_ref_id,
     b.broker_no,
@@ -61,7 +63,7 @@ SELECT
     a.account_origin,
     c.client_origin,
     b.generated_at
-FROM synth.bookings b
+FROM synth.bookkeeping b
 LEFT JOIN curated.dim_security ds ON ds.security_no = b.security_no
 LEFT JOIN synth.client_account_links l ON l.account_no = b.account_no
 LEFT JOIN synth.accounts a ON a.account_no = b.account_no
