@@ -20,82 +20,114 @@
           "name": "security_no",
           "type": "varchar",
           "notNull": true,
-          "properties": { "description": "Canonical security identifier. Primary key." }
+          "properties": {
+            "description": "Canonical security identifier. Primary key."
+          }
         },
         {
           "name": "symbol",
           "type": "varchar",
-          "properties": { "description": "Exchange ticker symbol (e.g. AAPL, TD). May be N/A when unknown." }
+          "properties": {
+            "description": "Exchange ticker symbol (e.g. AAPL, TD). May be N/A when unknown."
+          }
         },
         {
           "name": "cusip",
           "type": "varchar",
-          "properties": { "description": "CUSIP identifier — 9-character North American security identifier. May be N/A when unknown." }
+          "properties": {
+            "description": "CUSIP identifier \u2014 9-character North American security identifier. May be N/A when unknown."
+          }
         },
         {
           "name": "security_type",
           "type": "varchar",
-          "properties": { "description": "High-level security type code (e.g. EQ = equity, BD = bond, MF = mutual fund, ETF). UNK when not available." }
+          "properties": {
+            "description": "High-level security type code (e.g. EQ = equity, BD = bond, MF = mutual fund, ETF). UNK when not available."
+          }
         },
         {
           "name": "security_class",
           "type": "varchar",
-          "properties": { "description": "More granular classification within the security type (e.g. common share, preferred share, government bond). UNK when not available." }
+          "properties": {
+            "description": "More granular classification within the security type (e.g. common share, preferred share, government bond). UNK when not available."
+          }
         },
         {
           "name": "country",
           "type": "varchar",
-          "properties": { "description": "ISO country code of the security's primary listing (e.g. CA = Canada, US = United States). UNK when not available." }
+          "properties": {
+            "description": "ISO country code of the security's primary listing (e.g. CA = Canada, US = United States). UNK when not available."
+          }
         },
         {
           "name": "funds",
           "type": "varchar",
-          "properties": { "description": "Settlement currency or fund code for this security (e.g. CAD, USD). UNK when not available." }
+          "properties": {
+            "description": "Settlement currency or fund code for this security (e.g. CAD, USD). UNK when not available."
+          }
         },
         {
           "name": "english_description",
           "type": "varchar",
-          "properties": { "description": "Full English-language description of the security (e.g. company or fund name)." }
+          "properties": {
+            "description": "Full English-language description of the security (e.g. company or fund name)."
+          }
         },
         {
           "name": "french_description",
           "type": "varchar",
-          "properties": { "description": "Full French-language description of the security." }
+          "properties": {
+            "description": "Full French-language description of the security."
+          }
         },
         {
           "name": "cad_close_price",
           "type": "double",
-          "properties": { "description": "Most recent closing price in Canadian dollars. Null if no CAD price is available." }
+          "properties": {
+            "description": "Most recent closing price in Canadian dollars. Null if no CAD price is available."
+          }
         },
         {
           "name": "usd_close_price",
           "type": "double",
-          "properties": { "description": "Most recent closing price in US dollars. Null if no USD price is available." }
+          "properties": {
+            "description": "Most recent closing price in US dollars. Null if no USD price is available."
+          }
         },
         {
           "name": "cad_price_date",
           "type": "date",
-          "properties": { "description": "Date of the cad_close_price observation." }
+          "properties": {
+            "description": "Date of the cad_close_price observation."
+          }
         },
         {
           "name": "usd_price_date",
           "type": "date",
-          "properties": { "description": "Date of the usd_close_price observation." }
+          "properties": {
+            "description": "Date of the usd_close_price observation."
+          }
         },
         {
           "name": "security_origin",
           "type": "varchar",
-          "properties": { "description": "How this security entered the registry: 'master' = direct from ISM security master; 'bridge_fallback' = inferred from transaction security codes." }
+          "properties": {
+            "description": "How this security entered the registry: 'master' = direct from ISM security master; 'bridge_fallback' = inferred from transaction security codes."
+          }
         },
         {
           "name": "quality_tier",
           "type": "varchar",
-          "properties": { "description": "Data quality confidence: 'high' = master-sourced, 'medium' = bridge-inferred, 'low' = fallback or unknown (__UNKNOWN__)." }
+          "properties": {
+            "description": "Data quality confidence: 'high' = master-sourced, 'medium' = bridge-inferred, 'low' = fallback or unknown (__UNKNOWN__)."
+          }
         },
         {
           "name": "curated_at",
           "type": "timestamp",
-          "properties": { "description": "Timestamp when this row was last refreshed into the curated layer." }
+          "properties": {
+            "description": "Timestamp when this row was last refreshed into the curated layer."
+          }
         }
       ]
     },
@@ -115,128 +147,178 @@
           "name": "trade_no",
           "type": "varchar",
           "notNull": true,
-          "properties": { "description": "Unique trade reference number. Primary key. Synthetic format: T0000000001." }
+          "properties": {
+            "description": "Unique trade reference number. Primary key. Synthetic format: T0000000001."
+          }
         },
         {
           "name": "broker_no",
           "type": "varchar",
-          "properties": { "description": "Executing broker identifier. Synthetic format: BXXXXXX." }
+          "properties": {
+            "description": "Executing broker identifier. Synthetic format: BXXXXXX."
+          }
         },
         {
           "name": "account_no",
           "type": "varchar",
-          "properties": { "description": "Client account identifier. Synthetic format: AXXXXXXXXXX." }
+          "properties": {
+            "description": "Client account identifier. Synthetic format: AXXXXXXXXXX."
+          }
         },
         {
           "name": "client_no",
           "type": "varchar",
-          "properties": { "description": "Client identifier linked to the account. Synthetic format: CLXXXXXXXX." }
+          "properties": {
+            "description": "Client identifier linked to the account. Synthetic format: CLXXXXXXXX."
+          }
         },
         {
           "name": "security_no",
           "type": "varchar",
-          "properties": { "description": "Security identifier — foreign key to DimSecurity." }
+          "properties": {
+            "description": "Security identifier \u2014 foreign key to DimSecurity."
+          }
         },
         {
           "name": "security_symbol",
           "type": "varchar",
-          "properties": { "description": "Exchange ticker symbol of the traded security (denormalised from DimSecurity)." }
+          "properties": {
+            "description": "Exchange ticker symbol of the traded security (denormalised from DimSecurity)."
+          }
         },
         {
           "name": "security_cusip",
           "type": "varchar",
-          "properties": { "description": "CUSIP of the traded security (denormalised from DimSecurity)." }
+          "properties": {
+            "description": "CUSIP of the traded security (denormalised from DimSecurity)."
+          }
         },
         {
           "name": "security_type",
           "type": "varchar",
-          "properties": { "description": "Security type code (e.g. EQ, BD, MF) — denormalised from DimSecurity." }
+          "properties": {
+            "description": "Security type code (e.g. EQ, BD, MF) \u2014 denormalised from DimSecurity."
+          }
         },
         {
           "name": "security_class",
           "type": "varchar",
-          "properties": { "description": "Security classification — denormalised from DimSecurity." }
+          "properties": {
+            "description": "Security classification \u2014 denormalised from DimSecurity."
+          }
         },
         {
           "name": "security_origin",
           "type": "varchar",
-          "properties": { "description": "Security data origin: 'master' or 'bridge_fallback' — denormalised from DimSecurity." }
+          "properties": {
+            "description": "Security data origin: 'master' or 'bridge_fallback' \u2014 denormalised from DimSecurity."
+          }
         },
         {
           "name": "security_quality_tier",
           "type": "varchar",
-          "properties": { "description": "Security data quality: 'high', 'medium', or 'low' — denormalised from DimSecurity." }
+          "properties": {
+            "description": "Security data quality: 'high', 'medium', or 'low' \u2014 denormalised from DimSecurity."
+          }
         },
         {
           "name": "record_type",
           "type": "varchar",
-          "properties": { "description": "Internal record type code classifying the transaction kind within the source system." }
+          "properties": {
+            "description": "Internal record type code classifying the transaction kind within the source system."
+          }
         },
         {
           "name": "buy_sell",
           "type": "varchar",
-          "properties": { "description": "Trade direction: 'B' = buy, 'S' = sell." }
+          "properties": {
+            "description": "Trade direction: 'B' = buy, 'S' = sell."
+          }
         },
         {
           "name": "cancel_flag",
           "type": "varchar",
-          "properties": { "description": "Cancellation indicator: 'Y' = this trade has been cancelled; 'N' or null = active trade." }
+          "properties": {
+            "description": "Cancellation indicator: 'Y' = this trade has been cancelled; 'N' or null = active trade."
+          }
         },
         {
           "name": "process_ts",
           "type": "timestamp",
-          "properties": { "description": "Timestamp when the trade was processed (booked) by the back office." }
+          "properties": {
+            "description": "Timestamp when the trade was processed (booked) by the back office."
+          }
         },
         {
           "name": "trade_ts",
           "type": "timestamp",
-          "properties": { "description": "Timestamp when the trade was executed on the market." }
+          "properties": {
+            "description": "Timestamp when the trade was executed on the market."
+          }
         },
         {
           "name": "value_ts",
           "type": "timestamp",
-          "properties": { "description": "Settlement timestamp — when cash and securities are expected to be exchanged." }
+          "properties": {
+            "description": "Settlement timestamp \u2014 when cash and securities are expected to be exchanged."
+          }
         },
         {
           "name": "quantity",
           "type": "double",
-          "properties": { "description": "Number of units (shares, bonds, fund units) traded." }
+          "properties": {
+            "description": "Number of units (shares, bonds, fund units) traded."
+          }
         },
         {
           "name": "price",
           "type": "double",
-          "properties": { "description": "Per-unit execution price in the security's trading currency." }
+          "properties": {
+            "description": "Per-unit execution price in the security's trading currency."
+          }
         },
         {
           "name": "net_amount",
           "type": "double",
-          "properties": { "description": "Total settlement amount in the account's fund currency (quantity x price +/- commissions). Use this for dollar-value aggregations." }
+          "properties": {
+            "description": "Total settlement amount in the account's fund currency (quantity x price +/- commissions). Use this for dollar-value aggregations."
+          }
         },
         {
           "name": "net_amount_funds",
           "type": "varchar",
-          "properties": { "description": "Currency code for net_amount (e.g. CAD, USD)." }
+          "properties": {
+            "description": "Currency code for net_amount (e.g. CAD, USD)."
+          }
         },
         {
           "name": "account_origin",
           "type": "varchar",
-          "properties": { "description": "How the account entered the registry: 'core.accounts' = from ISM account master; 'transaction_fallback' = inferred from transactions." }
+          "properties": {
+            "description": "How the account entered the registry: 'core.accounts' = from ISM account master; 'transaction_fallback' = inferred from transactions."
+          }
         },
         {
           "name": "client_origin",
           "type": "varchar",
-          "properties": { "description": "How the client entered the registry: 'core.clients' = from ISM client master; 'account_scaffold' = scaffolded from account data." }
+          "properties": {
+            "description": "How the client entered the registry: 'core.clients' = from ISM client master; 'account_scaffold' = scaffolded from account data."
+          }
         },
         {
           "name": "generated_at",
           "type": "timestamp",
-          "properties": { "description": "Timestamp when this synthetic row was generated." }
+          "properties": {
+            "description": "Timestamp when this synthetic row was generated."
+          }
         },
         {
           "name": "security",
           "type": "DimSecurity",
           "relationship": "TradesDimSecurity",
-          "properties": { "description": "Related security dimension record (join via security_no)." }
+          "properties": {
+            "description": "Related security dimension record (join via security_no)."
+          }
         }
       ]
     },
@@ -256,123 +338,1583 @@
           "name": "txn_ref_id",
           "type": "varchar",
           "notNull": true,
-          "properties": { "description": "Unique bookkeeping transaction reference. Primary key. Synthetic format: R0000000001." }
+          "properties": {
+            "description": "Unique bookkeeping transaction reference. Primary key. Synthetic format: R0000000001."
+          }
         },
         {
           "name": "broker_no",
           "type": "varchar",
-          "properties": { "description": "Broker associated with the bookkeeping entry. Synthetic format: BXXXXXX." }
+          "properties": {
+            "description": "Broker associated with the bookkeeping entry. Synthetic format: BXXXXXX."
+          }
         },
         {
           "name": "account_no",
           "type": "varchar",
-          "properties": { "description": "Client account identifier for this bookkeeping entry. Synthetic format: AXXXXXXXXXX." }
+          "properties": {
+            "description": "Client account identifier for this bookkeeping entry. Synthetic format: AXXXXXXXXXX."
+          }
         },
         {
           "name": "client_no",
           "type": "varchar",
-          "properties": { "description": "Client identifier linked to the account. Synthetic format: CLXXXXXXXX." }
+          "properties": {
+            "description": "Client identifier linked to the account. Synthetic format: CLXXXXXXXX."
+          }
         },
         {
           "name": "security_no",
           "type": "varchar",
-          "properties": { "description": "Security referenced by this bookkeeping entry — foreign key to DimSecurity. May be null for cash-only entries." }
+          "properties": {
+            "description": "Security referenced by this bookkeeping entry \u2014 foreign key to DimSecurity. May be null for cash-only entries."
+          }
         },
         {
           "name": "security_symbol",
           "type": "varchar",
-          "properties": { "description": "Ticker symbol of the booked security (denormalised from DimSecurity)." }
+          "properties": {
+            "description": "Ticker symbol of the booked security (denormalised from DimSecurity)."
+          }
         },
         {
           "name": "security_cusip",
           "type": "varchar",
-          "properties": { "description": "CUSIP of the booked security (denormalised from DimSecurity)." }
+          "properties": {
+            "description": "CUSIP of the booked security (denormalised from DimSecurity)."
+          }
         },
         {
           "name": "security_type",
           "type": "varchar",
-          "properties": { "description": "Security type code (denormalised from DimSecurity)." }
+          "properties": {
+            "description": "Security type code (denormalised from DimSecurity)."
+          }
         },
         {
           "name": "security_class",
           "type": "varchar",
-          "properties": { "description": "Security classification (denormalised from DimSecurity)." }
+          "properties": {
+            "description": "Security classification (denormalised from DimSecurity)."
+          }
         },
         {
           "name": "security_origin",
           "type": "varchar",
-          "properties": { "description": "Security data origin (denormalised from DimSecurity)." }
+          "properties": {
+            "description": "Security data origin (denormalised from DimSecurity)."
+          }
         },
         {
           "name": "security_quality_tier",
           "type": "varchar",
-          "properties": { "description": "Security data quality tier (denormalised from DimSecurity)." }
+          "properties": {
+            "description": "Security data quality tier (denormalised from DimSecurity)."
+          }
         },
         {
           "name": "major_type_code",
           "type": "varchar",
-          "properties": { "description": "Transaction type from the bookkeeping system (e.g. BUY, SEL, DIV = dividend, INT = interest, FEE, TRF = transfer). Classifies the economic nature of the bookkeeping entry." }
+          "properties": {
+            "description": "Transaction type from the bookkeeping system (e.g. BUY, SEL, DIV = dividend, INT = interest, FEE, TRF = transfer). Classifies the economic nature of the bookkeeping entry."
+          }
         },
         {
           "name": "txn_subseq",
           "type": "integer",
-          "properties": { "description": "Sub-sequence number within a multi-line transaction. Used to identify individual legs of the same economic event." }
+          "properties": {
+            "description": "Sub-sequence number within a multi-line transaction. Used to identify individual legs of the same economic event."
+          }
         },
         {
           "name": "process_date",
           "type": "date",
-          "properties": { "description": "Date the bookkeeping entry was processed by the back office." }
+          "properties": {
+            "description": "Date the bookkeeping entry was processed by the back office."
+          }
         },
         {
           "name": "trade_date",
           "type": "date",
-          "properties": { "description": "Trade execution date associated with this bookkeeping entry." }
+          "properties": {
+            "description": "Trade execution date associated with this bookkeeping entry."
+          }
         },
         {
           "name": "value_date",
           "type": "date",
-          "properties": { "description": "Settlement date — when the cash or securities movement takes effect." }
+          "properties": {
+            "description": "Settlement date \u2014 when the cash or securities movement takes effect."
+          }
         },
         {
           "name": "detail_amount",
           "type": "double",
-          "properties": { "description": "Dollar value of this bookkeeping line in the account's fund currency. Positive = credit to account, negative = debit. Use for dollar-value aggregations." }
+          "properties": {
+            "description": "Dollar value of this bookkeeping line in the account's fund currency. Positive = credit to account, negative = debit. Use for dollar-value aggregations."
+          }
         },
         {
           "name": "detail_amount_funds",
           "type": "varchar",
-          "properties": { "description": "Currency code for detail_amount (e.g. CAD, USD)." }
+          "properties": {
+            "description": "Currency code for detail_amount (e.g. CAD, USD)."
+          }
         },
         {
           "name": "detail_quantity",
           "type": "double",
-          "properties": { "description": "Security quantity for this booking line. Null for cash-only transactions." }
+          "properties": {
+            "description": "Security quantity for this booking line. Null for cash-only transactions."
+          }
         },
         {
           "name": "rr_code",
           "type": "varchar",
-          "properties": { "description": "Registered Representative code — the advisor/broker assigned to this account's transaction." }
+          "properties": {
+            "description": "Registered Representative code \u2014 the advisor/broker assigned to this account's transaction."
+          }
         },
         {
           "name": "account_origin",
           "type": "varchar",
-          "properties": { "description": "How the account entered the registry: 'core.accounts' or 'transaction_fallback'." }
+          "properties": {
+            "description": "How the account entered the registry: 'core.accounts' or 'transaction_fallback'."
+          }
         },
         {
           "name": "client_origin",
           "type": "varchar",
-          "properties": { "description": "How the client entered the registry: 'core.clients' or 'account_scaffold'." }
+          "properties": {
+            "description": "How the client entered the registry: 'core.clients' or 'account_scaffold'."
+          }
         },
         {
           "name": "generated_at",
           "type": "timestamp",
-          "properties": { "description": "Timestamp when this synthetic row was generated." }
+          "properties": {
+            "description": "Timestamp when this synthetic row was generated."
+          }
         },
         {
           "name": "security",
           "type": "DimSecurity",
           "relationship": "BookkeepingDimSecurity",
-          "properties": { "description": "Related security dimension record (join via security_no)." }
+          "properties": {
+            "description": "Related security dimension record (join via security_no)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "SecurityMaster",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "security_master"
+      },
+      "primaryKey": "secno",
+      "properties": {
+        "description": "SM (Security Master) \u2014 raw.smdsdrt. Primary security master record. One row per security. Contains type, class, English/French descriptions, CUSIP, ticker symbol, country, settlement currency, CAD and USD closing prices with dates, coupon rate, payment frequency, maturity date, and dividend yield. The canonical source for security reference data; the curated DimSecurity model is derived from this table."
+      },
+      "columns": [
+        {
+          "name": "secno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Security number \u2014 primary key. Unique internal identifier for the security."
+          }
+        },
+        {
+          "name": "sectype",
+          "type": "varchar",
+          "properties": {
+            "description": "Security type code (e.g. equity, bond, mutual fund)."
+          }
+        },
+        {
+          "name": "secclass",
+          "type": "varchar",
+          "properties": {
+            "description": "Security class \u2014 more granular classification within the type."
+          }
+        },
+        {
+          "name": "engsdesc",
+          "type": "varchar",
+          "properties": {
+            "description": "English short description of the security (name or label)."
+          }
+        },
+        {
+          "name": "frsdesc",
+          "type": "varchar",
+          "properties": {
+            "description": "French short description of the security."
+          }
+        },
+        {
+          "name": "funds",
+          "type": "varchar",
+          "properties": {
+            "description": "Settlement currency code for the security (e.g. CAD, USD)."
+          }
+        },
+        {
+          "name": "cusip",
+          "type": "varchar",
+          "properties": {
+            "description": "CUSIP \u2014 9-character North American security identifier."
+          }
+        },
+        {
+          "name": "symbol",
+          "type": "varchar",
+          "properties": {
+            "description": "Exchange ticker symbol."
+          }
+        },
+        {
+          "name": "country",
+          "type": "varchar",
+          "properties": {
+            "description": "ISO country code of the security's primary listing."
+          }
+        },
+        {
+          "name": "cdnclspr",
+          "type": "varchar",
+          "properties": {
+            "description": "Canadian dollar closing price."
+          }
+        },
+        {
+          "name": "cdnprdt",
+          "type": "varchar",
+          "properties": {
+            "description": "Date of the CAD closing price."
+          }
+        },
+        {
+          "name": "usclspr",
+          "type": "varchar",
+          "properties": {
+            "description": "US dollar closing price."
+          }
+        },
+        {
+          "name": "usprdt",
+          "type": "varchar",
+          "properties": {
+            "description": "Date of the USD closing price."
+          }
+        },
+        {
+          "name": "payrate",
+          "type": "varchar",
+          "properties": {
+            "description": "Coupon or dividend pay rate."
+          }
+        },
+        {
+          "name": "payfreq",
+          "type": "varchar",
+          "properties": {
+            "description": "Payment frequency code (e.g. monthly, quarterly, annual)."
+          }
+        },
+        {
+          "name": "expmatdt",
+          "type": "varchar",
+          "properties": {
+            "description": "Expiry or maturity date for bonds and options."
+          }
+        },
+        {
+          "name": "indanndiv",
+          "type": "varchar",
+          "properties": {
+            "description": "Indicated annual dividend amount."
+          }
+        }
+      ]
+    },
+    {
+      "name": "SecurityDividend",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "security_dividend"
+      },
+      "properties": {
+        "description": "SM (Security Master) \u2014 raw.smdsddi. Dividend details per security. One row per dividend record for a security. Contains dividend record date, rate, pay frequency, pay date, and currency. Join to SecurityMaster via secno."
+      },
+      "columns": [
+        {
+          "name": "secno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Security number \u2014 foreign key to SecurityMaster."
+          }
+        },
+        {
+          "name": "divrecdt",
+          "type": "varchar",
+          "properties": {
+            "description": "Dividend record date (the date used to determine eligible shareholders)."
+          }
+        },
+        {
+          "name": "divrate",
+          "type": "varchar",
+          "properties": {
+            "description": "Dividend rate per unit/share."
+          }
+        },
+        {
+          "name": "payfreq",
+          "type": "varchar",
+          "properties": {
+            "description": "Payment frequency code."
+          }
+        },
+        {
+          "name": "paydt",
+          "type": "varchar",
+          "properties": {
+            "description": "Dividend payment date."
+          }
+        },
+        {
+          "name": "divfunds",
+          "type": "varchar",
+          "properties": {
+            "description": "Currency in which the dividend is paid (e.g. CAD, USD)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "SecurityMarkets",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "security_markets"
+      },
+      "primaryKey": "secno",
+      "properties": {
+        "description": "SM (Security Master) \u2014 raw.smdsdsy. Security market listings and exchange symbols. One row per security. Contains ticker symbol, country, and up to six market/exchange codes with their market type. Join to SecurityMaster via secno."
+      },
+      "columns": [
+        {
+          "name": "secno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Security number \u2014 foreign key to SecurityMaster."
+          }
+        },
+        {
+          "name": "symbol",
+          "type": "varchar",
+          "properties": {
+            "description": "Primary ticker symbol."
+          }
+        },
+        {
+          "name": "country",
+          "type": "varchar",
+          "properties": {
+            "description": "ISO country code."
+          }
+        },
+        {
+          "name": "mktcode1",
+          "type": "varchar",
+          "properties": {
+            "description": "First market/exchange code."
+          }
+        },
+        {
+          "name": "majmkt1",
+          "type": "varchar",
+          "properties": {
+            "description": "Major market flag for first exchange."
+          }
+        },
+        {
+          "name": "mktcode2",
+          "type": "varchar",
+          "properties": {
+            "description": "Second market/exchange code."
+          }
+        },
+        {
+          "name": "majmkt2",
+          "type": "varchar",
+          "properties": {
+            "description": "Major market flag for second exchange."
+          }
+        },
+        {
+          "name": "mktcode3",
+          "type": "varchar",
+          "properties": {
+            "description": "Third market/exchange code."
+          }
+        },
+        {
+          "name": "majmkt3",
+          "type": "varchar",
+          "properties": {
+            "description": "Major market flag for third exchange."
+          }
+        },
+        {
+          "name": "symbolid",
+          "type": "varchar",
+          "properties": {
+            "description": "System-assigned symbol identifier."
+          }
+        }
+      ]
+    },
+    {
+      "name": "SecurityBondDates",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "security_bond_dates"
+      },
+      "primaryKey": "secno",
+      "properties": {
+        "description": "SM (Security Master) \u2014 raw.smdsdbo. Bond-specific date fields. One row per bond security. Contains the dated date (bond issuance date), first coupon date, next coupon date, and interest/discount indicator. Join to SecurityMaster via secno."
+      },
+      "columns": [
+        {
+          "name": "secno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Security number \u2014 foreign key to SecurityMaster."
+          }
+        },
+        {
+          "name": "dateddt",
+          "type": "varchar",
+          "properties": {
+            "description": "Dated date \u2014 the bond issuance date from which interest accrues."
+          }
+        },
+        {
+          "name": "frstcpndt",
+          "type": "varchar",
+          "properties": {
+            "description": "First coupon payment date."
+          }
+        },
+        {
+          "name": "cpndt",
+          "type": "varchar",
+          "properties": {
+            "description": "Next upcoming coupon date."
+          }
+        },
+        {
+          "name": "intdiscind",
+          "type": "varchar",
+          "properties": {
+            "description": "Interest/discount indicator \u2014 whether the bond pays interest or trades at a discount."
+          }
+        }
+      ]
+    },
+    {
+      "name": "SecurityBondFactor",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "security_bond_factor"
+      },
+      "properties": {
+        "description": "SM (Security Master) \u2014 raw.smdsdum. Remaining principal factor for mortgage-backed securities and other amortising bonds. Tracks the fraction of original principal still outstanding over time. Join to SecurityMaster via secno."
+      },
+      "columns": [
+        {
+          "name": "secno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Security number \u2014 foreign key to SecurityMaster."
+          }
+        },
+        {
+          "name": "effectivedate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date from which this factor applies."
+          }
+        },
+        {
+          "name": "enddate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date on which this factor expires."
+          }
+        },
+        {
+          "name": "remprinfact",
+          "type": "varchar",
+          "properties": {
+            "description": "Remaining principal factor \u2014 proportion of original face value still outstanding (0.0\u20131.0)."
+          }
+        },
+        {
+          "name": "unitofmeasure",
+          "type": "varchar",
+          "properties": {
+            "description": "Unit of measure code for the security."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AccountHoldings",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "account_holdings"
+      },
+      "properties": {
+        "description": "DAS (Account Holdings) \u2014 raw.das4. Per-security holdings for each account. One row per account/security combination. Shows current quantity held, market price, market value, and loan value. This is the primary source for current client position data. Join to SecurityMaster via secnum (= secno)."
+      },
+      "columns": [
+        {
+          "name": "acctno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Account number \u2014 foreign key to AccountProfile."
+          }
+        },
+        {
+          "name": "secnum",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Security number \u2014 foreign key to SecurityMaster."
+          }
+        },
+        {
+          "name": "secdesc",
+          "type": "varchar",
+          "properties": {
+            "description": "Security description (short name)."
+          }
+        },
+        {
+          "name": "groupcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Asset group/category code for the holding."
+          }
+        },
+        {
+          "name": "funds",
+          "type": "varchar",
+          "properties": {
+            "description": "Currency code for the position (e.g. CAD, USD)."
+          }
+        },
+        {
+          "name": "currqty",
+          "type": "varchar",
+          "properties": {
+            "description": "Current quantity held in the account (shares, units, face value for bonds)."
+          }
+        },
+        {
+          "name": "sfkqty",
+          "type": "varchar",
+          "properties": {
+            "description": "Safekeeping quantity \u2014 units held in safekeeping/custody."
+          }
+        },
+        {
+          "name": "pendqty",
+          "type": "varchar",
+          "properties": {
+            "description": "Pending quantity \u2014 units in unsettled trades."
+          }
+        },
+        {
+          "name": "memoqty",
+          "type": "varchar",
+          "properties": {
+            "description": "Memo quantity \u2014 units reserved or flagged."
+          }
+        },
+        {
+          "name": "mktprice",
+          "type": "varchar",
+          "properties": {
+            "description": "Current market price per unit."
+          }
+        },
+        {
+          "name": "mktvalue",
+          "type": "varchar",
+          "properties": {
+            "description": "Total market value of the position (currqty \u00d7 mktprice)."
+          }
+        },
+        {
+          "name": "loanvalue",
+          "type": "varchar",
+          "properties": {
+            "description": "Loan value of the position \u2014 collateral value for margin lending."
+          }
+        },
+        {
+          "name": "lasttradedate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date of the most recent trade in this security for the account."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AccountHoldingsSummary",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "account_holdings_summary"
+      },
+      "primaryKey": "acctno",
+      "properties": {
+        "description": "DAS (Account Holdings) \u2014 raw.dasc1. Account-level holdings summary with aggregate balances and market values. One row per account. Contains the total debit/credit balances, total market value, loan value, margin requirements, and account status flags. Provides a rolled-up view of an account's financial position across all holdings."
+      },
+      "columns": [
+        {
+          "name": "acctno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Account number \u2014 primary key."
+          }
+        },
+        {
+          "name": "accttype",
+          "type": "varchar",
+          "properties": {
+            "description": "Account type code."
+          }
+        },
+        {
+          "name": "funds",
+          "type": "varchar",
+          "properties": {
+            "description": "Primary settlement currency for the account."
+          }
+        },
+        {
+          "name": "rrcode2",
+          "type": "varchar",
+          "properties": {
+            "description": "Registered Representative (advisor) code."
+          }
+        },
+        {
+          "name": "rrbranch",
+          "type": "varchar",
+          "properties": {
+            "description": "Branch code of the Registered Representative."
+          }
+        },
+        {
+          "name": "acctclass",
+          "type": "varchar",
+          "properties": {
+            "description": "Account class code."
+          }
+        },
+        {
+          "name": "language",
+          "type": "varchar",
+          "properties": {
+            "description": "Client language preference (E = English, F = French)."
+          }
+        },
+        {
+          "name": "tdmktval",
+          "type": "varchar",
+          "properties": {
+            "description": "Today's total market value of all holdings in the account."
+          }
+        },
+        {
+          "name": "mebknetchg",
+          "type": "varchar",
+          "properties": {
+            "description": "Month-end bookkeeping net change amount."
+          }
+        },
+        {
+          "name": "tdbalunsc",
+          "type": "varchar",
+          "properties": {
+            "description": "Today's unsecured debit balance."
+          }
+        },
+        {
+          "name": "sdbal",
+          "type": "varchar",
+          "properties": {
+            "description": "Securities debit balance."
+          }
+        },
+        {
+          "name": "tdreqmrg",
+          "type": "varchar",
+          "properties": {
+            "description": "Today's required margin amount."
+          }
+        },
+        {
+          "name": "tdreqsecure",
+          "type": "varchar",
+          "properties": {
+            "description": "Today's required secured amount."
+          }
+        },
+        {
+          "name": "curstat",
+          "type": "varchar",
+          "properties": {
+            "description": "Current account status code."
+          }
+        },
+        {
+          "name": "curdelinq",
+          "type": "varchar",
+          "properties": {
+            "description": "Current delinquency code."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AccountInventory",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "account_inventory"
+      },
+      "primaryKey": "acctno",
+      "properties": {
+        "description": "DAS (Account Holdings) \u2014 raw.dasinv. Inventory-view of account holdings. Similar to AccountHoldingsSummary but sourced from the inventory subsystem. One row per account. Includes total market value, loan value, debit/credit balances, and a text description of the security inventory."
+      },
+      "columns": [
+        {
+          "name": "acctno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Account number \u2014 primary key."
+          }
+        },
+        {
+          "name": "accttype",
+          "type": "varchar",
+          "properties": {
+            "description": "Account type code."
+          }
+        },
+        {
+          "name": "acctfunds",
+          "type": "varchar",
+          "properties": {
+            "description": "Account settlement currency."
+          }
+        },
+        {
+          "name": "rrcode2",
+          "type": "varchar",
+          "properties": {
+            "description": "Registered Representative code."
+          }
+        },
+        {
+          "name": "rrbranch",
+          "type": "varchar",
+          "properties": {
+            "description": "Branch code of the Registered Representative."
+          }
+        },
+        {
+          "name": "acctclass",
+          "type": "varchar",
+          "properties": {
+            "description": "Account class code."
+          }
+        },
+        {
+          "name": "tdmktval",
+          "type": "varchar",
+          "properties": {
+            "description": "Total market value of holdings."
+          }
+        },
+        {
+          "name": "tdloanval",
+          "type": "varchar",
+          "properties": {
+            "description": "Total loan value of holdings."
+          }
+        },
+        {
+          "name": "invsecdesc",
+          "type": "varchar",
+          "properties": {
+            "description": "Inventory security description \u2014 text summary of the securities held."
+          }
+        },
+        {
+          "name": "curstat",
+          "type": "varchar",
+          "properties": {
+            "description": "Current account status."
+          }
+        },
+        {
+          "name": "curdelinq",
+          "type": "varchar",
+          "properties": {
+            "description": "Current delinquency flag."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AccountProfile",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "account_profile"
+      },
+      "primaryKey": "accountno",
+      "properties": {
+        "description": "AP (Account Profile) \u2014 raw.apdadrt. Comprehensive account master record. More complete than the NA (Name and Address) equivalent. One row per account. Contains account type, funds, class, RR code, registration name, SIN, important dates (initial, last update, last trade, close), delivery and commission instructions, and plan/tax attributes. The AP tables are the authoritative source for account data."
+      },
+      "columns": [
+        {
+          "name": "accountno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Account number \u2014 primary key."
+          }
+        },
+        {
+          "name": "accounttype",
+          "type": "varchar",
+          "properties": {
+            "description": "Account type code (e.g. cash, margin, RRSP, RRIF, TFSA)."
+          }
+        },
+        {
+          "name": "accountfunds",
+          "type": "varchar",
+          "properties": {
+            "description": "Primary settlement currency for the account (CAD or USD)."
+          }
+        },
+        {
+          "name": "accountclass",
+          "type": "varchar",
+          "properties": {
+            "description": "Account class code."
+          }
+        },
+        {
+          "name": "rrcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Registered Representative (advisor) code assigned to the account."
+          }
+        },
+        {
+          "name": "reportingcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Regulatory reporting code for the account."
+          }
+        },
+        {
+          "name": "accountshname",
+          "type": "varchar",
+          "properties": {
+            "description": "Account short name \u2014 abbreviated display name."
+          }
+        },
+        {
+          "name": "regname",
+          "type": "varchar",
+          "properties": {
+            "description": "Registered name \u2014 full legal name of the account holder."
+          }
+        },
+        {
+          "name": "accountsin",
+          "type": "varchar",
+          "properties": {
+            "description": "Social Insurance Number of the account holder (sensitive \u2014 handle appropriately)."
+          }
+        },
+        {
+          "name": "initialdate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date the account was opened."
+          }
+        },
+        {
+          "name": "lastupdatedate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date of the most recent account record update."
+          }
+        },
+        {
+          "name": "lasttradedate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date of the most recent trade on the account."
+          }
+        },
+        {
+          "name": "closeinstrdate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date the account closure instruction was received."
+          }
+        },
+        {
+          "name": "closedate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date the account was closed (null if still open)."
+          }
+        },
+        {
+          "name": "delinstr",
+          "type": "varchar",
+          "properties": {
+            "description": "Delivery instruction code for securities."
+          }
+        },
+        {
+          "name": "planningcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Financial planning code assigned to the account."
+          }
+        },
+        {
+          "name": "commissioncode",
+          "type": "varchar",
+          "properties": {
+            "description": "Commission schedule code."
+          }
+        },
+        {
+          "name": "commissionrate",
+          "type": "varchar",
+          "properties": {
+            "description": "Commission rate override."
+          }
+        },
+        {
+          "name": "branchno",
+          "type": "varchar",
+          "properties": {
+            "description": "Branch number where the account is held."
+          }
+        }
+      ]
+    },
+    {
+      "name": "ClientProfile",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "client_profile"
+      },
+      "primaryKey": "clientno",
+      "properties": {
+        "description": "AP (Account Profile) \u2014 raw.apdclrt. Comprehensive client (Know Your Client) record. More complete than the NA equivalent. One row per client. Contains personal details (birthdate, citizenship, SIN, marital status, occupation, net worth), investment objectives and knowledge, risk tolerance, RR notes, and contact information. The AP tables are the authoritative source for client data."
+      },
+      "columns": [
+        {
+          "name": "clientno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Client number \u2014 primary key."
+          }
+        },
+        {
+          "name": "language",
+          "type": "varchar",
+          "properties": {
+            "description": "Language preference (E = English, F = French)."
+          }
+        },
+        {
+          "name": "clientshname",
+          "type": "varchar",
+          "properties": {
+            "description": "Client short name \u2014 abbreviated display name."
+          }
+        },
+        {
+          "name": "branch",
+          "type": "varchar",
+          "properties": {
+            "description": "Branch code."
+          }
+        },
+        {
+          "name": "residentcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Residency status code."
+          }
+        },
+        {
+          "name": "citizenshipcode",
+          "type": "varchar",
+          "properties": {
+            "description": "ISO citizenship/nationality code."
+          }
+        },
+        {
+          "name": "telephone",
+          "type": "varchar",
+          "properties": {
+            "description": "Primary phone number."
+          }
+        },
+        {
+          "name": "birthdate",
+          "type": "varchar",
+          "properties": {
+            "description": "Client date of birth."
+          }
+        },
+        {
+          "name": "deceaseddate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date of death, if applicable."
+          }
+        },
+        {
+          "name": "occupation",
+          "type": "varchar",
+          "properties": {
+            "description": "Occupation code."
+          }
+        },
+        {
+          "name": "maritalstatus",
+          "type": "varchar",
+          "properties": {
+            "description": "Marital status code."
+          }
+        },
+        {
+          "name": "networth",
+          "type": "varchar",
+          "properties": {
+            "description": "Net worth band code."
+          }
+        },
+        {
+          "name": "investobj1",
+          "type": "varchar",
+          "properties": {
+            "description": "Primary investment objective code (e.g. income, growth, speculation)."
+          }
+        },
+        {
+          "name": "investobj2",
+          "type": "varchar",
+          "properties": {
+            "description": "Secondary investment objective code."
+          }
+        },
+        {
+          "name": "investobj3",
+          "type": "varchar",
+          "properties": {
+            "description": "Tertiary investment objective code."
+          }
+        },
+        {
+          "name": "investknowledge",
+          "type": "varchar",
+          "properties": {
+            "description": "Investment knowledge level code."
+          }
+        },
+        {
+          "name": "investexper",
+          "type": "varchar",
+          "properties": {
+            "description": "Investment experience code."
+          }
+        },
+        {
+          "name": "risktolerance",
+          "type": "varchar",
+          "properties": {
+            "description": "Risk tolerance profile code or description."
+          }
+        },
+        {
+          "name": "employer",
+          "type": "varchar",
+          "properties": {
+            "description": "Employer name."
+          }
+        },
+        {
+          "name": "discretauth",
+          "type": "varchar",
+          "properties": {
+            "description": "Discretionary authority flag \u2014 whether the RR has discretion over this client's accounts."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AccountClientLink",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "account_client_link"
+      },
+      "properties": {
+        "description": "AP (Account Profile) \u2014 raw.apdclct. Links accounts to clients. One row per account/client relationship. Defines the relationship type (e.g. primary, joint, guardian), setup date, and which address to use for correspondence. Join AccountProfile via accountno and ClientProfile via clientno."
+      },
+      "columns": [
+        {
+          "name": "accountno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Account number \u2014 foreign key to AccountProfile."
+          }
+        },
+        {
+          "name": "clientno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Client number \u2014 foreign key to ClientProfile."
+          }
+        },
+        {
+          "name": "relationtype",
+          "type": "varchar",
+          "properties": {
+            "description": "Relationship type code (e.g. primary holder, joint holder, guardian, POA)."
+          }
+        },
+        {
+          "name": "relnsetupdate",
+          "type": "varchar",
+          "properties": {
+            "description": "Date the account-client relationship was established."
+          }
+        },
+        {
+          "name": "clientaddruse",
+          "type": "varchar",
+          "properties": {
+            "description": "Flag indicating whether the client's address should be used for account correspondence."
+          }
+        },
+        {
+          "name": "rrcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Registered Representative code for this relationship."
+          }
+        },
+        {
+          "name": "relnstartdate",
+          "type": "varchar",
+          "properties": {
+            "description": "Effective start date of the relationship."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AccountAddress",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "account_address"
+      },
+      "properties": {
+        "description": "AP (Account Profile) \u2014 raw.apdadaa. Account mailing address. One row per account/address-type combination. Stores up to eight free-form address lines plus postal code, and delivery preferences (confirm type, statement suppression, hold mail). AP address tables supersede the NA (Name and Address) address fields."
+      },
+      "columns": [
+        {
+          "name": "accountno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Account number \u2014 foreign key to AccountProfile."
+          }
+        },
+        {
+          "name": "addresstype",
+          "type": "varchar",
+          "properties": {
+            "description": "Address type code \u2014 distinguishes mailing, statement, safekeeping addresses."
+          }
+        },
+        {
+          "name": "naline1",
+          "type": "varchar",
+          "properties": {
+            "description": "Address line 1."
+          }
+        },
+        {
+          "name": "naline2",
+          "type": "varchar",
+          "properties": {
+            "description": "Address line 2."
+          }
+        },
+        {
+          "name": "naline3",
+          "type": "varchar",
+          "properties": {
+            "description": "Address line 3."
+          }
+        },
+        {
+          "name": "naline4",
+          "type": "varchar",
+          "properties": {
+            "description": "Address line 4."
+          }
+        },
+        {
+          "name": "naline5",
+          "type": "varchar",
+          "properties": {
+            "description": "Address line 5."
+          }
+        },
+        {
+          "name": "naline6",
+          "type": "varchar",
+          "properties": {
+            "description": "Address line 6."
+          }
+        },
+        {
+          "name": "postalcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Postal or ZIP code."
+          }
+        },
+        {
+          "name": "confirmtype",
+          "type": "varchar",
+          "properties": {
+            "description": "Trade confirmation delivery method code."
+          }
+        }
+      ]
+    },
+    {
+      "name": "NameAddressMaster",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "name_address_master"
+      },
+      "primaryKey": "acct",
+      "properties": {
+        "description": "NA (Name and Address) \u2014 raw.nam. Legacy account name and address master. One row per account. Provides basic account identification: account number, RR code, account type, settlement currency, client name, language, and delivery preferences. Less comprehensive than the AP (Account Profile) tables. Prefer AccountProfile and ClientProfile for full client data."
+      },
+      "columns": [
+        {
+          "name": "acct",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Account number \u2014 primary key."
+          }
+        },
+        {
+          "name": "rrcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Registered Representative code."
+          }
+        },
+        {
+          "name": "rrbranchcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Branch code of the Registered Representative."
+          }
+        },
+        {
+          "name": "type",
+          "type": "varchar",
+          "properties": {
+            "description": "Account type code."
+          }
+        },
+        {
+          "name": "funds",
+          "type": "varchar",
+          "properties": {
+            "description": "Settlement currency (CAD or USD)."
+          }
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "properties": {
+            "description": "Client or account name."
+          }
+        },
+        {
+          "name": "lang_ind",
+          "type": "varchar",
+          "properties": {
+            "description": "Language indicator (E = English, F = French)."
+          }
+        },
+        {
+          "name": "delivery",
+          "type": "varchar",
+          "properties": {
+            "description": "Securities delivery instruction code."
+          }
+        },
+        {
+          "name": "residenc",
+          "type": "varchar",
+          "properties": {
+            "description": "Residency code."
+          }
+        },
+        {
+          "name": "class",
+          "type": "varchar",
+          "properties": {
+            "description": "Account class code."
+          }
+        },
+        {
+          "name": "phone",
+          "type": "varchar",
+          "properties": {
+            "description": "Contact phone number."
+          }
+        },
+        {
+          "name": "upd_datestr",
+          "type": "varchar",
+          "properties": {
+            "description": "Last update date string."
+          }
+        },
+        {
+          "name": "act_datestr",
+          "type": "varchar",
+          "properties": {
+            "description": "Account activation date string."
+          }
+        }
+      ]
+    },
+    {
+      "name": "TradeCalc",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "synth",
+        "table": "trade_calc"
+      },
+      "properties": {
+        "description": "Calc (Trade Calculation) \u2014 raw.calc. Active trade processing records. One row per trade. Contains the full calculation detail generated during trade processing: broker, account, security, buy/sell direction, cancel flag, quantities, net amount, prices, commissions, taxes, FX details, and control counts for confirmation printing. This is the raw source for the curated Trades model. calc_hist contains completed/historical records with the same structure."
+      },
+      "columns": [
+        {
+          "name": "bkr",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Broker number."
+          }
+        },
+        {
+          "name": "acctbranch",
+          "type": "varchar",
+          "properties": {
+            "description": "Account branch code."
+          }
+        },
+        {
+          "name": "acctno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Account number \u2014 foreign key to AccountProfile."
+          }
+        },
+        {
+          "name": "procdate",
+          "type": "varchar",
+          "properties": {
+            "description": "Trade processing date."
+          }
+        },
+        {
+          "name": "recordtype",
+          "type": "varchar",
+          "properties": {
+            "description": "Record type code (e.g. TR = trade)."
+          }
+        },
+        {
+          "name": "tradeno",
+          "type": "varchar",
+          "notNull": true,
+          "properties": {
+            "description": "Trade number \u2014 unique trade reference within broker/account."
+          }
+        },
+        {
+          "name": "buysell",
+          "type": "varchar",
+          "properties": {
+            "description": "Buy/sell indicator (B = buy, S = sell)."
+          }
+        },
+        {
+          "name": "cancel",
+          "type": "varchar",
+          "properties": {
+            "description": "Cancel flag (Y = cancelled trade)."
+          }
+        },
+        {
+          "name": "seccode",
+          "type": "varchar",
+          "properties": {
+            "description": "Security code \u2014 foreign key to SecurityMaster."
+          }
+        },
+        {
+          "name": "valuedate",
+          "type": "varchar",
+          "properties": {
+            "description": "Settlement date."
+          }
+        },
+        {
+          "name": "tradedate",
+          "type": "varchar",
+          "properties": {
+            "description": "Trade execution date."
+          }
+        },
+        {
+          "name": "qty",
+          "type": "varchar",
+          "properties": {
+            "description": "Trade quantity (number of shares, units, or face value)."
+          }
+        },
+        {
+          "name": "netamt",
+          "type": "varchar",
+          "properties": {
+            "description": "Net settlement amount."
+          }
+        },
+        {
+          "name": "netamtfunds",
+          "type": "varchar",
+          "properties": {
+            "description": "Currency of the net amount (e.g. CAD, USD)."
+          }
+        },
+        {
+          "name": "totqty",
+          "type": "varchar",
+          "properties": {
+            "description": "Total quantity across all fills (for multi-fill trades)."
+          }
+        },
+        {
+          "name": "avgprice",
+          "type": "varchar",
+          "properties": {
+            "description": "Average execution price across fills."
+          }
+        },
+        {
+          "name": "price",
+          "type": "varchar",
+          "properties": {
+            "description": "Per-unit execution price."
+          }
+        },
+        {
+          "name": "pricefunds",
+          "type": "varchar",
+          "properties": {
+            "description": "Currency of the price."
+          }
+        },
+        {
+          "name": "mktcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Exchange/market code where the trade was executed."
+          }
+        },
+        {
+          "name": "tradebasis",
+          "type": "varchar",
+          "properties": {
+            "description": "Trade basis code (e.g. net, gross, commission)."
+          }
+        },
+        {
+          "name": "rrcode",
+          "type": "varchar",
+          "properties": {
+            "description": "Registered Representative code."
+          }
         }
       ]
     }
@@ -380,13 +1922,19 @@
   "relationships": [
     {
       "name": "TradesDimSecurity",
-      "models": ["Trades", "DimSecurity"],
+      "models": [
+        "Trades",
+        "DimSecurity"
+      ],
       "joinType": "MANY_TO_ONE",
       "condition": "Trades.security_no = DimSecurity.security_no"
     },
     {
       "name": "BookkeepingDimSecurity",
-      "models": ["Bookkeeping", "DimSecurity"],
+      "models": [
+        "Bookkeeping",
+        "DimSecurity"
+      ],
       "joinType": "MANY_TO_ONE",
       "condition": "Bookkeeping.security_no = DimSecurity.security_no"
     }
