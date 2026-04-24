@@ -78,6 +78,7 @@ services:
     volumes:
       - ${PROJECT_DIR}/config.yaml:/app/config.yaml:ro
       - ${PROJECT_DIR}/data:/app/data:ro
+      - /home/ubuntu/legible/wren-ai-service/src:/src
     networks:
       - legible
     depends_on:

@@ -72,7 +72,7 @@ class InstructionsCleaner:
 
         if project_id:
             filter["conditions"].append(
-                {"field": "project_id", "operator": "==", "value": project_id}
+                {"field": "meta.project_id", "operator": "==", "value": project_id}
             )
 
         return await self.store.delete_by_filter_async(filter)

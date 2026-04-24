@@ -42,7 +42,7 @@ async def count_documents(
         {
             "operator": "AND",
             "conditions": [
-                {"field": "project_id", "operator": "==", "value": project_id},
+                {"field": "meta.project_id", "operator": "==", "value": project_id},
             ],
         }
         if project_id
@@ -70,7 +70,7 @@ async def retrieval(embedding: dict, project_id: str, retriever: Any) -> dict:
             {
                 "operator": "AND",
                 "conditions": [
-                    {"field": "project_id", "operator": "==", "value": project_id},
+                    {"field": "meta.project_id", "operator": "==", "value": project_id},
                 ],
             }
             if project_id

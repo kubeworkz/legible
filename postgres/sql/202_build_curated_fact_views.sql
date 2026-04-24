@@ -67,4 +67,45 @@ LEFT JOIN synth.client_account_links l ON l.account_no = b.account_no
 LEFT JOIN synth.accounts a ON a.account_no = b.account_no
 LEFT JOIN synth.clients c ON c.client_no = l.client_no;
 
+-- ─── fact_positions ──────────────────────────────────────────────────────────
+-- Current holdings per account/security: buy quantity minus sell quantity.
+-- Only non-cancelled trades with a non-null, non-zero quantity are counted.
+-- Rows where net_quantity resolves to zero are excluded (fully liquidated).
+-- buy_sell '0' = buy, '1' = sell (matches synth.trades encoding).
+DROP VIEW IF EXISTS curated.fact_positions;
+CREATE VIEW curated.fact_positions AS
+SELECT
+    t.account_no,
+    t.client_no,
+    t.security_no,
+    t.security_symbol,
+    t.security_type,
+    t.security_class,
+    t.net_amount_funds                                             AS currency,
+
+    SUM(CASE WHEN t.buy_sell = '0' THEN COALESCE(t.quantity, 0) ELSE 0 END)
+  - SUM(CASE WHEN t.buy_sell = '1' THEN COALESCE(t.quantity, 0) ELSE 0 END)
+                                                                   AS net_quantity,
+
+    SUM(CASE WHEN t.buy_sell = '0' THEN COALESCE(t.net_amount, 0) ELSE 0 END)
+  - SUM(CASE WHEN t.buy_sell = '1' THEN COALESCE(t.net_amount, 0) ELSE 0 END)
+                                                                   AS net_cost
+
+FROM curated.fact_trades t
+WHERE (t.cancel_flag IS NULL OR t.cancel_flag != '1')
+  AND t.security_no IS NOT NULL
+  AND t.quantity IS NOT NULL
+  AND t.quantity != 0
+GROUP BY
+    t.account_no,
+    t.client_no,
+    t.security_no,
+    t.security_symbol,
+    t.security_type,
+    t.security_class,
+    t.net_amount_funds
+HAVING
+    (SUM(CASE WHEN t.buy_sell = '0' THEN COALESCE(t.quantity, 0) ELSE 0 END)
+   - SUM(CASE WHEN t.buy_sell = '1' THEN COALESCE(t.quantity, 0) ELSE 0 END)) != 0;
+
 COMMIT;

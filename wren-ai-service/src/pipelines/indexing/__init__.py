@@ -35,7 +35,7 @@ class DocumentCleaner:
                 filters = {
                     "operator": "AND",
                     "conditions": [
-                        {"field": "project_id", "operator": "==", "value": project_id},
+                        {"field": "meta.project_id", "operator": "==", "value": project_id},
                     ],
                 }
                 await store.delete_by_filter_async(filters)

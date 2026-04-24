@@ -143,13 +143,13 @@ async def table_retrieval(
     filters = {
         "operator": "AND",
         "conditions": [
-            {"field": "type", "operator": "==", "value": "TABLE_DESCRIPTION"},
+            {"field": "meta.type", "operator": "==", "value": "TABLE_DESCRIPTION"},
         ],
     }
 
     if project_id:
         filters["conditions"].append(
-            {"field": "project_id", "operator": "==", "value": project_id}
+            {"field": "meta.project_id", "operator": "==", "value": project_id}
         )
 
     if embedding:
@@ -159,7 +159,7 @@ async def table_retrieval(
         )
     else:
         filters["conditions"].append(
-            {"field": "name", "operator": "in", "value": tables}
+            {"field": "meta.name", "operator": "in", "value": tables}
         )
 
         return await table_retriever.run_async(
@@ -179,7 +179,7 @@ async def dbschema_retrieval(
         table_names.append(content["name"])
 
     table_name_conditions = [
-        {"field": "name", "operator": "==", "value": table_name}
+        {"field": "meta.name", "operator": "==", "value": table_name}
         for table_name in table_names
     ]
 
@@ -187,14 +187,14 @@ async def dbschema_retrieval(
         filters = {
             "operator": "AND",
             "conditions": [
-                {"field": "type", "operator": "==", "value": "TABLE_SCHEMA"},
+                {"field": "meta.type", "operator": "==", "value": "TABLE_SCHEMA"},
                 {"operator": "OR", "conditions": table_name_conditions},
             ],
         }
 
         if project_id:
             filters["conditions"].append(
-                {"field": "project_id", "operator": "==", "value": project_id}
+                {"field": "meta.project_id", "operator": "==", "value": project_id}
             )
 
         results = await dbschema_retriever.run_async(query_embedding=[], filters=filters)
@@ -331,9 +331,15 @@ async def filter_columns_in_tables(
     prompt: dict, table_columns_selection_generator: Any, generator_name: str
 ) -> dict:
     if prompt:
-        return await table_columns_selection_generator(
-            prompt=prompt.get("prompt")
-        ), generator_name
+        try:
+            return await table_columns_selection_generator(
+                prompt=prompt.get("prompt")
+            ), generator_name
+        except Exception as e:
+            logger.warning(
+                f"filter_columns_in_tables LLM call failed, falling back to unpruned schemas: {e}"
+            )
+            return {}, generator_name
     else:
         return {}, generator_name
 

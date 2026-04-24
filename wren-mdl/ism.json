@@ -1,0 +1,418 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Canner/WrenAI/main/wren-mdl/mdl.schema.json",
+  "catalog": "ism",
+  "schema": "curated",
+  "dataSource": "POSTGRES",
+  "models": [
+    {
+      "name": "DimSecurity",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "curated",
+        "table": "dim_security"
+      },
+      "primaryKey": "security_no",
+      "properties": {
+        "description": "Security master dimension. Each row is one canonical security (stock, bond, fund, etc.). Sourced from the ISM security master or inferred via the security code bridge. The quality_tier field indicates data confidence: high = direct master match, medium = bridge-inferred, low = fallback/unknown."
+      },
+      "columns": [
+        {
+          "name": "security_no",
+          "type": "varchar",
+          "notNull": true,
+          "properties": { "description": "Canonical security identifier. Primary key." }
+        },
+        {
+          "name": "symbol",
+          "type": "varchar",
+          "properties": { "description": "Exchange ticker symbol (e.g. AAPL, TD). May be N/A when unknown." }
+        },
+        {
+          "name": "cusip",
+          "type": "varchar",
+          "properties": { "description": "CUSIP identifier — 9-character North American security identifier. May be N/A when unknown." }
+        },
+        {
+          "name": "security_type",
+          "type": "varchar",
+          "properties": { "description": "High-level security type code (e.g. EQ = equity, BD = bond, MF = mutual fund, ETF). UNK when not available." }
+        },
+        {
+          "name": "security_class",
+          "type": "varchar",
+          "properties": { "description": "More granular classification within the security type (e.g. common share, preferred share, government bond). UNK when not available." }
+        },
+        {
+          "name": "country",
+          "type": "varchar",
+          "properties": { "description": "ISO country code of the security's primary listing (e.g. CA = Canada, US = United States). UNK when not available." }
+        },
+        {
+          "name": "funds",
+          "type": "varchar",
+          "properties": { "description": "Settlement currency or fund code for this security (e.g. CAD, USD). UNK when not available." }
+        },
+        {
+          "name": "english_description",
+          "type": "varchar",
+          "properties": { "description": "Full English-language description of the security (e.g. company or fund name)." }
+        },
+        {
+          "name": "french_description",
+          "type": "varchar",
+          "properties": { "description": "Full French-language description of the security." }
+        },
+        {
+          "name": "cad_close_price",
+          "type": "double",
+          "properties": { "description": "Most recent closing price in Canadian dollars. Null if no CAD price is available." }
+        },
+        {
+          "name": "usd_close_price",
+          "type": "double",
+          "properties": { "description": "Most recent closing price in US dollars. Null if no USD price is available." }
+        },
+        {
+          "name": "cad_price_date",
+          "type": "date",
+          "properties": { "description": "Date of the cad_close_price observation." }
+        },
+        {
+          "name": "usd_price_date",
+          "type": "date",
+          "properties": { "description": "Date of the usd_close_price observation." }
+        },
+        {
+          "name": "security_origin",
+          "type": "varchar",
+          "properties": { "description": "How this security entered the registry: 'master' = direct from ISM security master; 'bridge_fallback' = inferred from transaction security codes." }
+        },
+        {
+          "name": "quality_tier",
+          "type": "varchar",
+          "properties": { "description": "Data quality confidence: 'high' = master-sourced, 'medium' = bridge-inferred, 'low' = fallback or unknown (__UNKNOWN__)." }
+        },
+        {
+          "name": "curated_at",
+          "type": "timestamp",
+          "properties": { "description": "Timestamp when this row was last refreshed into the curated layer." }
+        }
+      ]
+    },
+    {
+      "name": "Trades",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "curated",
+        "table": "fact_trades"
+      },
+      "primaryKey": "trade_no",
+      "properties": {
+        "description": "Equity and fixed-income trade records. Each row is one trade (buy or sell order). Key columns: buy_sell (B=buy, S=sell), cancel_flag (Y=cancelled), net_amount (settlement value in account currency), net_amount_funds (currency of net_amount)."
+      },
+      "columns": [
+        {
+          "name": "trade_no",
+          "type": "varchar",
+          "notNull": true,
+          "properties": { "description": "Unique trade reference number. Primary key. Synthetic format: T0000000001." }
+        },
+        {
+          "name": "broker_no",
+          "type": "varchar",
+          "properties": { "description": "Executing broker identifier. Synthetic format: BXXXXXX." }
+        },
+        {
+          "name": "account_no",
+          "type": "varchar",
+          "properties": { "description": "Client account identifier. Synthetic format: AXXXXXXXXXX." }
+        },
+        {
+          "name": "client_no",
+          "type": "varchar",
+          "properties": { "description": "Client identifier linked to the account. Synthetic format: CLXXXXXXXX." }
+        },
+        {
+          "name": "security_no",
+          "type": "varchar",
+          "properties": { "description": "Security identifier — foreign key to DimSecurity." }
+        },
+        {
+          "name": "security_symbol",
+          "type": "varchar",
+          "properties": { "description": "Exchange ticker symbol of the traded security (denormalised from DimSecurity)." }
+        },
+        {
+          "name": "security_cusip",
+          "type": "varchar",
+          "properties": { "description": "CUSIP of the traded security (denormalised from DimSecurity)." }
+        },
+        {
+          "name": "security_type",
+          "type": "varchar",
+          "properties": { "description": "Security type code (e.g. EQ, BD, MF) — denormalised from DimSecurity." }
+        },
+        {
+          "name": "security_class",
+          "type": "varchar",
+          "properties": { "description": "Security classification — denormalised from DimSecurity." }
+        },
+        {
+          "name": "security_origin",
+          "type": "varchar",
+          "properties": { "description": "Security data origin: 'master' or 'bridge_fallback' — denormalised from DimSecurity." }
+        },
+        {
+          "name": "security_quality_tier",
+          "type": "varchar",
+          "properties": { "description": "Security data quality: 'high', 'medium', or 'low' — denormalised from DimSecurity." }
+        },
+        {
+          "name": "record_type",
+          "type": "varchar",
+          "properties": { "description": "Internal record type code classifying the transaction kind within the source system." }
+        },
+        {
+          "name": "buy_sell",
+          "type": "varchar",
+          "properties": { "description": "Trade direction: 'B' = buy, 'S' = sell." }
+        },
+        {
+          "name": "cancel_flag",
+          "type": "varchar",
+          "properties": { "description": "Cancellation indicator: 'Y' = this trade has been cancelled; 'N' or null = active trade." }
+        },
+        {
+          "name": "process_ts",
+          "type": "timestamp",
+          "properties": { "description": "Timestamp when the trade was processed (booked) by the back office." }
+        },
+        {
+          "name": "trade_ts",
+          "type": "timestamp",
+          "properties": { "description": "Timestamp when the trade was executed on the market." }
+        },
+        {
+          "name": "value_ts",
+          "type": "timestamp",
+          "properties": { "description": "Settlement timestamp — when cash and securities are expected to be exchanged." }
+        },
+        {
+          "name": "quantity",
+          "type": "double",
+          "properties": { "description": "Number of units (shares, bonds, fund units) traded." }
+        },
+        {
+          "name": "price",
+          "type": "double",
+          "properties": { "description": "Per-unit execution price in the security's trading currency." }
+        },
+        {
+          "name": "net_amount",
+          "type": "double",
+          "properties": { "description": "Total settlement amount in the account's fund currency (quantity x price +/- commissions). Use this for dollar-value aggregations." }
+        },
+        {
+          "name": "net_amount_funds",
+          "type": "varchar",
+          "properties": { "description": "Currency code for net_amount (e.g. CAD, USD)." }
+        },
+        {
+          "name": "account_origin",
+          "type": "varchar",
+          "properties": { "description": "How the account entered the registry: 'core.accounts' = from ISM account master; 'transaction_fallback' = inferred from transactions." }
+        },
+        {
+          "name": "client_origin",
+          "type": "varchar",
+          "properties": { "description": "How the client entered the registry: 'core.clients' = from ISM client master; 'account_scaffold' = scaffolded from account data." }
+        },
+        {
+          "name": "generated_at",
+          "type": "timestamp",
+          "properties": { "description": "Timestamp when this synthetic row was generated." }
+        },
+        {
+          "name": "security",
+          "type": "DimSecurity",
+          "relationship": "TradesDimSecurity",
+          "properties": { "description": "Related security dimension record (join via security_no)." }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "tableReference": {
+        "catalog": "ISM",
+        "schema": "curated",
+        "table": "fact_bookings"
+      },
+      "primaryKey": "txn_ref_id",
+      "properties": {
+        "description": "Financial transaction booking records from the settlement system. Each row is one booking line (a debit or credit entry against an account). Related to trades but also includes dividends, interest, fees, and cash transfers. Key columns: major_type_code (transaction type), detail_amount (the booked dollar value), txn_subseq (sub-sequence within a multi-leg transaction)."
+      },
+      "columns": [
+        {
+          "name": "txn_ref_id",
+          "type": "varchar",
+          "notNull": true,
+          "properties": { "description": "Unique booking transaction reference. Primary key. Synthetic format: R0000000001." }
+        },
+        {
+          "name": "broker_no",
+          "type": "varchar",
+          "properties": { "description": "Broker associated with the booking. Synthetic format: BXXXXXX." }
+        },
+        {
+          "name": "account_no",
+          "type": "varchar",
+          "properties": { "description": "Client account identifier for this booking. Synthetic format: AXXXXXXXXXX." }
+        },
+        {
+          "name": "client_no",
+          "type": "varchar",
+          "properties": { "description": "Client identifier linked to the account. Synthetic format: CLXXXXXXXX." }
+        },
+        {
+          "name": "security_no",
+          "type": "varchar",
+          "properties": { "description": "Security referenced by this booking — foreign key to DimSecurity. May be null for cash-only bookings." }
+        },
+        {
+          "name": "security_symbol",
+          "type": "varchar",
+          "properties": { "description": "Ticker symbol of the booked security (denormalised from DimSecurity)." }
+        },
+        {
+          "name": "security_cusip",
+          "type": "varchar",
+          "properties": { "description": "CUSIP of the booked security (denormalised from DimSecurity)." }
+        },
+        {
+          "name": "security_type",
+          "type": "varchar",
+          "properties": { "description": "Security type code (denormalised from DimSecurity)." }
+        },
+        {
+          "name": "security_class",
+          "type": "varchar",
+          "properties": { "description": "Security classification (denormalised from DimSecurity)." }
+        },
+        {
+          "name": "security_origin",
+          "type": "varchar",
+          "properties": { "description": "Security data origin (denormalised from DimSecurity)." }
+        },
+        {
+          "name": "security_quality_tier",
+          "type": "varchar",
+          "properties": { "description": "Security data quality tier (denormalised from DimSecurity)." }
+        },
+        {
+          "name": "major_type_code",
+          "type": "varchar",
+          "properties": { "description": "Transaction type from the booking system (e.g. BUY, SEL, DIV = dividend, INT = interest, FEE, TRF = transfer). Classifies the economic nature of the booking." }
+        },
+        {
+          "name": "txn_subseq",
+          "type": "integer",
+          "properties": { "description": "Sub-sequence number within a multi-line transaction. Used to identify individual legs of the same economic event." }
+        },
+        {
+          "name": "process_date",
+          "type": "date",
+          "properties": { "description": "Date the booking was processed by the back office." }
+        },
+        {
+          "name": "trade_date",
+          "type": "date",
+          "properties": { "description": "Trade execution date associated with this booking." }
+        },
+        {
+          "name": "value_date",
+          "type": "date",
+          "properties": { "description": "Settlement date — when the cash or securities movement takes effect." }
+        },
+        {
+          "name": "detail_amount",
+          "type": "double",
+          "properties": { "description": "Dollar value of this booking line in the account's fund currency. Positive = credit to account, negative = debit. Use for dollar-value aggregations." }
+        },
+        {
+          "name": "detail_amount_funds",
+          "type": "varchar",
+          "properties": { "description": "Currency code for detail_amount (e.g. CAD, USD)." }
+        },
+        {
+          "name": "detail_quantity",
+          "type": "double",
+          "properties": { "description": "Security quantity for this booking line. Null for cash-only transactions." }
+        },
+        {
+          "name": "rr_code",
+          "type": "varchar",
+          "properties": { "description": "Registered Representative code — the advisor/broker assigned to this account's transaction." }
+        },
+        {
+          "name": "account_origin",
+          "type": "varchar",
+          "properties": { "description": "How the account entered the registry: 'core.accounts' or 'transaction_fallback'." }
+        },
+        {
+          "name": "client_origin",
+          "type": "varchar",
+          "properties": { "description": "How the client entered the registry: 'core.clients' or 'account_scaffold'." }
+        },
+        {
+          "name": "generated_at",
+          "type": "timestamp",
+          "properties": { "description": "Timestamp when this synthetic row was generated." }
+        },
+        {
+          "name": "security",
+          "type": "DimSecurity",
+          "relationship": "BookingsDimSecurity",
+          "properties": { "description": "Related security dimension record (join via security_no)." }
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "TradesDimSecurity",
+      "models": ["Trades", "DimSecurity"],
+      "joinType": "MANY_TO_ONE",
+      "condition": "Trades.security_no = DimSecurity.security_no"
+    },
+    {
+      "name": "BookingsDimSecurity",
+      "models": ["Bookings", "DimSecurity"],
+      "joinType": "MANY_TO_ONE",
+      "condition": "Bookings.security_no = DimSecurity.security_no"
+    }
+  ],
+  "views": [
+    {
+      "name": "TradesBySecurityType",
+      "statement": "SELECT security_type, buy_sell, COUNT(*) AS trade_count, SUM(net_amount) AS total_net_amount, SUM(quantity) AS total_quantity FROM ism.curated.Trades WHERE cancel_flag != 'Y' OR cancel_flag IS NULL GROUP BY security_type, buy_sell",
+      "properties": {
+        "description": "Aggregated trade counts and amounts grouped by security type and direction (buy/sell). Excludes cancelled trades."
+      }
+    },
+    {
+      "name": "BookingsByMajorType",
+      "statement": "SELECT major_type_code, COUNT(*) AS booking_count, SUM(detail_amount) AS total_amount FROM ism.curated.Bookings GROUP BY major_type_code",
+      "properties": {
+        "description": "Summary of booking activity grouped by transaction type code (e.g. BUY, SEL, DIV, FEE)."
+      }
+    },
+    {
+      "name": "FactPositions",
+      "statement": "SELECT account_no, client_no, security_no, security_symbol, security_type, security_class, currency, SUM(CASE WHEN buy_sell = '0' THEN COALESCE(quantity, 0) ELSE 0 END) - SUM(CASE WHEN buy_sell = '1' THEN COALESCE(quantity, 0) ELSE 0 END) AS net_quantity, SUM(CASE WHEN buy_sell = '0' THEN COALESCE(net_amount, 0) ELSE 0 END) - SUM(CASE WHEN buy_sell = '1' THEN COALESCE(net_amount, 0) ELSE 0 END) AS net_cost FROM (SELECT account_no, client_no, security_no, security_symbol, security_type, security_class, net_amount_funds AS currency, buy_sell, quantity, net_amount FROM ism.curated.Trades WHERE (cancel_flag IS NULL OR cancel_flag != '1') AND security_no IS NOT NULL AND quantity IS NOT NULL AND quantity != 0) t GROUP BY account_no, client_no, security_no, security_symbol, security_type, security_class, currency",
+      "properties": {
+        "description": "Current holdings per account and security: net quantity (buy minus sell) and net cost. Excludes cancelled trades and zero-quantity trades. buy_sell '0' = buy, '1' = sell. net_quantity > 0 is a long position; negative means over-sold. Use net_cost for book-value aggregations. Group by security_type to see holdings by asset class, or by account_no to see a single account portfolio."
+      }
+    }
+  ],
+  "metrics": []
+}

@@ -70,7 +70,7 @@ async def retrieve_metadata(project_id: str, retriever) -> dict[str, Any]:
         filters = {
             "operator": "AND",
             "conditions": [
-                {"field": "project_id", "operator": "==", "value": project_id},
+                {"field": "meta.project_id", "operator": "==", "value": project_id},
             ],
         }
 

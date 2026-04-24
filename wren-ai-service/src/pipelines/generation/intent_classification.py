@@ -180,13 +180,13 @@ async def table_retrieval(
     filters = {
         "operator": "AND",
         "conditions": [
-            {"field": "type", "operator": "==", "value": "TABLE_DESCRIPTION"},
+            {"field": "meta.type", "operator": "==", "value": "TABLE_DESCRIPTION"},
         ],
     }
 
     if project_id:
         filters["conditions"].append(
-            {"field": "project_id", "operator": "==", "value": project_id}
+            {"field": "meta.project_id", "operator": "==", "value": project_id}
         )
 
     return await table_retriever.run_async(
@@ -208,21 +208,24 @@ async def dbschema_retrieval(
     logger.info(f"dbschema_retrieval with table_names: {table_names}")
 
     table_name_conditions = [
-        {"field": "name", "operator": "==", "value": table_name}
+        {"field": "meta.name", "operator": "==", "value": table_name}
         for table_name in table_names
     ]
+
+    if not table_name_conditions:
+        return []
 
     filters = {
         "operator": "AND",
         "conditions": [
-            {"field": "type", "operator": "==", "value": "TABLE_SCHEMA"},
+            {"field": "meta.type", "operator": "==", "value": "TABLE_SCHEMA"},
             {"operator": "OR", "conditions": table_name_conditions},
         ],
     }
 
     if project_id:
         filters["conditions"].append(
-            {"field": "project_id", "operator": "==", "value": project_id}
+            {"field": "meta.project_id", "operator": "==", "value": project_id}
         )
 
     results = await dbschema_retriever.run_async(
