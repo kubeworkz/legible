@@ -17,8 +17,8 @@
   "dependencies": {
     "@google-cloud/bigquery": "^6.0.3",
     "@google-cloud/storage": "^6.10.1",
-    "@univerjs/preset-sheets-core": "0.16.1",
-    "@univerjs/presets": "0.16.1",
+    "@univerjs/preset-sheets-core": "0.21.1",
+    "@univerjs/presets": "0.21.1",
     "@xyflow/react": "^12.10.2",
     "apollo-server-micro": "^3.10.2",
     "axios": "^1.12.0",

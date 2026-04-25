@@ -1208,7 +1208,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.10.4, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.16.7, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.22.5, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.23.6, @babel/runtime@npm:^7.23.9, @babel/runtime@npm:^7.24.4, @babel/runtime@npm:^7.24.7, @babel/runtime@npm:^7.24.8, @babel/runtime@npm:^7.25.7, @babel/runtime@npm:^7.26.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.10.4, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.16.7, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.22.5, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.23.6, @babel/runtime@npm:^7.23.9, @babel/runtime@npm:^7.24.4, @babel/runtime@npm:^7.24.7, @babel/runtime@npm:^7.24.8, @babel/runtime@npm:^7.25.7, @babel/runtime@npm:^7.26.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7":
   version: 7.28.6
   resolution: "@babel/runtime@npm:7.28.6"
   checksum: 10c0/358cf2429992ac1c466df1a21c1601d595c46930a13c1d4662fde908d44ee78ec3c183aaff513ecb01ef8c55c3624afe0309eeeb34715672dbfadb7feedb2c0d
@@ -2297,6 +2297,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@grpc/grpc-js@npm:^1.14.3":
+  version: 1.14.3
+  resolution: "@grpc/grpc-js@npm:1.14.3"
+  dependencies:
+    "@grpc/proto-loader": "npm:^0.8.0"
+    "@js-sdsl/ordered-map": "npm:^4.4.2"
+  checksum: 10c0/f41f06a311b93cca8c472d56e21387e0f7b57bb2337a91d15ea4279bac8ec4fa0de6bd0d881201229ab800c0f0c55277911ecb850e057f20a828d0ddd623551d
+  languageName: node
+  linkType: hard
+
+"@grpc/proto-loader@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "@grpc/proto-loader@npm:0.8.0"
+  dependencies:
+    lodash.camelcase: "npm:^4.3.0"
+    long: "npm:^5.0.0"
+    protobufjs: "npm:^7.5.3"
+    yargs: "npm:^17.7.2"
+  bin:
+    proto-loader-gen-types: build/bin/proto-loader-gen-types.js
+  checksum: 10c0/a27da3b85d5d17bab956d536786c717287eae46ca264ea9ec774db90ff571955bae2705809f431b4622fbf3be9951d7c7bbb1360b2015ee88abe1587cf3d6fe0
+  languageName: node
+  linkType: hard
+
 "@hapi/accept@npm:^5.0.2":
   version: 5.0.2
   resolution: "@hapi/accept@npm:5.0.2"
@@ -2940,6 +2964,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@js-sdsl/ordered-map@npm:^4.4.2":
+  version: 4.4.2
+  resolution: "@js-sdsl/ordered-map@npm:4.4.2"
+  checksum: 10c0/cc7e15dc4acf6d9ef663757279600bab70533d847dcc1ab01332e9e680bd30b77cdf9ad885cc774276f51d98b05a013571c940e5b360985af5eb798dc1a2ee2b
+  languageName: node
+  linkType: hard
+
 "@mapbox/node-pre-gyp@npm:^2.0.0":
   version: 2.0.3
   resolution: "@mapbox/node-pre-gyp@npm:2.0.3"
@@ -3035,6 +3066,13 @@ __metadata:
   version: 16.1.6
   resolution: "@next/swc-win32-x64-msvc@npm:16.1.6"
   conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@noble/ciphers@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@noble/ciphers@npm:2.2.0"
+  checksum: 10c0/56396fa9b2cd7863999d9d70c6cbfcc03db9644cbbac9bb9d383d18f701bee3eb09f36878d8252a763c8d1fb6f0807339e06e2d28f18b14c525133c57c14508d
   languageName: node
   linkType: hard
 
@@ -5088,17 +5126,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/hoist-non-react-statics@npm:^3.3.0":
-  version: 3.3.7
-  resolution: "@types/hoist-non-react-statics@npm:3.3.7"
-  dependencies:
-    hoist-non-react-statics: "npm:^3.3.0"
-  peerDependencies:
-    "@types/react": "*"
-  checksum: 10c0/ed8f4e88338f7d021d0f956adf6089d2a12b2e254a03c05292324f2e986d2376eb9efdb8a4f04596823e8fca88c9d06361d20dab4a2a00dc935fb36ac911de55
-  languageName: node
-  linkType: hard
-
 "@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.0, @types/istanbul-lib-coverage@npm:^2.0.1":
   version: 2.0.6
   resolution: "@types/istanbul-lib-coverage@npm:2.0.6"
@@ -5219,6 +5246,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:>=13.7.0":
+  version: 25.6.0
+  resolution: "@types/node@npm:25.6.0"
+  dependencies:
+    undici-types: "npm:~7.19.0"
+  checksum: 10c0/d2d2015630ff098a201407f55f5077a20270ae4f465c739b40865cd9933b91b9c5d2b85568eadaf3db0801b91e267333ca7eb39f007428b173d1cdab4b339ac5
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^10.1.0":
   version: 10.17.60
   resolution: "@types/node@npm:10.17.60"
@@ -5285,18 +5321,6 @@ __metadata:
   dependencies:
     "@types/react": "npm:*"
   checksum: 10c0/abd2a1dda9625c753ff2571a10b69740b2fb9ed1d3141755d54d5814cc12a9701c7c5cd78e8797e945486b441303b82543be71043a32d6a988b57a14237f93c6
-  languageName: node
-  linkType: hard
-
-"@types/react-redux@npm:^7.1.20":
-  version: 7.1.34
-  resolution: "@types/react-redux@npm:7.1.34"
-  dependencies:
-    "@types/hoist-non-react-statics": "npm:^3.3.0"
-    "@types/react": "npm:*"
-    hoist-non-react-statics: "npm:^3.3.0"
-    redux: "npm:^4.0.0"
-  checksum: 10c0/6750964ec656eb6973b0e4fda787549aee5dbc266a0f0e78fc9efb417b4965c0b060d10b99a7b7fa0c8812b8a0a07d97a1ef46d094bf64fee07144e8bbad781a
   languageName: node
   linkType: hard
 
@@ -5517,526 +5541,511 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@univerjs-pro/collaboration-client-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/collaboration-client-ui@npm:0.16.1"
+"@univerjs-pro/collaboration-client-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/collaboration-client-ui@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/collaboration": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs-pro/collaboration": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/rpc": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
-    crypto-js: "npm:4.2.0"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/696bb786fbf4c55e0d6fe81bf052b434c8523155451999b0d9b1b2e61c52d159ecdc508196be2ee3bdb818e3d01345fedcec1093bf168a051d0b475f1a38d506
+  checksum: 10c0/22861ab413cabdd8180a1be851139ab8f11bde950a787263f838ce10d75fc658971d1d0e14102c1e0a6d641303fb6f819853c0d887385e9a919bfca0e6918f79
   languageName: node
   linkType: hard
 
-"@univerjs-pro/collaboration-client@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/collaboration-client@npm:0.16.1"
+"@univerjs-pro/collaboration-client@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/collaboration-client@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/collaboration": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/telemetry": "npm:0.16.1"
-    crypto-js: "npm:4.2.0"
+    "@noble/ciphers": "npm:^2.2.0"
+    "@univerjs-pro/collaboration": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/telemetry": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/87a3700fc6915b121a9c3bd18cda3ff56d4a094aa2f82d5112a03adf7d58d623e99a818b69a2620adfa359d2f315309922a36aa5cd62e7104912e907a832c4e1
+  checksum: 10c0/1de5029008a827b9a95f9567fd5230ee206d9da396e765db36affbed3cfbeab518efd8c88f1f13f335b1bc32630505970751f6eed7655c4846a301c40f04a61a
   languageName: node
   linkType: hard
 
-"@univerjs-pro/collaboration@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/collaboration@npm:0.16.1"
+"@univerjs-pro/collaboration@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/collaboration@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/data-validation": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-conditional-formatting": "npm:0.16.1"
-    "@univerjs/sheets-drawing": "npm:0.16.1"
-    "@univerjs/sheets-filter": "npm:0.16.1"
-    "@univerjs/sheets-hyper-link": "npm:0.16.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/data-validation": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-conditional-formatting": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+    "@univerjs/sheets-filter": "npm:0.21.1"
+    "@univerjs/sheets-hyper-link": "npm:0.21.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
     uuid: "npm:^13.0.0"
-  checksum: 10c0/ad288a2d76a64929460d9cfdd7a636c96f1b88d8e298e0ed25b545f75a01210a6a530185d75510661ef4513e793fb2150a6f6d457bf9f6462364f1d87f42e92c
+  checksum: 10c0/a0b1b3045737a651705d6f2dd709e417f0368be62a7c1d1bf119c789cbcab01ce57ff46c3948c98757843e4c13437e41df4dd7b7e6579b0115178354c389be4a
   languageName: node
   linkType: hard
 
-"@univerjs-pro/docs-exchange-client@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/docs-exchange-client@npm:0.16.1"
+"@univerjs-pro/docs-exchange-client@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/docs-exchange-client@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/exchange-client": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
-  checksum: 10c0/0ecc18c71a1b4f577900be59773c32adedb72ae3e529f1796ad8845cabc8784c435d986e418712ef674ca7e9d7a6b80c1f4defd69ddd6441eccdef87b71f7115
+    "@univerjs-pro/exchange-client": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
+  checksum: 10c0/a0922e65d761c2f43de8c21c6a207ace047657bdbdc96366a9e2d5952e018d36cb3fdcd2f2e56f2c0f49c9489536e6c0f119b267d1ce17b8a686d506c480053b
   languageName: node
   linkType: hard
 
-"@univerjs-pro/docs-print@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/docs-print@npm:0.16.1"
+"@univerjs-pro/docs-print@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/docs-print@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/collaboration-client": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs-pro/print": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs-pro/print": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
-  peerDependencies:
-    react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-  dependenciesMeta:
-    "@univerjs-pro/collaboration-client":
-      optional: true
-  checksum: 10c0/9eb32b740a1e8cddd8ed68e54413e1ff0c324e0de5fb58fb62d6446d6e05e663bb9849d486d6147764c00ea5908ef486d7cf4ed7d06b49ccf7e36766e03e4e1d
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
+  checksum: 10c0/0c723640e7dbe5fac5f36d0319595765781dbde8c5962a77b4afe0b766f344892ae5b2bdf1524fb3d625a920409d6dfa918df6069774a6d6c1f2ebe641bed924
   languageName: node
   linkType: hard
 
-"@univerjs-pro/edit-history-loader@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/edit-history-loader@npm:0.16.1"
+"@univerjs-pro/edit-history-loader@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/edit-history-loader@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/collaboration": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client-ui": "npm:0.16.1"
-    "@univerjs-pro/edit-history-viewer": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs-pro/sheets-chart": "npm:0.16.1"
-    "@univerjs-pro/sheets-chart-ui": "npm:0.16.1"
-    "@univerjs-pro/sheets-pivot": "npm:0.16.1"
-    "@univerjs-pro/sheets-shape": "npm:0.16.1"
-    "@univerjs-pro/sheets-shape-ui": "npm:0.16.1"
-    "@univerjs-pro/sheets-sparkline": "npm:0.16.1"
-    "@univerjs-pro/sheets-sparkline-ui": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/data-validation": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/drawing-ui": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs-pro/collaboration": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client-ui": "npm:0.21.1"
+    "@univerjs-pro/edit-history-viewer": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs-pro/sheets-chart": "npm:0.21.1"
+    "@univerjs-pro/sheets-chart-ui": "npm:0.21.1"
+    "@univerjs-pro/sheets-pivot": "npm:0.21.1"
+    "@univerjs-pro/sheets-shape": "npm:0.21.1"
+    "@univerjs-pro/sheets-shape-ui": "npm:0.21.1"
+    "@univerjs-pro/sheets-sparkline": "npm:0.21.1"
+    "@univerjs-pro/sheets-sparkline-ui": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/data-validation": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/drawing-ui": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/rpc": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-conditional-formatting": "npm:0.16.1"
-    "@univerjs/sheets-conditional-formatting-ui": "npm:0.16.1"
-    "@univerjs/sheets-data-validation": "npm:0.16.1"
-    "@univerjs/sheets-data-validation-ui": "npm:0.16.1"
-    "@univerjs/sheets-drawing": "npm:0.16.1"
-    "@univerjs/sheets-drawing-ui": "npm:0.16.1"
-    "@univerjs/sheets-filter": "npm:0.16.1"
-    "@univerjs/sheets-filter-ui": "npm:0.16.1"
-    "@univerjs/sheets-formula": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-hyper-link": "npm:0.16.1"
-    "@univerjs/sheets-hyper-link-ui": "npm:0.16.1"
-    "@univerjs/sheets-numfmt": "npm:0.16.1"
-    "@univerjs/sheets-table": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-conditional-formatting": "npm:0.21.1"
+    "@univerjs/sheets-conditional-formatting-ui": "npm:0.21.1"
+    "@univerjs/sheets-data-validation": "npm:0.21.1"
+    "@univerjs/sheets-data-validation-ui": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+    "@univerjs/sheets-drawing-ui": "npm:0.21.1"
+    "@univerjs/sheets-filter": "npm:0.21.1"
+    "@univerjs/sheets-filter-ui": "npm:0.21.1"
+    "@univerjs/sheets-formula": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-hyper-link": "npm:0.21.1"
+    "@univerjs/sheets-hyper-link-ui": "npm:0.21.1"
+    "@univerjs/sheets-numfmt": "npm:0.21.1"
+    "@univerjs/sheets-table": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
-    react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/11f8d7421bcf7f5f8fd94a1272022afd95ea0d887875ec18c3d4b969dcce4891ccaf0e74b981a412ac98f2918429b648483cadd327631c726d8e564f8cafa113
+  checksum: 10c0/b34ff6ae9b5d63995fbc72c1a04764c7893ee6550670e9e2ff5990ec70ee208c6da0311b96281e93422b275fd3c1e82ba3abdc4431cbef2917bc4310fe1cf669
   languageName: node
   linkType: hard
 
-"@univerjs-pro/edit-history-viewer@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/edit-history-viewer@npm:0.16.1"
+"@univerjs-pro/edit-history-viewer@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/edit-history-viewer@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/collaboration": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client-ui": "npm:0.16.1"
-    "@univerjs-pro/sheets-chart": "npm:0.16.1"
-    "@univerjs-pro/sheets-pivot": "npm:0.16.1"
-    "@univerjs-pro/sheets-shape": "npm:0.16.1"
-    "@univerjs-pro/sheets-sparkline": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/data-validation": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs-pro/collaboration": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client-ui": "npm:0.21.1"
+    "@univerjs-pro/sheets-chart": "npm:0.21.1"
+    "@univerjs-pro/sheets-pivot": "npm:0.21.1"
+    "@univerjs-pro/sheets-shape": "npm:0.21.1"
+    "@univerjs-pro/sheets-sparkline": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/data-validation": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-conditional-formatting": "npm:0.16.1"
-    "@univerjs/sheets-data-validation": "npm:0.16.1"
-    "@univerjs/sheets-drawing": "npm:0.16.1"
-    "@univerjs/sheets-filter": "npm:0.16.1"
-    "@univerjs/sheets-table": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-conditional-formatting": "npm:0.21.1"
+    "@univerjs/sheets-data-validation": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+    "@univerjs/sheets-filter": "npm:0.21.1"
+    "@univerjs/sheets-table": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/3c0dd87b8bc7f80742566bf43f6951b49317ca2ce41827885015a94e48950e86fcb193ac38b8d9854df132369a5b6cf0f1b0bbe72b14e5df923db1902960e68b
+  checksum: 10c0/5938fca5d9aca6720e58ba227c867c7efc896f4ff47b0792a2e8f7a2f102e02257fbca22f04b6fdd2d5abd5def35125a3be6facd50f1db82f0be0623c594c9c7
   languageName: node
   linkType: hard
 
-"@univerjs-pro/engine-chart@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/engine-chart@npm:0.16.1"
+"@univerjs-pro/engine-chart@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/engine-chart@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/a81b8f37b7ab2d2a5fef5395b38a560464fb1b13d560a70a0afb7312dd42c1a0fe83f03a4cfb9573a3d06e3c64bd5f0a5b253e3872965c80ad831d62d02e9abf
+  checksum: 10c0/7490d274f26d1f1dda7a81bdc196385361803c429d92b861d7f10e13d09a0f30fd6ddb73f5de6d7fd9f6edfd1c615a77045bd56df2cd6d9ae28a485bfc6faa6a
   languageName: node
   linkType: hard
 
-"@univerjs-pro/engine-formula@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/engine-formula@npm:0.16.1"
+"@univerjs-pro/engine-formula@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/engine-formula@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-  peerDependencies:
-    rxjs: ">=7.0.0"
-  checksum: 10c0/3175e3bc95130fcddf8d8ed87a2c701eb7607e73552f8b9cb84983f986ca7119b4492700346f6b5e9635eeb1fe8cb288198a3254bcc3473a45178f97dd899efe
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+  checksum: 10c0/5042e154e170490b03a6b085b725c29b61965e5c551e3516161ce1bbe6a851062eec83364deea000dd76a8a8b49caacf91007edab65d11c96f446bf947576340
   languageName: node
   linkType: hard
 
-"@univerjs-pro/engine-pivot@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/engine-pivot@npm:0.16.1"
-  checksum: 10c0/36acfe069e4a2c2b2d08a28d25f6ce46cb2d5b6ebcc04d56841a67c1dd6559cfe3e31a73a3d0fb7150550a0d1ca19e076ab353844c4fe482387151649b950ba4
+"@univerjs-pro/engine-pivot@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/engine-pivot@npm:0.21.1"
+  checksum: 10c0/90f2df60d66a07f3cba591d9a687b088ab633814da81d90eb4fe1800812fae4ac254b75a0b1ec16b1dd3c35f926149b432633bf7de82cf50181bdb7b426010f6
   languageName: node
   linkType: hard
 
-"@univerjs-pro/engine-shape@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/engine-shape@npm:0.16.1"
-  checksum: 10c0/2801279c8a4ef825bdcd80314667e04e536e1dffe8173f0a099b5d0ed9d8e953801298ceae3bc5e7abe0988cb819bf30af62ef34fcacc3fed2c07bd5619dcca0
+"@univerjs-pro/engine-shape@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/engine-shape@npm:0.21.1"
+  checksum: 10c0/5a84e74b381efa374444b91514413bc9433b56d292e80dfb332af44e4a6153e8381fcf460306415b9c1d1dec400b6b5456d62f44d2e848b85b25ac1deeccdd52
   languageName: node
   linkType: hard
 
-"@univerjs-pro/exchange-client@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/exchange-client@npm:0.16.1"
+"@univerjs-pro/exchange-client@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/exchange-client@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/collaboration": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
+    "@univerjs-pro/collaboration": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/ui": "npm:0.16.1"
-    pako: "npm:^2.1.0"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
+    fflate: "npm:^0.4.8"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/030da956a96ef22db5304275b160071bcafc5c9940ccf015e9470cbda42d1ccfa132cb203ef6b824a6a9e7fe47256c794a20f2bde5cd12d28cfdec377fcda2da
+  checksum: 10c0/2f24a6300a9ef7aaf1ab205fdf291bc59ec7bcd1315373147088a3ee6c2ff833d945c1a742f1b32a2a13c5cfdd25048dc58a585baec339789ddc503692484666
   languageName: node
   linkType: hard
 
-"@univerjs-pro/license@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/license@npm:0.16.1"
+"@univerjs-pro/license@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/license@npm:0.21.1"
   dependencies:
     "@noble/ed25519": "npm:2.3.0"
     "@noble/hashes": "npm:1.8.0"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/4403a47774beb0193c8baec25048942ff144115f613dd9f92ed2425f17171cbec612897df38f01b425c3ddde7f8d1ce171c038ab8b85995a26e30c51cbc01ac1
+  checksum: 10c0/d4627ba68bcaab79e6d525dd20e651032160cf3c8483163b158aec8534e5e88831a8781586aff9880b35d427d0c0a44190ee713f67c6fc2b822b7057a1eec454
   languageName: node
   linkType: hard
 
-"@univerjs-pro/print@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/print@npm:0.16.1"
-  checksum: 10c0/135852001c9141f33015c7fce812ff9b089636c827573a47c4001ef6157848a9dca1fc1ce5cdf36c2f99b04d7b74e2e406923f54ebab630350d2c7cbfb9c7396
+"@univerjs-pro/print@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/print@npm:0.21.1"
+  checksum: 10c0/33c9f1d55b12fa338e4a345b11a2b91d154a6b6ed88ced312dad774bb5d9341d88c6cb00bab8293ca6cb5db206e66d6c7985c6c345efef6c436d9d9798366238
   languageName: node
   linkType: hard
 
-"@univerjs-pro/sheets-chart-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-chart-ui@npm:0.16.1"
+"@univerjs-pro/sheets-chart-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-chart-ui@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/engine-chart": "npm:0.16.1"
-    "@univerjs-pro/sheets-chart": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs-pro/engine-chart": "npm:0.21.1"
+    "@univerjs-pro/sheets-chart": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-drawing": "npm:0.16.1"
-    "@univerjs/sheets-drawing-ui": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+    "@univerjs/sheets-drawing-ui": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/769b191edcfc44d809fbbca20faf8088329219d83c73ded38673e8a1667eac4e3fa6fd234f511e9b766f7117757f0b33d76a6c86fc12a51162d4a7592e5a4edf
+  checksum: 10c0/176f6660f658b6c2e14940fcea8c933ca0f2acce61f91ed8e4c08e66cfbb0ae6365dd5f9710c7615c687f2d49b1b225435ded0670158415443d6ee46da18155c
   languageName: node
   linkType: hard
 
-"@univerjs-pro/sheets-chart@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-chart@npm:0.16.1"
+"@univerjs-pro/sheets-chart@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-chart@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/engine-chart": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs-pro/engine-chart": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/b9ce647f0d911535b8fb6a406d0a1582ba7968c2136e3240f5c49f83d9365986dcdd290919be8b9f778b73c2ec652e8f450585a99a2c14e7cb119dda7ab050fc
+  checksum: 10c0/969dd36ecff29484af87c3aa756edd544d50109b2fec82508fc2077f6612e6f57ef0a0af8105ae7b6cda4aaff5c75293b9ec2a7f61c7e8cd32146b980303b6f6
   languageName: node
   linkType: hard
 
-"@univerjs-pro/sheets-exchange-client@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-exchange-client@npm:0.16.1"
+"@univerjs-pro/sheets-exchange-client@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-exchange-client@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/exchange-client": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
-  checksum: 10c0/da3507dcb1c7b80dbf0d5e04e4c59ad01af03941b2a177677752055d784c96fa984d2ee2503f00fb8fc3e4063189090d4a69e87ded4e0adacf223f4b3906dd06
+    "@univerjs-pro/exchange-client": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
+  checksum: 10c0/3705dd546dee476b16e26001211650d5c3400126c92cda6e9a90f7fb1c2f405929698631e5a1cde0b2c99a05d05c0bae2d015d4e605ed0001ff23743056a524a
   languageName: node
   linkType: hard
 
-"@univerjs-pro/sheets-pivot-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-pivot-ui@npm:0.16.1"
+"@univerjs-pro/sheets-pivot-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-pivot-ui@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/engine-pivot": "npm:0.16.1"
-    "@univerjs-pro/sheets-pivot": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs-pro/engine-pivot": "npm:0.21.1"
+    "@univerjs-pro/sheets-pivot": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
-    react-beautiful-dnd: "npm:^13.1.1"
-  peerDependencies:
-    react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-    react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-    rxjs: ">=7.0.0"
-  checksum: 10c0/cc64c1f4c0ceb7dc3bcb5293956ee54518d738d73c0ba341d1a98b507af82c68144aef1a1e1dea88aff166b273c918acec8d7beb2087996a634ff107f54c418a
-  languageName: node
-  linkType: hard
-
-"@univerjs-pro/sheets-pivot@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-pivot@npm:0.16.1"
-  dependencies:
-    "@univerjs-pro/engine-pivot": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/rpc": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-filter": "npm:0.16.1"
-  peerDependencies:
-    rxjs: ">=7.0.0"
-  checksum: 10c0/c40da437051675ffbb9f542de4367e89ec36d91c7765eab27a43f11f5fc3c6ddb3df659cc6a90f05688ba3fae23691950372b21c69bb0222355d96014c95c211
-  languageName: node
-  linkType: hard
-
-"@univerjs-pro/sheets-print@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-print@npm:0.16.1"
-  dependencies:
-    "@univerjs-pro/collaboration-client": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs-pro/print": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  dependenciesMeta:
-    "@univerjs-pro/collaboration-client":
-      optional: true
-  checksum: 10c0/f89d7232f27cce3b337f4981d6ef068e32b946a5b198305bd46d918dcd7287c3d5eb98e0385e34b97723711645fd920aab52d6079237fe9e8a320acd7b9dfe97
+  checksum: 10c0/a5bc8eced0e94c6e187404184aedb9d37a8142b60d2e4bf5b2474066cfb9541bf8b517e30876fa8719e4c78056b9a1e467941fa367a1c309a097c1ac8029ea24
   languageName: node
   linkType: hard
 
-"@univerjs-pro/sheets-shape-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-shape-ui@npm:0.16.1"
+"@univerjs-pro/sheets-pivot@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-pivot@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/engine-shape": "npm:0.16.1"
-    "@univerjs-pro/sheets-shape": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/drawing-ui": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs-pro/engine-pivot": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-filter": "npm:0.21.1"
+  peerDependencies:
+    rxjs: ">=7.0.0"
+  checksum: 10c0/c96a20a6febb11788e9aeb90f428846cbfbfcda3e6f6b647f5b218fc2551f8d7adc8723c4082fea63e612f7552adad5f18689f7ea0ed5680f20b9a1aff50320f
+  languageName: node
+  linkType: hard
+
+"@univerjs-pro/sheets-print@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-print@npm:0.21.1"
+  dependencies:
+    "@univerjs-pro/collaboration-client": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs-pro/print": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-drawing": "npm:0.16.1"
-    "@univerjs/sheets-drawing-ui": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/f73566c822f8850293c32adbb01de146a5582fb34d23f35b00fbc2ecdb4b13112350f1ca23e0bb8a99649ee34156e4e3ac75a44c2480b06ecd0c33a68d44a66a
+  checksum: 10c0/f1e2b6991c528db8ec0836de7a291389d91f6adbe9a66c5345d54670105fb567adc5d9438a6fad772d3a6f42dfac3b835affca3b4372d732eae40fc440d8da92
   languageName: node
   linkType: hard
 
-"@univerjs-pro/sheets-shape@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-shape@npm:0.16.1"
+"@univerjs-pro/sheets-shape-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-shape-ui@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/engine-shape": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-  peerDependencies:
-    rxjs: ">=7.0.0"
-  checksum: 10c0/f71307a0e2d51f150ac2108b3ef61e403fb6b651ca4c54dcd1e6c259c9f418b970407332ee222b39461af143fffc99706cf3fb21478e7f3a7ad2cd42df37c9eb
-  languageName: node
-  linkType: hard
-
-"@univerjs-pro/sheets-sparkline-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-sparkline-ui@npm:0.16.1"
-  dependencies:
-    "@univerjs-pro/sheets-sparkline": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs-pro/engine-shape": "npm:0.21.1"
+    "@univerjs-pro/sheets-shape": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/drawing-ui": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-graphics": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+    "@univerjs/sheets-drawing-ui": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/beece996283431d14175c1989fd2f064b92c24ddd815165ad71b81e22d3ac7f880d135109fb796b3b636ab54451d9f728ac3e4a2cf834b8b55805fa2a2cc6db9
+  checksum: 10c0/91ebd1b44db51700a087c1239dc686881cfd9a4396439f67d82058b3b0ec1099b859f9f3525f272c959f74fa3ba6f13e245b771ea65e9abf7e541a1bb8ccc45a
   languageName: node
   linkType: hard
 
-"@univerjs-pro/sheets-sparkline@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/sheets-sparkline@npm:0.16.1"
+"@univerjs-pro/sheets-shape@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-shape@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs-pro/engine-shape": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+  checksum: 10c0/d6d6d0fe3ce982945cd0db5fc8cb5c62ac6573d3108245b83b598040a981e8aeb7d744a60a43670595a5cb5198212ef97b2287ec43cc798a8472be0230c7d61a
+  languageName: node
+  linkType: hard
+
+"@univerjs-pro/sheets-sparkline-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-sparkline-ui@npm:0.21.1"
+  dependencies:
+    "@univerjs-pro/sheets-sparkline": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/icons": "npm:^1.1.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-graphics": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
+  peerDependencies:
+    react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    rxjs: ">=7.0.0"
+  checksum: 10c0/5c7e023e590bd59bdd5f3f615a30816a54b06536d2c497dea8f3b4aa2255bbc109af456b539d606662a487946b7c3acd5afd99beee0b755384870025d38d232e
+  languageName: node
+  linkType: hard
+
+"@univerjs-pro/sheets-sparkline@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/sheets-sparkline@npm:0.21.1"
+  dependencies:
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/25d68c1808713f96dcc591bce249b9d89ee4d6b1695b973585e15c4f5c4dab875918675bba7f1bc3ab3ae144231f351e72131edb224a6af456b22b07d42f971c
+  checksum: 10c0/67b014c23c6d0c24f7d6c3675ee5a0a604299532e52a4f8c63888eec90f327596ae2ddcf1e0f4d972d0423e4553d34d2025ff842de89282190cd61c9c6a62cb2
   languageName: node
   linkType: hard
 
-"@univerjs-pro/thread-comment-datasource@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs-pro/thread-comment-datasource@npm:0.16.1"
+"@univerjs-pro/thread-comment-datasource@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs-pro/thread-comment-datasource@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/collaboration-client": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/thread-comment": "npm:0.16.1"
-    "@univerjs/thread-comment-ui": "npm:0.16.1"
+    "@univerjs-pro/collaboration-client": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
+    "@univerjs/thread-comment-ui": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/cd9058f7d73bb6054320a1536a88d6923cc8b9a26f2e59b7218b440ea367ccc6522b693bc8335a5eb32bf521243aa8450b8a6513b7a4fa55630281e05ebe829d
+  checksum: 10c0/2f9727f5bf84307b13f96eb6ff03f8ccc1c5b75c30cc023d65ca821a92d49a3c571cc954c667e81b93947297b3de412951e3556c24f7a20497d5cdc2221ac9b3
   languageName: node
   linkType: hard
 
-"@univerjs/core@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/core@npm:0.16.1"
+"@univerjs/core@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/core@npm:0.21.1"
   dependencies:
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/themes": "npm:0.16.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/themes": "npm:0.21.1"
     "@wendellhu/redi": "npm:1.1.1"
     async-lock: "npm:^1.4.1"
-    dayjs: "npm:^1.11.19"
     fast-diff: "npm:1.3.0"
     kdbush: "npm:^4.0.2"
-    lodash-es: "npm:^4.17.23"
-    nanoid: "npm:5.1.6"
-    numfmt: "npm:^3.2.3"
+    lodash-es: "npm:^4.18.1"
+    nanoid: "npm:5.1.9"
+    numfmt: "npm:3.2.6"
     ot-json1: "npm:^1.0.2"
     rbush: "npm:^4.0.1"
   peerDependencies:
-    "@wendellhu/redi": 1.1.1
     rxjs: ">=7.0.0"
-  checksum: 10c0/c3a80c328c9dc15b870cf94e7f197a5d8b15f8d1bc122142bdaaac66815fdaa2a0e4f37982c5a19a197ad81717280d17d4718d9e6d22c6d75c9f73d3ab6b7a7f
+  checksum: 10c0/384e5b6843cb24632678b9029ec5dfe6001c69308f8e669cedc4cb451a75eafe8454ae5dc1e02898f5c5327621f27d811906006ec4583a360fe7f8c8fea6a795
   languageName: node
   linkType: hard
 
-"@univerjs/data-validation@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/data-validation@npm:0.16.1"
+"@univerjs/data-validation@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/data-validation@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/57e6c9c3fabee7fcc657677b6b062a29d819f31002d22f32f21845677c3059ceeb11062e2885b042073b90eb27490f70a5e75ea5960c23aee6b93f4b420ada0e
+  checksum: 10c0/dd0369f88e9cd59f060a55bceb57473e1f9ecd74a067fa06ba3fd652ae2e6263e0f9efaa9aacc55b4ef6782e4c2901887f021276edc60c919812447e57f7f42b
   languageName: node
   linkType: hard
 
-"@univerjs/design@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/design@npm:0.16.1"
+"@univerjs/design@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/design@npm:0.21.1"
   dependencies:
     "@radix-ui/react-dialog": "npm:^1.1.15"
     "@radix-ui/react-dropdown-menu": "npm:^2.1.16"
@@ -6045,203 +6054,197 @@ __metadata:
     "@radix-ui/react-separator": "npm:^1.1.8"
     "@radix-ui/react-slot": "npm:^1.2.4"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/themes": "npm:0.16.1"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
-    dayjs: "npm:^1.11.19"
-    rc-dropdown: "npm:^4.2.1"
-    rc-menu: "npm:^9.16.0"
-    rc-virtual-list: "npm:^3.16.1"
-    react-grid-layout: "npm:^1.5.1"
     react-transition-group: "npm:^4.4.5"
     sonner: "npm:^2.0.7"
     tailwind-merge: "npm:2.6.0"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-  checksum: 10c0/2c4dd4f514aa680142291468e9fc9d84c6dcd475c649199136fa20c60c8df8754a17fae1663edca8a156a8f57a114cf03aba5c373414577e61bcd312954c9bc2
+  checksum: 10c0/1656b2c0dd5d93ec0ab6a266c56840cff6d4999fcc7bae4fa015b30754f5788600f1149f1e2bbf6efe9e1439c6fd200a6be40439e7bc62559d197cd9cff636b6
   languageName: node
   linkType: hard
 
-"@univerjs/docs-drawing-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/docs-drawing-ui@npm:0.16.1"
+"@univerjs/docs-drawing-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/docs-drawing-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-drawing": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/drawing-ui": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-drawing": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/drawing-ui": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/14c8f6c76b03a3d5dda49eab0902cac66feed9027cfc954ca8b9972e906d6c4b10d4faafa06df6a1eaec4c4b694cd7629fa71ca007f90e883ca980cd0a907e92
+  checksum: 10c0/9f1be1ca4162ff542f68af6304031b816aeeb0165b5ef095be275444dc4c1bdc2a82abaf69940fd47fe08265508aa42ff643ac6bad91a6f23f90ae2b93c95b1d
   languageName: node
   linkType: hard
 
-"@univerjs/docs-drawing@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/docs-drawing@npm:0.16.1"
+"@univerjs/docs-drawing@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/docs-drawing@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-  checksum: 10c0/bf29508f6e5d834c565deaf2b767ff30ea5ba6333d5d851163f82a6a3224c582b84595d7e7c423ea6ac8461bc89b0d39821d0b98b1d30bcde888dce5902b9521
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+  checksum: 10c0/f3e5d84f34e9b3d0d2468186d7e3e1e0e9e21aa701048e83635f962e406143a206afd0a0ecf4f4eabdb676527fe1f95ccdcce7779dba4a308994c06d1d1b4b33
   languageName: node
   linkType: hard
 
-"@univerjs/docs-hyper-link-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/docs-hyper-link-ui@npm:0.16.1"
+"@univerjs/docs-hyper-link-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/docs-hyper-link-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-hyper-link": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-hyper-link": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/3b1b4469fcbf69f032ecc99e59308c19f86ec05f736c818251d5f5cf9c02d5f1e2f4546072b7e37f678a1427a20d13da6f6d41117c7d4cab3ba70cc650b1d96d
+  checksum: 10c0/c7a326d2905c1671661ab73d7724511b9f3bda563a5404282feffba69c811cc7df32d83641dde2ebf46cdca6bf10ddc66bc13a38044040a5a88ff4b6c772f26c
   languageName: node
   linkType: hard
 
-"@univerjs/docs-hyper-link@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/docs-hyper-link@npm:0.16.1"
+"@univerjs/docs-hyper-link@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/docs-hyper-link@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-  checksum: 10c0/7f54b48a92e60ea8df7f6467f08551a3fefe18a57bfbeea8747f782f508d42748d84d6be3615136198616f71d9d0fadf89cfe8cc4ae35b7a98721d871bc0363d
+    "@univerjs/core": "npm:0.21.1"
+  checksum: 10c0/9ea3d0cf17ed68515ef2cc1e5ef8b0b20504bb986ffbf43c780672e300f8b66f3244fbd32fa7f0892b4959d711387d2da6d900d470bb5ce1a2c7462d6ecd0a72
   languageName: node
   linkType: hard
 
-"@univerjs/docs-thread-comment-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/docs-thread-comment-ui@npm:0.16.1"
+"@univerjs/docs-thread-comment-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/docs-thread-comment-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
-    "@univerjs/thread-comment-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
+    "@univerjs/thread-comment-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/7d4c187cd34cce0f4e887a630ce9b995822e59464a5d047003d433f379bc01f85bb0cd99a89b3086c1fe923f2afdfbd983c60f6869567605cb21bbed1fbe5b7c
+  checksum: 10c0/ed3ee15c029a4a819fcf4aed4fd6b1049fd5565252cc52b246dcaaa909adedf6b8c38ea4f999c6134c2fc3c6538dd154761c796bf21a5eb47c3659bd1b404174
   languageName: node
   linkType: hard
 
-"@univerjs/docs-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/docs-ui@npm:0.16.1"
+"@univerjs/docs-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/docs-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/3bf2ff6ac21b32ab07c52826c86b9d3d5e7c85c430ed4f12546d0f54f80981151d93563a537fe08b1013ab37e8234f70f9206a9ebf16666212efa2f662574335
+  checksum: 10c0/526830979805140604ebe27313774cf4551fdb003de90c8f95087f5e8cda92b16f3140330a934771d5d6f11b5e8b15a12ef9e5a2534a6cfafdaf0825a9e1f194
   languageName: node
   linkType: hard
 
-"@univerjs/docs@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/docs@npm:0.16.1"
+"@univerjs/docs@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/docs@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/839cf3f0ace531af7c19ec88ccd751f481320b47293a3f20d1193a5b669d01a9db11c90fc21a6c9fb574a7b24d030626b7bc2293476cf5ad110923bb7c41c388
+  checksum: 10c0/9f173b56b1c40368629ed7a2d6f3444862c7b1aad72838f63017051bf24543605c751ab3b3feaed526e4b9c670f55de149985d262c1d57f8fe2884670e9174fd
   languageName: node
   linkType: hard
 
-"@univerjs/drawing-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/drawing-ui@npm:0.16.1"
+"@univerjs/drawing-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/drawing-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/8c229058e2c2befc26ac14ad61f7d356a26c34d0a15ecfc09158ce007c72937ba5f879ab7665460aa43518c0b00ab0ec7b08cade40be65033920547da5b76b81
+  checksum: 10c0/a545412eb9201c9362869fce72b550cde70868581d22c25f3b235be3e58fa29f2e15138707712753b3ff083d9818483e7724bb0d0ba7df7551908ab9864e402f
   languageName: node
   linkType: hard
 
-"@univerjs/drawing@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/drawing@npm:0.16.1"
+"@univerjs/drawing@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/drawing@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
     ot-json1: "npm:^1.0.2"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/cf4327f58a5adbe98b7b502d545776e79d3a634840dfa1f2d69df4a4f35e6c75f0223cb70c9691c64cb2f88159f4723a77542c5a2aaea5420bcfd694ec772682
+  checksum: 10c0/e767748567755d892687ce78c977a0d13b56b9f4811775299b72093e4490a7f01c0530a16e8672167c309e8034ebd79d943267970a09b7c7dbb5022c08fe69bc
   languageName: node
   linkType: hard
 
-"@univerjs/engine-formula@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/engine-formula@npm:0.16.1"
+"@univerjs/engine-formula@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/engine-formula@npm:0.21.1"
   dependencies:
     "@flatten-js/interval-tree": "npm:1.1.3"
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/rpc": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
     decimal.js: "npm:^10.6.0"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/d70830467a3d1d24d061b1ce283801db006c9098930ba42a432d0977850e69ae18c0cc0761b0d31f1b19aefbea32256a46ac6da46a4c3ca39d8facd0374d8fea
+  checksum: 10c0/7f63e7a87ff9168dcc2ee5d2a42d44135d8e21fbc59f638b2c91aafc54350f04d1dd74f9b0f2dca858a49cca792c543034a31a8beeddd7b0a44362faea283fae
   languageName: node
   linkType: hard
 
-"@univerjs/engine-render@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/engine-render@npm:0.16.1"
+"@univerjs/engine-render@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/engine-render@npm:0.21.1"
   dependencies:
     "@floating-ui/dom": "npm:^1.7.4"
     "@floating-ui/utils": "npm:^0.2.10"
-    "@univerjs/core": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
     cjk-regex: "npm:^3.4.0"
     franc-min: "npm:^6.2.0"
     opentype.js: "npm:^1.3.4"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/c80e78b962f1316acb392eead705b0fbe0b34c8c9b2f11a8e3e3ab7d909b495e64e9a6f403f2f5b613b41036613c5a75d816eeb670173bf1bbd0e812af45d1fc
+  checksum: 10c0/67377f4d0ddc6d736a64addd7c97222d8f5cd21840403164a138dc99e5cc323a4d730a42fc69e79c6bd273f9939044a066372f97f391dab6ac5257abedb9e8e9
   languageName: node
   linkType: hard
 
-"@univerjs/find-replace@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/find-replace@npm:0.16.1"
+"@univerjs/find-replace@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/find-replace@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/1334b047b4b34b8ae0c99d4d92be94828010da6ab6561984d2f8f76637b47a802cb58683db082e6dfd2886e94934ce62140083a52af84c35361bc96f7efaaf2d
+  checksum: 10c0/d544e0cb52563617d217422926f25eb9ebd4fc60726b93a5c3bd05c8ffaab0365d808afaea586e8faa26ddcd1039b2087d73005880c0a80269e61cbd035614e2
   languageName: node
   linkType: hard
 
@@ -6255,933 +6258,935 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@univerjs/network@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/network@npm:0.16.1"
+"@univerjs/network@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/network@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/ca4caea97843ad1e2993fa5c83e6b6ba64886c33f92b4f27ed5be31afe63d2cf4287b6e78794b884fbb25195c32917bdfa221305919744a25d796750e747040a
+  checksum: 10c0/3879247a28feb6dc3de05b397ee8951fcac2daf5b429bf876925669b20e8370241ac9c78c80d29f46b3a03a4f88ad441aabecf777e90efb24cb4c1572fa2d203
   languageName: node
   linkType: hard
 
-"@univerjs/preset-docs-advanced@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-docs-advanced@npm:0.16.1"
+"@univerjs/preset-docs-advanced@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-docs-advanced@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/docs-exchange-client": "npm:0.16.1"
-    "@univerjs-pro/docs-print": "npm:0.16.1"
-    "@univerjs-pro/exchange-client": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-  peerDependencies:
-    react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-    react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-    rxjs: ">=7.0.0"
-  checksum: 10c0/c2d39f271d0a5605b4a4b1e27523248ffc99d89cfe676ba292825ed877aca51b3cc0b57dc05c3f107d6c2be5b029086597ea466600d4be3c5c719b4d6436688f
-  languageName: node
-  linkType: hard
-
-"@univerjs/preset-docs-collaboration@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-docs-collaboration@npm:0.16.1"
-  dependencies:
-    "@univerjs-pro/collaboration": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client-ui": "npm:0.16.1"
+    "@univerjs-pro/docs-exchange-client": "npm:0.21.1"
+    "@univerjs-pro/docs-print": "npm:0.21.1"
+    "@univerjs-pro/exchange-client": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/20c483646bccc3bb357940a966964a635f2c65d2822acb845b5c6b8f15ba2bd3967f4dec4e2af13357628179d841998276faefbf60e4a902413d2f9c7e998dad
+  checksum: 10c0/8c93d93074036f426f9e7fb6ea4dba3272050f9f75d24372b3f18aaef060f3f6853b69d35bfe592e8d9dd350bdebdb3b12ff7db02b37c39aaa3f0144cb362a22
   languageName: node
   linkType: hard
 
-"@univerjs/preset-docs-core@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-docs-core@npm:0.16.1"
+"@univerjs/preset-docs-collaboration@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-docs-collaboration@npm:0.21.1"
   dependencies:
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs-pro/collaboration": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/5a2779b029cd553c501d05042ada4be0064fb5a60486fc318940224bf1d52689b6d57c32483c3913ce127d7244caf08aff3d63daea39ff92a923bf74fab661ec
+  checksum: 10c0/9f0da0110e587a03831bc76a274d6cae2e8cc8f343d8e823d1ffe7a569d9a5dc632e4d9ffe9678725b41707294b8ea3f355df777a44a7db87cd776db6e52d1a2
   languageName: node
   linkType: hard
 
-"@univerjs/preset-docs-drawing@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-docs-drawing@npm:0.16.1"
+"@univerjs/preset-docs-core@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-docs-core@npm:0.21.1"
   dependencies:
-    "@univerjs/docs-drawing": "npm:0.16.1"
-    "@univerjs/docs-drawing-ui": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/drawing-ui": "npm:0.16.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/7e559424f0785f6a3ef5a424e9ff3ee434dfa7342133a0f1c0105398aa6d71464c1146974ae5ec2da384d1e29694cca0341481a93757a32f77ba859a810be96d
+  checksum: 10c0/6ddcbaf5abb1f6368343468cf28b76bf03c85156eb7c405e49320e11ae10f218810bbf534b17faaff31e8f711cd393c9b6fc266544f5c2305cebcd59e3ba0c8a
   languageName: node
   linkType: hard
 
-"@univerjs/preset-docs-hyper-link@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-docs-hyper-link@npm:0.16.1"
+"@univerjs/preset-docs-drawing@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-docs-drawing@npm:0.21.1"
   dependencies:
-    "@univerjs/docs-hyper-link": "npm:0.16.1"
-    "@univerjs/docs-hyper-link-ui": "npm:0.16.1"
+    "@univerjs/docs-drawing": "npm:0.21.1"
+    "@univerjs/docs-drawing-ui": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/drawing-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/4baef9bf19ed0cc4cc0cdeb0bd75cfcdb5ba962dce0af6bd80218de01d5b1291a1f40ca164c14064e92131afc3fe48b42d3842fd58f85edcdde407b6a00d3f2b
+  checksum: 10c0/d91a38f46c149d3e46f4530aaccc951e0628dc239f4297e295de04feffee47db97a6eef70f2a3e502c047c570f1f94d98a4028190705b06a8c8482167f64b9ca
   languageName: node
   linkType: hard
 
-"@univerjs/preset-docs-node-core@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-docs-node-core@npm:0.16.1"
+"@univerjs/preset-docs-hyper-link@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-docs-hyper-link@npm:0.21.1"
   dependencies:
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-drawing": "npm:0.16.1"
-    "@univerjs/docs-hyper-link": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/rpc-node": "npm:0.16.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
-  peerDependencies:
-    rxjs: ">=7.0.0"
-  checksum: 10c0/f619d83f76c5e9508c99f333d8258c05db6493ddf1bc38d6583a2b21fb1a35f3bdd43fd2b03f2a8babf59d930258ffab0969052dde200f133047fa82b73aab5d
-  languageName: node
-  linkType: hard
-
-"@univerjs/preset-docs-thread-comment@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-docs-thread-comment@npm:0.16.1"
-  dependencies:
-    "@univerjs/docs-thread-comment-ui": "npm:0.16.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
-    "@univerjs/thread-comment-ui": "npm:0.16.1"
+    "@univerjs/docs-hyper-link": "npm:0.21.1"
+    "@univerjs/docs-hyper-link-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/ecf643bc3a8db4d550240bf6bcfb6972dd476b927e084744bb62160f815ffb33c7f0082ae95b0e8ab7b7f62e9c8c0820f97fbe6776bf4b0bf00b3a82b8bdc908
+  checksum: 10c0/74b829cd01a8c991f037ea0d32934273c4d0675f319a7391b1605706841fe608a3c36e38daed9e751a8fdcd3a555d18b595072cdb33e35a1361cc37ca43a2395
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-advanced@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-advanced@npm:0.16.1"
+"@univerjs/preset-docs-node-core@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-docs-node-core@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/engine-chart": "npm:0.16.1"
-    "@univerjs-pro/engine-formula": "npm:0.16.1"
-    "@univerjs-pro/engine-shape": "npm:0.16.1"
-    "@univerjs-pro/exchange-client": "npm:0.16.1"
-    "@univerjs-pro/license": "npm:0.16.1"
-    "@univerjs-pro/sheets-chart": "npm:0.16.1"
-    "@univerjs-pro/sheets-chart-ui": "npm:0.16.1"
-    "@univerjs-pro/sheets-exchange-client": "npm:0.16.1"
-    "@univerjs-pro/sheets-pivot": "npm:0.16.1"
-    "@univerjs-pro/sheets-pivot-ui": "npm:0.16.1"
-    "@univerjs-pro/sheets-print": "npm:0.16.1"
-    "@univerjs-pro/sheets-shape": "npm:0.16.1"
-    "@univerjs-pro/sheets-shape-ui": "npm:0.16.1"
-    "@univerjs-pro/sheets-sparkline": "npm:0.16.1"
-    "@univerjs-pro/sheets-sparkline-ui": "npm:0.16.1"
-    "@univerjs/sheets-graphics": "npm:0.16.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-drawing": "npm:0.21.1"
+    "@univerjs/docs-hyper-link": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/rpc-node": "npm:0.21.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
+  peerDependencies:
+    rxjs: ">=7.0.0"
+  checksum: 10c0/968a760c882cbae6814197493707e460d6c229373c3adc33cb01dffe0368390d54423eebc593a84d31a423bcd50be0dbf69f561905b7886bce34b79db1f26f87
+  languageName: node
+  linkType: hard
+
+"@univerjs/preset-docs-thread-comment@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-docs-thread-comment@npm:0.21.1"
+  dependencies:
+    "@univerjs/docs-thread-comment-ui": "npm:0.21.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
+    "@univerjs/thread-comment-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/e7c07f0d743fb21229ada6708d4e9f0e016500545c75974d8dac26e00df48f9691ee2e2515e107570409c43236e2e896256ac511498885d7b389f610f89daa0d
+  checksum: 10c0/f2c0f4bff4d3fc8832ee39b1e5e4ce686f122f1f89628d61913dbbcc998878ea04d257be6dc24ab2b916d7d83098ee18c67963214028e5825023dae933ef6d41
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-collaboration@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-collaboration@npm:0.16.1"
+"@univerjs/preset-sheets-advanced@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-advanced@npm:0.21.1"
   dependencies:
-    "@univerjs-pro/collaboration": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client": "npm:0.16.1"
-    "@univerjs-pro/collaboration-client-ui": "npm:0.16.1"
-    "@univerjs-pro/edit-history-loader": "npm:0.16.1"
-    "@univerjs-pro/edit-history-viewer": "npm:0.16.1"
-    "@univerjs-pro/thread-comment-datasource": "npm:0.16.1"
-    "@univerjs/preset-sheets-advanced": "npm:0.16.1"
+    "@univerjs-pro/engine-chart": "npm:0.21.1"
+    "@univerjs-pro/engine-formula": "npm:0.21.1"
+    "@univerjs-pro/engine-shape": "npm:0.21.1"
+    "@univerjs-pro/exchange-client": "npm:0.21.1"
+    "@univerjs-pro/license": "npm:0.21.1"
+    "@univerjs-pro/sheets-chart": "npm:0.21.1"
+    "@univerjs-pro/sheets-chart-ui": "npm:0.21.1"
+    "@univerjs-pro/sheets-exchange-client": "npm:0.21.1"
+    "@univerjs-pro/sheets-pivot": "npm:0.21.1"
+    "@univerjs-pro/sheets-pivot-ui": "npm:0.21.1"
+    "@univerjs-pro/sheets-print": "npm:0.21.1"
+    "@univerjs-pro/sheets-shape": "npm:0.21.1"
+    "@univerjs-pro/sheets-shape-ui": "npm:0.21.1"
+    "@univerjs-pro/sheets-sparkline": "npm:0.21.1"
+    "@univerjs-pro/sheets-sparkline-ui": "npm:0.21.1"
+    "@univerjs/sheets-graphics": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/33800adbf5e5c7e489039f26b7c286c2d8021806057ab369c1703e7934893cfb62c4ef3c710f12366e67b09c0c7ced0086941d165a8fe38fc0e047cdd6fcb73d
+  checksum: 10c0/5eca72289afc0022a7d90d430043b93d491b977f046f59a099ffc384addf6be52f18c9e9d649b2897775565a0085be2f2247e9046538780c5657e852ec09c7f0
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-conditional-formatting@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-conditional-formatting@npm:0.16.1"
+"@univerjs/preset-sheets-collaboration@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-collaboration@npm:0.21.1"
   dependencies:
-    "@univerjs/sheets-conditional-formatting": "npm:0.16.1"
-    "@univerjs/sheets-conditional-formatting-ui": "npm:0.16.1"
+    "@univerjs-pro/collaboration": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client": "npm:0.21.1"
+    "@univerjs-pro/collaboration-client-ui": "npm:0.21.1"
+    "@univerjs-pro/edit-history-loader": "npm:0.21.1"
+    "@univerjs-pro/edit-history-viewer": "npm:0.21.1"
+    "@univerjs-pro/thread-comment-datasource": "npm:0.21.1"
+    "@univerjs/preset-sheets-advanced": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/991bf635b3a1460673a5a9595680749944521219a52965e075bcf59f3711bd9c4fc462f2ccc7400a45b7d6aba78a25b6a211995b9f63164032f3d42aebc786d0
+  checksum: 10c0/f3f53dd416ed5596dc44f9bd0f508c850d1061d680c790f921d80bbaf214165e6572d46730ef926dcbd5dad9b96efb9ab83681efee61d6239ea8db43776d98a9
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-core@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-core@npm:0.16.1"
+"@univerjs/preset-sheets-conditional-formatting@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-conditional-formatting@npm:0.21.1"
   dependencies:
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/network": "npm:0.16.1"
-    "@univerjs/rpc": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-formula": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-numfmt": "npm:0.16.1"
-    "@univerjs/sheets-numfmt-ui": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets-conditional-formatting": "npm:0.21.1"
+    "@univerjs/sheets-conditional-formatting-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/9d1f16392f6a963672238ec10f805d9d7d4885a7a11800f75a832fb86e30570a78224b514ffd53e5a00494549f89a01a16cf9509ea06413237671c0061b8ff33
+  checksum: 10c0/265c0272e7503953267445e3938d415461566f5cd4f3b2886f6501c8cfc3f55777965f3d71951018b6277acf988e0c8303be2a58c6dc9c9a92f9905f1d0bdd58
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-data-validation@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-data-validation@npm:0.16.1"
+"@univerjs/preset-sheets-core@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-core@npm:0.21.1"
   dependencies:
-    "@univerjs/data-validation": "npm:0.16.1"
-    "@univerjs/sheets-data-validation": "npm:0.16.1"
-    "@univerjs/sheets-data-validation-ui": "npm:0.16.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/network": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-formula": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-numfmt": "npm:0.21.1"
+    "@univerjs/sheets-numfmt-ui": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/71eeab86bb17013e7d2f9893d505e0239fd42565ccd677a817e223c67cd7ace7b4e3ebd3ddc046ce1d6a64935ddcdda9cb7cbc2dc00c1fab4480b2ab7ae1e1b5
+  checksum: 10c0/98b23539c38389f55991fd1c7a615bcdbc72ad7d6087e48da2aac0b2ae0fe69d88330458f3b07d7f4d939ab61968e89a526bf446b7d0c2cea8c46bd8f560e87f
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-drawing@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-drawing@npm:0.16.1"
+"@univerjs/preset-sheets-data-validation@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-data-validation@npm:0.21.1"
   dependencies:
-    "@univerjs/docs-drawing": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/drawing-ui": "npm:0.16.1"
-    "@univerjs/sheets-drawing": "npm:0.16.1"
-    "@univerjs/sheets-drawing-ui": "npm:0.16.1"
+    "@univerjs/data-validation": "npm:0.21.1"
+    "@univerjs/sheets-data-validation": "npm:0.21.1"
+    "@univerjs/sheets-data-validation-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/b62662e9418d9be1ae01741428b2c11d76a24fb64a8fd3e1682ba649a493301adcb9c5393030e39ca5753abeedf0d4ba5773936cd53e22ff0d66c1b4155332f4
+  checksum: 10c0/16441a693a1cbf7c93495b6543d0ef002f27f6b0d6dda2bb9f8f09290963e53cbac1e25d09b7c26d1cdd58ca7d2f75bcff35f313f4346e36a5f4bc3576d4693e
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-filter@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-filter@npm:0.16.1"
+"@univerjs/preset-sheets-drawing@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-drawing@npm:0.21.1"
   dependencies:
-    "@univerjs/sheets-filter": "npm:0.16.1"
-    "@univerjs/sheets-filter-ui": "npm:0.16.1"
+    "@univerjs/docs-drawing": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/drawing-ui": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+    "@univerjs/sheets-drawing-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/b09b277b3ad1546f6d03de0e07b6c39fcf8c42ac1913a006339b8fd9e440afdd78636a2397286766d9174c9060f26a56fe286eda53bbad116be8cdbd5a1a8b72
+  checksum: 10c0/600fd023bf974c4f74313e297c922f68667f804d6d3fdcfbbaa860fb53ab35f9625d4b3b810d43956b6da379f941762d519d007eda5bd89dc86b1982edfd989d
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-find-replace@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-find-replace@npm:0.16.1"
+"@univerjs/preset-sheets-filter@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-filter@npm:0.21.1"
   dependencies:
-    "@univerjs/find-replace": "npm:0.16.1"
-    "@univerjs/sheets-find-replace": "npm:0.16.1"
+    "@univerjs/sheets-filter": "npm:0.21.1"
+    "@univerjs/sheets-filter-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/860ea3168b9c7a2ba0f75d1f0490b838208f96778b04f089e82c23e562c6b92e4e86e186eeb2cfaa39236817612d64206e2def9d438ee450126f28cc8bf6198c
+  checksum: 10c0/c88154cd64848ced9ea4f3f562e40905d9bf5ef2c3a5b14acb68f587d6d216864bc482c41997e63f95c6e44c881ad8e4512b5f95cd281abbbfcc134bcc06288c
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-hyper-link@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-hyper-link@npm:0.16.1"
+"@univerjs/preset-sheets-find-replace@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-find-replace@npm:0.21.1"
   dependencies:
-    "@univerjs/sheets-hyper-link": "npm:0.16.1"
-    "@univerjs/sheets-hyper-link-ui": "npm:0.16.1"
+    "@univerjs/find-replace": "npm:0.21.1"
+    "@univerjs/sheets-find-replace": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/ea5177559666f6f52348d4bff0eea7240903af24d6480dcd93ca22101b51babd3c6c3b9bfdfd5fda6c4701ee7fb2393caedd177a583f2f82f2cd934a73aa83d7
+  checksum: 10c0/957710ee1836bc06c703f68ae56062fd721ae6aef6fcfd6015308fd24a9ec3c8372a87964ba256ddcf1ab3cde83c88b8352b208fe136ced47019ac6e91ba5a11
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-node-core@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-node-core@npm:0.16.1"
+"@univerjs/preset-sheets-hyper-link@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-hyper-link@npm:0.21.1"
   dependencies:
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/rpc-node": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-data-validation": "npm:0.16.1"
-    "@univerjs/sheets-drawing": "npm:0.16.1"
-    "@univerjs/sheets-filter": "npm:0.16.1"
-    "@univerjs/sheets-formula": "npm:0.16.1"
-    "@univerjs/sheets-hyper-link": "npm:0.16.1"
-    "@univerjs/sheets-numfmt": "npm:0.16.1"
-    "@univerjs/sheets-sort": "npm:0.16.1"
-    "@univerjs/sheets-thread-comment": "npm:0.16.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
-  peerDependencies:
-    rxjs: ">=7.0.0"
-  checksum: 10c0/96d44faae15edbc2e7e70c5a3e8fc966949e8a65926389dd91a03d1e1df6e0f9f318b781e88763d1536f9002f777428c3191c6b4c2c551eb8a36ccd5841d22b7
-  languageName: node
-  linkType: hard
-
-"@univerjs/preset-sheets-note@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-note@npm:0.16.1"
-  dependencies:
-    "@univerjs/sheets-note": "npm:0.16.1"
-    "@univerjs/sheets-note-ui": "npm:0.16.1"
+    "@univerjs/sheets-hyper-link": "npm:0.21.1"
+    "@univerjs/sheets-hyper-link-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/bab829910dc4c6614a9e562c90fdcf7439de3f0cae647903b67fa0be3c0e6df4e3536d0908bf357dabd60bfa521a6e064a5b49ec57c74d2d735e4f7110a338cf
+  checksum: 10c0/b3ac766948c07314722e73587105e238981c4e0a642c3302e0000146cb7c477dd6a5ca89be69c5590ad06764c33d6447e7d61526b024dbdc884b8df462cf2e56
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-sort@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-sort@npm:0.16.1"
+"@univerjs/preset-sheets-node-core@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-node-core@npm:0.21.1"
   dependencies:
-    "@univerjs/sheets-sort": "npm:0.16.1"
-    "@univerjs/sheets-sort-ui": "npm:0.16.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/rpc-node": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-data-validation": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+    "@univerjs/sheets-filter": "npm:0.21.1"
+    "@univerjs/sheets-formula": "npm:0.21.1"
+    "@univerjs/sheets-hyper-link": "npm:0.21.1"
+    "@univerjs/sheets-numfmt": "npm:0.21.1"
+    "@univerjs/sheets-sort": "npm:0.21.1"
+    "@univerjs/sheets-thread-comment": "npm:0.21.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
+  peerDependencies:
+    rxjs: ">=7.0.0"
+  checksum: 10c0/51e636b059c707c10a47951b8b3e1eb62fbb3254468179e4b223d132da907136b0a88d7f2b9ae12551f3794a42a4bc3085aafddd309fe2a2f7eb7f2095b6911d
+  languageName: node
+  linkType: hard
+
+"@univerjs/preset-sheets-note@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-note@npm:0.21.1"
+  dependencies:
+    "@univerjs/sheets-note": "npm:0.21.1"
+    "@univerjs/sheets-note-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/901307dfed0843eade030bb943e83ce93834a6273b8cf84c06ae0d02a34e9f5340f07dd3b341f8f4c2ab6c243456f5ea9907d7ac41da1dd05db5a9269b4b17eb
+  checksum: 10c0/45c4e61f7fb701421575296074371d01d8634c854287177319d8db7b17869f6b50c9ea47e2457aa5d6b3d32e05f66768f5c66a03e596947d753b188c702ed904
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-table@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-table@npm:0.16.1"
+"@univerjs/preset-sheets-sort@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-sort@npm:0.21.1"
   dependencies:
-    "@univerjs/sheets-table": "npm:0.16.1"
-    "@univerjs/sheets-table-ui": "npm:0.16.1"
+    "@univerjs/sheets-sort": "npm:0.21.1"
+    "@univerjs/sheets-sort-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/fe17a2075530dcc1cf54cdfd94719fb78e702420b49ff69f2a550b0023865b82d7b8ea70c9d9c4f5bd071d476b7ae7d00bb6abc852bbfe4692b7ab0744814ad5
+  checksum: 10c0/d6313c00669ed114eb9300ccb11f869ae97ec3b9bdbaf0080f6b0e202ab06477de90a037e731820dd8be75621b92e1ac14b03d004d715f6dd158e9b48f3c512c
   languageName: node
   linkType: hard
 
-"@univerjs/preset-sheets-thread-comment@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/preset-sheets-thread-comment@npm:0.16.1"
+"@univerjs/preset-sheets-table@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-table@npm:0.21.1"
   dependencies:
-    "@univerjs/sheets-thread-comment": "npm:0.16.1"
-    "@univerjs/sheets-thread-comment-ui": "npm:0.16.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
-    "@univerjs/thread-comment-ui": "npm:0.16.1"
+    "@univerjs/sheets-table": "npm:0.21.1"
+    "@univerjs/sheets-table-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/db8166ab5960e02ed9a23449a0a421add380d8ca28ca6b430b6a9b0b49dd779ddca6700e0903793b6d1ec42c292d4f1a69845f370a3dcf54393945ca8694f9e9
+  checksum: 10c0/8ff6e1be4efe3f50d6912d5f7be46cfdd6d24a51cd08bb4fa2f7518ed860550f74bf13d50e25b04827d8ded5a2f23dd8467e0305e46fd9bae7b06be77f0c61e5
   languageName: node
   linkType: hard
 
-"@univerjs/presets@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/presets@npm:0.16.1"
+"@univerjs/preset-sheets-thread-comment@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/preset-sheets-thread-comment@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/preset-docs-advanced": "npm:0.16.1"
-    "@univerjs/preset-docs-collaboration": "npm:0.16.1"
-    "@univerjs/preset-docs-core": "npm:0.16.1"
-    "@univerjs/preset-docs-drawing": "npm:0.16.1"
-    "@univerjs/preset-docs-hyper-link": "npm:0.16.1"
-    "@univerjs/preset-docs-node-core": "npm:0.16.1"
-    "@univerjs/preset-docs-thread-comment": "npm:0.16.1"
-    "@univerjs/preset-sheets-advanced": "npm:0.16.1"
-    "@univerjs/preset-sheets-collaboration": "npm:0.16.1"
-    "@univerjs/preset-sheets-conditional-formatting": "npm:0.16.1"
-    "@univerjs/preset-sheets-core": "npm:0.16.1"
-    "@univerjs/preset-sheets-data-validation": "npm:0.16.1"
-    "@univerjs/preset-sheets-drawing": "npm:0.16.1"
-    "@univerjs/preset-sheets-filter": "npm:0.16.1"
-    "@univerjs/preset-sheets-find-replace": "npm:0.16.1"
-    "@univerjs/preset-sheets-hyper-link": "npm:0.16.1"
-    "@univerjs/preset-sheets-node-core": "npm:0.16.1"
-    "@univerjs/preset-sheets-note": "npm:0.16.1"
-    "@univerjs/preset-sheets-sort": "npm:0.16.1"
-    "@univerjs/preset-sheets-table": "npm:0.16.1"
-    "@univerjs/preset-sheets-thread-comment": "npm:0.16.1"
+    "@univerjs/sheets-thread-comment": "npm:0.21.1"
+    "@univerjs/sheets-thread-comment-ui": "npm:0.21.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
+    "@univerjs/thread-comment-ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/846d6fc466b8362afb2b5e5aa6e51f5dea73ff088dfc1b7a5ae4b1cfe07865a37a8fa371574f377d39ea6ea8bdcac0264bc4a0182d97eaae68083ac90412fc93
+  checksum: 10c0/24a0a8265540fda2c367bcbc64072cc1a8c8dd01121dc2481a197bc28fb4e13604a46b90a60f6aa111a5a545663c4f883789f642126b52668805e487e15e6ca7
   languageName: node
   linkType: hard
 
-"@univerjs/protocol@npm:0.1.48":
-  version: 0.1.48
-  resolution: "@univerjs/protocol@npm:0.1.48"
-  checksum: 10c0/34afa20b9dfc9a3a5107ee4a15cc8104a52c5fb709bcd47f4de39d15515c494cbf8ba3b6146c3d241c6ed125fffcbe0027cfad5390294cd3b4534c144e27a47c
-  languageName: node
-  linkType: hard
-
-"@univerjs/rpc-node@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/rpc-node@npm:0.16.1"
+"@univerjs/presets@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/presets@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/rpc": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/preset-docs-advanced": "npm:0.21.1"
+    "@univerjs/preset-docs-collaboration": "npm:0.21.1"
+    "@univerjs/preset-docs-core": "npm:0.21.1"
+    "@univerjs/preset-docs-drawing": "npm:0.21.1"
+    "@univerjs/preset-docs-hyper-link": "npm:0.21.1"
+    "@univerjs/preset-docs-node-core": "npm:0.21.1"
+    "@univerjs/preset-docs-thread-comment": "npm:0.21.1"
+    "@univerjs/preset-sheets-advanced": "npm:0.21.1"
+    "@univerjs/preset-sheets-collaboration": "npm:0.21.1"
+    "@univerjs/preset-sheets-conditional-formatting": "npm:0.21.1"
+    "@univerjs/preset-sheets-core": "npm:0.21.1"
+    "@univerjs/preset-sheets-data-validation": "npm:0.21.1"
+    "@univerjs/preset-sheets-drawing": "npm:0.21.1"
+    "@univerjs/preset-sheets-filter": "npm:0.21.1"
+    "@univerjs/preset-sheets-find-replace": "npm:0.21.1"
+    "@univerjs/preset-sheets-hyper-link": "npm:0.21.1"
+    "@univerjs/preset-sheets-node-core": "npm:0.21.1"
+    "@univerjs/preset-sheets-note": "npm:0.21.1"
+    "@univerjs/preset-sheets-sort": "npm:0.21.1"
+    "@univerjs/preset-sheets-table": "npm:0.21.1"
+    "@univerjs/preset-sheets-thread-comment": "npm:0.21.1"
+  peerDependencies:
+    react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    rxjs: ">=7.0.0"
+  checksum: 10c0/13ca40dd6fa4e4ac9b536256c2f17406f95b2c356d799be491c260dbbd76fcdc5f85a935d4846b60cc412547174a07fa4baf08e662b002904b0f702e9d77d9e1
+  languageName: node
+  linkType: hard
+
+"@univerjs/protocol@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/protocol@npm:0.21.1"
+  dependencies:
+    "@grpc/grpc-js": "npm:^1.14.3"
+  checksum: 10c0/364aeb90c3a92fdc99200b06a2bdc142335c827a938719df940e7f19f08129b43576a8e89aadb7d325af18e35a23dfe12bfae85f2d962d8bf6a4cf971e205989
+  languageName: node
+  linkType: hard
+
+"@univerjs/rpc-node@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/rpc-node@npm:0.21.1"
+  dependencies:
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/107d0dbc260ebd6dc181cd851b3dc2b000255f867e56819804fecf48d360fb8a20bc7f3fc933bb8c3fea6711ba369c063f40038e3f9d04621a9e19f0f5c3d8f1
+  checksum: 10c0/a4525685053e5ca7efa978583fa73a3e93784ac3ef161cbbcb23fba1b4a975e213600bd28797cf8aba262b1ec9b5e4e977ee75c8fa4bba1f485299454993ae89
   languageName: node
   linkType: hard
 
-"@univerjs/rpc@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/rpc@npm:0.16.1"
+"@univerjs/rpc@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/rpc@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/fdeb70a75fdead5992b7f3c7982c1f5d345f798def394b5cbc8fd5e2a7829d665db3c115859b1a39a4925cfe31f16a0daf72c39cc3d79dec4383efd7baba9a31
+  checksum: 10c0/04a0858c8a7472f5cc8a4d521675492dcab2bb3e250705791de15b74938caf3a57f302014bb67ebca97b0a8d157137c9acaaf4d66ecb0a9fd4d8932c617e4b7f
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-conditional-formatting-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-conditional-formatting-ui@npm:0.16.1"
+"@univerjs/sheets-conditional-formatting-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-conditional-formatting-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-conditional-formatting": "npm:0.16.1"
-    "@univerjs/sheets-formula": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-conditional-formatting": "npm:0.21.1"
+    "@univerjs/sheets-formula": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/22148794c490295ed8be520dcf52ba5d249acf525a29bff9cfd0267b7568d79b5277bf103f8726c33683cca6ce887305a7b5e34884a47e599dbe20f53a878f98
+  checksum: 10c0/3c4884e1ce8bb317af67fff1ce7d654934a3fec94734f1fa746557b7b9b81b3bcea821c130d5269b32f00d44fc233fbd2a7d39f4103d8e45715619a53c786f65
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-conditional-formatting@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-conditional-formatting@npm:0.16.1"
+"@univerjs/sheets-conditional-formatting@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-conditional-formatting@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/3285b8f4abaf13b5cc6feab7a79c5c65a3c58ed64891996d88faaf7b99f14ac50a315c1b96821ed3a505f0a3f38e7e006a541a7b0b2d584ff81f043141070c2d
+  checksum: 10c0/0a011036628b05edb1a068264bce368bd66d02a72f8ca0f805738d3599ef2eed3c1c889981787f6ebed9124d3b21c3267c635761b976e9d9eca96acdb637c5e5
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-data-validation-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-data-validation-ui@npm:0.16.1"
+"@univerjs/sheets-data-validation-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-data-validation-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/data-validation": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/data-validation": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-data-validation": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-numfmt": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-data-validation": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-numfmt": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/132fe51b1f432c7227df2637f125a062ee4110b96a8eadb222dbaa8b46e99a7214403892a84b3ddf0c4f54884c3499b7c931ccec474cb00c281610f3fc324618
+  checksum: 10c0/f141760e6a08ec26816a457f67c6a4ba20af3ea75b172c38bb689075ffb2ee461a6d4aca67747602ed55d673bd27a2e0131880b9b35a0bd7d5f19ce8860a6deb
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-data-validation@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-data-validation@npm:0.16.1"
+"@univerjs/sheets-data-validation@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-data-validation@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/data-validation": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-formula": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/data-validation": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-formula": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/eadfa6b7669981f8bbbda1ac07e18d98a76527c080595249e7d7d36747c2415f6fd9935de608ede63d587655585f24b5a70de0c9b311318da709ca22619201c8
+  checksum: 10c0/a3be193c13a1a440a48fd835fa578a89e6b93e422695489bc3a435e72c73496c94cc652c441a938b1c13dbaec4457694825c40249a14a17f26fab4aa6ec5c4a6
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-drawing-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-drawing-ui@npm:0.16.1"
+"@univerjs/sheets-drawing-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-drawing-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs-drawing": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/drawing-ui": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-drawing": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs-drawing": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/drawing-ui": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-drawing": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/de3bd70f1c9560e0832487f14b74495404b92028ad09e76055cebbe009ef692d1fabad410200da5fbe04f7f16bd6e206e7c757186196cdc0841a1d9e08ab07bc
+  checksum: 10c0/dba0f6675b66f4f84eff4afcbd26b4eb3abb26a51c7e1fd651d50bbcf311b84b008ffe46c61bec43bbbbd9eb09255489f26db108f6d000815b49b08e94f539cb
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-drawing@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-drawing@npm:0.16.1"
+"@univerjs/sheets-drawing@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-drawing@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/drawing": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-  checksum: 10c0/c66a639630023cd6ee99e9e51b4fb996a5552580d2004a01d186125fb814ee5a79b3790c35af08e421017683bac2f75a8537d39107ea17bfed3231fb3537e230
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/drawing": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+  checksum: 10c0/98cd1add337ce54d86068211b44f262bb006677cc958c0c0abae9c57eb603078185d1e669ad05c85f06661546385421006a9f781a88f93cf69dd4b85d21ff36c
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-filter-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-filter-ui@npm:0.16.1"
+"@univerjs/sheets-filter-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-filter-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/rpc": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-filter": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/rpc": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-filter": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/71682476d38a30801fb790e87407760433e6e17a445a3d30ec3732b9f4cf10a08c3fdd570879caa180164af68a9a4563a9894c3f32031c52bd36b4b6bf3a0ccf
+  checksum: 10c0/68128bc720bff9f3c5ec2fb23210db6003c5e8050f974f808219d6ebbb3d608b2cd4522736a30ce78ddc581de4477439b3aee7ab329c5d616e5393ca8e4b5d73
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-filter@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-filter@npm:0.16.1"
+"@univerjs/sheets-filter@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-filter@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/rpc": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/de74897652349ce118775122dcfdca3db8361569af6d2bf562db666e66252c0d6cf33b6ca53a926ba10f69a27f937bbead985f9b9f9f52be45db404e6934ef2a
+  checksum: 10c0/d36c29b0e359234d461369023b7ab63828ed4369ce222c005c0ba1594da62cb2fcfcc6deb823ba9a36aa74f05f80a1053ad7ef785668b599d9b2c83f280122c9
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-find-replace@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-find-replace@npm:0.16.1"
+"@univerjs/sheets-find-replace@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-find-replace@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/find-replace": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/find-replace": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/e4cdb647feff22d1d76a44f444ff6d6bbcca07880d6da1ef62780ae8898f719972e19b33ce13db9012107a44e2e4018b1b4d614e6c740bc6e725020910fa2d13
+  checksum: 10c0/ca8065bbea359128d19e9d1b6ae9f4435b49aac870987b51b8ca0226048e5aa782f7a5f480b7040e0797065f018b6021ef8fa44daa473d8f4e6285a3acab3619
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-formula-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-formula-ui@npm:0.16.1"
+"@univerjs/sheets-formula-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-formula-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-formula": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-formula": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/43c15f2c5b1e2d73d5d6d17e8ea6a298ce4c764ac0a002f3ff0958b085cfee81a466ca03d460227678c798bf62d5ddf244a89d473177dc5e5d4990e3e479dabe
+  checksum: 10c0/f8ae7ac361f93435f1fecf97314e458b1bce9a83e5f7ea5b00725b111bc4db993ea0ed70660369eed0bf65169682f2623e3380a05fcfee456698913bea17943d
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-formula@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-formula@npm:0.16.1"
+"@univerjs/sheets-formula@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-formula@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/rpc": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/ce476a353b623de1003046546819fbb8d3322f8b5b3a7e8f8fe03191338c6fc033422d1444f93b18342faac4d8c068f27f589bc0f3f0a6d561f48244ca61e494
+  checksum: 10c0/839300f3e8280ad3f3499dffcc420e40f0f321c4f82292a2df2fcefca6ec96e8ac2ffe123640b9792e38375f146cbdc03a82969794a8c4e71f18862bd5e4ef23
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-graphics@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-graphics@npm:0.16.1"
+"@univerjs/sheets-graphics@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-graphics@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-  checksum: 10c0/a2812859a35f179e3845dcecec124c2de72291bedd0571ad38e7f279713b45c3374bde59195f37cbb14301726b6ebcc4db2e291463774fab57a8e62dcf7347d6
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+  checksum: 10c0/b998354d41ceef0fe92e80245ea94e06b27dc7ee04ef88075b603cacb3ced7638d7ef0d0a642693ee83e644454e711f46299d711c9d39e7e40ee15f905ed73b3
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-hyper-link-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-hyper-link-ui@npm:0.16.1"
+"@univerjs/sheets-hyper-link-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-hyper-link-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-data-validation": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-hyper-link": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-data-validation": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-hyper-link": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/e7dde77e8dfff5d4ac27e31c8f5b8b7247be71e3007c61cc95edb76bdfadba1828a0811abacdc8f3dad9b53127ada229745dd00d2241fac0e0cb86d1a7e3941a
+  checksum: 10c0/91f8e9cb4f5a6a6f8b29168a3857b8960f9305dad8b2d58c826c4b6ca8165aa54bb19244bd8f3b74439ca26f666ea0d4233cc0428afc5b20da26bbd90909ec82
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-hyper-link@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-hyper-link@npm:0.16.1"
+"@univerjs/sheets-hyper-link@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-hyper-link@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/0dba7116a676dc4946543cf687f28bedda78d78acb147e5449f94719491d848c8f177e9d11ea277d930dcd71ac6bc5f6048b1f4f6a3b688bb8d06f0f673e0440
+  checksum: 10c0/a39cbf10f56a18b28476433a2b8c9b72160f4443b4a7ecfedd036c584d69239990b5cdc7cfc5afd350f03a734478aeea7a129b9a14b5594a7bd16813e395447b
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-note-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-note-ui@npm:0.16.1"
+"@univerjs/sheets-note-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-note-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-note": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
-    rxjs: "npm:^7.8.2"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-note": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/78fce1da782eebff774a41f38b84030ab83b670230b6f28a181b927f6db553c5f3ea5714c95527e9f257eb8de1674e44e0b6ed1cdca780e29d417d82ed9a3a4c
+  checksum: 10c0/2b825397bde47cca41908e1633df9a929a481874e9427fdff64abbe75fea0de3b1f92f9315c052c4bf99d3889d13dc5b4df37ba68927f06161b8bba88db489d1
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-note@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-note@npm:0.16.1"
+"@univerjs/sheets-note@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-note@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/d7f6e0c5d8b226fb2e8c2fd4a712304352fdc0f63c39627384f93fdbebb296295999eccc8946a98dbb7f3a9860332cc38b345ad5bec4099911b7b8d3696522d9
+  checksum: 10c0/a52c1e328a84b435be4369ad27b68f8da1cf93ddafa9e21d077f25003250b455774a69058f8b9e833e82f3f1e4d5948ff5c8d0d2c633d646c9e5a4a22ed885d0
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-numfmt-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-numfmt-ui@npm:0.16.1"
+"@univerjs/sheets-numfmt-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-numfmt-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-numfmt": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-numfmt": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/9636efee7c1a2f89f979b2747d50765c9d57eaee99a7119cf6ce8ea50501df194bc381914e6b8657ec4f205207a746f3cca9a19fa8a9c349de6b0b9b56bd6778
+  checksum: 10c0/dc9f2c9753b0871ba4ba0819357c29c639bb6e6365098a2c376d402c5033da775acef2a1b05273bd4a7853abe0fbc121ae6dafe65aacfb8a220ea28ae9bd2444
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-numfmt@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-numfmt@npm:0.16.1"
+"@univerjs/sheets-numfmt@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-numfmt@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/1c272d30d45877cf5961c0e1e13dd9b7284fb416db39ff4b300b8086a2c2f261620df975be1ff37b3f85e27cabb8f94362d1583ff99fa0fc2ad8d18fb8c41e15
+  checksum: 10c0/b74a7f352569bc551759dcbf0c12b325477ed1e906ca08bc7c1c0660ddfac1d6ee7ce9f08415552f8762df39e26c97698ad94997b4eb13351937b826e4ba892f
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-sort-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-sort-ui@npm:0.16.1"
+"@univerjs/sheets-sort-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-sort-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-sort": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-sort": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/f15467420bdb40c402c42754057d003f79f309621042e3a86d48e2c29e7f5f3d75645337c2c0e4cad818f3261d9118e85853af6a4be04b1720a75c811e2f27fe
+  checksum: 10c0/4ed9fa05211c22c18aedd5e3812ddda38e0dc0ef7f37b457bc6148786cab5874b680d6863f0db894cc15586ea19c91f793224238a4eee4364b3d45a42978ab21
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-sort@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-sort@npm:0.16.1"
+"@univerjs/sheets-sort@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-sort@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-  checksum: 10c0/cb9c0db027485f43dc3fadd4f54798ac99e56a2886690b6bad637a3ddc32045a16dcf43edc377bc62fb6995d62b1b2101e45064e68f35f139f49746b7cbdcfbb
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+  checksum: 10c0/fd32cf716db7044e04701d7f6a6087462c73ca097d5b09414bf90d8b4fb091386284517548ec5757c4ecaf4f08a0167f9d2e1946e2d2a93f51b527898361aafe
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-table-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-table-ui@npm:0.16.1"
+"@univerjs/sheets-table-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-table-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-formula-ui": "npm:0.16.1"
-    "@univerjs/sheets-sort": "npm:0.16.1"
-    "@univerjs/sheets-table": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-formula-ui": "npm:0.21.1"
+    "@univerjs/sheets-sort": "npm:0.21.1"
+    "@univerjs/sheets-table": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/80169981bbc8ab94e5b9ea0f2ca7aac3386e34c0cfb7350f1d7fb9ddbf5e62fbcd76ad22eb84898055f37b2446910956d83c7f03841dd1d774d8be4d37007332
+  checksum: 10c0/1bb8236a6a37b8c3a1a6d02bd0fcc3a1df63c17e520886a01db9723c43d1dad487c072b6da4a5d794789517647291683b613eb1a99bdff5229124ad6a42bae78
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-table@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-table@npm:0.16.1"
+"@univerjs/sheets-table@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-table@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/62825a47b295d7c81c5c38dc4c8d5a9bc12bdd1150e07a90f7d0415644abc338d80a7fcac8f61daa2504d65085020b63390c0ac89578757136c0d384e18c6046
+  checksum: 10c0/2dd03a386d5af2e030be205d104c84ff979b758d342d96670bace86fde56137ddb206b9d303b04e152590b98585a1df8a858be6e44a715346f293018f7b94b47
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-thread-comment-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-thread-comment-ui@npm:0.16.1"
+"@univerjs/sheets-thread-comment-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-thread-comment-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/sheets-thread-comment": "npm:0.16.1"
-    "@univerjs/sheets-ui": "npm:0.16.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
-    "@univerjs/thread-comment-ui": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/sheets-thread-comment": "npm:0.21.1"
+    "@univerjs/sheets-ui": "npm:0.21.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
+    "@univerjs/thread-comment-ui": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/02c5931567f9a188c1e28aaf249b7f548aff8714dfb57495405b3de252041638f4024c5d4581ed88a3bd97b06300ccaaefed9af7fe688e8c202d7326c2119142
+  checksum: 10c0/d31b2dc7401220cffbeb98641a602c1dc1ac34ca0515668ad06d1ec14a9b2a72addd687d8760a66a6282049c425b40e518c3aecd6b1db91f7f93daffc7abee10
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-thread-comment@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-thread-comment@npm:0.16.1"
+"@univerjs/sheets-thread-comment@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-thread-comment@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/94a62ee25299e345b67ef29eafb0f8d00a3c09c50c39c59678dee781259a550a62e8f28f9fa041c93b98cb2d99e7f868415ce0ce3a5413057f2ff1dc26edce5f
+  checksum: 10c0/db126121a9cee48ca02389a452f351b39b61fd2d711caa5237943cfba61f590ae0d12be43119511fa6e961f20eecab4e54d2e589747f6258e54295e5bdd029ab
   languageName: node
   linkType: hard
 
-"@univerjs/sheets-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets-ui@npm:0.16.1"
+"@univerjs/sheets-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/sheets": "npm:0.16.1"
-    "@univerjs/telemetry": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/sheets": "npm:0.21.1"
+    "@univerjs/telemetry": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/27407e9f9153380ea1d12bebdecaec8ea164a3876b230af80e4e729c70ca5cef20efa3d59439002570346f34da6730e3da3ed6520084fbbfe2e821616b095258
+  checksum: 10c0/f873eae6fa50e7ea8c82ca0998e04b87fe8aac9f5012dc7b935c2ae3fb8de19ccb5b1396afebf0a631d90de126ddc2f9fb1280f57c5b9f3619c9dbd9699369e8
   languageName: node
   linkType: hard
 
-"@univerjs/sheets@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/sheets@npm:0.16.1"
+"@univerjs/sheets@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/sheets@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/engine-formula": "npm:0.16.1"
-    "@univerjs/protocol": "npm:0.1.48"
-    "@univerjs/rpc": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/engine-formula": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
+    "@univerjs/protocol": "npm:0.21.1"
+    "@univerjs/rpc": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/0e94f7daa9f8c4d41ebf8a5e4ea6d2c9efc149f0b2032f1b6053224e4ac7e1a37405586dd5e593f9dc626ece7d64d3fa7090c625085b8415e3128e5ef8b2cce3
+  checksum: 10c0/e81c618416202df8daeb303eb0980a18295c2e8db9de1c1d7f764b5544fe668eebed214bf6d9c4e6ff2831505f3f3e6faf4a4d577289596225721b6114b48371
   languageName: node
   linkType: hard
 
-"@univerjs/telemetry@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/telemetry@npm:0.16.1"
+"@univerjs/telemetry@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/telemetry@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-  checksum: 10c0/7398ea3ed34e55977cc5930198d112b681a07f9ea9b9d35d491906dff38c9a331c1917da6cc91416ee4652ea414ef0845f53d667fd01939cac485bdd9beac8ad
+    "@univerjs/core": "npm:0.21.1"
+  checksum: 10c0/6ab9ff20c0e70138d029512d60aec0c19635e1f6769fbb149dc9fda46eb89038abfc2bfe023fb16e5aac90b6e251bdc5300d885092f93fd4734eeb0a6b003515
   languageName: node
   linkType: hard
 
-"@univerjs/themes@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/themes@npm:0.16.1"
-  checksum: 10c0/e44e9a5787aad281b56ab559dc3e23ffdbbf27f1972bf2b1922516b65e50f7195751a0bd3dc44e88d05e1b7176015bd666bb4272358389de65565599e638e4dc
+"@univerjs/themes@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/themes@npm:0.21.1"
+  checksum: 10c0/be52b8f4e5fae6a1ddc06a9fb818a136e7f3828b4ff433ca32908229c62df047f1a9b4beae3eec7c523e79347f834fceed7777e9c28b253cfbb52f3336d9b773
   languageName: node
   linkType: hard
 
-"@univerjs/thread-comment-ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/thread-comment-ui@npm:0.16.1"
+"@univerjs/thread-comment-ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/thread-comment-ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/docs-ui": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/docs-ui": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
-    "@univerjs/thread-comment": "npm:0.16.1"
-    "@univerjs/ui": "npm:0.16.1"
+    "@univerjs/thread-comment": "npm:0.21.1"
+    "@univerjs/ui": "npm:0.21.1"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/476d3c79d4bf64b9e49200f29f4bcc1c8af4aa8d579d99ba1a22a1bd2ad4005c7e23dcc9237da7de0a9b4f66382aee308ccbacc86f1c4af779204ab907b0b71c
+  checksum: 10c0/b73d3d2cf6a0a25f3582cd4d59ebd2eb6d77b5762472c8852adc4da5905044bce60fc948497765f96d2347c8bc65992729ee1daa3924e1c8a36b450327e77224
   languageName: node
   linkType: hard
 
-"@univerjs/thread-comment@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/thread-comment@npm:0.16.1"
+"@univerjs/thread-comment@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/thread-comment@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
   peerDependencies:
     rxjs: ">=7.0.0"
-  checksum: 10c0/49b8afc7ccb17823549a2d6cdec1ff484d8e7c2c943a54046183156090c0c2e68c115e537347b503272b3a25c39a6473e3c25d189c054dc9f92ab17d27ca196a
+  checksum: 10c0/b0880e8969f13dea750c3d6cd4264ce92a1df6655a4e53ddbfd1ffa4345e83698511a341483d729323506836f4b194d3b878f6c224f646a193f5ec8a5527fecc
   languageName: node
   linkType: hard
 
-"@univerjs/ui@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@univerjs/ui@npm:0.16.1"
+"@univerjs/ui@npm:0.21.1":
+  version: 0.21.1
+  resolution: "@univerjs/ui@npm:0.21.1"
   dependencies:
-    "@univerjs/core": "npm:0.16.1"
-    "@univerjs/design": "npm:0.16.1"
-    "@univerjs/engine-render": "npm:0.16.1"
+    "@univerjs/core": "npm:0.21.1"
+    "@univerjs/design": "npm:0.21.1"
+    "@univerjs/engine-render": "npm:0.21.1"
     "@univerjs/icons": "npm:^1.1.1"
     "@wendellhu/redi": "npm:1.1.1"
     localforage: "npm:^1.10.0"
@@ -7189,7 +7194,7 @@ __metadata:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     rxjs: ">=7.0.0"
-  checksum: 10c0/e83935fabe4d6363379a00c29142bab9b200c9f39374b937519bc9c1788c6b1ca0780bad715396cd336486258ccfb0001e45d943220587af1cc129eb9af85b6d
+  checksum: 10c0/53c442f856494e6ed14c07f33a9513a4c20710f01621058659abea043c310c27f5d9e092f81d5509da2f65b3a00d08058391114d09d4c65edfca9d8bd7a01be3
   languageName: node
   linkType: hard
 
@@ -9212,22 +9217,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"crypto-js@npm:4.2.0":
-  version: 4.2.0
-  resolution: "crypto-js@npm:4.2.0"
-  checksum: 10c0/8fbdf9d56f47aea0794ab87b0eb9833baf80b01a7c5c1b0edc7faf25f662fb69ab18dc2199e2afcac54670ff0cd9607a9045a3f7a80336cccd18d77a55b9fdf0
-  languageName: node
-  linkType: hard
-
-"css-box-model@npm:^1.2.0":
-  version: 1.2.1
-  resolution: "css-box-model@npm:1.2.1"
-  dependencies:
-    tiny-invariant: "npm:^1.0.6"
-  checksum: 10c0/611e56d76b16e4e21956ed9fa53f1936fbbfaccd378659587e9c929f342037fc6c062f8af9447226e11fe7c95e31e6c007a37e592f9bff4c2d40e6915553104a
-  languageName: node
-  linkType: hard
-
 "css-color-keywords@npm:^1.0.0":
   version: 1.0.0
   resolution: "css-color-keywords@npm:1.0.0"
@@ -9561,13 +9550,6 @@ __metadata:
   version: 1.11.11
   resolution: "dayjs@npm:1.11.11"
   checksum: 10c0/0131d10516b9945f05a57e13f4af49a6814de5573a494824e103131a3bbe4cc470b1aefe8e17e51f9a478a22cd116084be1ee5725cedb66ec4c3f9091202dc4b
-  languageName: node
-  linkType: hard
-
-"dayjs@npm:^1.11.19":
-  version: 1.11.19
-  resolution: "dayjs@npm:1.11.19"
-  checksum: 10c0/7d8a6074a343f821f81ea284d700bd34ea6c7abbe8d93bce7aba818948957c1b7f56131702e5e890a5622cdfc05dcebe8aed0b8313bdc6838a594d7846b0b000
   languageName: node
   linkType: hard
 
@@ -13584,8 +13566,8 @@ __metadata:
     "@types/react-dom": "npm:18.2.0"
     "@types/react-grid-layout": "npm:^1.3.5"
     "@types/styled-components": "npm:5.1.26"
-    "@univerjs/preset-sheets-core": "npm:0.16.1"
-    "@univerjs/presets": "npm:0.16.1"
+    "@univerjs/preset-sheets-core": "npm:0.21.1"
+    "@univerjs/presets": "npm:0.21.1"
     "@xyflow/react": "npm:^12.10.2"
     ace-builds: "npm:^1.32.3"
     antd: "npm:^5"
@@ -13726,10 +13708,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash-es@npm:^4.17.23":
-  version: 4.17.23
-  resolution: "lodash-es@npm:4.17.23"
-  checksum: 10c0/3150fb6660c14c7a6b5f23bd11597d884b140c0e862a17fdb415aaa5ef7741523182904a6b7929f04e5f60a11edb5a79499eb448734381c99ffb3c4734beeddd
+"lodash-es@npm:^4.18.1":
+  version: 4.18.1
+  resolution: "lodash-es@npm:4.18.1"
+  checksum: 10c0/35d4dcf87ef07f8d090f409447575800108057e360b445f590d0d25d09e3d1e33a163d2fc100d4d072b0f901d5e2fc533cd7c4bfd8eeb38a06abec693823c8b8
+  languageName: node
+  linkType: hard
+
+"lodash.camelcase@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "lodash.camelcase@npm:4.3.0"
+  checksum: 10c0/fcba15d21a458076dd309fce6b1b4bf611d84a0ec252cb92447c948c533ac250b95d2e00955801ebc367e5af5ed288b996d75d37d2035260a937008e14eaf432
   languageName: node
   linkType: hard
 
@@ -13821,6 +13810,13 @@ __metadata:
   version: 4.0.0
   resolution: "long@npm:4.0.0"
   checksum: 10c0/50a6417d15b06104dbe4e3d4a667c39b137f130a9108ea8752b352a4cfae047531a3ac351c181792f3f8768fe17cca6b0f406674a541a86fb638aaac560d83ed
+  languageName: node
+  linkType: hard
+
+"long@npm:^5.0.0":
+  version: 5.3.2
+  resolution: "long@npm:5.3.2"
+  checksum: 10c0/7130fe1cbce2dca06734b35b70d380ca3f70271c7f8852c922a7c62c86c4e35f0c39290565eca7133c625908d40e126ac57c02b1b1a4636b9457d77e1e60b981
   languageName: node
   linkType: hard
 
@@ -14218,13 +14214,6 @@ __metadata:
   version: 0.3.0
   resolution: "media-typer@npm:0.3.0"
   checksum: 10c0/d160f31246907e79fed398470285f21bafb45a62869dc469b1c8877f3f064f5eabc4bcc122f9479b8b605bc5c76187d7871cf84c4ee3ecd3e487da1993279928
-  languageName: node
-  linkType: hard
-
-"memoize-one@npm:^5.1.1":
-  version: 5.2.1
-  resolution: "memoize-one@npm:5.2.1"
-  checksum: 10c0/fd22dbe9a978a2b4f30d6a491fc02fb90792432ad0dab840dc96c1734d2bd7c9cdeb6a26130ec60507eb43230559523615873168bcbe8fafab221c30b11d54c1
   languageName: node
   linkType: hard
 
@@ -14882,12 +14871,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:5.1.6":
-  version: 5.1.6
-  resolution: "nanoid@npm:5.1.6"
+"nanoid@npm:5.1.9":
+  version: 5.1.9
+  resolution: "nanoid@npm:5.1.9"
   bin:
     nanoid: bin/nanoid.js
-  checksum: 10c0/27b5b055ad8332cf4f0f9f6e2a494aa7e5ded89df4cab8c8490d4eabefe72c4423971d2745d22002868b1d50576a5e42b7b05214733b19f576382323282dd26e
+  checksum: 10c0/02cb4e48d30469eee3959795e2af6c113342e7f492906e43bd1e3c264d2dcee6c8236b0e441d4a9895b58c4ddb1c7c02170f63a2ca854a229cc4c7a544699cc1
   languageName: node
   linkType: hard
 
@@ -15196,10 +15185,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"numfmt@npm:^3.2.3":
-  version: 3.2.4
-  resolution: "numfmt@npm:3.2.4"
-  checksum: 10c0/e7a9fbade09159a69e3d3ea8f59ad8739cb97ee9018905c4dc00a1a03a663a2184e94abe47b235d6d984dcc4902e92c0010371f1e03ebe3636fb29f8dd1b0fe4
+"numfmt@npm:3.2.6":
+  version: 3.2.6
+  resolution: "numfmt@npm:3.2.6"
+  checksum: 10c0/e0ceea02d69ca2912d6dbdab29f9a0f83f197191482a6b6db05658c975cc8b1821bc4c6cb4f54cd810153ec0d05aacf3afc15d5be63e7d218119e9cf099126e9
   languageName: node
   linkType: hard
 
@@ -15539,13 +15528,6 @@ __metadata:
   version: 1.0.0
   resolution: "packet-reader@npm:1.0.0"
   checksum: 10c0/c86c3321bb07e0f03cc2db59f7701184e0bbfcb914f1fdc963993b03262486deb402292adcef39b64e3530ea66b3b2e2163d6da7b3792a730bdd1c6df3175aaa
-  languageName: node
-  linkType: hard
-
-"pako@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "pako@npm:2.1.0"
-  checksum: 10c0/8e8646581410654b50eb22a5dfd71159cae98145bd5086c9a7a816ec0370b5f72b4648d08674624b3870a521e6a3daffd6c2f7bc00fdefc7063c9d8232ff5116
   languageName: node
   linkType: hard
 
@@ -16123,6 +16105,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"protobufjs@npm:^7.5.3":
+  version: 7.5.5
+  resolution: "protobufjs@npm:7.5.5"
+  dependencies:
+    "@protobufjs/aspromise": "npm:^1.1.2"
+    "@protobufjs/base64": "npm:^1.1.2"
+    "@protobufjs/codegen": "npm:^2.0.4"
+    "@protobufjs/eventemitter": "npm:^1.1.0"
+    "@protobufjs/fetch": "npm:^1.1.0"
+    "@protobufjs/float": "npm:^1.0.2"
+    "@protobufjs/inquire": "npm:^1.1.0"
+    "@protobufjs/path": "npm:^1.1.2"
+    "@protobufjs/pool": "npm:^1.1.0"
+    "@protobufjs/utf8": "npm:^1.1.0"
+    "@types/node": "npm:>=13.7.0"
+    long: "npm:^5.0.0"
+  checksum: 10c0/3d48896a916761e3e60b52f80027eb4fba3f5a6e3f8461e04939db18812db2cb0db4c73d03e1134a960e99525ae1d236f076a0bc01273016f573b76f33ffbd47
+  languageName: node
+  linkType: hard
+
 "proxy-from-env@npm:^1.1.0":
   version: 1.1.0
   resolution: "proxy-from-env@npm:1.1.0"
@@ -16188,13 +16190,6 @@ __metadata:
   version: 3.0.0
   resolution: "quickselect@npm:3.0.0"
   checksum: 10c0/3a0d33b0ec06841d953accdfd735aa3d8b7922cddd12970544a2c4b0278871280d8f5ba496803600693c1e7b7b2fb57c31d2b14d99132f478888006a1be6e6b7
-  languageName: node
-  linkType: hard
-
-"raf-schd@npm:^4.0.2":
-  version: 4.0.3
-  resolution: "raf-schd@npm:4.0.3"
-  checksum: 10c0/ecabf0957c05fad059779bddcd992f1a9d3a35dfea439a6f0935c382fcf4f7f7fa60489e467b4c2db357a3665167d2a379782586b59712bb36c766e02824709b
   languageName: node
   linkType: hard
 
@@ -16313,7 +16308,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-dropdown@npm:^4.2.1, rc-dropdown@npm:~4.2.0, rc-dropdown@npm:~4.2.1":
+"rc-dropdown@npm:~4.2.0, rc-dropdown@npm:~4.2.1":
   version: 4.2.1
   resolution: "rc-dropdown@npm:4.2.1"
   dependencies:
@@ -16407,7 +16402,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-menu@npm:^9.16.0, rc-menu@npm:~9.16.0, rc-menu@npm:~9.16.1":
+"rc-menu@npm:~9.16.0, rc-menu@npm:~9.16.1":
   version: 9.16.1
   resolution: "rc-menu@npm:9.16.1"
   dependencies:
@@ -16797,7 +16792,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-virtual-list@npm:^3.14.2, rc-virtual-list@npm:^3.16.1, rc-virtual-list@npm:^3.5.1, rc-virtual-list@npm:^3.5.2":
+"rc-virtual-list@npm:^3.14.2, rc-virtual-list@npm:^3.5.1, rc-virtual-list@npm:^3.5.2":
   version: 3.19.2
   resolution: "rc-virtual-list@npm:3.19.2"
   dependencies:
@@ -16842,24 +16837,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-beautiful-dnd@npm:^13.1.1":
-  version: 13.1.1
-  resolution: "react-beautiful-dnd@npm:13.1.1"
-  dependencies:
-    "@babel/runtime": "npm:^7.9.2"
-    css-box-model: "npm:^1.2.0"
-    memoize-one: "npm:^5.1.1"
-    raf-schd: "npm:^4.0.2"
-    react-redux: "npm:^7.2.0"
-    redux: "npm:^4.0.4"
-    use-memo-one: "npm:^1.1.1"
-  peerDependencies:
-    react: ^16.8.5 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.5 || ^17.0.0 || ^18.0.0
-  checksum: 10c0/5bc04f6dcfededc6e5c90e696cda07816a018eada52f7438ded839f03786e3f319aa8a0bc7b14b86fb26a12c0e5ba53e8c5a4bf3832a8f827dd70f1410675525
-  languageName: node
-  linkType: hard
-
 "react-dom@npm:18.2.0":
   version: 18.2.0
   resolution: "react-dom@npm:18.2.0"
@@ -16885,19 +16862,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-draggable@npm:^4.4.6":
-  version: 4.5.0
-  resolution: "react-draggable@npm:4.5.0"
-  dependencies:
-    clsx: "npm:^2.1.1"
-    prop-types: "npm:^15.8.1"
-  peerDependencies:
-    react: ">= 16.3.0"
-    react-dom: ">= 16.3.0"
-  checksum: 10c0/6f7591fe450555218bf0d9e31984be02451bf3f678fb121f51ac0a0a645d01a1b5ea8248ef9afddcd24239028911fd88032194b9c00b30ad5ece76ea13397fc3
-  languageName: node
-  linkType: hard
-
 "react-grid-layout@npm:^1.5.0":
   version: 1.5.0
   resolution: "react-grid-layout@npm:1.5.0"
@@ -16915,23 +16879,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-grid-layout@npm:^1.5.1":
-  version: 1.5.3
-  resolution: "react-grid-layout@npm:1.5.3"
-  dependencies:
-    clsx: "npm:^2.1.1"
-    fast-equals: "npm:^4.0.3"
-    prop-types: "npm:^15.8.1"
-    react-draggable: "npm:^4.4.6"
-    react-resizable: "npm:^3.0.5"
-    resize-observer-polyfill: "npm:^1.5.1"
-  peerDependencies:
-    react: ">= 16.3.0"
-    react-dom: ">= 16.3.0"
-  checksum: 10c0/e7ddacff138e7e83121b7356411a38056fa628dcd77ee8dfa5d5290fda76c2bafdc757578ed5cf4617731696e959ba8570f391b509e597f6563158ed2dd8dbb9
-  languageName: node
-  linkType: hard
-
 "react-is@npm:^16.13.1, react-is@npm:^16.7.0":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
@@ -16939,7 +16886,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:^17.0.1, react-is@npm:^17.0.2":
+"react-is@npm:^17.0.1":
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 10c0/2bdb6b93fbb1820b024b496042cce405c57e2f85e777c9aabd55f9b26d145408f9f74f5934676ffdc46f3dcff656d78413a6e43968e7b3f92eea35b3052e9053
@@ -16971,27 +16918,6 @@ __metadata:
     "@types/react": ">=18"
     react: ">=18"
   checksum: 10c0/3a3895dbd56647bc864b8da46dd575e71a9e609eb1e43fea8e8e6209d86e208eddd5b07bf8d7b5306a194b405440760a8d134aebd5a4ce5dc7dee4299e84db96
-  languageName: node
-  linkType: hard
-
-"react-redux@npm:^7.2.0":
-  version: 7.2.9
-  resolution: "react-redux@npm:7.2.9"
-  dependencies:
-    "@babel/runtime": "npm:^7.15.4"
-    "@types/react-redux": "npm:^7.1.20"
-    hoist-non-react-statics: "npm:^3.3.2"
-    loose-envify: "npm:^1.4.0"
-    prop-types: "npm:^15.7.2"
-    react-is: "npm:^17.0.2"
-  peerDependencies:
-    react: ^16.8.3 || ^17 || ^18
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-    react-native:
-      optional: true
-  checksum: 10c0/904fac7f493942585ed7ebbd693b4f6b5c09c292366b4550e887ba1a2e83a92c55f0ddc35161d4ba87e3fadb6c681a59003f58df6335e5d2ddd72b06a557851d
   languageName: node
   linkType: hard
 
@@ -17125,15 +17051,6 @@ __metadata:
   dependencies:
     resolve: "npm:^1.20.0"
   checksum: 10c0/1a30074124a22abbd5d44d802dac26407fa72a0a95f162aa5504ba8246bc5452f8b1a027b154d9bdbabcd8764920ff9333d934c46a8f17479c8912e92332f3ff
-  languageName: node
-  linkType: hard
-
-"redux@npm:^4.0.0, redux@npm:^4.0.4":
-  version: 4.2.1
-  resolution: "redux@npm:4.2.1"
-  dependencies:
-    "@babel/runtime": "npm:^7.9.2"
-  checksum: 10c0/136d98b3d5dbed1cd6279c8c18a6a74c416db98b8a432a46836bdd668475de6279a2d4fd9d1363f63904e00f0678a8a3e7fa532c897163340baf1e71bb42c742
   languageName: node
   linkType: hard
 
@@ -18787,13 +18704,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-invariant@npm:^1.0.6":
-  version: 1.3.3
-  resolution: "tiny-invariant@npm:1.3.3"
-  checksum: 10c0/65af4a07324b591a059b35269cd696aba21bef2107f29b9f5894d83cc143159a204b299553435b03874ebb5b94d019afa8b8eff241c8a4cfee95872c2e1c1c4a
-  languageName: node
-  linkType: hard
-
 "tinyglobby@npm:^0.2.15":
   version: 0.2.15
   resolution: "tinyglobby@npm:0.2.15"
@@ -19263,6 +19173,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici-types@npm:~7.19.0":
+  version: 7.19.2
+  resolution: "undici-types@npm:7.19.2"
+  checksum: 10c0/7159f10546f9f6c47d36776bb1bbf8671e87c1e587a6fee84ae1f111ae8de4f914efa8ca0dfcd224f4f4a9dfc3f6028f627ccb5ddaccf82d7fd54671b89fac3e
+  languageName: node
+  linkType: hard
+
 "undici@npm:^5.8.0":
   version: 5.29.0
   resolution: "undici@npm:5.29.0"
@@ -19484,15 +19401,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/f887488c6e6075cdad4962979da1714b217bcb1ee009a9e57ce9a844bcfc4c3a99e93983dfc2e5af9e0913824d24e730090ff255e902c516dcb58d2d3837e01c
-  languageName: node
-  linkType: hard
-
-"use-memo-one@npm:^1.1.1":
-  version: 1.1.3
-  resolution: "use-memo-one@npm:1.1.3"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 10c0/3d596e65a6b47b2f1818061599738e00daad1f9a9bb4e5ce1f014b20a35b297e50fe4bf1d8c1699ab43ea97f01f84649a736c15ceff96de83bfa696925f6cc6b
   languageName: node
   linkType: hard
 
@@ -20544,7 +20452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.0.0, yargs@npm:^17.3.1":
+"yargs@npm:^17.0.0, yargs@npm:^17.3.1, yargs@npm:^17.7.2":
   version: 17.7.2
   resolution: "yargs@npm:17.7.2"
   dependencies:
