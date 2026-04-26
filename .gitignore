@@ -1,3 +1,6 @@
+# postgres dumps (large files, not versioned)
+postgres/dumps/
+
 # wren-ai-service
 wren-ai-service/.env.*
 wren-ai-service/config.yaml*
