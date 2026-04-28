@@ -22,10 +22,12 @@ import {
   Project,
 } from '../repositories';
 import {
+  SampleDataset,
   SampleDatasetName,
   SampleDatasetRelationship,
   buildInitSql,
   getRelations,
+  isPostgresBackedSampleDataset,
   sampleDatasets,
 } from '@server/data';
 import { snakeCase } from 'lodash';
@@ -389,6 +391,12 @@ export class ProjectResolver {
     if (!(name in SampleDatasetName)) {
       throw new Error('Invalid sample dataset name');
     }
+
+    // PostgreSQL-backed datasets (e.g. Retail Broker) skip DuckDB entirely
+    if (isPostgresBackedSampleDataset(name as SampleDatasetName)) {
+      return this.startPostgresBackedSampleDataset(_root, _arg, ctx, dataset);
+    }
+
     const eventName = TelemetryEvent.CONNECTION_START_SAMPLE_DATASET;
     const eventProperties = {
       datasetName: name,
@@ -547,6 +555,195 @@ export class ProjectResolver {
       );
       throw err;
     }
+  }
+
+  /**
+   * Handles `startSampleDataset` for PostgreSQL-backed datasets (e.g. Retail Broker).
+   * Configures the project as a real Postgres data source, creates models directly
+   * from the dataset's `postgresModels` definition, and seeds sample content.
+   */
+  private async startPostgresBackedSampleDataset(
+    _root: any,
+    _arg: { data: SampleDatasetData },
+    ctx: IContext,
+    dataset: SampleDataset,
+  ): Promise<{ name: string; projectId: number }> {
+    const { name } = _arg.data;
+    const pgConn = dataset.postgresConnection!;
+
+    // Clear data from any existing configured project so saveDataSource can
+    // find an unconfigured project (or create a new one).
+    if (ctx.projectId) {
+      try {
+        const existing = await ctx.projectService.getCurrentProject(ctx.projectId);
+        if (existing?.type) {
+          const pid = existing.id;
+          await ctx.schemaChangeRepository.deleteAllBy({ projectId: pid });
+          await ctx.deployService.deleteAllByProjectId(pid);
+          await ctx.askingService.deleteAllByProjectId(pid);
+          await ctx.modelService.deleteAllViewsByProjectId(pid);
+          await ctx.modelService.deleteAllModelsByProjectId(pid);
+          await ctx.dashboardRepository.deleteAllBy({ projectId: pid });
+          await ctx.spreadsheetRepository.deleteAllBy({ projectId: pid });
+          try { await ctx.wrenAIAdaptor.delete(pid); } catch { /* ignore */ }
+          // Reset to unconfigured so saveDataSource picks it up below
+          await ctx.projectService.updateProject(pid, {
+            type: null,
+            connectionInfo: null,
+          } as Partial<Project>);
+        }
+      } catch { /* no existing project — continue */ }
+    }
+
+    // saveDataSource creates or activates a project and verifies connectivity
+    const dsResult = await this.saveDataSource(
+      _root,
+      {
+        data: {
+          type: DataSourceName.POSTGRES,
+          properties: {
+            displayName: 'Retail Broker',
+            host: pgConn.host,
+            port: pgConn.port,
+            database: pgConn.database,
+            user: pgConn.user,
+            password: pgConn.password,
+            ssl: pgConn.ssl ?? false,
+          },
+        } as DataSource,
+      },
+      ctx,
+    );
+    const projectId = dsResult.projectId;
+    ctx.projectId = projectId;
+
+    // Set the correct catalog (DB name) and schema for table references in MDL
+    await ctx.projectService.updateProject(projectId, {
+      catalog: pgConn.database,
+      schema: pgConn.schema,
+    } as Partial<Project>);
+
+    const project = await ctx.projectService.getProjectById(projectId);
+
+    // Ensure the current user is project OWNER
+    if (ctx.currentUser?.id) {
+      const existingMember = await ctx.projectMemberRepository.findByProjectAndUser(
+        projectId,
+        ctx.currentUser.id,
+      );
+      if (!existingMember) {
+        await ctx.projectMemberService.addMember(projectId, ctx.currentUser.id, ProjectRole.OWNER);
+      }
+    }
+
+    // Create model records directly from postgresModels definitions
+    await ctx.modelService.deleteAllModelsByProjectId(projectId);
+    const modelValues = (dataset.postgresModels ?? []).map(
+      (m) =>
+        ({
+          projectId,
+          displayName: m.modelName,
+          referenceName: m.modelName,
+          sourceTableName: m.tableName,
+          cached: false,
+          refreshTime: null,
+          properties: null,
+        }) as Partial<Model>,
+    );
+    const models = await ctx.modelRepository.createMany(modelValues);
+
+    // Create column records for each model
+    const columnValues = (dataset.postgresModels ?? []).flatMap((m) => {
+      const model = models.find((dbm) => dbm.sourceTableName === m.tableName);
+      if (!model) return [];
+      return m.columns.map(
+        (col) =>
+          ({
+            modelId: model.id,
+            isCalculated: false,
+            displayName: col.name,
+            referenceName: transformInvalidColumnName(col.name),
+            sourceColumnName: col.name,
+            type: col.type || 'varchar',
+            notNull: col.notNull ?? false,
+            isPk: col.name === m.primaryKey,
+            properties: null,
+          }) as Partial<ModelColumn>,
+      );
+    });
+    const columns = await ctx.modelColumnRepository.createMany(columnValues);
+
+    // Save relationships (resolved by referenceName, not sourceTableName)
+    const relations = getRelations(name as SampleDatasetName) ?? [];
+    if (relations.length > 0) {
+      const mappedRelations = this.buildRelationInputByReferenceName(
+        relations,
+        models,
+        columns,
+      );
+      await ctx.modelService.saveRelations(mappedRelations, projectId);
+    }
+
+    // Mark project as using this sample dataset
+    await ctx.projectRepository.updateOne(project.id, { sampleDataset: name });
+
+    await this.deploy(ctx);
+
+    // Seed sample content (spreadsheets, etc.)
+    if (dataset.sampleContent) {
+      try {
+        await this.seedSampleContent(dataset.sampleContent, projectId, ctx);
+      } catch (seedErr: any) {
+        console.warn('Failed to seed sample content:', seedErr.message);
+      }
+    }
+
+    ctx.telemetry.sendEvent(TelemetryEvent.CONNECTION_START_SAMPLE_DATASET, {
+      datasetName: name,
+    });
+    return { name, projectId };
+  }
+
+  /**
+   * Like buildRelationInput but looks up models by referenceName (model name)
+   * rather than sourceTableName. Used for PostgreSQL-backed sample datasets
+   * where modelName ≠ tableName.
+   */
+  private buildRelationInputByReferenceName(
+    relations: SampleDatasetRelationship[],
+    models: Model[],
+    columns: ModelColumn[],
+  ) {
+    return relations.map((relation) => {
+      const { fromModelName, fromColumnName, toModelName, toColumnName, type } =
+        relation;
+      const fromModelId = models.find((m) => m.referenceName === fromModelName)?.id;
+      const toModelId = models.find((m) => m.referenceName === toModelName)?.id;
+      if (!fromModelId || !toModelId) {
+        throw new Error(
+          `Model not found for relation: "${fromModelName}" → "${toModelName}"`,
+        );
+      }
+      const fromColumnId = columns.find(
+        (c) => c.referenceName === fromColumnName && c.modelId === fromModelId,
+      )?.id;
+      const toColumnId = columns.find(
+        (c) => c.referenceName === toColumnName && c.modelId === toModelId,
+      )?.id;
+      if (!fromColumnId || !toColumnId) {
+        throw new Error(
+          `Column not found for relation: "${fromColumnName}" or "${toColumnName}"`,
+        );
+      }
+      return {
+        fromModelId,
+        fromColumnId,
+        toModelId,
+        toColumnId,
+        type,
+        description: relation.description,
+      } as RelationData;
+    });
   }
 
   private async seedSampleContent(

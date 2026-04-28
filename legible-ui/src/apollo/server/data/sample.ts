@@ -74,6 +74,30 @@ export interface SampleDataset {
   questions?: SuggestedQuestion[];
   relations?: SampleDatasetRelationship[];
   sampleContent?: SampleContent;
+  /**
+   * For PostgreSQL-backed sample datasets (e.g., Retail Broker).
+   * When present, the dataset connects to a real Postgres instance instead
+   * of spinning up a DuckDB environment with parquet files.
+   */
+  postgresConnection?: {
+    host: string;
+    port: number;
+    database: string;
+    user: string;
+    password: string;
+    schema: string;
+    ssl?: boolean;
+  };
+  /**
+   * Model definitions for PostgreSQL-backed datasets.
+   * Each entry maps a Wren model name (referenceName) to the underlying table.
+   */
+  postgresModels?: Array<{
+    modelName: string;  // Wren model name used in queries, e.g. 'AccountProfile'
+    tableName: string;  // Actual PostgreSQL table name, e.g. 'account_profile'
+    primaryKey?: string;
+    columns: Array<{ name: string; type: string; notNull?: boolean }>;
+  }>;
 }
 
 export const sampleDatasets: Record<string, SampleDataset> = {
@@ -5112,7 +5136,487 @@ export const buildInitSql = (datasetName: SampleDatasetName) => {
 
 export const getRelations = (datasetName: SampleDatasetName) => {
   const selectedDataset = sampleDatasets[datasetName.toLowerCase()];
-  return selectedDataset.relations;
+  return selectedDataset?.relations;
+};
+
+export const isPostgresBackedSampleDataset = (
+  datasetName: SampleDatasetName,
+): boolean => {
+  return datasetName === SampleDatasetName.RETAIL_BROKER;
+};
+
+// ---------------------------------------------------------------------------
+// Retail Broker (ISM PostgreSQL) — no parquet tables, PostgreSQL-backed
+// ---------------------------------------------------------------------------
+sampleDatasets['retail_broker'] = {
+  name: 'retail_broker',
+  tables: [],
+  postgresConnection: {
+    host: 'ism-postgres',
+    port: 5432,
+    database: 'ISM',
+    user: 'ism_admin',
+    password: 'ism_secret',
+    schema: 'curated',
+    ssl: false,
+  },
+  postgresModels: [
+    {
+      modelName: 'DimSecurity',
+      tableName: 'dim_security',
+      primaryKey: 'security_no',
+      columns: [
+        { name: 'security_no', type: 'varchar', notNull: true },
+        { name: 'symbol', type: 'varchar' },
+        { name: 'cusip', type: 'varchar' },
+        { name: 'security_type', type: 'varchar' },
+        { name: 'security_class', type: 'varchar' },
+        { name: 'country', type: 'varchar' },
+        { name: 'funds', type: 'varchar' },
+        { name: 'english_description', type: 'varchar' },
+        { name: 'french_description', type: 'varchar' },
+        { name: 'cad_close_price', type: 'double' },
+        { name: 'usd_close_price', type: 'double' },
+        { name: 'cad_price_date', type: 'date' },
+        { name: 'usd_price_date', type: 'date' },
+        { name: 'security_origin', type: 'varchar' },
+        { name: 'quality_tier', type: 'varchar' },
+        { name: 'curated_at', type: 'timestamp' },
+      ],
+    },
+    {
+      modelName: 'Trades',
+      tableName: 'fact_trades',
+      primaryKey: 'trade_no',
+      columns: [
+        { name: 'trade_no', type: 'varchar', notNull: true },
+        { name: 'broker_no', type: 'varchar' },
+        { name: 'account_no', type: 'varchar' },
+        { name: 'client_no', type: 'varchar' },
+        { name: 'security_no', type: 'varchar' },
+        { name: 'security_symbol', type: 'varchar' },
+        { name: 'security_cusip', type: 'varchar' },
+        { name: 'security_type', type: 'varchar' },
+        { name: 'security_class', type: 'varchar' },
+        { name: 'security_origin', type: 'varchar' },
+        { name: 'security_quality_tier', type: 'varchar' },
+        { name: 'record_type', type: 'varchar' },
+        { name: 'buy_sell', type: 'varchar' },
+        { name: 'cancel_flag', type: 'varchar' },
+        { name: 'process_ts', type: 'timestamp' },
+        { name: 'trade_ts', type: 'timestamp' },
+        { name: 'value_ts', type: 'timestamp' },
+        { name: 'quantity', type: 'double' },
+        { name: 'price', type: 'double' },
+        { name: 'net_amount', type: 'double' },
+        { name: 'net_amount_funds', type: 'varchar' },
+        { name: 'account_origin', type: 'varchar' },
+        { name: 'client_origin', type: 'varchar' },
+        { name: 'generated_at', type: 'timestamp' },
+      ],
+    },
+    {
+      modelName: 'Bookkeeping',
+      tableName: 'fact_bookkeeping',
+      primaryKey: 'txn_ref_id',
+      columns: [
+        { name: 'txn_ref_id', type: 'varchar', notNull: true },
+        { name: 'broker_no', type: 'varchar' },
+        { name: 'account_no', type: 'varchar' },
+        { name: 'client_no', type: 'varchar' },
+        { name: 'security_no', type: 'varchar' },
+        { name: 'security_symbol', type: 'varchar' },
+        { name: 'security_cusip', type: 'varchar' },
+        { name: 'security_type', type: 'varchar' },
+        { name: 'security_class', type: 'varchar' },
+        { name: 'security_origin', type: 'varchar' },
+        { name: 'security_quality_tier', type: 'varchar' },
+        { name: 'major_type_code', type: 'varchar' },
+        { name: 'txn_subseq', type: 'integer' },
+        { name: 'process_date', type: 'date' },
+        { name: 'trade_date', type: 'date' },
+        { name: 'value_date', type: 'date' },
+        { name: 'detail_amount', type: 'double' },
+        { name: 'detail_amount_funds', type: 'varchar' },
+        { name: 'detail_quantity', type: 'double' },
+        { name: 'rr_code', type: 'varchar' },
+        { name: 'account_origin', type: 'varchar' },
+        { name: 'client_origin', type: 'varchar' },
+        { name: 'generated_at', type: 'timestamp' },
+      ],
+    },
+    {
+      modelName: 'SecurityMaster',
+      tableName: 'security_master',
+      primaryKey: 'secno',
+      columns: [
+        { name: 'secno', type: 'varchar', notNull: true },
+        { name: 'sectype', type: 'varchar' },
+        { name: 'secclass', type: 'varchar' },
+        { name: 'engsdesc', type: 'varchar' },
+        { name: 'frsdesc', type: 'varchar' },
+        { name: 'funds', type: 'varchar' },
+        { name: 'cusip', type: 'varchar' },
+        { name: 'symbol', type: 'varchar' },
+        { name: 'country', type: 'varchar' },
+        { name: 'cdnclspr', type: 'varchar' },
+        { name: 'cdnprdt', type: 'varchar' },
+        { name: 'usclspr', type: 'varchar' },
+        { name: 'usprdt', type: 'varchar' },
+        { name: 'payrate', type: 'varchar' },
+        { name: 'payfreq', type: 'varchar' },
+        { name: 'expmatdt', type: 'varchar' },
+        { name: 'indanndiv', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'SecurityDividend',
+      tableName: 'security_dividend',
+      primaryKey: 'secno',
+      columns: [
+        { name: 'secno', type: 'varchar', notNull: true },
+        { name: 'divrecdt', type: 'varchar' },
+        { name: 'divrate', type: 'varchar' },
+        { name: 'payfreq', type: 'varchar' },
+        { name: 'paydt', type: 'varchar' },
+        { name: 'divfunds', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'SecurityMarkets',
+      tableName: 'security_markets',
+      primaryKey: 'secno',
+      columns: [
+        { name: 'secno', type: 'varchar', notNull: true },
+        { name: 'symbol', type: 'varchar' },
+        { name: 'country', type: 'varchar' },
+        { name: 'mktcode1', type: 'varchar' },
+        { name: 'majmkt1', type: 'varchar' },
+        { name: 'mktcode2', type: 'varchar' },
+        { name: 'majmkt2', type: 'varchar' },
+        { name: 'mktcode3', type: 'varchar' },
+        { name: 'majmkt3', type: 'varchar' },
+        { name: 'symbolid', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'SecurityBondDates',
+      tableName: 'security_bond_dates',
+      primaryKey: 'secno',
+      columns: [
+        { name: 'secno', type: 'varchar', notNull: true },
+        { name: 'dateddt', type: 'varchar' },
+        { name: 'frstcpndt', type: 'varchar' },
+        { name: 'cpndt', type: 'varchar' },
+        { name: 'intdiscind', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'SecurityBondFactor',
+      tableName: 'security_bond_factor',
+      primaryKey: 'secno',
+      columns: [
+        { name: 'secno', type: 'varchar', notNull: true },
+        { name: 'effectivedate', type: 'varchar' },
+        { name: 'enddate', type: 'varchar' },
+        { name: 'remprinfact', type: 'varchar' },
+        { name: 'unitofmeasure', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'AccountHoldings',
+      tableName: 'account_holdings',
+      primaryKey: 'acctno',
+      columns: [
+        { name: 'acctno', type: 'varchar', notNull: true },
+        { name: 'secnum', type: 'varchar', notNull: true },
+        { name: 'secdesc', type: 'varchar' },
+        { name: 'groupcode', type: 'varchar' },
+        { name: 'funds', type: 'varchar' },
+        { name: 'currqty', type: 'varchar' },
+        { name: 'sfkqty', type: 'varchar' },
+        { name: 'pendqty', type: 'varchar' },
+        { name: 'memoqty', type: 'varchar' },
+        { name: 'mktprice', type: 'varchar' },
+        { name: 'mktvalue', type: 'varchar' },
+        { name: 'loanvalue', type: 'varchar' },
+        { name: 'lasttradedate', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'AccountHoldingsSummary',
+      tableName: 'account_holdings_summary',
+      primaryKey: 'acctno',
+      columns: [
+        { name: 'acctno', type: 'varchar', notNull: true },
+        { name: 'accttype', type: 'varchar' },
+        { name: 'funds', type: 'varchar' },
+        { name: 'rrcode2', type: 'varchar' },
+        { name: 'rrbranch', type: 'varchar' },
+        { name: 'acctclass', type: 'varchar' },
+        { name: 'language', type: 'varchar' },
+        { name: 'tdmktval', type: 'varchar' },
+        { name: 'mebknetchg', type: 'varchar' },
+        { name: 'tdbalunsc', type: 'varchar' },
+        { name: 'sdbal', type: 'varchar' },
+        { name: 'tdreqmrg', type: 'varchar' },
+        { name: 'tdreqsecure', type: 'varchar' },
+        { name: 'curstat', type: 'varchar' },
+        { name: 'curdelinq', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'AccountInventory',
+      tableName: 'account_inventory',
+      primaryKey: 'acctno',
+      columns: [
+        { name: 'acctno', type: 'varchar', notNull: true },
+        { name: 'accttype', type: 'varchar' },
+        { name: 'acctfunds', type: 'varchar' },
+        { name: 'rrcode2', type: 'varchar' },
+        { name: 'rrbranch', type: 'varchar' },
+        { name: 'acctclass', type: 'varchar' },
+        { name: 'tdmktval', type: 'varchar' },
+        { name: 'tdloanval', type: 'varchar' },
+        { name: 'invsecdesc', type: 'varchar' },
+        { name: 'curstat', type: 'varchar' },
+        { name: 'curdelinq', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'AccountProfile',
+      tableName: 'account_profile',
+      primaryKey: 'accountno',
+      columns: [
+        { name: 'accountno', type: 'varchar', notNull: true },
+        { name: 'accounttype', type: 'varchar' },
+        { name: 'accountfunds', type: 'varchar' },
+        { name: 'accountclass', type: 'varchar' },
+        { name: 'rrcode', type: 'varchar' },
+        { name: 'reportingcode', type: 'varchar' },
+        { name: 'accountshname', type: 'varchar' },
+        { name: 'regname', type: 'varchar' },
+        { name: 'accountsin', type: 'varchar' },
+        { name: 'initialdate', type: 'varchar' },
+        { name: 'lastupdatedate', type: 'varchar' },
+        { name: 'lasttradedate', type: 'varchar' },
+        { name: 'closeinstrdate', type: 'varchar' },
+        { name: 'closedate', type: 'varchar' },
+        { name: 'delinstr', type: 'varchar' },
+        { name: 'planningcode', type: 'varchar' },
+        { name: 'commissioncode', type: 'varchar' },
+        { name: 'commissionrate', type: 'varchar' },
+        { name: 'branchno', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'ClientProfile',
+      tableName: 'client_profile',
+      primaryKey: 'clientno',
+      columns: [
+        { name: 'clientno', type: 'varchar', notNull: true },
+        { name: 'language', type: 'varchar' },
+        { name: 'clientshname', type: 'varchar' },
+        { name: 'branch', type: 'varchar' },
+        { name: 'residentcode', type: 'varchar' },
+        { name: 'citizenshipcode', type: 'varchar' },
+        { name: 'telephone', type: 'varchar' },
+        { name: 'birthdate', type: 'varchar' },
+        { name: 'deceaseddate', type: 'varchar' },
+        { name: 'occupation', type: 'varchar' },
+        { name: 'maritalstatus', type: 'varchar' },
+        { name: 'networth', type: 'varchar' },
+        { name: 'investobj1', type: 'varchar' },
+        { name: 'investobj2', type: 'varchar' },
+        { name: 'investobj3', type: 'varchar' },
+        { name: 'investknowledge', type: 'varchar' },
+        { name: 'investexper', type: 'varchar' },
+        { name: 'risktolerance', type: 'varchar' },
+        { name: 'employer', type: 'varchar' },
+        { name: 'discretauth', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'AccountClientLink',
+      tableName: 'account_client_link',
+      primaryKey: 'accountno',
+      columns: [
+        { name: 'accountno', type: 'varchar', notNull: true },
+        { name: 'clientno', type: 'varchar', notNull: true },
+        { name: 'relationtype', type: 'varchar' },
+        { name: 'relnsetupdate', type: 'varchar' },
+        { name: 'clientaddruse', type: 'varchar' },
+        { name: 'rrcode', type: 'varchar' },
+        { name: 'relnstartdate', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'AccountAddress',
+      tableName: 'account_address',
+      primaryKey: 'accountno',
+      columns: [
+        { name: 'accountno', type: 'varchar', notNull: true },
+        { name: 'addresstype', type: 'varchar' },
+        { name: 'naline1', type: 'varchar' },
+        { name: 'naline2', type: 'varchar' },
+        { name: 'naline3', type: 'varchar' },
+        { name: 'naline4', type: 'varchar' },
+        { name: 'naline5', type: 'varchar' },
+        { name: 'naline6', type: 'varchar' },
+        { name: 'postalcode', type: 'varchar' },
+        { name: 'confirmtype', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'NameAddressMaster',
+      tableName: 'name_address_master',
+      primaryKey: 'acct',
+      columns: [
+        { name: 'acct', type: 'varchar', notNull: true },
+        { name: 'rrcode', type: 'varchar' },
+        { name: 'rrbranchcode', type: 'varchar' },
+        { name: 'type', type: 'varchar' },
+        { name: 'funds', type: 'varchar' },
+        { name: 'name', type: 'varchar' },
+        { name: 'lang_ind', type: 'varchar' },
+        { name: 'delivery', type: 'varchar' },
+        { name: 'residenc', type: 'varchar' },
+        { name: 'class', type: 'varchar' },
+        { name: 'phone', type: 'varchar' },
+        { name: 'upd_datestr', type: 'varchar' },
+        { name: 'act_datestr', type: 'varchar' },
+      ],
+    },
+    {
+      modelName: 'TradeCalc',
+      tableName: 'trade_calc',
+      primaryKey: 'tradeno',
+      columns: [
+        { name: 'bkr', type: 'varchar', notNull: true },
+        { name: 'acctbranch', type: 'varchar' },
+        { name: 'acctno', type: 'varchar', notNull: true },
+        { name: 'procdate', type: 'varchar' },
+        { name: 'recordtype', type: 'varchar' },
+        { name: 'tradeno', type: 'varchar', notNull: true },
+        { name: 'buysell', type: 'varchar' },
+        { name: 'cancel', type: 'varchar' },
+        { name: 'seccode', type: 'varchar' },
+        { name: 'valuedate', type: 'varchar' },
+        { name: 'tradedate', type: 'varchar' },
+        { name: 'qty', type: 'varchar' },
+        { name: 'netamt', type: 'varchar' },
+        { name: 'netamtfunds', type: 'varchar' },
+        { name: 'totqty', type: 'varchar' },
+        { name: 'avgprice', type: 'varchar' },
+        { name: 'price', type: 'varchar' },
+        { name: 'pricefunds', type: 'varchar' },
+        { name: 'mktcode', type: 'varchar' },
+        { name: 'tradebasis', type: 'varchar' },
+        { name: 'rrcode', type: 'varchar' },
+      ],
+    },
+  ],
+  relations: [
+    {
+      fromModelName: 'Trades',
+      fromColumnName: 'security_no',
+      toModelName: 'DimSecurity',
+      toColumnName: 'security_no',
+      type: RelationType.MANY_TO_ONE,
+    },
+    {
+      fromModelName: 'Bookkeeping',
+      fromColumnName: 'security_no',
+      toModelName: 'DimSecurity',
+      toColumnName: 'security_no',
+      type: RelationType.MANY_TO_ONE,
+    },
+  ],
+  questions: [
+    {
+      question:
+        'Which accounts have the highest total portfolio market value?',
+      label: 'Descriptive',
+    },
+    {
+      question:
+        'What is the trade volume by security type and buy/sell direction?',
+      label: 'Segmentation',
+    },
+    {
+      question:
+        'Which clients with high or speculative risk tolerance have the largest portfolios?',
+      label: 'Comparative',
+    },
+    {
+      question:
+        'What is the equity vs. bond breakdown across all accounts?',
+      label: 'Descriptive',
+    },
+    {
+      question:
+        'Which accounts have the most individual holdings?',
+      label: 'Descriptive',
+    },
+  ],
+  sampleContent: {
+    spreadsheets: [
+      {
+        name: 'Account Portfolio Summary — Holdings by Asset Class',
+        sql: `SELECT
+  ap.accountno,
+  ap.accounttype,
+  ap.accountfunds AS currency,
+  ap.rrcode,
+  ahs.tdmktval AS total_market_value,
+  COUNT(ah.secnum) AS holdings_count,
+  ROUND(SUM(CASE WHEN ah.groupcode = 'EQ' THEN ah.mktvalue ELSE 0 END)::numeric, 2) AS equity_value,
+  ROUND(SUM(CASE WHEN ah.groupcode = 'BD' THEN ah.mktvalue ELSE 0 END)::numeric, 2) AS bond_value,
+  ROUND(SUM(CASE WHEN ah.groupcode NOT IN ('EQ','BD') THEN ah.mktvalue ELSE 0 END)::numeric, 2) AS other_value
+FROM "AccountProfile" ap
+JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = ap.accountno
+JOIN "AccountHoldings" ah ON ah.acctno = ap.accountno
+GROUP BY ap.accountno, ap.accounttype, ap.accountfunds, ap.rrcode, ahs.tdmktval
+ORDER BY total_market_value DESC NULLS LAST`,
+      },
+      {
+        name: 'Trade Volume by Security Type and Direction',
+        sql: `SELECT
+  COALESCE(sm.sectype, 'Unknown') AS security_type,
+  CASE tc.buysell WHEN '0' THEN 'Buy' WHEN '1' THEN 'Sell' ELSE tc.buysell END AS direction,
+  COUNT(*) AS trade_count,
+  ROUND(SUM(NULLIF(tc.qty, '')::numeric), 2) AS total_quantity,
+  ROUND(SUM(NULLIF(tc.netamt, '')::numeric), 2) AS total_net_amount,
+  tc.netamtfunds AS currency
+FROM "TradeCalc" tc
+LEFT JOIN "SecurityMaster" sm ON sm.secno = tc.seccode
+WHERE tc.cancel = '0'
+GROUP BY sm.sectype, tc.buysell, tc.netamtfunds
+ORDER BY total_net_amount DESC NULLS LAST`,
+      },
+      {
+        name: 'High-Risk and Speculative Client Accounts',
+        sql: `SELECT
+  cp.clientno,
+  cp.risktolerance AS risk_tolerance,
+  cp.investobj1 AS primary_objective,
+  cp.networth AS networth_band,
+  cp.occupation,
+  cp.maritalstatus AS marital_status,
+  ap.accounttype AS account_type,
+  ap.accountfunds AS currency,
+  ahs.tdmktval AS total_market_value,
+  ahs.tdreqmrg AS required_margin,
+  ROUND(ahs.tdmktval::numeric / NULLIF(ahs.tdreqmrg::numeric, 0), 2) AS coverage_ratio
+FROM "ClientProfile" cp
+JOIN "AccountClientLink" acl ON acl.clientno = cp.clientno
+JOIN "AccountProfile" ap ON ap.accountno = acl.accountno
+JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = acl.accountno
+WHERE cp.risktolerance IN ('HIGH', 'SPEC')
+ORDER BY total_market_value DESC NULLS LAST`,
+      },
+    ],
+  },
 };
 
 export const getSampleAskQuestions = (datasetName: SampleDatasetName) => {
