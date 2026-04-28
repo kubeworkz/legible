@@ -104,6 +104,7 @@ wren-launcher/main
 .tmp
 
 !wren-ai-service/tools/.env.example
+!docker/.env.example
 legible-ui/public/sample_data/
 wren-ai-service/transactions-fraud-datasets.zip
 
