@@ -5,6 +5,7 @@ import IdCardOutlined from '@ant-design/icons/IdcardOutlined';
 import CreditCardOutlined from '@ant-design/icons/CreditCardOutlined';
 import StarOutlined from '@ant-design/icons/StarOutlined';
 import NodeIndexOutlined from '@ant-design/icons/NodeIndexOutlined';
+import StockOutlined from '@ant-design/icons/StockOutlined';
 import { SETUP, DATA_SOURCES } from '@/utils/enum';
 import Starter from './Starter';
 import ConnectDataSource from './ConnectDataSource';
@@ -148,6 +149,11 @@ export const TEMPLATE_OPTIONS = {
     label: 'Supply Chain',
     IconComponent: NodeIndexOutlined,
     guide: 'https://www.kaggle.com/datasets/harshsingh2209/supply-chain-analysis',
+  },
+  [SampleDatasetName.RETAIL_BROKER]: {
+    label: 'Retail Broker',
+    IconComponent: StockOutlined,
+    guide: 'https://docs.legiblequery.ai',
   },
 };
 

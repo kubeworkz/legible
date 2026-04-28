@@ -708,6 +708,7 @@ export const typeDefs = gql`
     CARD_TRANSACTION
     HOTEL_RATING
     SUPPLY_CHAIN
+    RETAIL_BROKER
   }
 
   enum SyncStatus {
