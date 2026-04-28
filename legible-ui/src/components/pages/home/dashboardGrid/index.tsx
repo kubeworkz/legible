@@ -272,7 +272,8 @@ const DashboardGrid = forwardRef(
 
 export default DashboardGrid;
 
-const formatNumber = (value: number | string): string => {
+const formatNumber = (value: number | string | null | undefined): string => {
+  if (value === null || value === undefined) return '-';
   const num = typeof value === 'string' ? parseFloat(value) : value;
   if (isNaN(num)) return String(value);
   // Format with commas for thousands

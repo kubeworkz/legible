@@ -647,7 +647,11 @@ export class ProjectResolver {
           sourceTableName: m.tableName,
           cached: false,
           refreshTime: null,
-          properties: null,
+          properties: JSON.stringify({
+            table: m.tableName,
+            schema: pgConn.schema,
+            catalog: pgConn.database,
+          }),
         }) as Partial<Model>,
     );
     const models = await ctx.modelRepository.createMany(modelValues);

@@ -5650,9 +5650,9 @@ FROM "AccountHoldings"`,
     WHEN groupcode = 'MF' THEN 'Mutual Fund'
     ELSE COALESCE(groupcode, 'Other')
   END AS asset_class,
-  ROUND(SUM(NULLIF(mktvalue, '')::numeric), 2) AS total_market_value
+  ROUND(SUM(mktvalue), 2) AS total_market_value
 FROM "AccountHoldings"
-WHERE NULLIF(mktvalue, '') IS NOT NULL
+WHERE mktvalue IS NOT NULL
 GROUP BY groupcode
 ORDER BY total_market_value DESC NULLS LAST`,
             chartSchema: {
@@ -5670,10 +5670,10 @@ ORDER BY total_market_value DESC NULLS LAST`,
             sql: `SELECT
   ap.accountno,
   ap.accounttype,
-  ROUND(NULLIF(ahs.tdmktval, '')::numeric, 2) AS total_market_value
+  ROUND(ahs.tdmktval, 2) AS total_market_value
 FROM "AccountProfile" ap
 JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = ap.accountno
-WHERE NULLIF(ahs.tdmktval, '') IS NOT NULL
+WHERE ahs.tdmktval IS NOT NULL
 ORDER BY total_market_value DESC NULLS LAST
 LIMIT 10`,
             chartSchema: {
@@ -5729,12 +5729,12 @@ ORDER BY client_count DESC`,
             type: 'BAR',
             sql: `SELECT
   COALESCE(cp.risktolerance, 'Unknown') AS risk_tolerance,
-  ROUND(AVG(NULLIF(ahs.tdmktval, '')::numeric), 2) AS avg_portfolio_value,
+  ROUND(AVG(ahs.tdmktval), 2) AS avg_portfolio_value,
   COUNT(DISTINCT cp.clientno) AS client_count
 FROM "ClientProfile" cp
 JOIN "AccountClientLink" acl ON acl.clientno = cp.clientno
 JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = acl.accountno
-WHERE NULLIF(ahs.tdmktval, '') IS NOT NULL
+WHERE ahs.tdmktval IS NOT NULL
 GROUP BY cp.risktolerance
 ORDER BY avg_portfolio_value DESC NULLS LAST`,
             chartSchema: {
@@ -5845,9 +5845,9 @@ LIMIT 10`,
   END AS asset_class,
   COUNT(DISTINCT acctno) AS accounts_with_position,
   COUNT(*) AS total_positions,
-  ROUND(SUM(NULLIF(mktvalue, '')::numeric), 2) AS total_market_value
+  ROUND(SUM(mktvalue), 2) AS total_market_value
 FROM "AccountHoldings"
-WHERE NULLIF(mktvalue, '') IS NOT NULL
+WHERE mktvalue IS NOT NULL
 GROUP BY groupcode
 ORDER BY total_market_value DESC NULLS LAST`,
         chartDetail: {
@@ -5871,17 +5871,17 @@ ORDER BY total_market_value DESC NULLS LAST`,
   ah.secnum AS security_number,
   ah.secdesc AS security_description,
   ah.groupcode AS asset_group,
-  ROUND(NULLIF(ah.mktvalue, '')::numeric, 2) AS position_value,
-  ROUND(NULLIF(ahs.tdmktval, '')::numeric, 2) AS total_portfolio_value,
+  ROUND(ah.mktvalue, 2) AS position_value,
+  ROUND(ahs.tdmktval, 2) AS total_portfolio_value,
   ROUND(
-    NULLIF(ah.mktvalue, '')::numeric
-    / NULLIF(NULLIF(ahs.tdmktval, '')::numeric, 0) * 100
+    ah.mktvalue
+    / NULLIF(ahs.tdmktval, 0) * 100
   , 1) AS concentration_pct
 FROM "AccountHoldings" ah
 JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = ah.acctno
-WHERE NULLIF(ah.mktvalue, '') IS NOT NULL
-  AND NULLIF(ahs.tdmktval, '') IS NOT NULL
-  AND NULLIF(ahs.tdmktval, '')::numeric > 0
+WHERE ah.mktvalue IS NOT NULL
+  AND ahs.tdmktval IS NOT NULL
+  AND ahs.tdmktval > 0
 ORDER BY concentration_pct DESC NULLS LAST
 LIMIT 20`,
         chartDetail: {
