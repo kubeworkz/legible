@@ -5560,6 +5560,195 @@ sampleDatasets['retail_broker'] = {
     },
   ],
   sampleContent: {
+    dashboards: [
+      {
+        name: 'What is the overall trading activity profile?',
+        items: [
+          {
+            displayName: 'Total Active Trades',
+            type: 'NUMBER',
+            sql: `SELECT COUNT(*) AS total_active_trades
+FROM "Trades"
+WHERE cancel_flag = '0'`,
+            layout: { x: 0, y: 0, w: 2, h: 2 },
+          },
+          {
+            displayName: 'Total Net Trade Value (CAD, Millions)',
+            type: 'NUMBER',
+            sql: `SELECT ROUND(SUM(net_amount) / 1000000.0, 2) AS total_net_amount_cad_millions
+FROM "Trades"
+WHERE cancel_flag = '0'
+  AND net_amount_funds = 'CDN'`,
+            layout: { x: 2, y: 0, w: 2, h: 2 },
+          },
+          {
+            displayName: 'Buy vs. Sell Trade Split',
+            type: 'PIE',
+            sql: `SELECT
+  CASE buy_sell WHEN '0' THEN 'Buy' WHEN '1' THEN 'Sell' ELSE buy_sell END AS direction,
+  COUNT(*) AS trade_count
+FROM "Trades"
+WHERE cancel_flag = '0'
+GROUP BY buy_sell
+ORDER BY trade_count DESC`,
+            chartSchema: {
+              mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+              encoding: {
+                theta: { field: 'trade_count', type: 'quantitative' },
+                color: { field: 'direction', type: 'nominal', title: 'Direction' },
+              },
+            },
+            layout: { x: 0, y: 2, w: 3, h: 4 },
+          },
+          {
+            displayName: 'Trade Count by Security Type',
+            type: 'BAR',
+            sql: `SELECT
+  COALESCE(security_type, 'Unknown') AS security_type,
+  COUNT(*) AS trade_count
+FROM "Trades"
+WHERE cancel_flag = '0'
+GROUP BY security_type
+ORDER BY trade_count DESC
+LIMIT 10`,
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'security_type', type: 'nominal', title: 'Security Type', sort: '-y' },
+                y: { field: 'trade_count', type: 'quantitative', title: 'Trade Count' },
+              },
+            },
+            layout: { x: 3, y: 2, w: 3, h: 4 },
+          },
+        ],
+      },
+      {
+        name: 'How are client portfolios composed by asset class?',
+        items: [
+          {
+            displayName: 'Total Accounts with Holdings',
+            type: 'NUMBER',
+            sql: `SELECT COUNT(DISTINCT acctno) AS total_accounts
+FROM "AccountHoldings"`,
+            layout: { x: 0, y: 0, w: 2, h: 2 },
+          },
+          {
+            displayName: 'Total Unique Securities Held',
+            type: 'NUMBER',
+            sql: `SELECT COUNT(DISTINCT secnum) AS total_securities
+FROM "AccountHoldings"`,
+            layout: { x: 2, y: 0, w: 2, h: 2 },
+          },
+          {
+            displayName: 'Portfolio Market Value by Asset Group',
+            type: 'PIE',
+            sql: `SELECT
+  CASE
+    WHEN groupcode = 'EQ' THEN 'Equity'
+    WHEN groupcode = 'BD' THEN 'Fixed Income'
+    WHEN groupcode = 'CS' THEN 'Cash'
+    WHEN groupcode = 'MF' THEN 'Mutual Fund'
+    ELSE COALESCE(groupcode, 'Other')
+  END AS asset_class,
+  ROUND(SUM(NULLIF(mktvalue, '')::numeric), 2) AS total_market_value
+FROM "AccountHoldings"
+WHERE NULLIF(mktvalue, '') IS NOT NULL
+GROUP BY groupcode
+ORDER BY total_market_value DESC NULLS LAST`,
+            chartSchema: {
+              mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+              encoding: {
+                theta: { field: 'total_market_value', type: 'quantitative' },
+                color: { field: 'asset_class', type: 'nominal', title: 'Asset Class' },
+              },
+            },
+            layout: { x: 0, y: 2, w: 3, h: 4 },
+          },
+          {
+            displayName: 'Top 10 Accounts by Total Market Value',
+            type: 'BAR',
+            sql: `SELECT
+  ap.accountno,
+  ap.accounttype,
+  ROUND(NULLIF(ahs.tdmktval, '')::numeric, 2) AS total_market_value
+FROM "AccountProfile" ap
+JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = ap.accountno
+WHERE NULLIF(ahs.tdmktval, '') IS NOT NULL
+ORDER BY total_market_value DESC NULLS LAST
+LIMIT 10`,
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'accountno', type: 'nominal', title: 'Account', sort: '-y' },
+                y: { field: 'total_market_value', type: 'quantitative', title: 'Market Value' },
+                color: { field: 'accounttype', type: 'nominal', title: 'Account Type' },
+              },
+            },
+            layout: { x: 3, y: 2, w: 3, h: 4 },
+          },
+        ],
+      },
+      {
+        name: 'What is the client risk profile distribution?',
+        items: [
+          {
+            displayName: 'High / Speculative Risk Client Count',
+            type: 'NUMBER',
+            sql: `SELECT COUNT(DISTINCT clientno) AS high_risk_clients
+FROM "ClientProfile"
+WHERE risktolerance IN ('HIGH', 'SPEC')`,
+            layout: { x: 0, y: 0, w: 2, h: 2 },
+          },
+          {
+            displayName: 'Total Clients',
+            type: 'NUMBER',
+            sql: `SELECT COUNT(DISTINCT clientno) AS total_clients
+FROM "ClientProfile"`,
+            layout: { x: 2, y: 0, w: 2, h: 2 },
+          },
+          {
+            displayName: 'Client Risk Tolerance Distribution',
+            type: 'PIE',
+            sql: `SELECT
+  COALESCE(risktolerance, 'Unknown') AS risk_tolerance,
+  COUNT(*) AS client_count
+FROM "ClientProfile"
+GROUP BY risktolerance
+ORDER BY client_count DESC`,
+            chartSchema: {
+              mark: { type: 'arc', tooltip: true, innerRadius: 50 },
+              encoding: {
+                theta: { field: 'client_count', type: 'quantitative' },
+                color: { field: 'risk_tolerance', type: 'nominal', title: 'Risk Tolerance' },
+              },
+            },
+            layout: { x: 0, y: 2, w: 3, h: 4 },
+          },
+          {
+            displayName: 'Average Portfolio Value by Risk Tolerance',
+            type: 'BAR',
+            sql: `SELECT
+  COALESCE(cp.risktolerance, 'Unknown') AS risk_tolerance,
+  ROUND(AVG(NULLIF(ahs.tdmktval, '')::numeric), 2) AS avg_portfolio_value,
+  COUNT(DISTINCT cp.clientno) AS client_count
+FROM "ClientProfile" cp
+JOIN "AccountClientLink" acl ON acl.clientno = cp.clientno
+JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = acl.accountno
+WHERE NULLIF(ahs.tdmktval, '') IS NOT NULL
+GROUP BY cp.risktolerance
+ORDER BY avg_portfolio_value DESC NULLS LAST`,
+            chartSchema: {
+              mark: { type: 'bar', tooltip: true },
+              encoding: {
+                x: { field: 'risk_tolerance', type: 'nominal', title: 'Risk Tolerance', sort: '-y' },
+                y: { field: 'avg_portfolio_value', type: 'quantitative', title: 'Avg Portfolio Value' },
+              },
+            },
+            layout: { x: 3, y: 2, w: 3, h: 4 },
+          },
+        ],
+      },
+    ],
     spreadsheets: [
       {
         name: 'Account Portfolio Summary — Holdings by Asset Class',
@@ -5614,6 +5803,99 @@ JOIN "AccountProfile" ap ON ap.accountno = acl.accountno
 JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = acl.accountno
 WHERE cp.risktolerance IN ('HIGH', 'SPEC')
 ORDER BY total_market_value DESC NULLS LAST`,
+      },
+    ],
+    threads: [
+      {
+        question: 'Which broker codes are driving the most trade activity?',
+        answer: 'The top broker codes by trade count are shown below, including buy/sell breakdown and total net trade value in CAD.',
+        sql: `SELECT
+  broker_no,
+  COUNT(*) AS trade_count,
+  COUNT(CASE WHEN buy_sell = '0' THEN 1 END) AS buy_trades,
+  COUNT(CASE WHEN buy_sell = '1' THEN 1 END) AS sell_trades,
+  ROUND(SUM(CASE WHEN net_amount_funds = 'CDN' THEN net_amount ELSE 0 END)::numeric, 2) AS total_net_cad
+FROM "Trades"
+WHERE cancel_flag = '0'
+GROUP BY broker_no
+ORDER BY trade_count DESC
+LIMIT 10`,
+        chartDetail: {
+          description: 'Top broker codes by trade volume with buy/sell breakdown',
+          chartType: 'BAR',
+          chartSchema: {
+            mark: { type: 'bar', tooltip: true },
+            encoding: {
+              x: { field: 'broker_no', type: 'nominal', title: 'Broker Code', sort: '-y' },
+              y: { field: 'trade_count', type: 'quantitative', title: 'Trade Count' },
+            },
+          },
+        },
+      },
+      {
+        question: 'What is the equity vs. fixed income breakdown across all account portfolios?',
+        answer: 'Across all accounts with holdings, the table below shows portfolio market value and position count by asset group, from equity and fixed income to cash and other categories.',
+        sql: `SELECT
+  CASE
+    WHEN groupcode = 'EQ' THEN 'Equity'
+    WHEN groupcode = 'BD' THEN 'Fixed Income'
+    WHEN groupcode = 'CS' THEN 'Cash'
+    WHEN groupcode = 'MF' THEN 'Mutual Fund'
+    ELSE COALESCE(groupcode, 'Other')
+  END AS asset_class,
+  COUNT(DISTINCT acctno) AS accounts_with_position,
+  COUNT(*) AS total_positions,
+  ROUND(SUM(NULLIF(mktvalue, '')::numeric), 2) AS total_market_value
+FROM "AccountHoldings"
+WHERE NULLIF(mktvalue, '') IS NOT NULL
+GROUP BY groupcode
+ORDER BY total_market_value DESC NULLS LAST`,
+        chartDetail: {
+          description: 'Portfolio market value by asset class',
+          chartType: 'BAR',
+          chartSchema: {
+            mark: { type: 'bar', tooltip: true },
+            encoding: {
+              x: { field: 'asset_class', type: 'nominal', title: 'Asset Class', sort: '-y' },
+              y: { field: 'total_market_value', type: 'quantitative', title: 'Total Market Value' },
+              color: { field: 'asset_class', type: 'nominal', title: 'Asset Class' },
+            },
+          },
+        },
+      },
+      {
+        question: 'Which accounts show the highest concentration risk in a single security position?',
+        answer: 'The accounts below have the largest single-security positions as a percentage of their total portfolio market value, highlighting potential concentration risk.',
+        sql: `SELECT
+  ah.acctno,
+  ah.secnum AS security_number,
+  ah.secdesc AS security_description,
+  ah.groupcode AS asset_group,
+  ROUND(NULLIF(ah.mktvalue, '')::numeric, 2) AS position_value,
+  ROUND(NULLIF(ahs.tdmktval, '')::numeric, 2) AS total_portfolio_value,
+  ROUND(
+    NULLIF(ah.mktvalue, '')::numeric
+    / NULLIF(NULLIF(ahs.tdmktval, '')::numeric, 0) * 100
+  , 1) AS concentration_pct
+FROM "AccountHoldings" ah
+JOIN "AccountHoldingsSummary" ahs ON ahs.acctno = ah.acctno
+WHERE NULLIF(ah.mktvalue, '') IS NOT NULL
+  AND NULLIF(ahs.tdmktval, '') IS NOT NULL
+  AND NULLIF(ahs.tdmktval, '')::numeric > 0
+ORDER BY concentration_pct DESC NULLS LAST
+LIMIT 20`,
+        chartDetail: {
+          description: 'Top accounts by single-security concentration percentage',
+          chartType: 'BAR',
+          chartSchema: {
+            mark: { type: 'bar', tooltip: true },
+            encoding: {
+              x: { field: 'acctno', type: 'nominal', title: 'Account', sort: '-y' },
+              y: { field: 'concentration_pct', type: 'quantitative', title: 'Concentration (%)' },
+              color: { field: 'asset_group', type: 'nominal', title: 'Asset Group' },
+            },
+          },
+        },
       },
     ],
   },
