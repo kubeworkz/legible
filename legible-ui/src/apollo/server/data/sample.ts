@@ -5578,7 +5578,7 @@ WHERE cancel_flag = '0'`,
             sql: `SELECT ROUND(SUM(net_amount) / 1000000.0, 2) AS total_net_amount_cad_millions
 FROM "Trades"
 WHERE cancel_flag = '0'
-  AND net_amount_funds = 'CDN'`,
+  AND net_amount_funds = 'CAD'`,
             layout: { x: 2, y: 0, w: 2, h: 2 },
           },
           {
@@ -5814,7 +5814,7 @@ ORDER BY total_market_value DESC NULLS LAST`,
   COUNT(*) AS trade_count,
   COUNT(CASE WHEN buy_sell = '0' THEN 1 END) AS buy_trades,
   COUNT(CASE WHEN buy_sell = '1' THEN 1 END) AS sell_trades,
-  ROUND(SUM(CASE WHEN net_amount_funds = 'CDN' THEN net_amount ELSE 0 END)::numeric, 2) AS total_net_cad
+  ROUND(SUM(CASE WHEN net_amount_funds = 'CAD' THEN net_amount ELSE 0 END), 2) AS total_net_cad
 FROM "Trades"
 WHERE cancel_flag = '0'
 GROUP BY broker_no
