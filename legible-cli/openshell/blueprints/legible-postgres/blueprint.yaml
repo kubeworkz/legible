@@ -7,7 +7,7 @@
 #   legible agent create my-pg-agent --blueprint legible-postgres
 
 version: "0.3.0"
-min_openshell_version: "0.0.32"
+min_openshell_version: "0.0.36"
 description: |
   PostgreSQL-optimized Legible agent blueprint. Pre-installed with psql,
   pgcli, and pg_dump. Network policies allow PostgreSQL wire protocol

@@ -8,7 +8,7 @@
 #   legible agent create my-db2i-agent --blueprint legible-db2i
 
 version: "0.3.0"
-min_openshell_version: "0.0.32"
+min_openshell_version: "0.0.36"
 description: |
   IBM DB2 for i agent blueprint. Connects to DB2i databases via the
   mcp-server-db2i MCP server (read-only SQL, schema inspection, table

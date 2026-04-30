@@ -8,7 +8,7 @@
 #   legible agent create my-agent --blueprint legible-default
 
 version: "0.3.0"
-min_openshell_version: "0.0.32"
+min_openshell_version: "0.0.36"
 description: |
   Default Legible agent blueprint. Provides a sandboxed AI coding agent
   with MCP access to your Legible project's semantic layer, pre-configured

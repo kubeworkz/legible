@@ -5,7 +5,7 @@
 # Ideal for BI dashboards and scheduled reporting.
 
 version: "0.3.0"
-min_openshell_version: "0.0.32"
+min_openshell_version: "0.0.36"
 description: |
   Restricted data analyst agent. Read-only access to the Legible semantic layer.
   Cannot install packages at runtime. Uses pre-built tools only.

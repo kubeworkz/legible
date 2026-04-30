@@ -3,7 +3,7 @@
 # A NemoClaw-compatible blueprint optimized for Amazon Redshift.
 
 version: "0.3.0"
-min_openshell_version: "0.0.32"
+min_openshell_version: "0.0.36"
 description: |
   Redshift-optimized Legible agent blueprint. Uses psql (Redshift-compatible)
   and AWS CLI. Network policies allow Redshift endpoints and Legible access.
